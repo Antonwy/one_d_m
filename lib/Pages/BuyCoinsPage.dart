@@ -1,11 +1,13 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 const kPricePerCoin = 0.1;
 
 class BuyCoinsPage extends StatelessWidget {
+  void _onTap(_BuyOption option) {
+    print("BUY $option"); // TODO implementation missing
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -23,12 +25,17 @@ class BuyCoinsPage extends StatelessWidget {
       body: ListView.builder(
         padding: const EdgeInsets.only(top: 10.0),
         itemBuilder: (BuildContext context, int index) {
+          final first = _BuyOption.all[index * 2 + 0];
+          final second = index * 2 + 1 >= _BuyOption.all.length ? null : _BuyOption.all[index * 2 + 1];
+
           return Row(
             children: <Widget>[
-              Expanded(child: _BuyOptionWidget(option: _BuyOption.all[index * 2 + 0])),
-              (index * 2 + 1 >= _BuyOption.all.length)
+              Expanded(
+                child: _BuyOptionWidget(option: first, onTap: () => _onTap(first),),
+              ),
+              (second == null)
                   ? Expanded(child: Container())
-                  : Expanded(child: _BuyOptionWidget(option: _BuyOption.all[index * 2 + 1])),
+                  : Expanded(child: _BuyOptionWidget(option: second, onTap: () => _onTap(second))),
             ],
           );
         },
@@ -47,10 +54,13 @@ class _BuyOption {
 
   const _BuyOption.fromCoins(this.coins) : price = kPricePerCoin * coins;
 
-  static final all = [1, 5, 10, 15, 20, 25].map((amount) => _BuyOption.fromCoins(amount)).toList();
+  static final all = [1, 5, 10, 15, 20].map((amount) => _BuyOption.fromCoins(amount)).toList();
 
   final int coins;
   final double price;
+
+  @override
+  String toString() => '_BuyOption{coins: $coins, price: $price}';
 }
 
 class _BuyOptionWidget extends StatelessWidget {

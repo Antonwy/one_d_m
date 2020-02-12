@@ -54,6 +54,7 @@ flutter:
     - assets/images/clip-sign-up.png
     - assets/images/clip-1.png
     - assets/images/clip-virtual-reality.png
+    - assets/icons/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

@@ -7,10 +7,12 @@ import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/AddPostPage.dart';
+import 'package:one_d_m/Pages/BuyCoinsPage.dart';
 import 'package:one_d_m/Pages/SettingsPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatelessWidget {
+  final GlobalKey _coinsBtnKey = GlobalKey();
   final GlobalKey _addBtnKey = GlobalKey();
   final GlobalKey _settingsBtnKey = GlobalKey();
 
@@ -95,6 +97,23 @@ class ProfilePage extends StatelessWidget {
                           ),
                           Row(
                             children: <Widget>[
+                              _roundButton(
+                                  key: _coinsBtnKey,
+                                  icon: Icons.attach_money,
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        CircularRevealRoute(
+                                            page: BuyCoinsPage(),
+                                            offset: Helper
+                                                .getCenteredPositionFromKey(
+                                                _addBtnKey),
+                                            startColor: Colors.indigo,
+                                            color: Colors.indigo));
+                                  }),
+                              SizedBox(
+                                width: 10,
+                              ),
                               _roundButton(
                                   key: _addBtnKey,
                                   icon: Icons.add,

@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/PlaceSearch.dart';
-import 'package:one_d_m/Helper/Api.dart';
+import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Place.dart';
 
-class AddPostPage extends StatefulWidget {
+class CreateCampaignPage extends StatefulWidget {
   @override
-  _AddPostPageState createState() => _AddPostPageState();
+  _CreateCampaignState createState() => _CreateCampaignState();
 }
 
-class _AddPostPageState extends State<AddPostPage> {
+class _CreateCampaignState extends State<CreateCampaignPage> {
   ThemeData theme;
 
   PostPage _currentPage = PostPage.NAME;
@@ -92,7 +93,7 @@ class _AddPostPageState extends State<AddPostPage> {
         ),
         OutlineButton(
           onPressed: () {
-            if (_name.isEmpty) return _showAlert("Gib einen Namen ein!");
+            if (_name.isEmpty) return Helper.showAlert(context, "Gib einen Namen ein!");
             _changePage(PostPage.IMAGE);
           },
           child: Text("Weiter"),
@@ -172,7 +173,7 @@ class _AddPostPageState extends State<AddPostPage> {
             ),
             OutlineButton(
               onPressed: () {
-                if (_image == null) return _showAlert("Wähle ein Bild aus!");
+                if (_image == null) return Helper.showAlert(context, "Wähle ein Bild aus!");
                 _changePage(PostPage.DESCRIPTION);
               },
               child: Text("Weiter"),
@@ -220,7 +221,7 @@ class _AddPostPageState extends State<AddPostPage> {
               OutlineButton(
                 onPressed: () {
                   if (_description.isEmpty)
-                    return _showAlert("Gib eine Beschreibung ein!");
+                    return Helper.showAlert(context, "Gib eine Beschreibung ein!");
                   _changePage(PostPage.POSITION);
                 },
                 child: Text("Weiter"),
@@ -305,7 +306,7 @@ class _AddPostPageState extends State<AddPostPage> {
               child: Text("Weiter"),
               onPressed: () {
                 if (_selectedDate.isBefore(DateTime.now()))
-                  return _showAlert("Datum muss in der Zukunft liegen!");
+                  return Helper.showAlert(context, "Datum muss in der Zukunft liegen!");
                 setState(() {
                   _currentPage = PostPage.RESULT;
                 });
@@ -385,14 +386,13 @@ class _AddPostPageState extends State<AddPostPage> {
                       description: _description,
                       city: _place.name,
                       endDate: _selectedDate,
-                      imgUrl: "",
-                      finalAmount: 10000, img: _image);
+                      imgUrl: null,
+                      finalAmount: 10000, img: null);
 
                   if (await Api.createCampaign(campaign)) {
                     Navigator.pop(context);
                   } else {
-                    _showAlert(
-                        "Etwas ist schief gelaufen! Versuche es später erneut!");
+                    Helper.showAlert(context, "Etwas ist schief gelaufen! Versuche es später erneut!");
                   }
                 },
               ),
@@ -450,15 +450,6 @@ class _AddPostPageState extends State<AddPostPage> {
 
   String _convertDate(DateTime date) {
     return DateFormat("d. MMMM yyyy").format(date);
-  }
-
-  void _showAlert(String message) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("Error"),
-              content: Text(message),
-            ));
   }
 
   void _changePage(PostPage page) {

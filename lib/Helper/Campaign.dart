@@ -25,7 +25,7 @@ class Campaign {
     this.subscribed = false,
   });
 
-  factory Campaign.fromJson(Map<String, dynamic> json) {
+  static Campaign fromJson(Map<String, dynamic> json) {
     return new Campaign(
         id: json["id"],
         name: json["name"],

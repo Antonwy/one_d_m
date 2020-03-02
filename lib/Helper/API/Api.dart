@@ -3,56 +3,43 @@ import 'package:http/http.dart' as http;
 import 'package:one_d_m/Helper/User.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Campaign.dart';
-import 'Constants.dart';
+import '../Campaign.dart';
+import '../Constants.dart';
+import 'ApiResult.dart';
 
 class Api {
-  static Future<String> register(User user) async {
+
+  static Future<ApiResult> register(User user) async {
     http.Response res =
         await http.post("${Constants.BASE_URL}/register", body: user.toMap());
 
-    Map<String, dynamic> body = json.decode(res.body);
+    ApiResult result = ApiResult.fromJson(res.body);
 
-    if (body["successful"] == true) {
-      print('Successfully Registered!');
-      await _saveCredentials(username: user.username, password: user.password);
-      return null;
-    } else {
-      print('Something went wrong registering the user');
-      return body["errors"];
-    }
+    if(!result.hasError()) await _saveCredentials(username: user.username, password: user.password);
+
+    return result;
   }
 
-  static Future<String> login({String username, String password}) async {
+  static Future<ApiResult> login({String username, String password}) async {
 
     http.Response res = await http.get("${Constants.BASE_URL}/user",
         headers: <String, String>{
           'authorization': _basicAuth(password: password, username: username)
         });
 
-    Map<String, dynamic> body = json.decode(res.body);
+    ApiResult result = ApiResult.fromJson(res.body);
 
-    if (body["successful"] == true) {
-      print("Successful logged in!");
-      await _saveCredentials(username: username, password: password);
-      return null;
-    } else {
-      print("Something went wrong!");
-      return body["errors"];
-    }
+    if(!result.hasError()) await _saveCredentials(username: username, password: password);
+
+    return result;
   }
 
-  static Future<User> getUser() async {
+  static Future<ApiResult<User>> getUser() async {
+    print('Getting User...');
     http.Response res = await http.get("${Constants.BASE_URL}/user",
         headers: {'authorization': await _basicAuthStorage()});
 
-    Map<String, dynamic> jsonRes = json.decode(res.body);
-
-    if (jsonRes["successful"]) {
-      return User.fromJson(jsonRes["data"]);
-    } else {
-      print('Something went wrong getting the userdata');
-    }
+    return ApiResult.fromJson(res.body, User.fromJson);
   }
 
   static Future<User> getUserWithId(int id) async {
@@ -104,43 +91,23 @@ class Api {
     await prefs.setString(Constants.PASSWORD, password);
   }
 
-  static Future<List<Campaign>> getCampaigns() async {
+  static Future<ApiResult<List<Campaign>>> getCampaigns() async {
+    print("Getting Campaigns...");
     http.Response res = await http.get('${Constants.BASE_URL}/projects',
         headers: <String, String>{'authorization': await _basicAuthStorage()});
 
-    dynamic parsedJson = json.decode(res.body);
-
-    if (!parsedJson["successful"]) return null;
-
-    List<dynamic> data = parsedJson["data"];
-
-    List<Campaign> campaigns = [];
-
-    for (dynamic c in data) {
-      campaigns.add(Campaign.fromJson(c));
-    }
-
-    return campaigns;
+    return ApiResult<List<Campaign>>.fromJson(res.body, Api.parseCampaigns);
   }
 
-  static Future<List<Campaign>> getSubscribedCampaigns(int userId) async {
+  static Future<ApiResult> getSubscribedCampaigns() async {
+
+    ApiResult<User> userRes = await Api.getUser();
+
     http.Response res = await http.get(
-        '${Constants.BASE_URL}/user/$userId/subscriptions',
+        '${Constants.BASE_URL}/user/${userRes.getData().id}/subscriptions',
         headers: <String, String>{'authorization': await _basicAuthStorage()});
 
-    dynamic parsedJson = json.decode(res.body);
-
-    if (!parsedJson["successful"]) return null;
-
-    List<dynamic> data = parsedJson["data"];
-
-    List<Campaign> campaigns = [];
-
-    for (dynamic c in data) {
-      campaigns.add(Campaign.fromJson(c));
-    }
-
-    return campaigns;
+    return ApiResult.fromJson(res.body, Api.parseCampaigns);
   }
 
   static Future<bool> subscribe(int projId) async {
@@ -162,4 +129,14 @@ class Api {
 
     return parsedJson["successful"];
   }
+
+  static List<Campaign> parseCampaigns(Map<String, dynamic> map) {
+    List<dynamic> data = map["data"];
+    List<Campaign> campaigns = [];
+    for (dynamic c in data) {
+      campaigns.add(Campaign.fromJson(c));
+    }
+    return campaigns;
+  }
+
 }

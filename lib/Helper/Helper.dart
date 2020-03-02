@@ -55,4 +55,13 @@ class Helper {
     
   }
 
+  static showAlert(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text(message),
+        ));
+  }
+
 }

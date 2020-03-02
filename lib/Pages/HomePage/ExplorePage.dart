@@ -2,7 +2,8 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
-import 'package:one_d_m/Helper/Api.dart';
+import 'package:one_d_m/Helper/API/Api.dart';
+import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Pages/CampaignPage.dart';
 
@@ -18,7 +19,13 @@ class _ExplorePageState extends State<ExplorePage> {
 
   String searchQuery = "";
 
-  final AsyncMemoizer<List<Campaign>> _memoizer = new AsyncMemoizer();
+  Future<ApiResult> _future;
+
+  @override
+  void initState() {
+    _future = Api.getCampaigns();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +64,11 @@ class _ExplorePageState extends State<ExplorePage> {
             ),
           ),
         ),
-        FutureBuilder<List<Campaign>>(
-          future: _fetchData(),
-          builder: (BuildContext c, AsyncSnapshot<List<Campaign>> snapshot) {
+        FutureBuilder<ApiResult>(
+          future: _future,
+          builder: (BuildContext c, AsyncSnapshot<ApiResult> snapshot) {
             if(snapshot.hasData) {
-              campaigns = snapshot.data.where((Campaign c) => c.name.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+              campaigns = snapshot.data.getData().where((Campaign c) => c.name.toLowerCase().contains(searchQuery.toLowerCase())).toList();
               return SliverList(delegate: SliverChildListDelegate(_buildChildren(context)),);
             }
             return SliverFillRemaining(child: Center(child: CircularProgressIndicator(),),);
@@ -69,12 +76,6 @@ class _ExplorePageState extends State<ExplorePage> {
         ),
       ],
     );
-  }
-
-  Future<List<Campaign>> _fetchData() {
-    return _memoizer.runOnce(() async {
-      return await Api.getCampaigns();
-    });
   }
 
   List<Widget> _buildChildren(BuildContext context) {

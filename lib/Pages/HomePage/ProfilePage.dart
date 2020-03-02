@@ -1,29 +1,46 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignItem.dart';
-import 'package:one_d_m/Helper/Api.dart';
+import 'package:one_d_m/Components/RoundButtonHomePage.dart';
+import 'package:one_d_m/Helper/API/Api.dart';
+import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/AddPostPage.dart';
+import 'package:one_d_m/Pages/CreateCampaignPage.dart';
+import 'package:one_d_m/Pages/BuyCoinsPage.dart';
 import 'package:one_d_m/Pages/SettingsPage.dart';
 import 'package:provider/provider.dart';
 
-class ProfilePage extends StatelessWidget {
-  final GlobalKey _addBtnKey = GlobalKey();
-  final GlobalKey _settingsBtnKey = GlobalKey();
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
 
-  final AsyncMemoizer<List<Campaign>> _asyncMemoizer = new AsyncMemoizer();
-
+class _ProfilePageState extends State<ProfilePage> {
   UserManager um;
+
+  Future<ApiResult> _future;
+
+  @override
+  void initState() {
+    _future = Api.getCampaigns();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     um = Provider.of<UserManager>(context);
 
     return RefreshIndicator(
-        onRefresh: () => Future.delayed(Duration(seconds: 2)),
+        onRefresh: () {
+          Future<ApiResult> res = Api.getCampaigns();
+          setState(() {
+            _future = res;
+          });
+          return res;
+        },
         child: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
@@ -95,39 +112,15 @@ class ProfilePage extends StatelessWidget {
                           ),
                           Row(
                             children: <Widget>[
-                              _roundButton(
-                                  key: _addBtnKey,
-                                  icon: Icons.add,
-                                  onPressed: () {
-                                    print("Add");
-                                    Navigator.push(
-                                        context,
-                                        CircularRevealRoute(
-                                            page: AddPostPage(),
-                                            offset: Helper
-                                                .getCenteredPositionFromKey(
-                                                    _addBtnKey),
-                                            startColor: Colors.indigo,
-                                            color: Colors.indigo));
-                                  }),
+                              RoundButtonHomePage(icon: Icons.attach_money, toPage: BuyCoinsPage()),
                               SizedBox(
                                 width: 10,
                               ),
-                              _roundButton(
-                                  key: _settingsBtnKey,
-                                  icon: Icons.settings,
-                                  onPressed: () {
-                                    print("Settings");
-                                    Navigator.push(
-                                        context,
-                                        CircularRevealRoute(
-                                            page: SettingsPage(),
-                                            offset: Helper
-                                                .getCenteredPositionFromKey(
-                                                    _settingsBtnKey),
-                                            startColor: Colors.indigo,
-                                            color: Colors.white));
-                                  }),
+                              RoundButtonHomePage(icon: Icons.add, toPage: CreateCampaignPage(), toColor: Colors.indigo,),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              RoundButtonHomePage(icon: Icons.settings, toPage: SettingsPage(),)
                             ],
                           ),
                         ],
@@ -137,14 +130,13 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            FutureBuilder<List<Campaign>>(
-              future: _fetchData(),
-              builder:
-                  (BuildContext c, AsyncSnapshot<List<Campaign>> snapshot) {
+            FutureBuilder<ApiResult>(
+              future: _future,
+              builder: (BuildContext c, AsyncSnapshot<ApiResult> snapshot) {
                 if (snapshot.hasData) {
                   return SliverList(
                     delegate: SliverChildListDelegate(
-                        _generateChildren(snapshot.data)),
+                        _generateChildren(snapshot.data.getData())),
                   );
                 }
                 return SliverFillRemaining(
@@ -156,32 +148,6 @@ class ProfilePage extends StatelessWidget {
             ),
           ],
         ));
-  }
-
-  Future<dynamic> _fetchData() {
-    return this._asyncMemoizer.runOnce(() async {
-      return await Api.getCampaigns();
-    });
-  }
-
-  Widget _roundButton({Key key, IconData icon, void Function() onPressed}) {
-    return Container(
-      key: key,
-      width: 50,
-      height: 50,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        color: Colors.indigo,
-        shape: CircleBorder(),
-        child: InkWell(
-          onTap: onPressed,
-          child: Icon(
-            icon,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
   }
 
   List<Widget> _generateChildren(List<Campaign> data) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/HomePage.dart';
+import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:provider/provider.dart';
 
 class ExplanationPage extends StatelessWidget {

@@ -1,19 +1,14 @@
 import 'package:flutter/foundation.dart';
-import 'package:one_d_m/Helper/Api.dart';
-
+import 'package:one_d_m/Helper/API/Api.dart';
 import 'User.dart';
 
 class UserManager extends ChangeNotifier {
   User user;
-
   bool hasData = false;
 
-  void setUser([User user]) async {
-    if(user != null) this.user = user;
-    else user = await Api.getUser();
-  
+  void setUser(User user) {
+    this.user = user;
     hasData = true;
-    notifyListeners();
   }
 
   Future<void> logout() async {

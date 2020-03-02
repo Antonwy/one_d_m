@@ -1,19 +1,32 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
-import 'package:one_d_m/Helper/Api.dart';
+import 'package:one_d_m/Helper/API/Api.dart';
+import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
-import 'CampaignPage.dart';
+import '../CampaignPage.dart';
 
-class FollowedProjects extends StatelessWidget {
+class FollowedProjects extends StatefulWidget {
 
+  @override
+  _FollowedProjectsState createState() => _FollowedProjectsState();
+}
+
+class _FollowedProjectsState extends State<FollowedProjects> {
   TextTheme textTheme;
+
   UserManager um;
 
-  AsyncMemoizer<List<Campaign>> _memoizer = new AsyncMemoizer();
+  Future<ApiResult> _future;
+  
+  @override
+  void initState() {
+    _future = Api.getSubscribedCampaigns();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,23 +41,17 @@ class FollowedProjects extends StatelessWidget {
           title: Text("Deine unterstützten Projekte", style: textTheme.title,),
           centerTitle: false,
         ),
-        FutureBuilder<List<Campaign>>(
-          future: _fetchData(),
-          builder: (BuildContext c, AsyncSnapshot<List<Campaign>> snapshot) {
+        FutureBuilder<ApiResult>(
+          future: _future,
+          builder: (BuildContext c, AsyncSnapshot<ApiResult> snapshot) {
             if(snapshot.hasData) {
-              return SliverList(delegate: SliverChildListDelegate(_buildChildren(context, snapshot.data)),);
+              return SliverList(delegate: SliverChildListDelegate(_buildChildren(context, snapshot.data.getData())),);
             }
             return SliverFillRemaining(child: Center(child: CircularProgressIndicator(),),);
           },
         ),
       ],
     );
-  }
-
-  Future<List<Campaign>> _fetchData() {
-    return _memoizer.runOnce(() async {
-      return await Api.getSubscribedCampaigns(um.user.id);
-    });
   }
 
   List<Widget> _buildChildren(BuildContext context, List<Campaign> data) {
@@ -80,5 +87,4 @@ class FollowedProjects extends StatelessWidget {
 
     return list;
   }
-
 }

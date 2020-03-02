@@ -2,13 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Components/ValueAnimator.dart';
-import 'package:one_d_m/Helper/Api.dart';
+import 'package:one_d_m/Helper/API/Api.dart';
+import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/Validate.dart';
-import 'package:one_d_m/Pages/HomePage.dart';
+import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -51,6 +52,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   File _file;
 
+  bool _loading = false;
+
   @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
@@ -79,10 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
               FloatingActionButton(
                 key: _fabKey,
                 heroTag: "null",
-                child: _currentPage.index == RegisterPages.values.length - 1 ||
-                        _login
-                    ? Icon(Icons.done)
-                    : Icon(Icons.navigate_next),
+                child: _getFabWidget(),
                 onPressed: _nextPage,
               ),
             ],
@@ -529,6 +529,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _formKey.currentState.save();
 
     if (_login) {
+      _showLoading(true);
       _loginUser();
       return;
     }
@@ -538,8 +539,28 @@ class _RegisterPageState extends State<RegisterPage> {
         _currentPage = RegisterPages.values[_currentPage.index + 1];
       });
     } else {
+      _showLoading(true);
       _registerUser();
     }
+  }
+
+  Widget _getFabWidget() {
+    if (_loading)
+      return Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: CircularProgressIndicator(
+          valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      );
+    return _currentPage.index == RegisterPages.values.length - 1 || _login
+        ? Icon(Icons.done)
+        : Icon(Icons.navigate_next);
+  }
+
+  void _showLoading(bool value) {
+    setState(() {
+      _loading = value;
+    });
   }
 
   void _prevPage() {
@@ -582,23 +603,23 @@ class _RegisterPageState extends State<RegisterPage> {
         password: password1,
         profileImage: _file);
 
-    String success = await Api.register(user);
+    ApiResult result = await Api.register(user);
 
-    if (success == null) {
-      _pushNextPage();
+    if (result.hasError()) {
+      _showError(result.getMessage());
     } else {
-      _showError(success);
+      _pushNextPage();
     }
   }
 
   Future _loginUser() async {
-    String success = await Api.login(username: username, password: password1);
+    ApiResult success =
+        await Api.login(username: username, password: password1);
 
-    if (success == null) {
-      _pushNextPage();
-    } else {
+    if (success.hasError())
       _showError("Password or username wrong!");
-    }
+    else
+      _pushNextPage();
   }
 
   void _showError(String error) {
@@ -610,7 +631,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: TextStyle(color: Colors.red),
               ),
               content: Text(error),
-            ));
+            )).then((v) => _showLoading(false));
   }
 
   Widget _textField(

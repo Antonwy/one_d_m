@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
@@ -12,7 +11,7 @@ class ExplorePage extends StatefulWidget {
   _ExplorePageState createState() => _ExplorePageState();
 }
 
-class _ExplorePageState extends State<ExplorePage> {
+class _ExplorePageState extends State<ExplorePage> with AutomaticKeepAliveClientMixin<ExplorePage> {
   TextTheme textTheme;
 
   List<Campaign> campaigns;
@@ -93,7 +92,7 @@ class _ExplorePageState extends State<ExplorePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => CampaignPage(c)));
+                            builder: (context) => CampaignPage(campaign: c)));
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -111,4 +110,8 @@ class _ExplorePageState extends State<ExplorePage> {
 
     return list;
   }
+
+  @override
+  bool get wantKeepAlive => true;
+
 }

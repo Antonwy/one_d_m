@@ -15,7 +15,7 @@ class FollowedProjects extends StatefulWidget {
   _FollowedProjectsState createState() => _FollowedProjectsState();
 }
 
-class _FollowedProjectsState extends State<FollowedProjects> {
+class _FollowedProjectsState extends State<FollowedProjects> with AutomaticKeepAliveClientMixin<FollowedProjects> {
   TextTheme textTheme;
 
   UserManager um;
@@ -69,7 +69,7 @@ class _FollowedProjectsState extends State<FollowedProjects> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => CampaignPage(c)));
+                            builder: (context) => CampaignPage(campaign: c,)));
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -87,4 +87,8 @@ class _FollowedProjectsState extends State<FollowedProjects> {
 
     return list;
   }
+
+  @override
+  bool get wantKeepAlive => true;
+
 }

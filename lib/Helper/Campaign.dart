@@ -26,6 +26,7 @@ class Campaign {
   });
 
   static Campaign fromJson(Map<String, dynamic> json) {
+    if(json.containsKey("data")) json = json["data"];
     return new Campaign(
         id: json["id"],
         name: json["name"],
@@ -34,6 +35,7 @@ class Campaign {
         endDate: DateFormat("yyyy-MM-dd HH:mm:ss").parseLoose(json["end_date"]),
         authorId: json["admin_id"],
         subscribed: json["subscribed"],
+        imgUrl: "https://source.unsplash.com/random/${json["city"]}",
         img: new File(json["thumbnail"]));
   }
 

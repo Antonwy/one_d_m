@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/MyProjectsPage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
@@ -40,25 +41,20 @@ class SettingsPage extends StatelessWidget {
             OutlineButton(
               child: Text("Profil bearbeiten"),
               onPressed: () async {
-                await um.logout();
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()));
+                    MaterialPageRoute(builder: (context) => EditProfile()));
               },
             ),
             OutlineButton(
               child: Text("Datenschutzerklärung"),
               onPressed: () async {
-                await um.logout();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()));
+                showLicensePage(context: context);
               },
             ),
             OutlineButton(
               child: Text("AGB's"),
               onPressed: () async {
-                await um.logout();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()));
+                showAboutDialog(context: context, applicationName:  "One Dollar Movement", applicationVersion: "1.0.4");
               },
             ),
             OutlineButton(

@@ -16,13 +16,14 @@ class User {
       this.profileImage});
 
   static User fromJson(Map<String, dynamic> json) {
+    json = json["data"];
     return User(
-        username: json["data"]["username"],
-        firstname: json["data"]["first_name"],
-        lastname: json["data"]["last_name"],
-        email: json["data"]["email_address"],
-        id: json["data"]["id"],
-        profileImage: getImage(json["data"]["profile_picture"])
+        username: json["username"],
+        firstname: json["first_name"],
+        lastname: json["last_name"],
+        email: json["email_address"],
+        id: json["id"],
+        profileImage: getImage(json["profile_picture"])
     );
   }
 

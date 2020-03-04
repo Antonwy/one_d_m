@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Campaign.dart';
 import '../Constants.dart';
+import '../News.dart';
 import 'ApiResult.dart';
 
 class Api {
@@ -35,24 +36,17 @@ class Api {
   }
 
   static Future<ApiResult<User>> getUser() async {
-    print('Getting User...');
     http.Response res = await http.get("${Constants.BASE_URL}/user",
         headers: {'authorization': await _basicAuthStorage()});
 
     return ApiResult.fromJson(res.body, User.fromJson);
   }
 
-  static Future<User> getUserWithId(int id) async {
+  static Future<ApiResult<User>> getUserWithId(int id) async {
     http.Response res = await http.get("${Constants.BASE_URL}/user/$id",
         headers: {'authorization': await _basicAuthStorage()});
 
-    Map<String, dynamic> jsonRes = json.decode(res.body);
-
-    if (jsonRes["successful"]) {
-      return User.fromJson(jsonRes["data"]);
-    } else {
-      print('Something went wrong getting the userdata');
-    }
+    return ApiResult.fromJson(res.body, User.fromJson);
   }
 
   static Future<void> logout() async {
@@ -99,7 +93,12 @@ class Api {
     return ApiResult<List<Campaign>>.fromJson(res.body, Api.parseCampaigns);
   }
 
-  static Future<ApiResult> getSubscribedCampaigns() async {
+  static Future<ApiResult<List<Campaign>>> getMyCampaigns() async {
+    ApiResult<User> userRes = await Api.getUser();
+    return Api.getCampaignsFromUserId(userRes.getData().id);
+  }
+
+  static Future<ApiResult<List<Campaign>>> getSubscribedCampaigns() async {
 
     ApiResult<User> userRes = await Api.getUser();
 
@@ -108,6 +107,42 @@ class Api {
         headers: <String, String>{'authorization': await _basicAuthStorage()});
 
     return ApiResult.fromJson(res.body, Api.parseCampaigns);
+  }
+
+  static Future<ApiResult<List<Campaign>>> getCampaignsFromUserId(int id) async {
+    http.Response res = await http.get(
+      '${Constants.BASE_URL}/user/$id/projects',
+      headers: <String, String>{'authorization': await _basicAuthStorage()}
+    );
+
+    return ApiResult.fromJson(res.body, Api.parseCampaigns);
+  }
+
+  static Future<ApiResult<Campaign>> getCampaignFromId(int id) async {
+    http.Response res = await http.get(
+      '${Constants.BASE_URL}/project/$id',
+      headers: <String, String>{'authorization': await _basicAuthStorage()}
+    );
+
+    return ApiResult.fromJson(res.body, Campaign.fromJson);
+  }
+
+  static Future<ApiResult<List<News>>> getNews() async {
+    http.Response res = await http.get(
+      '${Constants.BASE_URL}/news',
+      headers: <String, String>{'authorization': await _basicAuthStorage()}
+    );
+
+    return ApiResult.fromJson(res.body, Api.parseNews);
+  }
+
+  static Future<ApiResult<List<News>>> getNewsFromCampaignId(int id) async {
+    http.Response res = await http.get(
+      '${Constants.BASE_URL}/project/$id/news',
+      headers: <String, String>{'authorization': await _basicAuthStorage()}
+    );
+
+    return ApiResult.fromJson(res.body, Api.parseNewsCampaign);
   }
 
   static Future<bool> subscribe(int projId) async {
@@ -137,6 +172,26 @@ class Api {
       campaigns.add(Campaign.fromJson(c));
     }
     return campaigns;
+  }
+
+  static List<News> parseNewsCampaign(Map<String, dynamic> map) {
+    List<dynamic> data = map["data"];
+    List<News> news = [];
+    for (dynamic c in data) {
+        news.add(News.fromJson(c));
+    }
+    return news;
+  }
+
+  static List<News> parseNews(Map<String, dynamic> map) {
+    List<dynamic> data = map["data"];
+    List<News> news = [];
+    for (dynamic c in data) {
+      for(dynamic n in c) {
+        news.add(News.fromJson(n));
+      }
+    }
+    return news;
   }
 
 }

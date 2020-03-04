@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/API/Api.dart';
@@ -23,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   int _currentPage = 1;
 
-  PageController _pageController = PageController(initialPage: 1);
+  PageController _pageController = PageController(initialPage: 1, keepPage: true);
 
   UserManager um;
 

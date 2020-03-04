@@ -1,12 +1,9 @@
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CampaignItem.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CircularRevealRoute.dart';
-import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
 import 'package:one_d_m/Pages/BuyCoinsPage.dart';
@@ -18,14 +15,15 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin<ProfilePage> {
   UserManager um;
 
   Future<ApiResult> _future;
 
   @override
   void initState() {
-    _future = Api.getCampaigns();
+    print("NOw");
+    _future = Api.getNews();
     super.initState();
   }
 
@@ -35,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return RefreshIndicator(
         onRefresh: () {
-          Future<ApiResult> res = Api.getCampaigns();
+          Future<ApiResult> res = Api.getNews();
           setState(() {
             _future = res;
           });
@@ -150,11 +148,11 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
   }
 
-  List<Widget> _generateChildren(List<Campaign> data) {
+  List<Widget> _generateChildren(List<News> data) {
     List<Widget> list = [];
 
-    for (Campaign c in data) {
-      list.add(CampaignItem(c));
+    for (News n in data) {
+      list.add(NewsPost(n));
     }
 
     list.add(SizedBox(
@@ -163,4 +161,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return list;
   }
+
+  @override
+  bool get wantKeepAlive => true;
+
 }

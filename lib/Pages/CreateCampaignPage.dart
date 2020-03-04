@@ -32,7 +32,7 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text("Post Erstellen"),
+        title: Text("Projekt Erstellen"),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -388,7 +388,6 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
                       endDate: _selectedDate,
                       imgUrl: null,
                       finalAmount: 10000, img: null);
-
                   if (await Api.createCampaign(campaign)) {
                     Navigator.pop(context);
                   } else {

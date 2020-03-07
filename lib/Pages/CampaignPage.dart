@@ -141,8 +141,8 @@ class _CampaignPageState extends State<CampaignPage> {
                               child: Container(
                                 height: 55,
                                 child: Material(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.green[500],
+                                  borderRadius: BorderRadius.circular(5),
                                   clipBehavior: Clip.antiAlias,
                                   elevation: 10,
                                   child: InkWell(
@@ -171,7 +171,7 @@ class _CampaignPageState extends State<CampaignPage> {
                                 height: 55,
                                 child: Material(
                                   color: Colors.orange,
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(5),
                                   clipBehavior: Clip.antiAlias,
                                   elevation: 10,
                                   child: InkWell(

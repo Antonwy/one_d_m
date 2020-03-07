@@ -1,6 +1,6 @@
 class Validate {
   static String username(String text) {
-    if (text.length < 4 || text.length >= 32)
+    if (text.length < 3 || text.length >= 32)
       return "Bitte gib einen richtigen Namen ein!";
     return null;
   }

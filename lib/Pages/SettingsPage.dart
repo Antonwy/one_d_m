@@ -54,7 +54,10 @@ class SettingsPage extends StatelessWidget {
             OutlineButton(
               child: Text("AGB's"),
               onPressed: () async {
-                showAboutDialog(context: context, applicationName:  "One Dollar Movement", applicationVersion: "1.0.4");
+                showAboutDialog(
+                    context: context,
+                    applicationName: "One Dollar Movement",
+                    applicationVersion: "1.0.4");
               },
             ),
             OutlineButton(
@@ -65,6 +68,8 @@ class SettingsPage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => RegisterPage()));
               },
             ),
+            SizedBox(height: 20),
+            Text("Illustrations by Ouch.pics: https://icons8.com")
           ],
         ),
       ),

@@ -22,7 +22,6 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
 
   @override
   void initState() {
-    print("NOw");
     _future = Api.getNews();
     super.initState();
   }

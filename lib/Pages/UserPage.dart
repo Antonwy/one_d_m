@@ -157,7 +157,10 @@ class _UserPageState extends State<UserPage> {
     ));
 
     for (Campaign c in data) {
+      list.add(SizedBox(height: 20));
       list.add(CampaignHeader(c));
+      list.add(SizedBox(height: 20));
+      list.add(Divider());
     }
 
     list.add(SizedBox(

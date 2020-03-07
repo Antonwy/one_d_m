@@ -15,6 +15,7 @@ class NewsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -50,8 +51,10 @@ class NewsPage extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       Campaign campaign = snapshot.data.getData();
-                      return Card(
-                        margin: EdgeInsets.all(0),
+                      return Material(
+                        borderRadius: BorderRadius.circular(5),
+                        clipBehavior: Clip.antiAlias,
+                        color: Colors.white,
                         child: InkWell(
                           onTap: () {
                             Navigator.push(

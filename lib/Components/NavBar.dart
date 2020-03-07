@@ -26,9 +26,9 @@ class NavBar extends StatelessWidget {
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                    Colors.black87,
-                    Colors.black.withOpacity(.4),
-                    Colors.black.withAlpha(0)
+                    Colors.black.withOpacity(.7),
+                    Colors.black.withOpacity(.32),
+                    Colors.black.withOpacity(0)
                   ])),
             ),
             Center(

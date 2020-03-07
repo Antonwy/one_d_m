@@ -7,7 +7,6 @@ import 'package:one_d_m/Pages/UserPage.dart';
 import 'AnimatedFutureBuilder.dart';
 
 class UserButton extends StatelessWidget {
-
   int id;
 
   UserButton(this.id);
@@ -18,7 +17,10 @@ class UserButton extends StatelessWidget {
         future: Api.getUserWithId(id),
         builder: (context, snapshot) {
           if (snapshot.hasData)
-            return Card(
+            return Material(
+              borderRadius: BorderRadius.circular(5),
+              clipBehavior: Clip.antiAlias,
+              color: Colors.white,
               child: InkWell(
                 onTap: () {
                   Navigator.push(

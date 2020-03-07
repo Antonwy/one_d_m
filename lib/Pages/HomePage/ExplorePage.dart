@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/ApiBuilder.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
+import 'package:one_d_m/Components/ErrorText.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
@@ -11,7 +13,8 @@ class ExplorePage extends StatefulWidget {
   _ExplorePageState createState() => _ExplorePageState();
 }
 
-class _ExplorePageState extends State<ExplorePage> with AutomaticKeepAliveClientMixin<ExplorePage> {
+class _ExplorePageState extends State<ExplorePage>
+    with AutomaticKeepAliveClientMixin<ExplorePage> {
   TextTheme textTheme;
 
   List<Campaign> campaigns;
@@ -51,28 +54,35 @@ class _ExplorePageState extends State<ExplorePage> with AutomaticKeepAliveClient
                   SizedBox(
                     height: 10,
                   ),
-                  SearchBar(
-                    onChanged: (String text) {
-                      setState(() {
-                        searchQuery = text;
-                      });
-                    }
-                  ),
+                  SearchBar(onChanged: (String text) {
+                    setState(() {
+                      searchQuery = text;
+                    });
+                  }),
                 ],
               ),
             ),
           ),
         ),
-        FutureBuilder<ApiResult>(
-          future: _future,
-          builder: (BuildContext c, AsyncSnapshot<ApiResult> snapshot) {
-            if(snapshot.hasData) {
-              campaigns = snapshot.data.getData().where((Campaign c) => c.name.toLowerCase().contains(searchQuery.toLowerCase())).toList();
-              return SliverList(delegate: SliverChildListDelegate(_buildChildren(context)),);
-            }
-            return SliverFillRemaining(child: Center(child: CircularProgressIndicator(),),);
-          },
-        ),
+        ApiBuilder<List<Campaign>>(
+            future: _future,
+            success: (context, camp) {
+              this.campaigns = camp
+                  .where((Campaign c) =>
+                      c.name.toLowerCase().contains(searchQuery.toLowerCase()))
+                  .toList();
+              return SliverList(
+                delegate: SliverChildListDelegate(_buildChildren(context)),
+              );
+            },
+            loading: SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (context, message) => SliverFillRemaining(
+                  child: Center(child: ErrorText(message)),
+                )),
       ],
     );
   }
@@ -113,5 +123,4 @@ class _ExplorePageState extends State<ExplorePage> with AutomaticKeepAliveClient
 
   @override
   bool get wantKeepAlive => true;
-
 }

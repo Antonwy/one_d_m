@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 
 const kPricePerCoin = 0.1;
 
-class BuyCoinsPage extends StatelessWidget {
-  void _onTap(_BuyOption option) {
-    print("BUY $option"); // TODO implementation missing
+class BuyCoinsPage extends StatefulWidget {
+  @override
+  _BuyCoinsPageState createState() => _BuyCoinsPageState();
+}
+
+class _BuyCoinsPageState extends State<BuyCoinsPage> {
+  StripePayment sp;
+
+  @override
+  void initState() {
+    StripePayment.setOptions(StripeOptions(
+        publishableKey: "pk_test_mMYl6nvlrQmibKbJWw3CsdoK00lcfXjNKW",
+        merchantId: "Test",
+        androidPayMode: 'test'));
+    super.initState();
+  }
+
+  void _onTap(_BuyOption option) async {
+    try {
+      PaymentMethod pm = await StripePayment.paymentRequestWithCardForm(
+          CardFormPaymentRequest());
+      print(pm);
+    } on PlatformException catch (e) {
+      return;
+    }
   }
 
   @override
@@ -26,7 +50,9 @@ class BuyCoinsPage extends StatelessWidget {
         padding: EdgeInsets.only(top: 10.0),
         itemBuilder: (BuildContext context, int index) {
           final first = _BuyOption.all[index * 2 + 0];
-          final second = index * 2 + 1 >= _BuyOption.all.length ? null : _BuyOption.all[index * 2 + 1];
+          final second = index * 2 + 1 >= _BuyOption.all.length
+              ? null
+              : _BuyOption.all[index * 2 + 1];
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -34,16 +60,20 @@ class BuyCoinsPage extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: _BuyOptionWidget(option: first, onTap: () => _onTap(first),),
+                  child: _BuyOptionWidget(
+                    option: first,
+                    onTap: () => _onTap(first),
+                  ),
                 ),
               ),
               Expanded(
                 child: (second == null)
                     ? Container()
                     : Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _BuyOptionWidget(option: second, onTap: () => _onTap(second)),
-                    ),
+                        padding: const EdgeInsets.all(8.0),
+                        child: _BuyOptionWidget(
+                            option: second, onTap: () => _onTap(second)),
+                      ),
               ),
             ],
           );
@@ -63,7 +93,8 @@ class _BuyOption {
 
   const _BuyOption.fromCoins(this.coins) : price = kPricePerCoin * coins;
 
-  static final all = [1, 5, 10, 15, 20].map((amount) => _BuyOption.fromCoins(amount)).toList();
+  static final all =
+      [1, 5, 10, 15, 20].map((amount) => _BuyOption.fromCoins(amount)).toList();
 
   final int coins;
   final double price;
@@ -98,19 +129,19 @@ class _BuyOptionWidget extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: onTap,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/icons/coins-white.png', width: 35),
-                    SizedBox(width: 10.0),
-                    Text(option.coins.toString(), style: TextStyle(color: Colors.white, fontSize: 50)),
-                  ]
-                ),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Image.asset('assets/icons/coins-white.png', width: 35),
+                  SizedBox(width: 10.0),
+                  Text(option.coins.toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 50)),
+                ]),
               ),
             ),
           ),
           SizedBox(height: 10.0),
-          Text(option.price.toStringAsFixed(2) + '€', style: TextStyle(fontSize: 22)),
+          Text(option.price.toStringAsFixed(2) + '€',
+              style: TextStyle(fontSize: 22)),
         ],
       ),
     );

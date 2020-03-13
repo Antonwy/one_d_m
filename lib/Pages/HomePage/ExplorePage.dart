@@ -1,33 +1,24 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/ApiBuilder.dart';
+import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
-import 'package:one_d_m/Components/ErrorText.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Pages/CampaignPage.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Pages/UserPage.dart';
 
 class ExplorePage extends StatefulWidget {
   @override
   _ExplorePageState createState() => _ExplorePageState();
 }
 
-class _ExplorePageState extends State<ExplorePage>
-    with AutomaticKeepAliveClientMixin<ExplorePage> {
+class _ExplorePageState extends State<ExplorePage> {
   TextTheme textTheme;
 
   List<Campaign> campaigns;
 
   String searchQuery = "";
-
-  Future<ApiResult> _future;
-
-  @override
-  void initState() {
-    _future = Api.getCampaigns();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +31,7 @@ class _ExplorePageState extends State<ExplorePage>
           centerTitle: false,
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
-            preferredSize: Size(0, 70),
+            preferredSize: Size(0, 200),
             child: Container(),
           ),
           flexibleSpace: SafeArea(
@@ -59,59 +50,89 @@ class _ExplorePageState extends State<ExplorePage>
                       searchQuery = text;
                     });
                   }),
+                  SizedBox(height: 20),
+                  AnimatedFutureBuilder<List<User>>(
+                      future: DatabaseService().getUsers(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data.isEmpty) return Container();
+                          return Container(
+                            height: 85,
+                            child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: _buildUserAvatars(snapshot.data)),
+                          );
+                        }
+                        return Container();
+                      })
                 ],
               ),
             ),
           ),
         ),
-        ApiBuilder<List<Campaign>>(
-            future: _future,
-            success: (context, camp) {
-              this.campaigns = camp
-                  .where((Campaign c) =>
-                      c.name.toLowerCase().contains(searchQuery.toLowerCase()))
-                  .toList();
+        StreamBuilder<List<Campaign>>(
+          stream: DatabaseService().getCampaignFromQuery(searchQuery),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              this.campaigns = snapshot.data;
               return SliverList(
                 delegate: SliverChildListDelegate(_buildChildren(context)),
               );
-            },
-            loading: SliverFillRemaining(
+            }
+            return SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(),
               ),
-            ),
-            error: (context, message) => SliverFillRemaining(
-                  child: Center(child: ErrorText(message)),
-                )),
+            );
+          },
+        ),
       ],
     );
+  }
+
+  List<Widget> _buildUserAvatars(List<User> users) {
+    List<Widget> list = [];
+
+    for (User user in users) {
+      list.add(Column(
+        children: <Widget>[
+          Container(
+            width: 60,
+            height: 60,
+            child: Material(
+              color: Colors.grey[300],
+              shape: CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (c) => UserPage(user)));
+                  },
+                  child: user.imgUrl == null
+                      ? Icon(Icons.person)
+                      : CachedNetworkImage(
+                          imageUrl: user.imgUrl,
+                          fit: BoxFit.cover,
+                        )),
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(user.firstname)
+        ],
+      ));
+      list.add(SizedBox(
+        width: 10,
+      ));
+    }
+
+    return list;
   }
 
   List<Widget> _buildChildren(BuildContext context) {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {
-      list.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-        child: Column(
-          children: <Widget>[
-            Card(
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CampaignPage(campaign: c)));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: CampaignHeader(c),
-                  ),
-                )),
-          ],
-        ),
-      ));
+      list.add(CampaignHeader(c));
     }
 
     list.add(SizedBox(
@@ -121,6 +142,4 @@ class _ExplorePageState extends State<ExplorePage>
     return list;
   }
 
-  @override
-  bool get wantKeepAlive => true;
 }

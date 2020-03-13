@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/ApiBuilder.dart';
 import 'package:one_d_m/Components/ErrorText.dart';
 import 'package:one_d_m/Components/NavBar.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
@@ -30,14 +31,6 @@ class _HomePageState extends State<HomePage> {
 
   UserManager um;
 
-  Future<ApiResult> _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = Api.getUser();
-  }
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -56,34 +49,64 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         body: Stack(
           children: <Widget>[
-            ApiBuilder<User>(
-                future: _future,
-                success: (context, user) {
-                  um.setUser(user);
-                  return PageView(
-                    controller: _pageController,
-                    onPageChanged: (page) {
-                      setState(() {
-                        _currentPage = page;
-                      });
-                    },
-                    children: <Widget>[
-                      FollowedProjects(),
-                      ProfilePage(),
-                      ExplorePage(),
-                    ],
-                  );
-                },
-                error: (context, message) {
-                  if (message == "Unauthorized") {
-                    _logout();
+            StreamBuilder<DocumentSnapshot>(
+                stream: DatabaseService(um.uid).userReference.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data.exists) {
+                    um.user = User.fromSnapshot(snapshot.data);
+                    return PageView(
+                      controller: _pageController,
+                      onPageChanged: (page) {
+                        setState(() {
+                          _currentPage = page;
+                        });
+                      },
+                      children: <Widget>[
+                        FollowedProjects(() => _changePage(2)),
+                        ProfilePage(() => _changePage(2)),
+                        ExplorePage(),
+                      ],
+                    );
+                  } else if (!snapshot.hasData && !snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
                   }
+
                   return Center(
-                      child: ErrorText(message));
-                },
-                loading: Center(
-                  child: CircularProgressIndicator(),
-                )),
+                      child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      ErrorText(
+                          "Etwas ist schief gelaufen! Versuche es später erneut!"),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          RaisedButton(
+                            onPressed: () {
+                              setState(() {});
+                            },
+                            color: Colors.red,
+                            child: Text(
+                              "Erneut laden",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          RaisedButton(
+                            onPressed: () {
+                              um.logout();
+                            },
+                            color: Colors.red,
+                            child: Text(
+                              "Logout",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ));
+                }),
             NavBar(
               _changePage,
               currentPage: _currentPage,
@@ -93,7 +116,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _logout() async {
-    Api.logout();
+    um.logout();
     Navigator.push(context, MaterialPageRoute(builder: (c) => RegisterPage()));
   }
 

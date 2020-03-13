@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/CampaignPage.dart';
 
@@ -24,7 +25,7 @@ class NewsPost extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (c) =>
-                          CampaignPage(campaignId: news.projectId)));
+                          CampaignPage(Campaign(id: news.campaignId))));
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -35,7 +36,7 @@ class NewsPost extends StatelessWidget {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    news.title,
+                    news.campaignName,
                     style: Theme.of(context).textTheme.title,
                   ),
                 ],

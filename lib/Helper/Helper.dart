@@ -51,17 +51,14 @@ class Helper {
     return "${date.day}.${date.month}.${date.year}";
   }
 
-  static File byteStringToFile(String byteString) {
-    
-  }
-
   static showAlert(BuildContext context, String message) {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Error"),
-          content: Text(message),
-        ));
+              title: Text("Error", style: TextStyle(color: Colors.red)),
+              content: Text(
+                message,
+              ),
+            ));
   }
-
 }

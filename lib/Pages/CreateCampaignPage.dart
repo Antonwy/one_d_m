@@ -1,13 +1,19 @@
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/PlaceSearch.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Place.dart';
+import 'package:one_d_m/Helper/StorageService.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:image/image.dart' as Im;
+import 'package:uuid/uuid.dart';
 
 class CreateCampaignPage extends StatefulWidget {
   @override
@@ -25,9 +31,16 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
 
   File _image;
 
+  UserManager um;
+
+  String _postId = Uuid().v4();
+
+  bool isUploading = false;
+
   @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
+    um = Provider.of<UserManager>(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -93,7 +106,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
         ),
         OutlineButton(
           onPressed: () {
-            if (_name.isEmpty) return Helper.showAlert(context, "Gib einen Namen ein!");
+            if (_name.isEmpty)
+              return Helper.showAlert(context, "Gib einen Namen ein!");
             _changePage(PostPage.IMAGE);
           },
           child: Text("Weiter"),
@@ -173,7 +187,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
             ),
             OutlineButton(
               onPressed: () {
-                if (_image == null) return Helper.showAlert(context, "Wähle ein Bild aus!");
+                if (_image == null)
+                  return Helper.showAlert(context, "Wähle ein Bild aus!");
                 _changePage(PostPage.DESCRIPTION);
               },
               child: Text("Weiter"),
@@ -221,7 +236,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
               OutlineButton(
                 onPressed: () {
                   if (_description.isEmpty)
-                    return Helper.showAlert(context, "Gib eine Beschreibung ein!");
+                    return Helper.showAlert(
+                        context, "Gib eine Beschreibung ein!");
                   _changePage(PostPage.POSITION);
                 },
                 child: Text("Weiter"),
@@ -306,7 +322,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
               child: Text("Weiter"),
               onPressed: () {
                 if (_selectedDate.isBefore(DateTime.now()))
-                  return Helper.showAlert(context, "Datum muss in der Zukunft liegen!");
+                  return Helper.showAlert(
+                      context, "Datum muss in der Zukunft liegen!");
                 setState(() {
                   _currentPage = PostPage.RESULT;
                 });
@@ -328,7 +345,10 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
             height: 200,
             child: Center(
               child: Material(
-                child: Image.file(_image, fit: BoxFit.cover,),
+                child: Image.file(
+                  _image,
+                  fit: BoxFit.cover,
+                ),
                 borderRadius: BorderRadius.circular(5),
                 elevation: 10,
                 clipBehavior: Clip.antiAlias,
@@ -377,29 +397,47 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
                   });
                 },
               ),
+              isUploading ? CircularProgressIndicator() : Container(),
               OutlineButton(
-                child: Text("Erstellen"),
-                onPressed: () async {
-                  Campaign campaign = Campaign(
-                      amount: 0,
-                      name: _name,
-                      description: _description,
-                      city: _place.name,
-                      endDate: _selectedDate,
-                      imgUrl: null,
-                      finalAmount: 10000, img: null);
-                  if (await Api.createCampaign(campaign)) {
-                    Navigator.pop(context);
-                  } else {
-                    Helper.showAlert(context, "Etwas ist schief gelaufen! Versuche es später erneut!");
-                  }
-                },
-              ),
+                  child: Text("Erstellen"),
+                  onPressed: isUploading ? null : _uploadCampaign),
             ],
           )
         ],
       ),
     );
+  }
+
+  void _uploadCampaign() async {
+    setState(() {
+      isUploading = true;
+    });
+
+    StorageService service = StorageService(file: _image, id: _postId);
+
+    await service.compressImage();
+
+    Campaign campaign = Campaign(
+      amount: 0,
+      name: _name,
+      description: _description,
+      city: _place.name,
+      imgUrl: await service.uploadImage(),
+      finalAmount: 10000,
+      authorId: um.uid,
+    );
+
+    await DatabaseService(um.uid).createCampaign(campaign);
+    Navigator.pop(context);
+  }
+
+  compressImage() async {
+    final tempDir = await getTemporaryDirectory();
+    final path = tempDir.path;
+    Im.Image image = Im.decodeImage(_image.readAsBytesSync());
+    final compressedImageFile = File("$path/img_$_postId.jpg")
+      ..writeAsBytesSync(Im.encodeJpg(image, quality: 85));
+    _image = compressedImageFile;
   }
 
   Widget _resultRow(String left, String right) {

@@ -1,33 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/ApiBuilder.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
-import 'package:one_d_m/Components/ErrorText.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
 import '../CampaignPage.dart';
 
 class FollowedProjects extends StatefulWidget {
+  Function goToExplore;
+
+  FollowedProjects(this.goToExplore);
+
   @override
   _FollowedProjectsState createState() => _FollowedProjectsState();
 }
 
-class _FollowedProjectsState extends State<FollowedProjects>
-    with AutomaticKeepAliveClientMixin<FollowedProjects> {
+class _FollowedProjectsState extends State<FollowedProjects> {
   TextTheme textTheme;
 
   UserManager um;
-
-  Future<ApiResult> _future;
-
-  @override
-  void initState() {
-    _future = Api.getSubscribedCampaigns();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,19 +36,44 @@ class _FollowedProjectsState extends State<FollowedProjects>
           ),
           centerTitle: false,
         ),
-        ApiBuilder<List<Campaign>>(
-          future: _future,
-          success: (BuildContext c, List<Campaign> campaigns) => SliverList(
-            delegate:
-                SliverChildListDelegate(_buildChildren(context, campaigns)),
-          ),
-          loading: SliverFillRemaining(
-              child: Center(
-            child: CircularProgressIndicator(),
-          )),
-          error: (context, message) =>
-              SliverFillRemaining(child: Center(child: ErrorText(message))),
-        ),
+        StreamBuilder<List<Campaign>>(
+            stream: DatabaseService(um.uid).getSubscribedCampaignsStream(),
+            builder: (BuildContext c, snapshot) {
+              if (!snapshot.hasData) {
+                return SliverFillRemaining(
+                    child: Center(
+                  child: CircularProgressIndicator(),
+                ));
+              }
+
+              if (snapshot.data.isEmpty) {
+                return SliverFillRemaining(
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 50),
+                      Image.asset("assets/images/clip-no-comments.png"),
+                      Text(
+                        "Du hast noch keine unterstützten Projekte!",
+                        style: textTheme.body2,
+                      ),
+                      SizedBox(height: 10),
+                      RaisedButton(
+                        onPressed: widget.goToExplore,
+                        child: Text(
+                          "Entdecke Projekte!",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        color: Theme.of(context).primaryColor,
+                      )
+                    ],
+                  ),
+                );
+              }
+
+              return SliverList(
+                  delegate: SliverChildListDelegate(
+                      _buildChildren(context, snapshot.data)));
+            }),
       ],
     );
   }
@@ -65,29 +82,7 @@ class _FollowedProjectsState extends State<FollowedProjects>
     List<Widget> list = [];
 
     for (Campaign c in data) {
-      list.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-        child: Column(
-          children: <Widget>[
-            Card(
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CampaignPage(
-                                  campaign: c,
-                                )));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: CampaignHeader(c),
-                  ),
-                )),
-          ],
-        ),
-      ));
+      list.add(CampaignHeader(c));
     }
 
     list.add(SizedBox(
@@ -97,6 +92,4 @@ class _FollowedProjectsState extends State<FollowedProjects>
     return list;
   }
 
-  @override
-  bool get wantKeepAlive => true;
 }

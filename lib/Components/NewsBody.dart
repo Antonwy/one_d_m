@@ -66,13 +66,27 @@ class NewsBody extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              height: 100,
-              padding: EdgeInsets.all(15),
-              child: Text(
-                news.text,
-              ),
-            ),
+            LayoutBuilder(builder: (context, constraints) {
+              return Container(
+                height: 85,
+                width: constraints.maxWidth,
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      news.title,
+                      style: Theme.of(context).textTheme.title,
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      news.shortText,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),

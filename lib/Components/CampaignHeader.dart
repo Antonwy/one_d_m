@@ -1,73 +1,115 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Pages/CampaignPage.dart';
 
 class CampaignHeader extends StatelessWidget {
   Campaign campaign;
 
   TextTheme textTheme;
 
-  CampaignHeader(this.campaign);
+  BuildContext context;
+
+  bool isFollowed = false;
+
+  CampaignHeader(this.campaign, [this.isFollowed = false]);
+
+  GlobalKey _cardKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     textTheme = Theme.of(context).textTheme;
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "${campaign.amount}€",
-                  style: textTheme.title,
+    return _secondLayout();
+  }
+
+  Widget _secondLayout() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+      child: Column(
+        children: <Widget>[
+          Material(
+            clipBehavior: Clip.antiAlias,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) =>
+                            CampaignPage(campaign, isFollowed)));
+
+                /*Navigator.push(
+                    context,
+                    CampaignRevealRoute(
+                        page: CampaignPage(campaign), widgetKey: _cardKey));*/
+              },
+              child: Hero(
+                tag: "image-${campaign.imgUrl}${isFollowed ? "followed" : ""}",
+                child: Image(
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(
+                    campaign.imgUrl,
+                  ),
                 ),
-                Text(
-                  "Spenden",
-                  style: textTheme.subtitle.copyWith(color: Colors.black54),
-                ),
-              ],
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(50),
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    image: DecorationImage(
-                        image: NetworkImage(campaign.imgUrl),
-                        fit: BoxFit.cover)),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          ),
+          Card(
+            key: _cardKey,
+            clipBehavior: Clip.antiAlias,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: ExpansionTile(
+              title: Text(
+                campaign.name,
+                style: textTheme.title,
+              ),
+              subtitle: Text("To make the world a better place!"),
               children: <Widget>[
-                Text(
-                  "+126",
-                  style: textTheme.title,
-                ),
-                Text(
-                  "Mitglieder",
-                  style: textTheme.subtitle.copyWith(color: Colors.black54),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            "${campaign.amount}€",
+                            style: textTheme.title,
+                          ),
+                          Text(
+                            "Spenden",
+                            style: textTheme.subtitle
+                                .copyWith(color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 10),
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            "+126",
+                            style: textTheme.title,
+                          ),
+                          Text(
+                            "Mitglieder",
+                            style: textTheme.subtitle
+                                .copyWith(color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Text(
-          campaign.name,
-          style: textTheme.title,
-        ),
-        SizedBox(
-          height: 5,
-        ),
-        Text(campaign.description, textAlign: TextAlign.center,),
-      ],
+          )
+        ],
+      ),
     );
   }
 }

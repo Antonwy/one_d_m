@@ -1,13 +1,16 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/PlaceSearch.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Place.dart';
+import 'package:one_d_m/Helper/StorageService.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateCampaignPage extends StatefulWidget {
   @override
@@ -19,15 +22,21 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
 
   PostPage _currentPage = PostPage.NAME;
 
-  DateTime _selectedDate = DateTime.now();
-  String _name = "", _description = "";
+  String _name = "", _description = "", _shortDescription = "";
   Place _place;
 
   File _image;
 
+  UserManager um;
+
+  String _postId = Uuid().v4();
+
+  bool isUploading = false;
+
   @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
+    um = Provider.of<UserManager>(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -61,8 +70,6 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
         return _descriptionWidget();
       case PostPage.POSITION:
         return _positionWidget();
-      case PostPage.ENDDATE:
-        return _endDateWidget();
       case PostPage.RESULT:
         return _resultWidget();
       default:
@@ -93,7 +100,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
         ),
         OutlineButton(
           onPressed: () {
-            if (_name.isEmpty) return Helper.showAlert(context, "Gib einen Namen ein!");
+            if (_name.isEmpty)
+              return Helper.showAlert(context, "Gib einen Namen ein!");
             _changePage(PostPage.IMAGE);
           },
           child: Text("Weiter"),
@@ -113,13 +121,17 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
           style: theme.accentTextTheme.title,
         ),
         _image != null
-            ? Container(
+            ? Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
-                height: 400,
-                child: Image.file(
-                  _image,
-                  fit: BoxFit.cover,
-                ))
+                child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.file(
+                      _image,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )),
+              )
             : Container(),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -173,7 +185,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
             ),
             OutlineButton(
               onPressed: () {
-                if (_image == null) return Helper.showAlert(context, "Wähle ein Bild aus!");
+                if (_image == null)
+                  return Helper.showAlert(context, "Wähle ein Bild aus!");
                 _changePage(PostPage.DESCRIPTION);
               },
               child: Text("Weiter"),
@@ -192,7 +205,23 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            "Geben sie die Projektbeschreibung ein.",
+            "Beschreibe dein Projekt kurz.",
+            style: theme.accentTextTheme.title,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          _textField(
+              hint: "Kurze Beschreibung",
+              minLines: 2,
+              onChanged: (text) {
+                _shortDescription = text;
+              }),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "Beschreibe dein Projekt detailliert.",
             style: theme.accentTextTheme.title,
           ),
           SizedBox(
@@ -220,8 +249,10 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
               ),
               OutlineButton(
                 onPressed: () {
-                  if (_description.isEmpty)
-                    return Helper.showAlert(context, "Gib eine Beschreibung ein!");
+                  if (_description.isEmpty || _shortDescription.isEmpty) {
+                    return Helper.showAlert(
+                        context, "Gib eine Beschreibung ein!");
+                  }
                   _changePage(PostPage.POSITION);
                 },
                 child: Text("Weiter"),
@@ -238,84 +269,8 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
       _changePage(PostPage.DESCRIPTION);
     }, onNext: (Place place) {
       _place = place;
-      _changePage(PostPage.ENDDATE);
+      _changePage(PostPage.RESULT);
     });
-  }
-
-  Widget _endDateWidget() {
-    return Column(
-      key: Key("EndDate"),
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          "Wähle das Enddatum deines Projektes aus.",
-          style: theme.accentTextTheme.title,
-        ),
-        SizedBox(
-          height: 5,
-        ),
-        Text(
-          "Bis zu diesem Datum soll für dein Projekt spenden gesammelt werden.",
-          style: theme.accentTextTheme.body1,
-        ),
-        SizedBox(
-          height: 25,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              _convertDate(_selectedDate),
-              style: theme.accentTextTheme.title,
-            ),
-            FlatButton(
-              child: Text("Datum auswählen"),
-              onPressed: () async {
-                DateTime myDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2018),
-                      lastDate: DateTime(2030),
-                    ) ??
-                    _selectedDate;
-                setState(() {
-                  _selectedDate = myDate;
-                });
-              },
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        Row(
-          children: <Widget>[
-            OutlineButton(
-              child: Text("Zurück"),
-              onPressed: () {
-                setState(() {
-                  _currentPage = PostPage.POSITION;
-                });
-              },
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            OutlineButton(
-              child: Text("Weiter"),
-              onPressed: () {
-                if (_selectedDate.isBefore(DateTime.now()))
-                  return Helper.showAlert(context, "Datum muss in der Zukunft liegen!");
-                setState(() {
-                  _currentPage = PostPage.RESULT;
-                });
-              },
-            ),
-          ],
-        )
-      ],
-    );
   }
 
   Widget _resultWidget() {
@@ -328,7 +283,10 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
             height: 200,
             child: Center(
               child: Material(
-                child: Image.file(_image, fit: BoxFit.cover,),
+                child: Image.file(
+                  _image,
+                  fit: BoxFit.cover,
+                ),
                 borderRadius: BorderRadius.circular(5),
                 elevation: 10,
                 clipBehavior: Clip.antiAlias,
@@ -343,6 +301,20 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
               _name,
               style: theme.accentTextTheme.headline,
             ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "Kurze Beschreibung: ",
+            style: theme.accentTextTheme.title,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            _shortDescription,
+            style: theme.accentTextTheme.body1,
           ),
           SizedBox(
             height: 20,
@@ -364,8 +336,6 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
           Divider(),
           _resultRow("Ort", _place.name),
           Divider(),
-          _resultRow("Enddatum", _convertDate(_selectedDate)),
-          Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -373,33 +343,42 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
                 child: Text("Zurück"),
                 onPressed: () {
                   setState(() {
-                    _currentPage = PostPage.ENDDATE;
+                    _currentPage = PostPage.POSITION;
                   });
                 },
               ),
+              isUploading ? CircularProgressIndicator() : Container(),
               OutlineButton(
-                child: Text("Erstellen"),
-                onPressed: () async {
-                  Campaign campaign = Campaign(
-                      amount: 0,
-                      name: _name,
-                      description: _description,
-                      city: _place.name,
-                      endDate: _selectedDate,
-                      imgUrl: null,
-                      finalAmount: 10000, img: null);
-                  if (await Api.createCampaign(campaign)) {
-                    Navigator.pop(context);
-                  } else {
-                    Helper.showAlert(context, "Etwas ist schief gelaufen! Versuche es später erneut!");
-                  }
-                },
-              ),
+                  child: Text("Erstellen"),
+                  onPressed: isUploading ? null : _uploadCampaign),
             ],
           )
         ],
       ),
     );
+  }
+
+  void _uploadCampaign() async {
+    setState(() {
+      isUploading = true;
+    });
+
+    StorageService service = StorageService(file: _image, id: _postId);
+
+    await service.compressImage();
+
+    Campaign campaign = Campaign(
+      amount: 0,
+      name: _name,
+      description: _description,
+      city: _place.name,
+      imgUrl: await service.uploadImage(),
+      finalAmount: 10000,
+      authorId: um.uid,
+    );
+
+    await DatabaseService(um.uid).createCampaign(campaign);
+    Navigator.pop(context);
   }
 
   Widget _resultRow(String left, String right) {
@@ -458,4 +437,4 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
   }
 }
 
-enum PostPage { NAME, IMAGE, DESCRIPTION, POSITION, ENDDATE, RESULT }
+enum PostPage { NAME, IMAGE, DESCRIPTION, POSITION, RESULT }

@@ -19,4 +19,15 @@ class Validate {
       return "Bitte gib ein richtiges Passwort ein!";
     return null;
   }
+
+  static String postTitle(String text) {
+    if(text.length < 3) return "Der Titel ist zu kurz!";
+    return null;
+  }
+
+  static String postText(String text) {
+    if(text.length < 20) return "Beschreibung zu kurz!";
+    return null;
+  }
+
 }

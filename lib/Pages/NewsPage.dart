@@ -1,9 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/UserButton.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/CampaignPage.dart';
 
@@ -30,9 +30,12 @@ class NewsPage extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 16.0,
                       )),
-                  background: Image.network(
-                    news.imageUrl,
-                    fit: BoxFit.cover,
+                  background: Hero(
+                    tag: "news${news.id}",
+                    child: CachedNetworkImage(
+                      imageUrl: news.imageUrl,
+                      fit: BoxFit.cover,
+                    ),
                   )),
             ),
           ];
@@ -46,11 +49,11 @@ class NewsPage extends StatelessWidget {
               SizedBox(height: 20),
               UserButton(news.userId),
               SizedBox(height: 10),
-              AnimatedFutureBuilder<ApiResult<Campaign>>(
-                  future: Api.getCampaignFromId(news.projectId),
+              AnimatedFutureBuilder<Campaign>(
+                  future: DatabaseService().getCampaign(news.campaignId),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      Campaign campaign = snapshot.data.getData();
+                      Campaign campaign = snapshot.data;
                       return Material(
                         borderRadius: BorderRadius.circular(5),
                         clipBehavior: Clip.antiAlias,
@@ -60,16 +63,15 @@ class NewsPage extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (c) =>
-                                        CampaignPage(campaign: campaign)));
+                                    builder: (c) => CampaignPage(campaign)));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: <Widget>[
                                 CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(campaign.imgUrl),
+                                  backgroundImage: CachedNetworkImageProvider(
+                                      campaign.imgUrl),
                                 ),
                                 SizedBox(width: 10),
                                 Text(

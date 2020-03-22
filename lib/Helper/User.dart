@@ -1,10 +1,18 @@
-import 'dart:convert';
 import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
   String username, email, firstname, lastname, password;
-  File profileImage;
-  int id;
+  String imgUrl;
+  String id;
+  bool admin;
+
+  static final String FIRSTNAME = "first_name",
+      LASTNAME = "last_name",
+      EMAIL = "email_address",
+      ADMIN = "admin",
+      IMAGEURL = "image_url";
 
   User(
       {this.username,
@@ -12,39 +20,37 @@ class User {
       this.firstname,
       this.lastname,
       this.password,
-      this.id = 0,
-      this.profileImage});
+      this.id,
+      this.imgUrl,
+      this.admin,});
 
-  static User fromJson(Map<String, dynamic> json) {
-    json = json["data"];
+  static User fromSnapshot(DocumentSnapshot snapshot) {
+    Map<String, dynamic> map = snapshot.data;
     return User(
-        username: json["username"],
-        firstname: json["first_name"],
-        lastname: json["last_name"],
-        email: json["email_address"],
-        id: json["id"],
-        profileImage: getImage(json["profile_picture"])
-    );
+        id: snapshot.documentID,
+        firstname: map[User.FIRSTNAME],
+        lastname: map[User.LASTNAME],
+        email: map[User.EMAIL],
+        admin: map[User.ADMIN],
+        imgUrl: map[IMAGEURL]);
+  }
+
+  static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {
+    return snapshots.map((ss) => fromSnapshot(ss)).toList();
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "first_name": firstname,
-      "last_name": lastname,
-      "username": username,
-      "email_address": email,
-      "password": password,
-      "iban": "DE123",
-      "profile_picture": profileImage == null ? "" : base64Encode(profileImage.readAsBytesSync()),
+      FIRSTNAME: firstname,
+      LASTNAME: lastname,
+      EMAIL: email,
+      ADMIN: false,
+      IMAGEURL: imgUrl
     };
-  }
-
-  static File getImage(String base64) {
-
   }
 
   @override
   String toString() {
-    return 'User{username: $username, email: $email, firstname: $firstname, lastname: $lastname, password: $password, profileImage: $profileImage, id: $id}';
+    return 'User{username: $username, email: $email, firstname: $firstname, lastname: $lastname, password: $password, profileImage: $imgUrl, id: $id}';
   }
 }

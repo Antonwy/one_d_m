@@ -1,20 +1,20 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 
 import 'AnimatedFutureBuilder.dart';
 
 class UserButton extends StatelessWidget {
-  int id;
+  String id;
 
   UserButton(this.id);
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedFutureBuilder<ApiResult<User>>(
-        future: Api.getUserWithId(id),
+    return AnimatedFutureBuilder<User>(
+        future: DatabaseService(id).getUser(),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Material(
@@ -26,18 +26,23 @@ class UserButton extends StatelessWidget {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (c) => UserPage(snapshot.data.getData())));
+                          builder: (c) => UserPage(snapshot.data)));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: <Widget>[
                       CircleAvatar(
-                        child: Icon(Icons.person),
+                        child: snapshot.data.imgUrl == null
+                            ? Icon(Icons.person)
+                            : null,
+                        backgroundImage: snapshot.data.imgUrl == null
+                            ? null
+                            : CachedNetworkImageProvider(snapshot.data.imgUrl),
                       ),
                       SizedBox(width: 10),
                       Text(
-                        "${snapshot.data.getData().firstname} ${snapshot.data.getData().lastname}",
+                        "${snapshot.data.firstname} ${snapshot.data.lastname}",
                         style: Theme.of(context).textTheme.title,
                       )
                     ],

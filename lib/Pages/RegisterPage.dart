@@ -2,15 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Components/ValueAnimator.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/Validate.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -40,17 +41,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final _formKey = GlobalKey<FormState>();
 
-  String username = "",
-      email = "",
+  String email = "",
       password1 = "",
       password2 = "",
       firstName = "",
-      lastName = "",
-      description = "";
+      lastName = "";
 
   UserManager um;
 
   File _file;
+
+  String _userId = Uuid().v4();
 
   bool _loading = false;
 
@@ -91,6 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
         body: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              automaticallyImplyLeading: false,
               expandedHeight: 250,
               floating: false,
               pinned: true,
@@ -186,17 +188,6 @@ class _RegisterPageState extends State<RegisterPage> {
               )),
           SizedBox(
             height: 20,
-          ),
-          _textField(
-              label: "Nutzername",
-              hint: "z.B. tester",
-              initText: username,
-              onSaved: (text) {
-                username = text;
-              },
-              validator: Validate.username),
-          SizedBox(
-            height: 15,
           ),
           _textField(
               label: "Email",
@@ -415,25 +406,6 @@ class _RegisterPageState extends State<RegisterPage> {
           SizedBox(
             height: 10,
           ),
-          Text(
-            "Profilbeschreibung",
-            style: textTheme.title,
-          ),
-          Text("Beschreibe dein Profil."),
-          SizedBox(
-            height: 10,
-          ),
-          TextFormField(
-            initialValue: description,
-            minLines: 5,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(), labelText: "Profilbeschreibung"),
-          ),
-          SizedBox(
-            height: 10,
-          ),
           Material(
             borderRadius: BorderRadius.circular(3),
             clipBehavior: Clip.antiAlias,
@@ -484,10 +456,11 @@ class _RegisterPageState extends State<RegisterPage> {
             height: 20,
           ),
           _textField(
-              label: "Nutzername",
+              label: "Email",
               hint: "",
+              inputType: TextInputType.emailAddress,
               onSaved: (text) {
-                username = text;
+                email = text;
               }),
           SizedBox(
             height: 15,
@@ -595,31 +568,25 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future _registerUser() async {
+
     User user = User(
-        username: username,
-        email: email,
+        email: email.toLowerCase(),
         firstname: firstName,
         lastname: lastName,
-        password: password1,
-        profileImage: _file);
+        password: password1);
 
-    ApiResult result = await Api.register(user);
+    ApiResult result = await um.signUp(user, _file);
 
     if (result.hasError()) {
       _showError(result.getMessage());
-    } else {
-      _pushNextPage();
     }
   }
 
   Future _loginUser() async {
-    ApiResult success =
-        await Api.login(username: username, password: password1);
+    ApiResult result = await um.signIn(email.toLowerCase(), password1);
 
-    if (success.hasError())
-      _showError("Password or username wrong!");
-    else
-      _pushNextPage();
+    if (result.hasError())
+      _showError(result.getMessage());
   }
 
   void _showError(String error) {

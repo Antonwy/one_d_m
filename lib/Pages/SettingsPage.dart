@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/API/Api.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
-import 'package:one_d_m/Pages/MyProjectsPage.dart';
+import 'package:one_d_m/Pages/MyCampaignsPage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +34,7 @@ class SettingsPage extends StatelessWidget {
               child: Text("Meine Projekte"),
               onPressed: () async {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MyProjectsPage()));
+                    MaterialPageRoute(builder: (context) => MyCampaignsPage()));
               },
             ),
             OutlineButton(
@@ -64,8 +63,8 @@ class SettingsPage extends StatelessWidget {
               child: Text("Logout"),
               onPressed: () async {
                 await um.logout();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()));
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (c) => RegisterPage()));
               },
             ),
             SizedBox(height: 20),

@@ -1,40 +1,45 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool isLoggedIn = prefs.containsKey(Constants.USERNAME);
-
-  runApp(MyApp(isLoggedIn));
-}
+void main() => runApp(ChangeNotifierProvider(
+    create: (context) => UserManager.instance(), child: MyApp()));
 
 class MyApp extends StatelessWidget {
-  bool isLoggedIn;
-
-  MyApp(this.isLoggedIn);
-
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          builder: (context) => UserManager(),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            primarySwatch: Colors.indigo),
-        // home: RegisterPage(),
-        home: isLoggedIn ? HomePage() : RegisterPage(),
+    return MaterialApp(
+      title: 'One Dollar Movement',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      home: Consumer<UserManager>(builder: (context, um, child) {
+        print(um.status);
+
+        switch (um.status) {
+          case Status.Uninitialized:
+            return Splash();
+          case Status.Authenticated:
+            return HomePage();
+          case Status.Unauthenticated:
+          case Status.Authenticating:
+            return RegisterPage();
+          default:
+            return Splash();
+        }
+      }),
+    );
+  }
+}
+
+class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }

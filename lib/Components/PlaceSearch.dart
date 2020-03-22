@@ -18,7 +18,7 @@ class PlaceSearch extends StatefulWidget {
 
 class _PlaceSearchState extends State<PlaceSearch> {
   List<Place> suggestions = [];
-  bool _showStandart = true;
+  bool _showStandart = true, _loading = false;
 
   TextEditingController _controller = TextEditingController();
 
@@ -30,7 +30,6 @@ class _PlaceSearchState extends State<PlaceSearch> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _controller.dispose();
   }
@@ -72,9 +71,14 @@ class _PlaceSearchState extends State<PlaceSearch> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(5),
               elevation: 7,
-              child: ListView(
-                children: _getSuggestions(),
-              ),
+              child: _loading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.indigo),
+                    ))
+                  : ListView(
+                      children: _getSuggestions(),
+                    ),
             ),
           ),
         ),
@@ -93,6 +97,10 @@ class _PlaceSearchState extends State<PlaceSearch> {
     String reqUrl =
         "https://nominatim.openstreetmap.org/search/${_controller.text}?format=json&limit=10";
 
+    setState(() {
+      _loading = true;
+    });
+
     http.Response res = await http.get(reqUrl);
 
     List<dynamic> body = json.decode(res.body);
@@ -107,20 +115,18 @@ class _PlaceSearchState extends State<PlaceSearch> {
         }
       }
 
-      setState(() {
-        suggestions = placesList;
-      });
+      suggestions = placesList;
     }
 
     if (suggestions.isEmpty || _controller.text.isEmpty) {
-      setState(() {
-        _showStandart = true;
-      });
+      _showStandart = true;
     } else if (suggestions.isNotEmpty) {
-      setState(() {
-        _showStandart = false;
-      });
+      _showStandart = false;
     }
+
+    setState(() {
+      _loading = false;
+    });
   }
 
   List<Widget> _getSuggestions() {

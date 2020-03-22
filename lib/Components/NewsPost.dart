@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/CampaignPage.dart';
 
@@ -23,19 +25,20 @@ class NewsPost extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
+                      fullscreenDialog: true,
                       builder: (c) =>
-                          CampaignPage(campaignId: news.projectId)));
+                          CampaignPage(Campaign(id: news.campaignId))));
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: NetworkImage(news.imageUrl),
+                    backgroundImage: CachedNetworkImageProvider(news.imageUrl),
                   ),
                   SizedBox(width: 10),
                   Text(
-                    news.title,
+                    news.campaignName,
                     style: Theme.of(context).textTheme.title,
                   ),
                 ],

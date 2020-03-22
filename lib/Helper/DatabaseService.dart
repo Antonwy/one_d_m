@@ -56,11 +56,19 @@ class DatabaseService {
         .map((QuerySnapshot qs) => Campaign.listFromSnapshot(qs.documents));
   }
 
-  Stream<List<Campaign>> getCampaignFromQuery(String query) {
+  Stream<List<Campaign>> getCampaignFromQueryStream(String query) {
     return campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
         .snapshots()
         .map((qs) => Campaign.listFromSnapshot(qs.documents));
+  }
+
+  Future<List<Campaign>> getCampaignFromQuery(String query) async {
+    QuerySnapshot qs = await campaignsCollection
+        .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
+        .getDocuments();
+
+    return qs.documents.map((doc) => Campaign.fromSnapshot(doc)).toList();
   }
 
   Stream<DocumentSnapshot> hasSubscribedCampaign(String campaignId) {
@@ -93,6 +101,16 @@ class DatabaseService {
         .collection(CAMPAIGNS)
         .snapshots()
         .map((qs) => Campaign.listFromShortSnapshot(qs.documents));
+  }
+
+  Future<List<Campaign>> getSubscribedCampaigns() async {
+    return (await subscribedCampaignsCollection
+            .document(uid)
+            .collection(CAMPAIGNS)
+            .getDocuments())
+        .documents
+        .map((qs) => Campaign.fromSnapshot(qs))
+        .toList();
   }
 
   Stream<List<Campaign>> getMyCampaignsStream() {
@@ -135,6 +153,13 @@ class DatabaseService {
         .collection(NEWS)
         .snapshots()
         .map((qs) => News.listFromSnapshot(qs.documents));
+  }
+
+  Future<List<News>> getNews() async {
+    QuerySnapshot qs =
+        await feedCollection.document(uid).collection(NEWS).getDocuments();
+
+    return qs.documents.map((doc) => News.fromSnapshot(doc)).toList();
   }
 
   Future<ApiResult> createNews(News news) async {

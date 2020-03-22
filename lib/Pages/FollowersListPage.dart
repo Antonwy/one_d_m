@@ -31,8 +31,9 @@ class FollowersListPage extends StatelessWidget {
                     children: <Widget>[
                       CircleAvatar(
                         child: user.imgUrl == null ? Icon(Icons.person) : null,
-                        backgroundImage:
-                            CachedNetworkImageProvider(user.imgUrl),
+                        backgroundImage: user.imgUrl == null
+                            ? null
+                            : CachedNetworkImageProvider(user.imgUrl),
                       ),
                       SizedBox(width: 10),
                       Text(

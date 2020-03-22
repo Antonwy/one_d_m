@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
+import 'package:one_d_m/Components/DonationDialog.dart';
 
 import 'package:one_d_m/Components/NewsBody.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
@@ -14,39 +15,43 @@ import 'package:one_d_m/Helper/RectRevealRoute.dart';
 import 'package:one_d_m/Helper/User.dart';
 
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/BuyCoinsPage.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class CampaignPage extends StatefulWidget {
   Campaign campaign;
+  bool isHero;
 
-  CampaignPage(this.campaign);
+  CampaignPage(this.campaign, [this.isHero = false]);
 
   @override
   _CampaignPageState createState() => _CampaignPageState();
 }
 
-class _CampaignPageState extends State<CampaignPage> {
-  PersistentBottomSheetController _controller;
+class _CampaignPageState extends State<CampaignPage>
+    with TickerProviderStateMixin {
   ThemeData theme;
 
   UserManager um;
   Size displaySize;
   Campaign campaign;
   Future<Campaign> _future;
-  bool _subscribed = false;
-  bool _isOwnPage = false;
+  bool _subscribed = false,
+      _isOwnPage = false,
+      _loading = false,
+      _showDescription = true;
+  String _imgUrl;
   ScrollController _scrollController = ScrollController();
   double _scrollOffset = 0;
 
   GlobalKey _fabKey = GlobalKey();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  bool _loading = false;
-
   int _donationAmount = 0;
+
+  AnimationController _animationController;
+  Duration _duration = Duration(milliseconds: 1200);
 
   @override
   void dispose() {
@@ -57,6 +62,9 @@ class _CampaignPageState extends State<CampaignPage> {
   @override
   void initState() {
     super.initState();
+
+    _animationController =
+        AnimationController(vsync: this, duration: _duration);
 
     _scrollController.addListener(() {
       setState(() {
@@ -70,9 +78,13 @@ class _CampaignPageState extends State<CampaignPage> {
       _future = Future.value(widget.campaign);
     }
 
+    _imgUrl = widget.campaign.imgUrl;
+
     _future.then((Campaign c) {
+      _animationController.forward();
       setState(() {
         _isOwnPage = c.authorId == um.uid;
+        _imgUrl = c.imgUrl;
       });
     });
   }
@@ -101,18 +113,7 @@ class _CampaignPageState extends State<CampaignPage> {
                     color: theme.primaryColor,
                     startColor: theme.primaryColor));
           } else {
-            if (_controller == null) {
-              _donationAmount = 0;
-              _showCoins();
-            } else {
-              _controller.close();
-              _scaffoldKey.currentState.showSnackBar(SnackBar(
-                  content: Text(
-                      "Du hast $_donationAmount ${_donationAmount > 1 ? "Coins" : "Coin"} gespendet!")));
-            }
-
-            // Navigator.push(
-            //     context, MaterialPageRoute(builder: (c) => BuyCoinsPage()));
+            _showCoins();
           }
         },
         label: Text(_isOwnPage ? "Post erstellen" : "Spenden"),
@@ -121,117 +122,133 @@ class _CampaignPageState extends State<CampaignPage> {
       body: Stack(
         children: <Widget>[
           Positioned(
-            top: _scrollOffset < 0 ? 0 : -_scrollOffset * .3,
-            width: displaySize.width,
-            child: AnimatedFutureBuilder<Campaign>(
-                future: _future,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container(
-                      height: displaySize.height * .35,
-                    );
-                  }
-                  return Container(
-                    height: displaySize.height * .35 -
-                        (_scrollOffset < 0 ? _scrollOffset : 0),
-                    width: displaySize.width -
-                        (_scrollOffset < 0 ? _scrollOffset : 0),
-                    child: CachedNetworkImage(
-                      imageUrl: snapshot.data.imgUrl,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                }),
-          ),
-          FutureBuilder<Campaign>(
-              future: _future,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  campaign = snapshot.data;
-                  _isOwnPage = campaign.authorId == um.uid;
-                  return Stack(
-                    children: <Widget>[
-                      SingleChildScrollView(
-                        controller: _scrollController,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(height: displaySize.height * .35 - 45),
-                            Material(
-                              color: Colors.white,
-                              clipBehavior: Clip.antiAlias,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(35),
-                                  topRight: Radius.circular(35)),
-                              child: Padding(
-                                padding: EdgeInsets.fromLTRB(25, 10, 25, 0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    _showAuthorAndDate(),
-                                    SizedBox(height: 5),
-                                    Container(
-                                      width: displaySize.width * .6,
-                                      child: Text(
-                                        campaign.name,
-                                        style: theme.textTheme.title.copyWith(
-                                            fontSize: 30,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 30,
-                                    ),
-                                    _campaignDetails(),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    _isOwnPage
-                                        ? Container()
-                                        : Center(child: _followButton()),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    Text(
-                                      campaign.description,
-                                      style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 18),
-                                    ),
-                                    SizedBox(height: 20),
-                                    StreamBuilder<List<News>>(
-                                        stream: DatabaseService()
-                                            .getNewsFromCampaignStream(
-                                                campaign),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.hasData) {
-                                            if (snapshot.data.isEmpty)
-                                              return Container();
-                                            return _generateNews(snapshot.data);
-                                          }
-
-                                          return Container();
-                                        }),
-                                    SizedBox(
-                                      height: 150,
-                                    )
-                                  ],
-                                ),
+              top: _scrollOffset < 0 ? 0 : -_scrollOffset * .3,
+              width: displaySize.width,
+              child: Container(
+                height: displaySize.height * .35 -
+                    (_scrollOffset < 0 ? _scrollOffset : 0),
+                width:
+                    displaySize.width - (_scrollOffset < 0 ? _scrollOffset : 0),
+                child: Hero(
+                    tag:
+                        "image-${widget.campaign.imgUrl}${widget.isHero ? "followed" : ""}",
+                    child: _imgUrl != null
+                        ? Material(
+                          borderRadius: BorderRadius.circular(0),
+                          clipBehavior: Clip.antiAlias,
+                            child: Image(
+                              fit: BoxFit.cover,
+                              image: CachedNetworkImageProvider(
+                                _imgUrl,
                               ),
                             ),
-                          ],
-                        ),
+                          )
+                        : Center(child: CircularProgressIndicator())),
+              )),
+          AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return Positioned(
+                  width: displaySize.width,
+                  height: displaySize.height,
+                  top: Tween<double>(begin: displaySize.height * .65, end: 0)
+                      .animate(CurvedAnimation(
+                          curve: Curves.fastLinearToSlowEaseIn,
+                          parent: _animationController))
+                      .value,
+                  child: child);
+            },
+            child: FutureBuilder<Campaign>(
+                future: _future,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    campaign = snapshot.data;
+                    _isOwnPage = campaign.authorId == um.uid;
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(height: displaySize.height * .35 - 45),
+                          Material(
+                            color: Colors.white,
+                            clipBehavior: Clip.antiAlias,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30)),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(25, 10, 25, 0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  _showAuthorAndDate(),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    campaign.name,
+                                    style: theme.textTheme.title.copyWith(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  _isOwnPage
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Center(child: _followButton()),
+                                        ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  _campaignDetails(),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Text(
+                                    campaign.description,
+                                    style: TextStyle(
+                                        color: Colors.grey[600], fontSize: 18),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  StreamBuilder<List<News>>(
+                                      stream: DatabaseService()
+                                          .getNewsFromCampaignStream(campaign),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          if (snapshot.data.isEmpty)
+                                            return Container();
+                                          return _generateNews(snapshot.data);
+                                        }
+
+                                        return Container();
+                                      }),
+                                  SizedBox(height: 100)
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  );
-                }
-                return Center(child: CircularProgressIndicator());
-              }),
-          Positioned(
-            left: 20,
+                    );
+                  }
+                  return Center(child: CircularProgressIndicator());
+                }),
+          ),
+          AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return Positioned(
+                  top: Tween<double>(begin: -100, end: 0)
+                      .animate(CurvedAnimation(
+                          parent: _animationController,
+                          curve: Interval(.25, .45, curve: Curves.easeOut)))
+                      .value,
+                  left: 20,
+                  child: child);
+            },
             child: SafeArea(
               child: Material(
                 clipBehavior: Clip.antiAlias,
@@ -243,15 +260,26 @@ class _CampaignPageState extends State<CampaignPage> {
                   },
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(10, 12, 12, 12),
-                    child: Icon(Icons.arrow_back_ios),
+                    child: Icon(Icons.close),
                   ),
                 ),
               ),
             ),
           ),
           _isOwnPage
-              ? Positioned(
-                  right: 20,
+              ? AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return Positioned(
+                        top: Tween<double>(begin: -100, end: 0)
+                            .animate(CurvedAnimation(
+                                parent: _animationController,
+                                curve:
+                                    Interval(.35, .55, curve: Curves.easeOut)))
+                            .value,
+                        right: 20,
+                        child: child);
+                  },
                   child: SafeArea(
                     child: Material(
                       clipBehavior: Clip.antiAlias,
@@ -279,105 +307,7 @@ class _CampaignPageState extends State<CampaignPage> {
   }
 
   void _showCoins() {
-    _controller = _scaffoldKey.currentState.showBottomSheet((c) => Container(
-          height: 380,
-          color: Colors.indigo,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  SizedBox(
-                    height: 50,
-                  ),
-                  Text(
-                    "Wieviele Coins?",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      _coinCard(1),
-                      SizedBox(
-                        width: 7,
-                      ),
-                      _coinCard(2),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 7,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      _coinCard(5),
-                      SizedBox(
-                        width: 7,
-                      ),
-                      _coinCard(10),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 7,
-                  ),
-                  Card(
-                    margin: EdgeInsets.all(0),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: TextField(
-                        keyboardType: TextInputType.numberWithOptions(),
-                        onChanged: (text) {
-                          _donationAmount = int.parse(text);
-                        },
-                        decoration: InputDecoration.collapsed(
-                            hintText: "Anderer Betrag"),
-                      ),
-                    ),
-                    color: Colors.white,
-                  )
-                ],
-              ),
-            ),
-          ),
-        ));
-    _controller.closed.then((val) {
-      _controller = null;
-    });
-  }
-
-  Widget _coinCard(int amount) {
-    bool highlighted = _donationAmount == amount;
-    return Expanded(
-      child: Container(
-        height: 80,
-        child: Card(
-          elevation: 10,
-          margin: EdgeInsets.all(0),
-          clipBehavior: Clip.antiAlias,
-          color: highlighted ? Colors.indigo : null,
-          child: InkWell(
-            onTap: () {
-              _controller.setState(() {
-                _donationAmount = amount;
-              });
-            },
-            child: Center(
-              child: Text(
-                amount.toString(),
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                    color: highlighted ? Colors.white : Colors.black),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    DonationDialog.of(context).show();
   }
 
   Widget _followButton() {
@@ -459,7 +389,7 @@ class _CampaignPageState extends State<CampaignPage> {
         )));
 
     for (News n in news) {
-      widgets.add(NewsBody(n));
+      widgets.add(NewsBody(n, isHero: false,));
     }
 
     return Column(

@@ -8,64 +8,71 @@ class CampaignHeader extends StatelessWidget {
 
   TextTheme textTheme;
 
-  CampaignHeader(this.campaign);
+  BuildContext context;
+
+  bool isFollowed = false;
+
+  CampaignHeader(this.campaign, [this.isFollowed = false]);
+
+  GlobalKey _cardKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     textTheme = Theme.of(context).textTheme;
+    return _secondLayout();
+  }
+
+  Widget _secondLayout() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-      child: Container(
-        height: 230,
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
+      child: Column(
+        children: <Widget>[
+          Material(
+            clipBehavior: Clip.antiAlias,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => CampaignPage(campaign)));
+                        fullscreenDialog: true,
+                        builder: (context) =>
+                            CampaignPage(campaign, isFollowed)));
+
+                /*Navigator.push(
+                    context,
+                    CampaignRevealRoute(
+                        page: CampaignPage(campaign), widgetKey: _cardKey));*/
               },
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      CachedNetworkImage(
-                          width: 150,
-                          height: 150,
-                          placeholder: (context, url) =>
-                              Center(child: CircularProgressIndicator()),
-                          imageUrl: campaign.imgUrl,
-                          fit: BoxFit.cover),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                campaign.name,
-                                style: textTheme.title.copyWith(fontSize: 25),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                "Für die Rettung des Planeten!",
-                                style: textTheme.subtitle
-                                    .copyWith(color: Colors.black54),
-                                    textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+              child: Hero(
+                tag: "image-${campaign.imgUrl}${isFollowed ? "followed" : ""}",
+                child: Image(
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(
+                    campaign.imgUrl,
                   ),
-                  Divider(
-                    height: 1,
-                  ),
-                  SizedBox(height: 15),
-                  Row(
+                ),
+              ),
+            ),
+          ),
+          Card(
+            key: _cardKey,
+            clipBehavior: Clip.antiAlias,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: ExpansionTile(
+              title: Text(
+                campaign.name,
+                style: textTheme.title,
+              ),
+              subtitle: Text("To make the world a better place!"),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       Column(
@@ -96,10 +103,12 @@ class CampaignHeader extends StatelessWidget {
                         ],
                       ),
                     ],
-                  )
-                ],
-              )),
-        ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

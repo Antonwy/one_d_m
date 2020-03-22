@@ -30,9 +30,12 @@ class NewsPage extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 16.0,
                       )),
-                  background: Image.network(
-                    news.imageUrl,
-                    fit: BoxFit.cover,
+                  background: Hero(
+                    tag: "news${news.id}",
+                    child: CachedNetworkImage(
+                      imageUrl: news.imageUrl,
+                      fit: BoxFit.cover,
+                    ),
                   )),
             ),
           ];
@@ -60,16 +63,15 @@ class NewsPage extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (c) =>
-                                        CampaignPage(campaign)));
+                                    builder: (c) => CampaignPage(campaign)));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: <Widget>[
                                 CircleAvatar(
-                                  backgroundImage:
-                                      CachedNetworkImageProvider(campaign.imgUrl),
+                                  backgroundImage: CachedNetworkImageProvider(
+                                      campaign.imgUrl),
                                 ),
                                 SizedBox(width: 10),
                                 Text(

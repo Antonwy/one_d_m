@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Campaign {
-  String name, description, city, imgUrl;
+  String name, description, shortDescription, city, imgUrl;
   DateTime createdAt;
   int amount, finalAmount;
   String authorId, id;
@@ -10,6 +10,7 @@ class Campaign {
   static final String ID = "id",
       NAME = "title",
       DESCRIPTION = "description",
+      SHORTDESCRIPTION = "short_description",
       CITY = "city",
       CREATEDAT = "created_at",
       AUTHORID = "authorId",
@@ -21,26 +22,15 @@ class Campaign {
     this.id,
     this.name,
     this.description,
+    this.shortDescription,
     this.city,
     this.createdAt,
     this.authorId,
     this.amount = 10000,
-    this.imgUrl =
-        "https://images.unsplash.com/photo-1568025848823-86404cd04ad1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=3367&q=80",
+    this.imgUrl,
     this.finalAmount = 200000,
     this.subscribed = false,
   });
-
-  static Campaign fromJson(Map<String, dynamic> json) {
-    return Campaign(
-        id: json[ID],
-        name: json[NAME],
-        description: json[DESCRIPTION],
-        city: json[CITY],
-        createdAt: DateTime.fromMillisecondsSinceEpoch(json[CREATEDAT] ?? 0),
-        imgUrl: json[IMAGEURL],
-        authorId: json[AUTHORID]);
-  }
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -48,6 +38,7 @@ class Campaign {
         name: snapshot[NAME],
         description: snapshot[DESCRIPTION],
         city: snapshot[CITY],
+        shortDescription: snapshot[SHORTDESCRIPTION],
         createdAt:
             DateTime.fromMicrosecondsSinceEpoch(snapshot[CREATEDAT] ?? 0),
         imgUrl: snapshot[IMAGEURL],

@@ -63,7 +63,7 @@ class SettingsPage extends StatelessWidget {
               child: Text("Logout"),
               onPressed: () async {
                 await um.logout();
-                Navigator.push(
+                Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (c) => RegisterPage()));
               },
             ),

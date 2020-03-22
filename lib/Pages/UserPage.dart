@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
@@ -34,110 +33,111 @@ class _UserPageState extends State<UserPage> {
     _isOwnPage = widget.user.id == um.uid;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            iconTheme: _theme.iconTheme.copyWith(color: Colors.black87),
-            bottom: PreferredSize(
-                preferredSize: Size(
-                    MediaQuery.of(context).size.width, _isOwnPage ? 220 : 260),
-                child: Container()),
-            flexibleSpace: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        _followersCollumn(
-                            text: "Abonnenten",
-                            stream: DatabaseService()
-                                .getFollowedUsersStream(widget.user)),
-                        CircleAvatar(
-                          child: widget.user.imgUrl == null
-                              ? Icon(Icons.person)
-                              : null,
-                          radius: 50,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: widget.user.imgUrl == null
-                              ? null
-                              : CachedNetworkImageProvider(widget.user.imgUrl),
-                        ),
-                        _followersCollumn(
-                            text: "Abonniert",
-                            stream: DatabaseService()
-                                .getFollowingUsersStream(widget.user)),
-                      ],
+        backgroundColor: Colors.white,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              iconTheme: _theme.iconTheme.copyWith(color: Colors.black87),
+              bottom: PreferredSize(
+                  preferredSize: Size(MediaQuery.of(context).size.width,
+                      _isOwnPage ? 220 : 260),
+                  child: Container()),
+              flexibleSpace: SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          _followersCollumn(
+                              text: "Abonnenten",
+                              stream: DatabaseService()
+                                  .getFollowedUsersStream(widget.user)),
+                          Container(
+                            height: 120,
+                            width: 120,
+                            child: Hero(
+                              tag: "user${widget.user.id}",
+                              child: Material(
+                                elevation: 2,
+                                shape: CircleBorder(),
+                                clipBehavior: Clip.antiAlias,
+                                child: widget.user.imgUrl == null
+                                    ? Icon(
+                                        Icons.person,
+                                        color: Colors.indigo,
+                                      )
+                                    : CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl: widget.user.imgUrl),
+                              ),
+                            ),
+                          ),
+                          _followersCollumn(
+                              text: "Abonniert",
+                              stream: DatabaseService()
+                                  .getFollowingUsersStream(widget.user)),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "${widget.user?.firstname} ${widget.user?.lastname}",
-                    style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  _isOwnPage ? Container() : _roundButtons(),
-                  SizedBox(height: 10),
-                  Divider(),
-                ],
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "${widget.user?.firstname} ${widget.user?.lastname}",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    _isOwnPage ? Container() : _roundButtons(),
+                    SizedBox(height: 10),
+                    Divider(),
+                  ],
+                ),
               ),
             ),
-          ),
-          StreamBuilder<List<Campaign>>(
-            stream:
-                DatabaseService(widget.user.id).getSubscribedCampaignsStream(),
-            builder: (BuildContext c, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data.isEmpty) {
-                  return SliverFillRemaining(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 40,
-                        ),
-                        Image.asset("assets/images/clip-no-comments.png"),
-                        Text("Du hast noch keine Projekte abonniert!"),
-                      ],
-                    ),
+            StreamBuilder<List<Campaign>>(
+              stream: DatabaseService(widget.user.id)
+                  .getSubscribedCampaignsStream(),
+              builder: (BuildContext c, snapshot) {
+                if (snapshot.hasData) {
+                  if (snapshot.data.isEmpty) {
+                    return SliverFillRemaining(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 40,
+                          ),
+                          Image.asset("assets/images/clip-no-comments.png"),
+                          Text("Du hast noch keine Projekte abonniert!"),
+                        ],
+                      ),
+                    );
+                  }
+                  return SliverList(
+                    delegate: SliverChildListDelegate(
+                        _generateChildren(snapshot.data)),
                   );
                 }
-                return SliverList(
-                  delegate:
-                      SliverChildListDelegate(_generateChildren(snapshot.data)),
+                return SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 );
-              }
-              return SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (c) => HomePage()));
-        },
-        icon: Icon(Icons.home),
-        label: Text("Back home"),
-      ),
-    );
+              },
+            ),
+          ],
+        ));
   }
 
   Widget _followersCollumn({String text, Stream stream}) {
@@ -212,7 +212,7 @@ class _UserPageState extends State<UserPage> {
     ));
 
     for (Campaign c in data) {
-      list.add(CampaignHeader(c));
+      list.add(CampaignHeader(c, true));
     }
 
     list.add(SizedBox(

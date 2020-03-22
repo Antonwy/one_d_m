@@ -26,15 +26,15 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     um = Provider.of<UserManager>(context);
 
-    return CustomScrollView(
-      slivers: <Widget>[
+    return NestedScrollView(
+      headerSliverBuilder: (context, b) => [
         SliverAppBar(
           backgroundColor: Colors.white,
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: <Widget>[],
           bottom: PreferredSize(
-            preferredSize: Size(MediaQuery.of(context).size.width, 150),
+            preferredSize: Size(MediaQuery.of(context).size.width, 140),
             child: LayoutBuilder(builder: (context, constraints) {
               return Container();
             }),
@@ -123,46 +123,39 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        StreamBuilder<List<News>>(
-          stream: DatabaseService(um.uid).getNewsStream(),
-          builder: (BuildContext c, AsyncSnapshot<List<News>> snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data.isEmpty)
-                return SliverFillRemaining(
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(height: 50),
-                      Image.asset("assets/images/clip-1.png"),
-                      Text(
-                        "Du folgst noch keinen Projekte!",
-                        style: Theme.of(context).textTheme.body2,
-                      ),
-                      SizedBox(height: 10),
-                      RaisedButton(
-                        onPressed: widget.goToExplore,
-                        child: Text(
-                          "Entdecke Projekte!",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        color: Theme.of(context).primaryColor,
-                      )
-                    ],
-                  ),
-                );
-
-              return SliverList(
-                delegate:
-                    SliverChildListDelegate(_generateChildren(snapshot.data)),
-              );
-            }
-            return SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
-        ),
       ],
+      body: FutureBuilder<List<News>>(
+        future: DatabaseService(um.uid).getNews(),
+        builder: (BuildContext c, AsyncSnapshot<List<News>> snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data.isEmpty)
+              return Column(
+                children: <Widget>[
+                  SizedBox(height: 50),
+                  Image.asset("assets/images/clip-1.png"),
+                  Text(
+                    "Du folgst noch keinen Projekte!",
+                    style: Theme.of(context).textTheme.body2,
+                  ),
+                  SizedBox(height: 10),
+                  RaisedButton(
+                    onPressed: widget.goToExplore,
+                    child: Text(
+                      "Entdecke Projekte!",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    color: Theme.of(context).primaryColor,
+                  )
+                ],
+              );
+
+            return ListView(children: _generateChildren(snapshot.data));
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
     );
   }
 

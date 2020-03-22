@@ -9,11 +9,12 @@ class News {
       SHORTTEXT = "short_text",
       CREATEDAT = "created_at",
       IMAGEURL = "image_url";
-  String campaignId, userId, campaignName, title, imageUrl, text, shortText;
+  String campaignId, userId, campaignName, title, imageUrl, text, shortText, id;
   DateTime createdAt;
 
   News(
       {this.campaignId,
+      this.id,
       this.userId,
       this.title,
       this.imageUrl =
@@ -32,8 +33,7 @@ class News {
       shortText: json[SHORTTEXT],
       campaignName: json[CAMPAIGNNAME],
       imageUrl: json[IMAGEURL],
-      createdAt:
-          DateTime.fromMicrosecondsSinceEpoch(json[CREATEDAT] ?? 0),
+      createdAt: DateTime.fromMicrosecondsSinceEpoch(json[CREATEDAT] ?? 0),
     );
   }
 
@@ -51,7 +51,17 @@ class News {
   }
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
-    return News.fromJson(snapshot.data);
+    return News(
+      id: snapshot.documentID,
+      campaignId: snapshot[CAMPAIGNID],
+      userId: snapshot[USERID],
+      title: snapshot[TITLE],
+      text: snapshot[TEXT],
+      shortText: snapshot[SHORTTEXT],
+      campaignName: snapshot[CAMPAIGNNAME],
+      imageUrl: snapshot[IMAGEURL],
+      createdAt: DateTime.fromMicrosecondsSinceEpoch(snapshot[CREATEDAT] ?? 0),
+    );
   }
 
   static List<News> listFromSnapshot(List<DocumentSnapshot> snapshot) {

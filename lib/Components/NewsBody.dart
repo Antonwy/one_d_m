@@ -1,11 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/NewsPage.dart';
 
 class NewsBody extends StatelessWidget {
   News news;
+  bool isHero;
 
-  NewsBody(this.news);
+  NewsBody(this.news, {this.isHero = true});
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +22,29 @@ class NewsBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              height: 280,
+              height: 230,
               child: Stack(
                 children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: NetworkImage(news.imageUrl),
-                            fit: BoxFit.cover)),
-                  ),
+                  isHero
+                      ? Hero(
+                          tag: "news${news.id}",
+                          child: CachedNetworkImage(
+                            width: double.infinity,
+                            imageUrl: news.imageUrl,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          width: double.infinity,
+                          imageUrl: news.imageUrl,
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -45,21 +61,12 @@ class NewsBody extends StatelessWidget {
                     ),
                   ),
                   Align(
-                    alignment: Alignment.bottomCenter,
+                    alignment: Alignment.bottomRight,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            "Atlantik",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            "Vor 2 Minuten",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                      child: Text(
+                        "Vor 2 Minuten",
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
@@ -32,10 +33,12 @@ class UserButton extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       CircleAvatar(
-                        child: Icon(Icons.person),
-                        backgroundImage: snapshot.data.imgUrl != null
-                            ? NetworkImage(snapshot.data.imgUrl)
+                        child: snapshot.data.imgUrl == null
+                            ? Icon(Icons.person)
                             : null,
+                        backgroundImage: snapshot.data.imgUrl == null
+                            ? null
+                            : CachedNetworkImageProvider(snapshot.data.imgUrl),
                       ),
                       SizedBox(width: 10),
                       Text(

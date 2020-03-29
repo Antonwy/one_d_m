@@ -3,13 +3,14 @@ import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 
 class RoundButtonHomePage extends StatelessWidget {
-
   final IconData icon;
   final Widget toPage;
+  Function onTap;
   final GlobalKey _key = GlobalKey();
   final Color toColor;
 
-  RoundButtonHomePage({this.icon, this.toPage, this.toColor = Colors.white});
+  RoundButtonHomePage(
+      {this.icon, this.toPage, this.toColor = Colors.white, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +24,15 @@ class RoundButtonHomePage extends StatelessWidget {
         shape: CircleBorder(),
         child: InkWell(
           onTap: () {
+            if (toPage == null) {
+              onTap();
+              return;
+            }
             Navigator.push(
                 context,
                 CircularRevealRoute(
                     page: toPage,
-                    offset: Helper
-                        .getCenteredPositionFromKey(
-                        _key),
+                    offset: Helper.getCenteredPositionFromKey(_key),
                     startColor: Colors.indigo,
                     color: toColor));
           },

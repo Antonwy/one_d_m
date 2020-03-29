@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   int _currentPage = 1;
 
   PageController _pageController =
-      PageController(initialPage: 1, keepPage: true);
+      PageController(initialPage: 1, viewportFraction: .99);
 
   UserManager um;
 

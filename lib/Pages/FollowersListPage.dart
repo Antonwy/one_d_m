@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 
@@ -22,8 +23,7 @@ class FollowersListPage extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (c) => UserPage(user)));
+                  Navigator.push(context, UserPageRoute(user));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),

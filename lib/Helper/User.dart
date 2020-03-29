@@ -50,6 +50,9 @@ class User {
   }
 
   @override
+  int get hashCode => id.hashCode;
+
+  @override
   String toString() {
     return 'User{username: $username, email: $email, firstname: $firstname, lastname: $lastname, password: $password, profileImage: $imgUrl, id: $id}';
   }

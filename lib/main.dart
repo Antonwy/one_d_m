@@ -17,7 +17,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.indigo),
       home: Consumer<UserManager>(builder: (context, um, child) {
         print(um.status);
-
         switch (um.status) {
           case Status.Uninitialized:
             return Splash();

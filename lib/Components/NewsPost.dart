@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/CampaignPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/CampaignPage.dart';
@@ -17,17 +18,10 @@ class NewsPost extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: Column(
         children: <Widget>[
-          SizedBox(
-            height: 20,
-          ),
           InkWell(
             onTap: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (c) =>
-                          CampaignPage(Campaign(id: news.campaignId))));
+                  context, CampaignPageRoute(Campaign(id: news.campaignId)));
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),

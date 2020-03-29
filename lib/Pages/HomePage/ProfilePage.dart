@@ -1,13 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
+import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
 import 'package:one_d_m/Pages/BuyCoinsPage.dart';
-import 'package:one_d_m/Pages/SettingsPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -21,11 +22,12 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   UserManager um;
+  Size _displaySize;
 
   @override
   Widget build(BuildContext context) {
     um = Provider.of<UserManager>(context);
-
+    _displaySize = MediaQuery.of(context).size;
     return NestedScrollView(
       headerSliverBuilder: (context, b) => [
         SliverAppBar(
@@ -34,10 +36,8 @@ class _ProfilePageState extends State<ProfilePage> {
           automaticallyImplyLeading: false,
           actions: <Widget>[],
           bottom: PreferredSize(
-            preferredSize: Size(MediaQuery.of(context).size.width, 140),
-            child: LayoutBuilder(builder: (context, constraints) {
-              return Container();
-            }),
+            preferredSize: Size(MediaQuery.of(context).size.width, 130),
+            child: Container(),
           ),
           flexibleSpace: SafeArea(
             child: Padding(
@@ -64,15 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
-                      CircleAvatar(
-                        child:
-                            um.user.imgUrl != null ? null : Icon(Icons.person),
-                        radius: 30,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: um.user.imgUrl == null
-                            ? null
-                            : CachedNetworkImageProvider(um.user.imgUrl),
-                      )
+                      Container(child: Avatar(um.user.imgUrl), width: 60, height: 60,)
                     ],
                   ),
                   SizedBox(
@@ -89,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(fontSize: 15),
                           ),
                           Text(
-                            "25 Coins",
+                            "0 DC",
                             style: TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.bold),
                           ),
@@ -102,17 +94,26 @@ class _ProfilePageState extends State<ProfilePage> {
                           SizedBox(
                             width: 10,
                           ),
-                          RoundButtonHomePage(
-                            icon: Icons.add,
-                            toPage: CreateCampaignPage(),
-                            toColor: Colors.indigo,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          um.user.admin
+                              ? RoundButtonHomePage(
+                                  icon: Icons.add,
+                                  toPage: CreateCampaignPage(),
+                                  toColor: Colors.indigo,
+                                )
+                              : Container(),
+                          um.user.admin
+                              ? SizedBox(
+                                  width: 10,
+                                )
+                              : Container(),
                           RoundButtonHomePage(
                             icon: Icons.settings,
-                            toPage: SettingsPage(),
+                            onTap: () {
+                              BottomDialog(
+                                      context: context,
+                                      widget: SettingsDialog())
+                                  .show();
+                            },
                           )
                         ],
                       ),
@@ -134,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: 50),
                   Image.asset("assets/images/clip-1.png"),
                   Text(
-                    "Du folgst noch keinen Projekte!",
+                    "Noch keine Posts.",
                     style: Theme.of(context).textTheme.body2,
                   ),
                   SizedBox(height: 10),

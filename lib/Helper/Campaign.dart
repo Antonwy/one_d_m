@@ -61,6 +61,7 @@ class Campaign {
     return {
       NAME: name,
       DESCRIPTION: description,
+      SHORTDESCRIPTION: shortDescription,
       CITY: city,
       CREATEDAT: DateTime.now().millisecondsSinceEpoch,
       AUTHORID: authorId,

@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
-import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
+import 'package:one_d_m/Components/UserAvatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 
@@ -56,7 +58,6 @@ class _ExplorePageState extends State<ExplorePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: SearchBar(onChanged: (String text) {
-                    print("Test");
                     setState(() {
                       _queryFuture =
                           DatabaseService().getCampaignFromQuery(text);
@@ -76,7 +77,7 @@ class _ExplorePageState extends State<ExplorePage> {
                               children: _buildUserAvatars(snapshot.data)),
                         );
                       }
-                      return Container();
+                      return Container(height: 110,);
                     })
               ],
             ),
@@ -95,41 +96,7 @@ class _ExplorePageState extends State<ExplorePage> {
     list.add(SizedBox(width: 20));
 
     for (User user in users) {
-      list.add(Column(
-        children: <Widget>[
-          Container(
-            width: 70,
-            height: 70,
-            child: Hero(
-              tag: "user${user.id}",
-              child: Material(
-                color: Colors.grey[300],
-                shape: CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (c) => UserPage(user),
-                          ));
-                    },
-                    child: user.imgUrl == null
-                        ? Icon(Icons.person)
-                        : CachedNetworkImage(
-                            imageUrl: user.imgUrl,
-                            fit: BoxFit.cover,
-                          )),
-              ),
-            ),
-          ),
-          SizedBox(height: 5),
-          Text(
-            "${user.firstname}\n${user.lastname}",
-            textAlign: TextAlign.center,
-          )
-        ],
-      ));
+      list.add(UserAvatar(user));
       list.add(SizedBox(
         width: 20,
       ));

@@ -1,35 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/SearchPage.dart';
+import 'package:one_d_m/Helper/FadePageTransition.dart';
+import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/RectRevealRoute.dart';
 
 class SearchBar extends StatelessWidget {
-
   Function(String) onChanged;
 
   SearchBar({Key key, this.onChanged}) : super();
 
+  BuildContext _context;
+
+  GlobalKey _key = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
+    _context = context;
     return Container(
+      key: _key,
       width: double.infinity,
       height: 60,
-      child: Material(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-        clipBehavior: Clip.antiAlias,
+      child: Card(
+        margin: EdgeInsets.all(0),
         child: InkWell(
-          child: Center(
+          child: Align(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: TextField(
-                decoration: InputDecoration.collapsed(
-                  hintText: "Suchen",
-                ),
-                onChanged: onChanged,
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text(
+                "Suchen",
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
             ),
+            alignment: Alignment.centerLeft,
           ),
-          onTap: () {},
+          onTap: openSearchPage,
         ),
       ),
     );
+  }
+
+  openSearchPage() {
+    RenderBox box = _key.currentContext.findRenderObject();
+    Offset offset = box.localToGlobal(Offset.zero);
+    Navigator.push(
+        _context,
+        PageRouteBuilder(
+            opaque: false,
+            pageBuilder: (c, a1, a2) => SearchPage(
+                  size: box.size,
+                  offset: offset,
+                ),
+            transitionDuration: Duration.zero));
   }
 }

@@ -5,9 +5,9 @@ class NavBar extends StatelessWidget {
   Function(int) changePage;
   int currentPage;
 
-  List<IconData> _iconList = [Icons.home, Icons.person, Icons.public];
-
   NavBar(this.changePage, {this.currentPage});
+
+  List<IconData> _iconList = [Icons.home, Icons.person, Icons.public];
 
   BuildContext _context;
 
@@ -20,16 +20,18 @@ class NavBar extends StatelessWidget {
         height: 110,
         child: Stack(
           children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                    Colors.black.withOpacity(.7),
-                    Colors.black.withOpacity(.32),
-                    Colors.black.withOpacity(0)
-                  ])),
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                      Colors.black.withOpacity(.7),
+                      Colors.black.withOpacity(.32),
+                      Colors.black.withOpacity(0)
+                    ])),
+              ),
             ),
             Center(
               child: Stack(
@@ -84,7 +86,8 @@ class NavBar extends StatelessWidget {
                     height: 25,
                     child: Icon(
                       icon,
-                      color: active ? Colors.white : Colors.white.withOpacity(.8),
+                      color:
+                          active ? Colors.white : Colors.white.withOpacity(.8),
                       size: 25,
                     )),
               );

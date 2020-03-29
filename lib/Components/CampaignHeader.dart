@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/CampaignPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Pages/CampaignPage.dart';
 
 class CampaignHeader extends StatelessWidget {
   Campaign campaign;
@@ -10,9 +10,11 @@ class CampaignHeader extends StatelessWidget {
 
   BuildContext context;
 
-  bool isFollowed = false;
+  bool isFollowed = false, expanded;
 
-  CampaignHeader(this.campaign, [this.isFollowed = false]);
+  Function(bool) onExpand;
+
+  CampaignHeader(this.campaign, {this.onExpand, this.expanded = false});
 
   GlobalKey _cardKey = GlobalKey();
 
@@ -20,6 +22,7 @@ class CampaignHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     this.context = context;
     textTheme = Theme.of(context).textTheme;
+
     return _secondLayout();
   }
 
@@ -33,42 +36,36 @@ class CampaignHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: InkWell(
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) =>
-                            CampaignPage(campaign, isFollowed)));
-
-                /*Navigator.push(
-                    context,
-                    CampaignRevealRoute(
-                        page: CampaignPage(campaign), widgetKey: _cardKey));*/
+                Navigator.push(context, CampaignPageRoute(campaign));
               },
-              child: Hero(
-                tag: "image-${campaign.imgUrl}${isFollowed ? "followed" : ""}",
-                child: Image(
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(
-                    campaign.imgUrl,
-                  ),
+              child: Image(
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                image: CachedNetworkImageProvider(
+                  campaign.imgUrl,
                 ),
               ),
             ),
           ),
+          SizedBox(
+            height: 10,
+          ),
           Card(
             key: _cardKey,
             clipBehavior: Clip.antiAlias,
+            margin: EdgeInsets.all(0),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: ExpansionTile(
+              //onExpansionChanged: onExpand,
               title: Text(
                 campaign.name,
                 style: textTheme.title,
               ),
-              subtitle: Text("To make the world a better place!"),
+              subtitle: campaign.shortDescription == null
+                  ? null
+                  : Text(campaign.shortDescription),
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),

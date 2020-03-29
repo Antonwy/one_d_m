@@ -5,7 +5,6 @@ import 'package:one_d_m/Components/ValueAnimator.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/CircularRevealRoute.dart';
 import 'package:one_d_m/Helper/Helper.dart';
-import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/Validate.dart';
@@ -496,14 +495,15 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void _nextPage() {
+  void _nextPage() async {
     if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save();
 
     if (_login) {
       _showLoading(true);
-      _loginUser();
+      bool res = await _loginUser();
+      if (res) _pushNextPage();
       return;
     }
 
@@ -513,7 +513,8 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     } else {
       _showLoading(true);
-      _registerUser();
+      bool res = await _registerUser();
+      if (res) _pushNextPage();
     }
   }
 
@@ -568,7 +569,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future _registerUser() async {
-
     User user = User(
         email: email.toLowerCase(),
         firstname: firstName,
@@ -580,13 +580,15 @@ class _RegisterPageState extends State<RegisterPage> {
     if (result.hasError()) {
       _showError(result.getMessage());
     }
+
+    return !result.hasError();
   }
 
   Future _loginUser() async {
     ApiResult result = await um.signIn(email.toLowerCase(), password1);
 
-    if (result.hasError())
-      _showError(result.getMessage());
+    if (result.hasError()) _showError(result.getMessage());
+    return !result.hasError();
   }
 
   void _showError(String error) {

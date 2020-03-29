@@ -19,6 +19,8 @@ class CampaignList extends StatefulWidget {
 class _CampaignListState extends State<CampaignList> {
   Future<List<Campaign>> _campaignsFuture;
 
+  bool _campaignsAreExpanded = false;
+
   @override
   void initState() {
     _campaignsFuture = widget.campaignsFuture;
@@ -32,20 +34,18 @@ class _CampaignListState extends State<CampaignList> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data.isEmpty)
-            return SliverFillRemaining(
-              child: Center(
-                  child: Column(
-                children: <Widget>[
-                  Image(
-                    image: widget.emptyImage,
-                  ),
-                  Text(
-                    widget.emptyMessage,
-                    style: Theme.of(context).textTheme.body2,
-                  ),
-                ],
-              )),
-            );
+            return Center(
+                child: Column(
+              children: <Widget>[
+                Image(
+                  image: widget.emptyImage,
+                ),
+                Text(
+                  widget.emptyMessage,
+                  style: Theme.of(context).textTheme.body2,
+                ),
+              ],
+            ));
 
           return ListView(children: _buildChildren(snapshot.data));
         }
@@ -60,7 +60,7 @@ class _CampaignListState extends State<CampaignList> {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(c));
+      list.add(CampaignHeader(c, onExpand: _changeExpanded, expanded: _campaignsAreExpanded));
     }
 
     list.add(SizedBox(
@@ -69,4 +69,11 @@ class _CampaignListState extends State<CampaignList> {
 
     return list;
   }
+
+  _changeExpanded(bool expanded) {
+    setState(() {
+      _campaignsAreExpanded = expanded;
+    });
+  }
+
 }

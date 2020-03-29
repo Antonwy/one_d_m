@@ -1,4 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:provider/provider.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   Function close;
@@ -14,8 +21,12 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   Size _displaySize;
   AnimationController _controller;
   ThemeData _theme;
+  UserManager um;
+  Future<List<Campaign>> _alternativeFuture =
+      Completer<List<Campaign>>().future;
 
   String _amount, _method;
+  bool _hasAlternative = true;
 
   @override
   void initState() {
@@ -26,6 +37,19 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
             setState(() {});
           });
     _controller.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((d) {
+      _alternativeFuture = DatabaseService(um.uid).getSubscribedCampaigns();
+      _alternativeFuture.then((list) {
+        if(list.isEmpty) {
+          _alternativeFuture = DatabaseService().getCampaignFromQuery("");
+          setState(() {
+            _hasAlternative = false;
+          });
+        }
+      });
+
+    });
   }
 
   @override
@@ -38,6 +62,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   Widget build(BuildContext context) {
     _displaySize = MediaQuery.of(context).size;
     _theme = Theme.of(context);
+    um = Provider.of<UserManager>(context);
 
     return Stack(
       children: <Widget>[
@@ -63,7 +88,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
             width: _displaySize.width,
             height: _displaySize.height * .65,
             child: Material(
-              borderRadius: BorderRadius.only(
+              borderRadius: BorderRadius.only( 
                   topLeft: Radius.circular(10), topRight: Radius.circular(10)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,81 +204,69 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   ),
                   Padding(
                     padding: EdgeInsets.only(left: 20.0),
-                    child: Text(
-                      "Bezahlmethode",
-                      style: _theme.textTheme.title,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "Alternatives Projekt",
+                          style: _theme.textTheme.title,
+                        ),
+                        Text(
+                          "Aus ${_hasAlternative ? "deinen abonnierten" : "beliebten"} Projekten.",
+                          style: _theme.textTheme.body1,
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(
                     height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        List<String> values = [
-                          "Visa",
-                          "Mastercard",
-                          "Apple Pay",
-                        ];
-                        List<String> icons = [
-                          "assets/icons/visa.png",
-                          "assets/icons/mastercard-logo.png",
-                          "assets/icons/apple-pay.png",
-                        ];
-                        List<Color> colors = [
-                          Colors.blue[100],
-                          Colors.red[100],
-                          Colors.grey[100],
-                        ];
-                        return Center(
-                          child: Container(
-                            height: 80,
-                            margin: index == 0
-                                ? EdgeInsets.only(left: 20)
-                                : index == 5
-                                    ? EdgeInsets.only(right: 20)
-                                    : null,
-                            child: Card(
-                              clipBehavior: Clip.antiAlias,
-                              elevation: _method == values[index] ? 2 : 0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _method = values[index];
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15.0, vertical: 8),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Material(
-                                        color: colors[index],
-                                        shape: CircleBorder(),
+                    child: FutureBuilder<List<Campaign>>(
+                        future: _alternativeFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                return Center(
+                                  child: Container(
+                                    height: 80,
+                                    margin: index == 0
+                                        ? EdgeInsets.only(left: 20)
+                                        : index == 5
+                                            ? EdgeInsets.only(right: 20)
+                                            : null,
+                                    child: Card(
+                                      clipBehavior: Clip.antiAlias,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: InkWell(
+                                        onTap: () {},
                                         child: Padding(
-                                          padding: EdgeInsets.all(5.0),
-                                          child: Image.asset(
-                                            icons[index],
-                                            width: 25,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15.0, vertical: 8),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Avatar(
+                                                  snapshot.data[index].imgUrl),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                "${snapshot.data[index].name}",
+                                                style: _theme.textTheme.title,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "${values[index]}",
-                                        style: _theme.textTheme.title,
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      itemCount: 3,
-                    ),
+                                );
+                              },
+                              itemCount: snapshot.data.length,
+                            );
+                          }
+                          return Container();
+                        }),
                   ),
                   Expanded(
                     child: Container(),

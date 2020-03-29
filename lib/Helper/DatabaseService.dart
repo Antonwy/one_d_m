@@ -1,9 +1,12 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/StorageService.dart';
 import 'Campaign.dart';
 import 'User.dart';
@@ -63,12 +66,55 @@ class DatabaseService {
         .map((qs) => Campaign.listFromSnapshot(qs.documents));
   }
 
+  Future<SearchResult> getSearchResultFromQuery(String query) async {
+    List<Campaign> campaigns = await getCampaignFromQuery(query);
+    List<User> users = await getUsersFromQuery(query);
+    return SearchResult(campaigns: campaigns, users: users);
+  }
+
   Future<List<Campaign>> getCampaignFromQuery(String query) async {
     QuerySnapshot qs = await campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
         .getDocuments();
 
-    return qs.documents.map((doc) => Campaign.fromSnapshot(doc)).toList();
+    List<Campaign> campaigns =
+        qs.documents.map((doc) => Campaign.fromSnapshot(doc)).toList();
+
+    campaigns.removeWhere((Campaign c) => !c.name.contains(query));
+
+    return campaigns;
+  }
+
+  Future<List<User>> getUsersFromQuery(String query) async {
+    QuerySnapshot firstnameSnapshot = await userCollection
+        .where(User.FIRSTNAME, isGreaterThanOrEqualTo: query)
+        .limit(5)
+        .getDocuments();
+    QuerySnapshot lastnameSnapshot = await userCollection
+        .where(User.LASTNAME, isGreaterThanOrEqualTo: query)
+        .limit(5)
+        .getDocuments();
+
+    print(firstnameSnapshot.documents.map((doc) => doc["first_name"]));
+    print(lastnameSnapshot.documents.map((doc) => doc["first_name"]));
+
+    List<User> firstnameList = firstnameSnapshot.documents
+        .map((doc) => User.fromSnapshot(doc))
+        .toList();
+
+    Map<String, User> userMap = Map.fromIterable(firstnameList,
+        key: (user) => user.id, value: (user) => user);
+
+    List<User> lastnameList = firstnameSnapshot.documents
+        .map((doc) => User.fromSnapshot(doc))
+        .toList();
+
+    userMap.addAll(Map.fromIterable(lastnameList,
+        key: (user) => user.id, value: (user) => user));
+
+    userMap.removeWhere((String str, User user) =>
+        !user.firstname.contains(query) && !user.lastname.contains(query));
+    return userMap.values.toList();
   }
 
   Stream<DocumentSnapshot> hasSubscribedCampaign(String campaignId) {

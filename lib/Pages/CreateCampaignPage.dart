@@ -371,6 +371,7 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
       amount: 0,
       name: _name,
       description: _description,
+      shortDescription: _shortDescription,
       city: _place.name,
       imgUrl: await service.uploadImage(),
       finalAmount: 10000,

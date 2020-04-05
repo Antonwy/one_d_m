@@ -374,7 +374,6 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
       shortDescription: _shortDescription,
       city: _place.name,
       imgUrl: await service.uploadImage(),
-      finalAmount: 10000,
       authorId: um.uid,
     );
 

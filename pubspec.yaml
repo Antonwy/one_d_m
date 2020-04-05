@@ -36,6 +36,7 @@ dependencies:
   cached_network_image: ^2.0.0
   stripe_payment: ^1.0.6
   transparent_image: ^1.0.0
+  timeago: ^2.0.26
 
 dev_dependencies:
 

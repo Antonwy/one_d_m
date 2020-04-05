@@ -89,7 +89,6 @@ class CustomExpansionTileState extends State<CustomExpansionTile>
   }
 
   void _handleTap() {
-    print("TAP");
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -159,8 +158,6 @@ class CustomExpansionTileState extends State<CustomExpansionTile>
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
     _backgroundColorTween..end = widget.backgroundColor;
-
-    print(widget.expanded);
 
     super.didChangeDependencies();
   }

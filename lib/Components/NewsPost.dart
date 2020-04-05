@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CampaignPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Pages/CampaignPage.dart';
 
 import 'NewsBody.dart';
 
@@ -21,14 +21,14 @@ class NewsPost extends StatelessWidget {
           InkWell(
             onTap: () {
               Navigator.push(
-                  context, CampaignPageRoute(Campaign(id: news.campaignId)));
+                  context, CampaignPageRoute(Campaign(id: news.campaignId, imgUrl: news.campaignImgUrl)));
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Row(
                 children: <Widget>[
-                  CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(news.imageUrl),
+                  Avatar(
+                    news.campaignImgUrl,
                   ),
                   SizedBox(width: 10),
                   Text(

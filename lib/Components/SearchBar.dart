@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
-import 'package:one_d_m/Helper/FadePageTransition.dart';
-import 'package:one_d_m/Helper/Helper.dart';
-import 'package:one_d_m/Helper/RectRevealRoute.dart';
 
 class SearchBar extends StatelessWidget {
-  Function(String) onChanged;
-
-  SearchBar({Key key, this.onChanged}) : super();
+  SearchBar({Key key}) : super();
 
   BuildContext _context;
 

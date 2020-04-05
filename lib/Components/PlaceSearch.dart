@@ -105,8 +105,6 @@ class _PlaceSearchState extends State<PlaceSearch> {
 
     List<dynamic> body = json.decode(res.body);
 
-    print(body);
-
     List<Place> placesList = [];
 
     if (body.isNotEmpty) {

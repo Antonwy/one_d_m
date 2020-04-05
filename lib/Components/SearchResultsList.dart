@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignPageRoute.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/User.dart';
-import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:provider/provider.dart';
 
 import 'Avatar.dart';
 
@@ -19,37 +20,40 @@ class SearchResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _context = context;
-    return FutureBuilder<SearchResult>(
-        future: DatabaseService().getSearchResultFromQuery(query),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            SearchResult res = snapshot.data;
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                res.campaigns.isEmpty
-                    ? Container()
-                    : Padding(
-                        padding: const EdgeInsets.only(left: 20, bottom: 10),
-                        child: Text("Projekte"),
-                      ),
-                ..._buildCampaigns(res.campaigns),
-                res.users.isEmpty
-                    ? Container()
-                    : Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, bottom: 10, top: 10),
-                        child: Text("Nutzer"),
-                      ),
-                ..._buildUsers(res.users),
-                SizedBox(height: 50)
-              ],
+    return Consumer<CampaignsManager>(builder: (context, cm, child) {
+      return FutureBuilder<List<User>>(
+          future: DatabaseService().getUsersFromQuery(query),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List<Campaign> resCampaigns = cm.queryCampaigns(query);
+              List<User> resUsers = snapshot.data;
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  resCampaigns.isEmpty
+                      ? Container()
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 20, bottom: 10),
+                          child: Text("Projekte"),
+                        ),
+                  ..._buildCampaigns(resCampaigns),
+                  resUsers.isEmpty
+                      ? Container()
+                      : Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20, bottom: 10, top: 10),
+                          child: Text("Nutzer"),
+                        ),
+                  ..._buildUsers(resUsers),
+                  SizedBox(height: 50)
+                ],
+              );
+            }
+            return Center(
+              child: CircularProgressIndicator(),
             );
-          }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        });
+          });
+    });
   }
 
   _buildCampaigns(List<Campaign> campaigns) {

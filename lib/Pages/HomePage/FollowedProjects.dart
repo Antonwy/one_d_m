@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -15,19 +13,18 @@ class FollowedProjects extends StatefulWidget {
   _FollowedProjectsState createState() => _FollowedProjectsState();
 }
 
-class _FollowedProjectsState extends State<FollowedProjects> {
+class _FollowedProjectsState extends State<FollowedProjects>
+    with AutomaticKeepAliveClientMixin {
   TextTheme textTheme;
-
-  UserManager um;
 
   @override
   Widget build(BuildContext context) {
     textTheme = Theme.of(context).textTheme;
-    um = Provider.of<UserManager>(context);
 
-    return NestedScrollView(
-      headerSliverBuilder: (context, b) => <Widget>[
+    return CustomScrollView(
+      slivers: <Widget>[
         SliverAppBar(
+          elevation: 0,
           backgroundColor: Colors.white,
           title: Text(
             "Deine unterstützten Projekte",
@@ -35,12 +32,18 @@ class _FollowedProjectsState extends State<FollowedProjects> {
           ),
           centerTitle: false,
         ),
+        Consumer2<CampaignsManager, UserManager>(
+          builder: (context, cm, um, child) => CampaignList(
+            campaigns: cm.getSubscribedCampaigns(um.user),
+            emptyImage: AssetImage("assets/images/clip-no-comments.png"),
+            emptyMessage: "Du hast noch keine unterstützten Projekte!",
+          ),
+        )
       ],
-      body: CampaignList(
-        campaignsFuture: DatabaseService(um.uid).getSubscribedCampaigns(),
-        emptyImage: AssetImage("assets/images/clip-no-comments.png"),
-        emptyMessage: "Du hast noch keine unterstützten Projekte!",
-      ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

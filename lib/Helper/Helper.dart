@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 class Helper {
@@ -48,7 +46,7 @@ class Helper {
   }
 
   static String getDate(DateTime date) {
-    return "${date.day}.${date.month}.${date.year}";
+    return "${date.day < 10 ? "0${date.day}" : date.day}.${date.month < 10 ? "0${date.month}" : date.month}.${date.year}";
   }
 
   static showAlert(BuildContext context, String message) {

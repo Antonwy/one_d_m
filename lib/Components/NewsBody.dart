@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/NewsPage.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class NewsBody extends StatelessWidget {
   News news;
-  bool isHero;
 
-  NewsBody(this.news, {this.isHero = true});
+  NewsBody(this.news);
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +16,10 @@ class NewsBody extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (c) => NewsPage(news)));
+          BottomDialog(context,
+                  curve: ElasticOutCurve(1.4),
+                  duration: Duration(milliseconds: 500))
+              .show(NewsPage(news));
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,26 +28,14 @@ class NewsBody extends StatelessWidget {
               height: 230,
               child: Stack(
                 children: <Widget>[
-                  isHero
-                      ? Hero(
-                          tag: "news${news.id}",
-                          child: CachedNetworkImage(
-                            width: double.infinity,
-                            imageUrl: news.imageUrl,
-                            placeholder: (context, url) => Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          width: double.infinity,
-                          imageUrl: news.imageUrl,
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          fit: BoxFit.cover,
-                        ),
+                  CachedNetworkImage(
+                    width: double.infinity,
+                    imageUrl: news.imageUrl,
+                    placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    fit: BoxFit.cover,
+                  ),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -65,7 +56,7 @@ class NewsBody extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        "Vor 2 Minuten",
+                        timeago.format(news.createdAt, locale: "de"),
                         style: TextStyle(color: Colors.white),
                       ),
                     ),

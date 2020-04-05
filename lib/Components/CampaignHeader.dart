@@ -23,12 +23,12 @@ class CampaignHeader extends StatelessWidget {
     this.context = context;
     textTheme = Theme.of(context).textTheme;
 
-    return _secondLayout();
+    return _layout();
   }
 
-  Widget _secondLayout() {
+  Widget _layout() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5),
       child: Column(
         children: <Widget>[
           Material(
@@ -75,7 +75,7 @@ class CampaignHeader extends StatelessWidget {
                       Column(
                         children: <Widget>[
                           Text(
-                            "${campaign.amount}€",
+                            "${campaign.amount} DC",
                             style: textTheme.title,
                           ),
                           Text(
@@ -89,7 +89,7 @@ class CampaignHeader extends StatelessWidget {
                       Column(
                         children: <Widget>[
                           Text(
-                            "+126",
+                            "${campaign.subscribedCount}",
                             style: textTheme.title,
                           ),
                           Text(

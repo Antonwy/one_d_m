@@ -1,12 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(ChangeNotifierProvider(
-    create: (context) => UserManager.instance(), child: MyApp()));
+void main() => runApp(MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => UserManager.instance()),
+      ChangeNotifierProvider(create: (context) => CampaignsManager()),
+    ], child: MyApp()));
 
 class MyApp extends StatelessWidget {
   @override
@@ -16,7 +18,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.indigo),
       home: Consumer<UserManager>(builder: (context, um, child) {
-        print(um.status);
         switch (um.status) {
           case Status.Uninitialized:
             return Splash();

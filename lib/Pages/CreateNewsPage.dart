@@ -139,6 +139,7 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
     News news = News(
         campaignId: widget.campaign.id,
         campaignName: widget.campaign.name,
+        campaignImgUrl: widget.campaign.imgUrl,
         userId: um.uid,
         title: _postTitle,
         text: _postText,
@@ -182,6 +183,7 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
                     )
                   : Image.file(
                       _image,
+                      width: _displaySize.width * 85,
                       fit: BoxFit.cover,
                     ),
             ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
-import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/RectRevealRoute.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -16,12 +15,11 @@ class MyCampaignsPage extends StatefulWidget {
 
 class _MyCampaignsPageState extends State<MyCampaignsPage> {
   ThemeData theme;
-  UserManager um;
+  List<Campaign> campaigns;
 
   @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
-    um = Provider.of<UserManager>(context);
     GlobalKey _createNowKey = GlobalKey();
 
     return Scaffold(
@@ -32,57 +30,35 @@ class _MyCampaignsPageState extends State<MyCampaignsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: StreamBuilder<List<Campaign>>(
-          stream: DatabaseService(um.uid).getMyCampaignsStream(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Text("Du hast noch kein Projekt erstellt!"),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        RaisedButton(
-                          key: _createNowKey,
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                RectRevealRoute(
-                                    page: CreateCampaignPage(),
-                                    startColor: theme.primaryColor,
-                                    color: theme.primaryColor,
-                                    startRadius: 2,
-                                    duration: Duration(milliseconds: 500),
-                                    offset: Helper.getCenteredPositionFromKey(
-                                        _createNowKey),
-                                    startSize:
-                                        Helper.getSizeFromKey(_createNowKey)));
-                          },
-                          child: Text(
-                            "Jetzt erstellen!",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          color: theme.primaryColor,
-                        )
-                      ],
-                    ),
+      body: Consumer2<UserManager, CampaignsManager>(
+          builder: (context, um, cm, child) {
+        campaigns = cm.getCampaingsFrom(um.uid);
+
+        if (campaigns.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ListView(
+                children: <Widget>[
+                  Text("Du hast noch kein Projekt erstellt!"),
+                  SizedBox(
+                    height: 10,
                   ),
-                );
-              }
-              return ListView(
-                children: _getMyProjects(snapshot.data),
-              );
-            }
-            return Center(child: CircularProgressIndicator());
-          }),
+                  Text(
+                      "Projekte können nur von Administratoren erstellt werden! \n kontaktiere uns wenn du ein Projekt hast, was hier angezeigt werden soll!"),
+                ],
+              ),
+            ),
+          );
+        }
+        return ListView(
+          children: _getMyProjects(),
+        );
+      }),
     );
   }
 
-  List<Widget> _getMyProjects(List<Campaign> campaigns) {
+  List<Widget> _getMyProjects() {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {

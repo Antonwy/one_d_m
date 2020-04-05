@@ -1,15 +1,15 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
-import 'package:one_d_m/Components/DonationDialog.dart';
+import 'package:one_d_m/Components/BottomDialog.dart';
+import 'package:one_d_m/Components/DonationDialogWidget.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 
 import 'package:one_d_m/Components/NewsBody.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/RectRevealRoute.dart';
@@ -17,7 +17,6 @@ import 'package:one_d_m/Helper/User.dart';
 
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
-import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class CampaignPage extends StatefulWidget {
@@ -37,9 +36,10 @@ class _CampaignPageState extends State<CampaignPage>
   UserManager um;
   Size displaySize;
   Campaign campaign;
-  Future<Campaign> _future;
-  bool _subscribed = false, _isOwnPage = false, _loading = false;
-  String _imgUrl;
+  bool _isOwnPage = false,
+      _loading = false,
+      _subscribed = false,
+      _subscribing = false;
   ScrollController _scrollController = ScrollController();
   double _scrollOffset = 0;
 
@@ -76,20 +76,7 @@ class _CampaignPageState extends State<CampaignPage>
       });
     });
 
-    if (widget.campaign.description == null) {
-      _future = DatabaseService().getCampaign(widget.campaign.id);
-    } else {
-      _future = Future.value(widget.campaign);
-    }
-
-    _imgUrl = widget.campaign.imgUrl;
-
-    _future.then((Campaign c) {
-      setState(() {
-        _isOwnPage = c.authorId == um.uid;
-        _imgUrl = c.imgUrl;
-      });
-    });
+    campaign = widget.campaign;
   }
 
   @override
@@ -100,11 +87,13 @@ class _CampaignPageState extends State<CampaignPage>
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTween(
-              begin: Colors.white.withOpacity(0), end: Colors.white)
-          .animate(
-              CurvedAnimation(parent: _transitionAnim, curve: Interval(.1, .2)))
-          .value,
+      backgroundColor:
+          ColorTween(begin: Colors.white.withOpacity(0), end: Colors.white)
+              .animate(CurvedAnimation(
+                  parent: _transitionAnim,
+                  curve: Interval(.1, .2),
+                  reverseCurve: Interval(.9, 1.0)))
+              .value,
       floatingActionButton: ScaleTransition(
         scale: CurvedAnimation(
             parent: _transitionAnim,
@@ -145,21 +134,25 @@ class _CampaignPageState extends State<CampaignPage>
                         .value
                     : _scrollOffset < 0 ? 0 : -_scrollOffset * .3,
                 width: displaySize.width,
-                child: Container(
-                  height: displaySize.height * .35 -
-                      (_scrollOffset < 0 ? _scrollOffset : 0),
-                  width: displaySize.width -
-                      (_scrollOffset < 0 ? _scrollOffset : 0),
-                  child: _imgUrl != null
-                      ? Image(
-                          fit: BoxFit.cover,
-                          image: CachedNetworkImageProvider(
-                            _imgUrl,
-                          ),
-                        )
-                      : Material(
-                          color: Colors.grey[300],
-                          child: Center(child: CircularProgressIndicator())),
+                child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(20)),
+                  child: Container(
+                    height: displaySize.height * .35 -
+                        (_scrollOffset < 0 ? _scrollOffset : 0),
+                    width: displaySize.width -
+                        (_scrollOffset < 0 ? _scrollOffset : 0),
+                    child: campaign.imgUrl != null
+                        ? Image(
+                            fit: BoxFit.cover,
+                            image: CachedNetworkImageProvider(
+                              campaign.imgUrl,
+                            ),
+                          )
+                        : Material(
+                            color: Colors.grey[200],
+                            child: Center(child: CircularProgressIndicator())),
+                  ),
                 )),
             Positioned(
               width: displaySize.width,
@@ -170,8 +163,9 @@ class _CampaignPageState extends State<CampaignPage>
                       parent: _transitionAnim,
                       curve: Interval(0.1, 1, curve: _transitionCurve)))
                   .value,
-              child: FutureBuilder<Campaign>(
-                  future: _future,
+              child: StreamBuilder<Campaign>(
+                  initialData: campaign.description != null ? campaign : null,
+                  stream: DatabaseService().getCampaignStream(campaign.id),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       campaign = snapshot.data;
@@ -189,7 +183,7 @@ class _CampaignPageState extends State<CampaignPage>
                                   topLeft: Radius.circular(30),
                                   topRight: Radius.circular(30)),
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(25, 10, 25, 0),
+                                padding: EdgeInsets.fromLTRB(18, 10, 18, 0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -227,17 +221,16 @@ class _CampaignPageState extends State<CampaignPage>
                                     SizedBox(
                                       height: 20,
                                     ),
-                                    StreamBuilder<List<News>>(
-                                        stream: DatabaseService()
-                                            .getNewsFromCampaignStream(
-                                                campaign),
+                                    _getCampaignDonations(),
+                                    FutureBuilder<List<News>>(
+                                        future: DatabaseService()
+                                            .getNewsFromCampaign(campaign),
                                         builder: (context, snapshot) {
                                           if (snapshot.hasData) {
                                             if (snapshot.data.isEmpty)
                                               return Container();
                                             return _generateNews(snapshot.data);
                                           }
-
                                           return Container();
                                         }),
                                     SizedBox(
@@ -251,7 +244,9 @@ class _CampaignPageState extends State<CampaignPage>
                         ),
                       );
                     }
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
                   }),
             ),
             Positioned(
@@ -268,7 +263,7 @@ class _CampaignPageState extends State<CampaignPage>
                     child: InkWell(
                       onTap: () {
                         if (_transitionAnim.isAnimating) return;
-                        _transitionAnim.duration = Duration(milliseconds: 350);
+                        _transitionAnim.duration = Duration(milliseconds: 400);
                         _transitionAnim.reverse().whenComplete(() {
                           Navigator.pop(context);
                         });
@@ -317,32 +312,51 @@ class _CampaignPageState extends State<CampaignPage>
     );
   }
 
+  Widget _getCampaignDonations() {
+    return StreamBuilder<List<Donation>>(
+        stream: DatabaseService().getDonationFromCampaignStream(campaign.id),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data.isEmpty) return Container();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Aktuelle Spenden: ",
+                  style: theme.textTheme.title,
+                ),
+                SizedBox(height: 10),
+                ...snapshot.data.map((d) => DonationWidget(d)).toList()
+              ],
+            );
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            );
+
+          return Container();
+        });
+  }
+
   void _showCoins() {
-    DonationDialog.of(context).show();
+    BottomDialog bd = BottomDialog(context);
+    bd.show(DonationDialogWidget(
+        close: bd.close, campaign: campaign, user: um.user));
   }
 
   Widget _followButton() {
-    return StreamBuilder<DocumentSnapshot>(
-        stream: DatabaseService(um.uid).hasSubscribedCampaign(campaign.id),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            _subscribed = snapshot.data.exists;
-            return RaisedButton(
-              onPressed: _toggleSubscribed,
-              color: _subscribed ? Colors.red : theme.primaryColor,
-              child: Text(
-                _subscribed ? "Entfolgen" : "Folgen",
-                style: TextStyle(color: Colors.white),
-              ),
-            );
-          } else {
-            return RaisedButton(
-              onPressed: null,
-              color: theme.primaryColor,
-              child: Text("Laden...", style: TextStyle(color: Colors.white)),
-            );
-          }
-        });
+    _subscribed = um.user.subscribedCampaignsIds.contains(campaign.id);
+    return RaisedButton(
+      onPressed: _subscribing ? null : _toggleSubscribed,
+      color: _subscribed ? Colors.red : theme.primaryColor,
+      child: Text(
+        _subscribed ? "Entfolgen" : "Folgen",
+        style: TextStyle(color: Colors.white),
+      ),
+    );
   }
 
   _deleteCampaign() async {
@@ -379,11 +393,19 @@ class _CampaignPageState extends State<CampaignPage>
     }
   }
 
-  void _toggleSubscribed() {
+  void _toggleSubscribed() async {
+    setState(() {
+      _subscribing = true;
+    });
     if (_subscribed)
-      DatabaseService(um.uid).deleteSubscription(campaign);
+      await DatabaseService(um.uid).deleteSubscription(campaign);
     else
-      DatabaseService(um.uid).createSubscription(campaign);
+      await DatabaseService(um.uid).createSubscription(campaign);
+
+    setState(() {
+      _subscribing = false;
+      _subscribed = !_subscribed;
+    });
   }
 
   Widget _generateNews(List<News> news) {
@@ -402,7 +424,6 @@ class _CampaignPageState extends State<CampaignPage>
     for (News n in news) {
       widgets.add(NewsBody(
         n,
-        isHero: false,
       ));
     }
 
@@ -466,9 +487,10 @@ class _CampaignPageState extends State<CampaignPage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _details(icon: Icons.location_on, text: campaign.city.split(",")[0]),
+          _details(icon: Icons.monetization_on, text: "${campaign.amount} DC"),
           _details(
-              icon: Icons.monetization_on, text: "${campaign.amount} Coins"),
-          _details(icon: Icons.people, text: "1400 Mitglieder"),
+              icon: Icons.people,
+              text: "${campaign.subscribedCount} Mitglieder"),
         ],
       ),
     );

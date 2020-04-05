@@ -4,19 +4,28 @@ import 'package:flutter/material.dart';
 class Avatar extends StatelessWidget {
   String imageUrl;
   IconData icon;
+  Function onTap;
 
-  Avatar(this.imageUrl, {this.icon});
+  Avatar(this.imageUrl, {this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundColor: Colors.grey[300],
-      child: imageUrl == null ? Icon(icon ?? Icons.person, color: Colors.black87,) : null,
-      backgroundImage: imageUrl == null
-          ? null
-          : CachedNetworkImageProvider(
-              imageUrl,
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: CircleAvatar(
+        backgroundColor: Colors.grey[300],
+        child: imageUrl == null
+            ? Icon(
+                icon ?? Icons.person,
+                color: Colors.black87,
+              )
+            : null,
+        backgroundImage: imageUrl == null
+            ? null
+            : CachedNetworkImageProvider(
+                imageUrl,
+              ),
+      ),
     );
   }
 }

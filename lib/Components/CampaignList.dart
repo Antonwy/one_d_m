@@ -4,12 +4,11 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'CampaignHeader.dart';
 
 class CampaignList extends StatefulWidget {
-  Future<List<Campaign>> campaignsFuture;
+  List<Campaign> campaigns;
   ImageProvider emptyImage;
   String emptyMessage;
 
-  CampaignList(
-      {Key key, this.campaignsFuture, this.emptyImage, this.emptyMessage})
+  CampaignList({Key key, this.campaigns, this.emptyImage, this.emptyMessage})
       : super(key: key);
 
   @override
@@ -17,50 +16,36 @@ class CampaignList extends StatefulWidget {
 }
 
 class _CampaignListState extends State<CampaignList> {
-  Future<List<Campaign>> _campaignsFuture;
-
   bool _campaignsAreExpanded = false;
 
   @override
-  void initState() {
-    _campaignsFuture = widget.campaignsFuture;
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Campaign>>(
-      future: _campaignsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data.isEmpty)
-            return Center(
-                child: Column(
-              children: <Widget>[
-                Image(
-                  image: widget.emptyImage,
-                ),
-                Text(
-                  widget.emptyMessage,
-                  style: Theme.of(context).textTheme.body2,
-                ),
-              ],
-            ));
-
-          return ListView(children: _buildChildren(snapshot.data));
-        }
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    if (widget.campaigns.isEmpty && widget.emptyImage != null) {
+      return SliverFillRemaining(
+        child: Center(
+            child: Column(
+          children: <Widget>[
+            Image(
+              image: widget.emptyImage,
+            ),
+            Text(
+              widget.emptyMessage,
+              style: Theme.of(context).textTheme.body2,
+            ),
+          ],
+        )),
+      );
+    }
+    return SliverList(
+        delegate: SliverChildListDelegate(_buildChildren(widget.campaigns)));
   }
 
   List<Widget> _buildChildren(List<Campaign> campaigns) {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(c, onExpand: _changeExpanded, expanded: _campaignsAreExpanded));
+      list.add(CampaignHeader(c,
+          onExpand: _changeExpanded, expanded: _campaignsAreExpanded));
     }
 
     list.add(SizedBox(
@@ -75,5 +60,4 @@ class _CampaignListState extends State<CampaignList> {
       _campaignsAreExpanded = expanded;
     });
   }
-
 }

@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Campaign {
   String name, description, shortDescription, city, imgUrl;
   DateTime createdAt;
-  int amount, finalAmount;
+  int amount, subscribedCount;
   String authorId, id;
-  bool subscribed;
 
   static final String ID = "id",
       NAME = "title",
       DESCRIPTION = "description",
       SHORTDESCRIPTION = "short_description",
+      SUBSCRIBEDCOUNT = "subscribed_count",
       CITY = "city",
       CREATEDAT = "created_at",
       AUTHORID = "authorId",
@@ -26,31 +26,23 @@ class Campaign {
     this.city,
     this.createdAt,
     this.authorId,
-    this.amount = 10000,
+    this.subscribedCount,
+    this.amount,
     this.imgUrl,
-    this.finalAmount = 200000,
-    this.subscribed = false,
   });
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
         id: snapshot.documentID,
         name: snapshot[NAME],
+        amount: snapshot[AMOUNT],
         description: snapshot[DESCRIPTION],
         city: snapshot[CITY],
         shortDescription: snapshot[SHORTDESCRIPTION],
-        createdAt:
-            DateTime.fromMicrosecondsSinceEpoch(snapshot[CREATEDAT] ?? 0),
+        subscribedCount: snapshot[SUBSCRIBEDCOUNT] ?? 0,
+        createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
         imgUrl: snapshot[IMAGEURL],
         authorId: snapshot[AUTHORID]);
-  }
-
-  static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {
-    return Campaign(
-      id: snapshot.documentID,
-      name: snapshot[NAME],
-      imgUrl: snapshot[IMAGEURL],
-    );
   }
 
   static List<Campaign> listFromSnapshot(List<DocumentSnapshot> list) {
@@ -62,29 +54,17 @@ class Campaign {
       NAME: name,
       DESCRIPTION: description,
       SHORTDESCRIPTION: shortDescription,
+      SUBSCRIBEDCOUNT: 0,
       CITY: city,
-      CREATEDAT: DateTime.now().millisecondsSinceEpoch,
+      CREATEDAT: Timestamp.now(),
       AUTHORID: authorId,
       AMOUNT: amount,
-      FINALAMOUNT: finalAmount,
-      IMAGEURL: imgUrl
+      IMAGEURL: imgUrl,
     };
-  }
-
-  static List<Campaign> listFromShortSnapshot(List<DocumentSnapshot> list) {
-    return list.map(Campaign.fromShortSnapshot).toList();
-  }
-
-  Map<String, dynamic> toShortMap() {
-    return {NAME: name, AMOUNT: amount, IMAGEURL: imgUrl};
-  }
-
-  void toggleSubscribed() {
-    subscribed = !subscribed;
   }
 
   @override
   String toString() {
-    return 'Campaign{name: $name, description: $description, city: $city, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, finalAmount: $finalAmount, id: $id, authorId: $authorId, subscribed: $subscribed}';
+    return 'Campaign{name: $name, description: $description, city: $city, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, id: $id, authorId: $authorId}';
   }
 }

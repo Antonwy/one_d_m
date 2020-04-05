@@ -1,23 +1,20 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/UserPageRoute.dart';
+import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/CampaignPageRoute.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/User.dart';
 
 import 'AnimatedFutureBuilder.dart';
-import 'Avatar.dart';
 
-class UserButton extends StatelessWidget {
+class CampaignButton extends StatelessWidget {
   String id;
-  User user;
 
-  UserButton(this.id, {this.user});
+  CampaignButton(this.id);
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedFutureBuilder<User>(
-        future:
-            user == null ? DatabaseService(id).getUser() : Future.value(user),
+    return AnimatedFutureBuilder<Campaign>(
+        future: DatabaseService().getCampaign(id),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Material(
@@ -26,7 +23,7 @@ class UserButton extends StatelessWidget {
               color: Colors.white,
               child: InkWell(
                 onTap: () {
-                  Navigator.push(context, UserPageRoute(snapshot.data));
+                  Navigator.push(context, CampaignPageRoute(snapshot.data));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -35,7 +32,7 @@ class UserButton extends StatelessWidget {
                       Avatar(snapshot.data.imgUrl),
                       SizedBox(width: 10),
                       Text(
-                        "${snapshot.data.firstname} ${snapshot.data.lastname}",
+                        "${snapshot.data.name}",
                         style: Theme.of(context).textTheme.title,
                       )
                     ],

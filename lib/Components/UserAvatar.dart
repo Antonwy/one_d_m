@@ -1,11 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
-import 'package:one_d_m/Helper/CircularRevealRoute.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
-import 'package:one_d_m/Pages/UserPage.dart';
 
 class UserAvatar extends StatelessWidget {
   User user;
@@ -36,7 +32,7 @@ class UserAvatar extends StatelessWidget {
       ),
       SizedBox(height: 5),
       Text(
-        "${user.firstname}\n${user.lastname}",
+        "${user.firstname ?? "Laden..."}\n${user.lastname ?? ""}",
         textAlign: TextAlign.center,
       )
     ]);

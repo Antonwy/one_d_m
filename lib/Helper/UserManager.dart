@@ -22,14 +22,17 @@ class UserManager extends ChangeNotifier {
   Status get status => _status;
   User get user => _user;
 
-  set user(User user) {
-    _user = user;
-  }
+  set user(User user) => _user = user;
 
   String get uid => _fireUser.uid;
 
   UserManager.instance() : _auth = FirebaseAuth.instance {
     _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+  }
+
+  void initListener(DocumentSnapshot qs) {
+    user = User.fromSnapshot(qs);
+    notifyListeners();
   }
 
   Future<User> getUser() async {
@@ -77,7 +80,7 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> updateUser() async {
-    await DatabaseService(uid).addUser(user);
+    await DatabaseService(uid).updateUser(user);
   }
 
   Future<void> logout() async {
@@ -91,6 +94,11 @@ class UserManager extends ChangeNotifier {
       _status = Status.Unauthenticated;
     } else {
       _fireUser = firebaseUser;
+      Firestore.instance
+          .collection("user")
+          .document(_fireUser.uid)
+          .snapshots()
+          .listen(initListener);
       _status = Status.Authenticated;
     }
     notifyListeners();

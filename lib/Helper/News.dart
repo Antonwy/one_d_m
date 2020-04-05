@@ -8,8 +8,18 @@ class News {
       TEXT = "text",
       SHORTTEXT = "short_text",
       CREATEDAT = "created_at",
+      CAMPAIGNIMGURL = "campaign_img_url",
       IMAGEURL = "image_url";
-  String campaignId, userId, campaignName, title, imageUrl, text, shortText, id;
+
+  String campaignId,
+      userId,
+      campaignName,
+      campaignImgUrl,
+      title,
+      imageUrl,
+      text,
+      shortText,
+      id;
   DateTime createdAt;
 
   News(
@@ -17,25 +27,12 @@ class News {
       this.id,
       this.userId,
       this.title,
-      this.imageUrl =
-          "https://images.unsplash.com/photo-1568025848823-86404cd04ad1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=3367&q=80",
+      this.campaignImgUrl,
+      this.imageUrl,
       this.text,
       this.shortText,
       this.createdAt,
       this.campaignName});
-
-  factory News.fromJson(Map<String, dynamic> json) {
-    return News(
-      campaignId: json[CAMPAIGNID],
-      userId: json[USERID],
-      title: json[TITLE],
-      text: json[TEXT],
-      shortText: json[SHORTTEXT],
-      campaignName: json[CAMPAIGNNAME],
-      imageUrl: json[IMAGEURL],
-      createdAt: DateTime.fromMicrosecondsSinceEpoch(json[CREATEDAT] ?? 0),
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -46,7 +43,8 @@ class News {
       TEXT: text,
       SHORTTEXT: shortText,
       IMAGEURL: imageUrl,
-      CREATEDAT: DateTime.now().millisecondsSinceEpoch
+      CAMPAIGNIMGURL: campaignImgUrl,
+      CREATEDAT: Timestamp.now()
     };
   }
 
@@ -59,8 +57,9 @@ class News {
       text: snapshot[TEXT],
       shortText: snapshot[SHORTTEXT],
       campaignName: snapshot[CAMPAIGNNAME],
+      campaignImgUrl: snapshot[CAMPAIGNIMGURL],
       imageUrl: snapshot[IMAGEURL],
-      createdAt: DateTime.fromMicrosecondsSinceEpoch(snapshot[CREATEDAT] ?? 0),
+      createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
     );
   }
 

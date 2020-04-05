@@ -11,10 +11,7 @@ class CampaignRevealRoute extends PageRouteBuilder {
             pageBuilder: (context, firstAnim, secAnim) => page,
             transitionDuration: Duration(milliseconds: 500),
             transitionsBuilder: (context, firstAnim, secondAnim, child) {
-              Offset cardPos = Helper.getCenteredPositionFromKey(widgetKey);
               Size cardSize = Helper.getSizeFromKey(widgetKey);
-
-              print(firstAnim.value);
 
               return LayoutBuilder(builder: (context, constraints) {
                 return Container(

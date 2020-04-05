@@ -112,12 +112,14 @@ class _EditProfileState extends State<EditProfile> {
               SizedBox(height: 10),
               _textView(
                   label: "Vorname",
+                  initValue: um.user.firstname,
                   onChanged: (text) {
                     _firstName = text;
                   }),
               SizedBox(height: 10),
               _textView(
                   label: "Nachname",
+                  initValue: um.user.lastname,
                   onChanged: (text) {
                     _lastName = text;
                   }),
@@ -150,7 +152,9 @@ class _EditProfileState extends State<EditProfile> {
     });
   }
 
-  Widget _textView({String label, Function onChanged}) => TextField(
+  Widget _textView({String label, Function onChanged, String initValue}) =>
+      TextFormField(
+        initialValue: initValue,
         onChanged: onChanged,
         decoration:
             InputDecoration(labelText: label, border: OutlineInputBorder()),

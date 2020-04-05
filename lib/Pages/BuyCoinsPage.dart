@@ -26,7 +26,6 @@ class _BuyCoinsPageState extends State<BuyCoinsPage> {
     try {
       PaymentMethod pm = await StripePayment.paymentRequestWithCardForm(
           CardFormPaymentRequest());
-      print(pm);
     } on PlatformException catch (e) {
       return;
     }

@@ -2,24 +2,36 @@ import 'package:flutter/material.dart';
 
 class BottomDialog {
   BuildContext context;
-  Widget widget;
+  ValueNotifier<bool> _notifier = ValueNotifier(true);
+  Duration duration;
+  Curve curve;
 
-  BottomDialog({this.context, this.widget});
+  BottomDialog(this.context,
+      {this.duration = const Duration(milliseconds: 250),
+      this.curve = Curves.easeInOut});
 
-  void show() {
+  void show(Widget widget) {
     Navigator.push(
         context,
         PageRouteBuilder(
             opaque: false,
             transitionDuration: Duration.zero,
-            pageBuilder: (c, animOne, animTwo) => _Dialog(widget)));
+            pageBuilder: (c, animOne, animTwo) => _Dialog(widget,
+                open: _notifier, duration: duration, curve: curve)));
+  }
+
+  void close() {
+    _notifier.value = false;
   }
 }
 
 class _Dialog extends StatefulWidget {
   Widget child;
+  ValueNotifier<bool> open;
+  Duration duration;
+  Curve curve;
 
-  _Dialog(this.child);
+  _Dialog(this.child, {this.open, this.duration, this.curve});
 
   @override
   __DialogState createState() => __DialogState();
@@ -29,13 +41,21 @@ class __DialogState extends State<_Dialog> with SingleTickerProviderStateMixin {
   Size _displaySize;
 
   AnimationController _controller;
-  Duration _duration = Duration(milliseconds: 250);
+
+  bool _isOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _duration);
-    _controller.forward();
+
+    widget.open.addListener(() {
+      if (!widget.open.value) close();
+    });
+
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _controller.forward().whenComplete(() {
+      _isOpen = true;
+    });
   }
 
   @override
@@ -64,18 +84,25 @@ class __DialogState extends State<_Dialog> with SingleTickerProviderStateMixin {
         _controller.fling(velocity: flingVelocity);
       }
       if (flingVelocity < 0.0) {
-        _closeWidget();
+        close();
       }
     } else if (_controller.value < .5) {
       if (_controller.value > 0.0) _controller.fling(velocity: -1.0);
-      _closeWidget();
+      close();
     } else {
       _controller.forward();
     }
   }
 
-  _closeWidget() {
+  _pop() {
     Navigator.pop(context);
+  }
+
+  close() {
+    _controller.duration = Duration(milliseconds: 250);
+    _controller.reverse().then((c) {
+      _pop();
+    });
   }
 
   @override
@@ -84,11 +111,7 @@ class __DialogState extends State<_Dialog> with SingleTickerProviderStateMixin {
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: () {
-            _controller.reverse().then((c) {
-              _closeWidget();
-            });
-          },
+          onTap: close,
           child: AnimatedBuilder(
               animation: _controller,
               builder: (context, snapshot) {
@@ -108,13 +131,16 @@ class __DialogState extends State<_Dialog> with SingleTickerProviderStateMixin {
           builder: (context, child) {
             return ClipRRect(
               child: CustomSingleChildLayout(
-                delegate: _DialogLayout(_controller.value),
+                delegate: _DialogLayout(CurvedAnimation(
+                  parent: _controller,
+                  curve: _isOpen ? Curves.easeOut : widget.curve,
+                ).value),
                 child: GestureDetector(
                   onVerticalDragUpdate: _handleDragUpdate,
                   onVerticalDragEnd: _handleDragEnd,
                   child: Container(
                     key: _childKey,
-                    child: widget.child,
+                    child: child,
                   ),
                 ),
               ),

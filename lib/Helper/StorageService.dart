@@ -33,7 +33,6 @@ class StorageService {
     RegExpMatch match = expr.firstMatch(url);
     if (match != null) {
       String name = url.substring(match.start, match.end);
-      print(name);
       await storageRef.child(name).delete();
     }
   }

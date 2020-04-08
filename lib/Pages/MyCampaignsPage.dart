@@ -45,7 +45,7 @@ class _MyCampaignsPageState extends State<MyCampaignsPage> {
                     height: 10,
                   ),
                   Text(
-                      "Projekte können nur von Administratoren erstellt werden! \n kontaktiere uns wenn du ein Projekt hast, was hier angezeigt werden soll!"),
+                      "Projekte können nur von Administratoren erstellt werden!\nKontaktiere uns wenn du ein Projekt hast, was hier angezeigt werden soll!"),
                 ],
               ),
             ),

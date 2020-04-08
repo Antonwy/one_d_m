@@ -21,7 +21,6 @@ class DonationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _mq = MediaQuery.of(context);
-    print(donation);
     if (_future == null)
       _future = DatabaseService().getUserFromId(donation.userId);
 
@@ -30,6 +29,7 @@ class DonationWidget extends StatelessWidget {
       builder: (context, snapshot) {
         User user = snapshot.data;
         return Card(
+          clipBehavior: Clip.antiAlias,
           margin: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
           child: ListTile(
             leading: Avatar(user?.imgUrl),
@@ -63,7 +63,9 @@ class DonationWidget extends StatelessWidget {
             onTap: () {
               BottomDialog(context, duration: Duration(milliseconds: 125))
                   .show(Container(
-                margin: EdgeInsets.symmetric(vertical: _mq.padding.bottom + 10, horizontal: 10),
+                margin: EdgeInsets.symmetric(
+                    vertical: _mq.padding.bottom == 0 ? 10 : _mq.padding.bottom,
+                    horizontal: 10),
                 child: Material(
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),

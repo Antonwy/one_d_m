@@ -38,7 +38,7 @@ class User {
         lastname: snapshot[User.LASTNAME],
         email: snapshot[User.EMAIL],
         admin: snapshot[User.ADMIN],
-        donatedAmount: snapshot[DONATEDAMOUNT],
+        donatedAmount: snapshot[DONATEDAMOUNT] ?? 0,
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
             : List.from(snapshot[User.SUBSCRIBEDCAMPAIGNS]),

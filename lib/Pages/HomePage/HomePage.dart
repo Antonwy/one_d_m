@@ -31,9 +31,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ChangeNotifierProvider(
               create: (context) => NavPageManager(_pageController),
-              child: NavBar(
-                _changePage,
-              ),
+              child: NavBar(_changePage),
             )
           ],
         ));

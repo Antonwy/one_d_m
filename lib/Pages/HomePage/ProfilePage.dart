@@ -1,17 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/ActivityDonationFeed.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
-import 'package:one_d_m/Components/DonationWidget.dart';
+import 'package:one_d_m/Components/GeneralDonationFeed.dart';
+import 'package:one_d_m/Components/NavBarDialog.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
-import 'package:one_d_m/Components/PercentIndicator.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
-import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
@@ -111,12 +108,27 @@ class _ProfilePageState extends State<ProfilePage>
                       Row(
                         children: <Widget>[
                           RoundButtonHomePage(
-                            icon: Icons.attach_money, // toPage: BuyCoinsPage(),
+                            icon: Icons.credit_card, // toPage: BuyCoinsPage(),
                             // toPage: BuyCoinsPage(),
                             onTap: () {
-                              DatabaseService().updateDatabaseDonations();
+                              // DatabaseService().updateDatabaseDonations();
+                              NavBarDialog.of(context).show(Container(
+                                height: 200,
+                                width: double.infinity,
+                              ));
                             },
                           ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Consumer<UserManager>(builder: (context, um, child) {
+                            return RoundButtonHomePage(
+                              icon: Icons.person,
+                              onTap: () {
+                                Navigator.push(context, UserPageRoute(um.user));
+                              },
+                            );
+                          }),
                           SizedBox(
                             width: 10,
                           ),
@@ -145,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage>
                           RoundButtonHomePage(
                             icon: Icons.settings,
                             onTap: () {
-                              BottomDialog(context).show(SettingsDialog());
+                              NavBarDialog(context).show(SettingsDialog());
                             },
                           )
                         ],
@@ -183,13 +195,13 @@ class _ProfilePageState extends State<ProfilePage>
   List<Widget> _generateChildren(List<News> data) {
     List<Widget> list = [];
 
-    list.addAll(_showGeneralDonationFeed());
+    list.add(GeneralDonationFeed());
 
-    list.addAll(_showDonationFeed());
+    list.add(ActivityDonationFeed());
 
     if (data.isNotEmpty) {
       list.add(Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
         child: Text(
           "Neuigkeiten:",
           style: _theme.textTheme.title,
@@ -229,95 +241,6 @@ class _ProfilePageState extends State<ProfilePage>
     ));
 
     return list;
-  }
-
-  List<Widget> _showGeneralDonationFeed() {
-    return [
-      StreamBuilder<DonationInfo>(
-          stream: DatabaseService().getDonationInfo(),
-          builder: (context, snapshot) {
-            DonationInfo di = snapshot.data;
-
-            if (!snapshot.hasData)
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-              );
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  child: Text(
-                    "Unsere Ziele:",
-                    style: _theme.textTheme.title,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    PercentIndicator(
-                      currentValue: di.dailyAmount,
-                      targetValue: di.dailyAmountTarget,
-                      color: Colors.indigo,
-                      description: "Tagesziel",
-                    ),
-                    PercentIndicator(
-                      currentValue: di.monthlyAmount,
-                      targetValue: di.monthlyAmountTarget,
-                      color: Colors.red,
-                      description: "Monatsziel",
-                    ),
-                    PercentIndicator(
-                      currentValue: di.yearlyAmount,
-                      targetValue: di.yearlyAmountTarget,
-                      color: Colors.orange,
-                      description: "Jahresziel",
-                    ),
-                  ],
-                ),
-              ],
-            );
-          })
-    ];
-  }
-
-  List<Widget> _showDonationFeed() {
-    return [
-      Consumer<UserManager>(
-        builder: (context, um, child) => StreamBuilder<List<Donation>>(
-          stream: DatabaseService(um.uid).getDonationFeedStream(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data.isEmpty) return Container();
-              print(snapshot.data);
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18.0, vertical: 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Aktivitäten: ",
-                      style: _theme.textTheme.title,
-                    ),
-                    SizedBox(height: 5),
-                    ...snapshot.data
-                        .map((d) => DonationWidget(d, withCampaignName: true))
-                  ],
-                ),
-              );
-            }
-
-            return Center(child: CircularProgressIndicator());
-          },
-        ),
-      )
-    ];
   }
 
   @override

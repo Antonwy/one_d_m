@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/PageManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 void main() => runApp(MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => UserManager.instance()),
       ChangeNotifierProvider(create: (context) => CampaignsManager()),
+      ChangeNotifierProvider(create: (context) => PageManager()),
     ], child: MyApp()));
 
 class MyApp extends StatelessWidget {

@@ -14,22 +14,17 @@ class NewsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     _mq = MediaQuery.of(context);
     return Container(
-      height: _mq.size.height * .95,
+      height: _mq.size.height * .7,
       child: Material(
         clipBehavior: Clip.antiAlias,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         color: Colors.white,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Stack(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                CachedNetworkImage(
-                  width: _mq.size.width,
-                  height: 250,
-                  imageUrl: news.imageUrl,
-                  fit: BoxFit.cover,
-                ),
                 Align(
                   alignment: Alignment.topCenter,
                   child: Container(
@@ -37,36 +32,25 @@ class NewsPage extends StatelessWidget {
                     height: 6,
                     margin: EdgeInsets.only(top: 5),
                     child: Material(
-                      color: Colors.white60,
+                      color: Colors.black54,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
+                SizedBox(height: 20),
+                Text(
+                  news.title,
+                  style: Theme.of(context).textTheme.title.copyWith(fontSize: 30),
+                ),
+                SizedBox(height: 5),
+                Text(news.text),
+                SizedBox(height: 20),
+                UserButton(news.userId),
+                SizedBox(height: 10),
+                CampaignButton(news.campaignId)
               ],
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        news.title,
-                        style: Theme.of(context).textTheme.title,
-                      ),
-                      SizedBox(height: 5),
-                      Text(news.text),
-                      SizedBox(height: 20),
-                      UserButton(news.userId),
-                      SizedBox(height: 10),
-                      CampaignButton(news.campaignId)
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

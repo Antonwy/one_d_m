@@ -4,11 +4,13 @@ class PercentIndicator extends StatefulWidget {
   int currentValue, targetValue;
   String description;
   Color color;
+  Function onTap;
 
   PercentIndicator(
       {this.currentValue,
       this.targetValue,
       this.description,
+      this.onTap,
       this.color = Colors.indigo});
 
   @override
@@ -63,32 +65,39 @@ class _PercentIndicatorState extends State<PercentIndicator>
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: 90,
-            height: 90,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, snapshot) {
-                      return CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(widget.color),
-                        value: _valueTween.evaluate(_controller),
-                        backgroundColor: Colors.grey[300],
-                      );
-                    }),
-                Center(
-                    child: Container(
-                        width: 90,
-                        padding: EdgeInsets.all(5),
-                        child: Text(
-                          "${widget.currentValue}/${widget.targetValue} DC",
-                          textAlign: TextAlign.center,
-                        )))
-              ],
+        Container(
+          width: 100,
+          height: 100,
+          child: Material(
+            shape: CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(1.5),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, snapshot) {
+                          return CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(widget.color),
+                            value: _valueTween.evaluate(_controller),
+                            backgroundColor: Colors.grey[300],
+                          );
+                        }),
+                    Center(
+                        child: Container(
+                            width: 90,
+                            padding: EdgeInsets.all(5),
+                            child: Text(
+                              "${widget.currentValue}/${widget.targetValue} DC",
+                              textAlign: TextAlign.center,
+                            )))
+                  ],
+                ),
+              ),
             ),
           ),
         ),

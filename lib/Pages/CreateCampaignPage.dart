@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/PlaceSearch.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -427,7 +426,7 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
   }
 
   String _convertDate(DateTime date) {
-    return DateFormat("d. MMMM yyyy").format(date);
+    return Helper.getDate(date);
   }
 
   void _changePage(PostPage page) {

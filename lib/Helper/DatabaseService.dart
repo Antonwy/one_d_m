@@ -301,7 +301,6 @@ class DatabaseService {
     return donationFeedCollection
         .document(uid)
         .collection(DONATIONS)
-        .orderBy(Donation.CREATEDAT, descending: true)
         .limit(5)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
@@ -312,6 +311,14 @@ class DatabaseService {
         .document("info")
         .snapshots()
         .map((ds) => DonationInfo.fromSnapshot(ds));
+  }
+
+  Stream<List<Donation>> getDonationsFromUser(User user) {
+    return donationsCollection
+        .where(Donation.USERID, isEqualTo: user.id)
+        .orderBy(Donation.CREATEDAT, descending: true)
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
   DocumentReference get userReference => userCollection.document(uid);

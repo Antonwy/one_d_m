@@ -5,27 +5,32 @@ class Avatar extends StatelessWidget {
   String imageUrl;
   IconData icon;
   Function onTap;
+  double elevation;
 
-  Avatar(this.imageUrl, {this.icon, this.onTap});
+  Avatar(this.imageUrl, {this.icon, this.onTap, this.elevation = 0.0});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: CircleAvatar(
-        backgroundColor: Colors.grey[300],
-        child: imageUrl == null
-            ? Icon(
-                icon ?? Icons.person,
-                color: Colors.black87,
-              )
-            : null,
-        backgroundImage: imageUrl == null
-            ? null
-            : CachedNetworkImageProvider(
-                imageUrl,
-              ),
-      ),
+      child: Material(
+          elevation: elevation,
+          shape: CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            child: imageUrl == null
+                ? Icon(
+                    icon ?? Icons.person,
+                    color: Colors.black87,
+                  )
+                : null,
+            backgroundImage: imageUrl == null
+                ? null
+                : CachedNetworkImageProvider(
+                    imageUrl,
+                  ),
+          )),
     );
   }
 }

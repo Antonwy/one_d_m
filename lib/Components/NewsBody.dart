@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
+import 'package:one_d_m/Components/NavBarDialog.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Pages/NewsPage.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -16,9 +17,8 @@ class NewsBody extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          BottomDialog(context,
-                  curve: ElasticOutCurve(1.4),
-                  duration: Duration(milliseconds: 500))
+          NavBarDialog.of(context)
+              .withTopImage(news.imageUrl)
               .show(NewsPage(news));
         },
         child: Column(

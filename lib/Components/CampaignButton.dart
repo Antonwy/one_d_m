@@ -8,13 +8,16 @@ import 'AnimatedFutureBuilder.dart';
 
 class CampaignButton extends StatelessWidget {
   String id;
+  Campaign campaign;
 
-  CampaignButton(this.id);
+  CampaignButton(this.id, {this.campaign});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedFutureBuilder<Campaign>(
-        future: DatabaseService().getCampaign(id),
+        future: campaign == null
+            ? DatabaseService().getCampaign(id)
+            : Future.value(campaign),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Material(

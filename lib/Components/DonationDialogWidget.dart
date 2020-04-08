@@ -12,8 +12,9 @@ class DonationDialogWidget extends StatefulWidget {
   Function close;
   Campaign campaign;
   User user;
+  BuildContext context;
 
-  DonationDialogWidget({this.close, this.campaign, this.user});
+  DonationDialogWidget({this.close, this.campaign, this.user, this.context});
 
   @override
   _DonationDialogWidgetState createState() => _DonationDialogWidgetState();
@@ -144,9 +145,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
           ),
           Consumer2<CampaignsManager, UserManager>(
               builder: (context, cm, um, child) {
-            bool _hasAlternative =
-                cm.getSubscribedCampaigns(um.user).isNotEmpty;
-            List<Campaign> campaigns = _hasAlternative
+            List<Campaign> possibleCampaigns =
+                cm.getSubscribedCampaigns(um.user);
+            possibleCampaigns.removeWhere((c) => c.id == widget.campaign.id);
+            List<Campaign> campaigns = possibleCampaigns.isNotEmpty
                 ? cm.getSubscribedCampaigns(um.user)
                 : cm.getAllCampaigns();
 
@@ -165,7 +167,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                         style: _theme.textTheme.title,
                       ),
                       Text(
-                        "Auswahl aus ${_hasAlternative ? "deinen abonnierten" : "allen"} Projekten",
+                        "Auswahl aus ${possibleCampaigns.isNotEmpty ? "deinen abonnierten" : "allen"} Projekten",
                         style: _theme.textTheme.body1,
                       ),
                     ],
@@ -234,7 +236,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
               color: Colors.indigo,
-              onPressed: _donate,
+              disabledColor: Colors.grey,
+              onPressed: _amount != null && _alternativCampaign != null
+                  ? _donate
+                  : null,
               child: Text(
                 "Spenden",
                 style: _theme.accentTextTheme.button,
@@ -259,6 +264,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
     );
 
     await DatabaseService(widget.user.id).donate(donation);
+
+    Scaffold.of(widget.context).showSnackBar(SnackBar(
+        content: Text(
+            "Du hast $_amount DC an ${widget.campaign.name} gespendet! Vielen Dank!")));
 
     widget.close();
   }

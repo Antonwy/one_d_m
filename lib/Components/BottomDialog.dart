@@ -10,8 +10,8 @@ class BottomDialog {
       {this.duration = const Duration(milliseconds: 250),
       this.curve = Curves.easeInOut});
 
-  void show(Widget widget) {
-    Navigator.push(
+  Future<void> show(Widget widget) async {
+    await Navigator.push(
         context,
         PageRouteBuilder(
             opaque: false,
@@ -163,7 +163,7 @@ class _DialogLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
+      minHeight: 0,
       maxHeight: constraints.maxHeight,
     );
   }

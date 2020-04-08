@@ -16,19 +16,9 @@ class UserAvatar extends StatelessWidget {
       Container(
         width: 70,
         height: 70,
-        child: Hero(
-          key: _key,
-          tag: "user${user.id}",
-          child: Material(
-              color: Colors.grey[300],
-              shape: CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                  onTap: () {
-                    Navigator.push(context, UserPageRoute(user));
-                  },
-                  child: Avatar(user.imgUrl))),
-        ),
+        child: Avatar(user.imgUrl, onTap: () {
+          Navigator.push(context, UserPageRoute(user));
+        }),
       ),
       SizedBox(height: 5),
       Text(

@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CampaignPageRoute.dart';
+import 'package:one_d_m/Components/NavBarSheet.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Pages/CampaignPage.dart';
+
+import 'CampaignBottomSheet.dart';
 
 class CampaignHeader extends StatelessWidget {
   Campaign campaign;
@@ -34,9 +37,13 @@ class CampaignHeader extends StatelessWidget {
           Material(
             clipBehavior: Clip.antiAlias,
             borderRadius: BorderRadius.circular(10),
+            elevation: 1,
             child: InkWell(
               onTap: () {
-                Navigator.push(context, CampaignPageRoute(campaign));
+                NavBarSheet.of(context)
+                    .withTopImage(campaign.imgUrl)
+                    .show(CampaignPage(campaign));
+                //Navigator.push(context, CampaignPageRoute(campaign));
               },
               child: Image(
                 width: double.infinity,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
@@ -16,7 +17,8 @@ class SettingsDialog extends StatelessWidget {
     um = Provider.of<UserManager>(context);
     _textTheme = Theme.of(context).accentTextTheme;
     return Material(
-      color: Colors.transparent,
+      color: ColorTheme.navBar,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Theme(

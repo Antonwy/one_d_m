@@ -44,13 +44,12 @@ class _RegisterPageState extends State<RegisterPage> {
       password1 = "",
       password2 = "",
       firstName = "",
-      lastName = "";
+      lastName = "",
+      telephone = "";
 
   UserManager um;
 
   File _file;
-
-  String _userId = Uuid().v4();
 
   bool _loading = false;
 
@@ -100,7 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: FlexibleSpaceBar(
                       title: Text(
-                        "One\$M",
+                        "One Dollar Movement",
                         style: accentTextTheme.headline.copyWith(fontSize: 25),
                       ),
                       background: AnimatedSwitcher(
@@ -113,9 +112,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       curve: Curves.fastOutSlowIn,
                       value: Helper.mapValue(_currentPage.index, 0,
                           RegisterPages.values.length, 0, 1),
-                      builder: (value) {
+                      builder: (context, value) {
                         return LinearProgressIndicator(
-                          value: value,
+                          value: value.value,
                           valueColor: AlwaysStoppedAnimation(
                               Theme.of(context).primaryColorDark),
                         );
@@ -405,6 +404,29 @@ class _RegisterPageState extends State<RegisterPage> {
           SizedBox(
             height: 10,
           ),
+          Text(
+            "Telefonnummer",
+            style: textTheme.title,
+          ),
+          Text(
+            "Gib deine Telefonnummer ein um zu entdecken, welche deiner Freunde die App schon nutzen!",
+            style: textTheme.caption,
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          _textField(
+              label: "Nummer",
+              hint: "z.B. 012345678976",
+              initText: lastName,
+              onSaved: (text) {
+                telephone = text;
+              },
+              inputType: TextInputType.phone,
+              validator: Validate.telephone),
+          SizedBox(
+            height: 10,
+          ),
           Material(
             borderRadius: BorderRadius.circular(3),
             clipBehavior: Clip.antiAlias,
@@ -420,7 +442,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           SizedBox(
-            height: 50,
+            height: 100,
           ),
         ],
       ),
@@ -573,6 +595,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: email.toLowerCase(),
         firstname: firstName,
         lastname: lastName,
+        phoneNumber: telephone,
         password: password1);
 
     ApiResult result = await um.signUp(user, _file);

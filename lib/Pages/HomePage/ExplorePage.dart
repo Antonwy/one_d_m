@@ -1,12 +1,14 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Components/UserAvatar.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Pages/FindFriendsPage.dart';
 import 'package:provider/provider.dart';
 
 class ExplorePage extends StatefulWidget {
@@ -18,11 +20,11 @@ class _ExplorePageState extends State<ExplorePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme textTheme;
 
-  Future<List<User>> _userFuture;
+  Stream<List<User>> _userStream;
 
   @override
   void initState() {
-    _userFuture = DatabaseService().getUsers();
+    _userStream = DatabaseService().getUsersStream();
     super.initState();
   }
 
@@ -57,49 +59,89 @@ class _ExplorePageState extends State<ExplorePage>
                   child: SearchBar(),
                 ),
                 SizedBox(height: 20),
-                AnimatedFutureBuilder<List<User>>(
-                    future: _userFuture,
+                StreamBuilder<List<User>>(
+                    stream: _userStream,
                     builder: (context, snapshot) {
+                      if (!snapshot.hasData) return Container();
                       if (snapshot.hasData && snapshot.data.isEmpty)
                         return Container();
                       return Container(
                         height: 110,
-                        child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: snapshot.hasData
-                                ? _buildUserAvatars(snapshot.data)
-                                : _buildUserAvatars(
-                                    List.generate(10, (i) => User()))),
+                        child: UserAvatarList(snapshot.data),
                       );
                     })
               ],
             ),
           ),
         ),
-        Consumer<CampaignsManager>(
-            builder: (context, cm, child) => CampaignList(
-                  campaigns: cm.getAllCampaigns(),
-                ))
+        Consumer<CampaignsManager>(builder: (context, cm, child) {
+          return CampaignList(
+            campaigns: cm.getAllCampaigns(),
+          );
+        })
       ],
     );
   }
 
-  List<Widget> _buildUserAvatars(List<User> users) {
-    List<Widget> list = [];
+  @override
+  bool get wantKeepAlive => true;
+}
 
-    list.add(SizedBox(width: 18));
+class UserAvatarList extends StatelessWidget {
+  final List<User> userList;
 
-    for (User user in users) {
-      list.add(UserAvatar(user));
-      list.add(SizedBox(
-        width: 18,
-      ));
-    }
-
-    return list;
-  }
+  UserAvatarList(this.userList);
 
   @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: userList.length + 1,
+      separatorBuilder: (context, index) => SizedBox(
+        width: 10,
+      ),
+      itemBuilder: (context, index) => Padding(
+        padding: index == 0
+            ? const EdgeInsets.only(left: 18.0)
+            : index == userList.length - 1
+                ? const EdgeInsets.only(right: 18.0)
+                : const EdgeInsets.all(0),
+        child: index == 0
+            ? _getAddFriendsButton()
+            : UserAvatar(userList[index - 1]),
+      ),
+    );
+  }
+
+  _getAddFriendsButton() {
+    return Container(
+      height: 110,
+      width: 70,
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: 70,
+            height: 70,
+            child: OpenContainer(
+              tappable: true,
+              closedColor: ColorTheme.avatar,
+              closedShape: CircleBorder(),
+              openBuilder: (context, close) => FindFriendsPage(),
+              closedBuilder: (context, open) => Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Text(
+            "Freunde finden",
+            textAlign: TextAlign.center,
+          )
+        ],
+      ),
+    );
+  }
 }

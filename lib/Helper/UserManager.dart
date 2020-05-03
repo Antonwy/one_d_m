@@ -22,8 +22,6 @@ class UserManager extends ChangeNotifier {
   Status get status => _status;
   User get user => _user;
 
-  set user(User user) => _user = user;
-
   String get uid => _fireUser.uid;
 
   UserManager.instance() : _auth = FirebaseAuth.instance {
@@ -31,7 +29,7 @@ class UserManager extends ChangeNotifier {
   }
 
   void initListener(DocumentSnapshot qs) {
-    user = User.fromSnapshot(qs);
+    _user = User.fromSnapshot(qs);
     notifyListeners();
   }
 
@@ -64,7 +62,6 @@ class UserManager extends ChangeNotifier {
 
       if (image != null) {
         StorageService service = StorageService(file: image, id: res.user.uid);
-        await service.compressImage(quality: 20);
         user.imgUrl = await service.uploadImage();
       }
 

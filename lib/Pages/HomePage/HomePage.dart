@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
-import 'package:one_d_m/Helper/NavPageManager.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';
-import 'FollowedProjects.dart';
+import 'NewsHomePage.dart';
 import 'ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,19 +19,19 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorTheme.homePage,
         body: Stack(
           children: <Widget>[
             PageView(
               controller: _pageController,
               children: <Widget>[
-                FollowedProjects(() => _changePage(2)),
+                NewsHomePage(() => _changePage(2)),
                 ProfilePage(() => _changePage(2)),
                 ExplorePage(),
               ],
             ),
             ChangeNotifierProvider(
-              create: (context) => NavPageManager(_pageController),
+              create: (context) => NavBarManager(_pageController),
               child: NavBar(_changePage),
             )
           ],

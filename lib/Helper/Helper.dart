@@ -30,7 +30,7 @@ class Helper {
   }
 
   static Size getSizeFromKey(GlobalKey key) {
-    if (key.currentContext == null) return Size(0, 0);
+    if (key.currentContext == null) return null;
 
     final RenderBox containerRenderBox = key.currentContext.findRenderObject();
     return containerRenderBox.size;

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class PercentIndicator extends StatefulWidget {
   int currentValue, targetValue;
   String description;
-  Color color;
   Function onTap;
 
   PercentIndicator(
       {this.currentValue,
       this.targetValue,
       this.description,
-      this.onTap,
-      this.color = Colors.indigo});
+      this.onTap,});
 
   @override
   _PercentIndicatorState createState() => _PercentIndicatorState();
@@ -63,46 +62,36 @@ class _PercentIndicatorState extends State<PercentIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: 100,
-          height: 100,
-          child: Material(
-            shape: CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: widget.onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(1.5),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, snapshot) {
-                          return CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(widget.color),
-                            value: _valueTween.evaluate(_controller),
-                            backgroundColor: Colors.grey[300],
-                          );
-                        }),
-                    Center(
-                        child: Container(
-                            width: 90,
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "${widget.currentValue}/${widget.targetValue} DC",
-                              textAlign: TextAlign.center,
-                            )))
-                  ],
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 50,
+            child: Text(
+              widget.description,
+              style: Theme.of(context).textTheme.body1,
             ),
           ),
-        ),
-        Text(widget.description)
-      ],
+          Expanded(
+            child: Container(
+              height: 13,
+              child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(7),
+                                          child: LinearProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(ColorTheme.percentSlider),
+                        value: _valueTween.evaluate(_controller),
+                        backgroundColor: ColorTheme.lightGrey,
+                      ),
+                    );
+                  }),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

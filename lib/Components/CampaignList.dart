@@ -16,8 +16,6 @@ class CampaignList extends StatefulWidget {
 }
 
 class _CampaignListState extends State<CampaignList> {
-  bool _campaignsAreExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     if (widget.campaigns.isEmpty && widget.emptyImage != null) {
@@ -44,8 +42,7 @@ class _CampaignListState extends State<CampaignList> {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(c,
-          onExpand: _changeExpanded, expanded: _campaignsAreExpanded));
+      list.add(CampaignHeader(c));
     }
 
     list.add(SizedBox(
@@ -53,11 +50,5 @@ class _CampaignListState extends State<CampaignList> {
     ));
 
     return list;
-  }
-
-  _changeExpanded(bool expanded) {
-    setState(() {
-      _campaignsAreExpanded = expanded;
-    });
   }
 }

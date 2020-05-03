@@ -1,8 +1,5 @@
 import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as Im;
 
 class StorageService {
   final StorageReference storageRef = FirebaseStorage.instance.ref();
@@ -11,16 +8,6 @@ class StorageService {
   String id;
 
   StorageService({this.file, this.id});
-
-  Future<File> compressImage({int quality = 40}) async {
-    final tempDir = await getTemporaryDirectory();
-    final path = tempDir.path;
-    Im.Image image = Im.decodeImage(file.readAsBytesSync());
-    File compressedImageFile = File("$path/img_$id.jpg")
-      ..writeAsBytesSync(Im.encodeJpg(image, quality: quality));
-    file = compressedImageFile;
-    return compressedImageFile;
-  }
 
   Future<String> uploadImage() async {
     StorageUploadTask task = storageRef.child("campaign_$id.jpg").putFile(file);

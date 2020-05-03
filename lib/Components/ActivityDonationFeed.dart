@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -15,30 +14,23 @@ class ActivityDonationFeed extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<Donation> donations = snapshot.data;
-            if (donations.isEmpty) return Container();
-            return Padding(
-              padding: const EdgeInsets.only(top: 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 18),
-                    child: Text(
-                      "Aktivitäten: ",
-                      style: Theme.of(context).textTheme.title,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  ...donations.map((d) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: DonationWidget(d, withCampaignName: true),
-                      ))
-                ],
+            donations.sort((d2, d1) => d1.createdAt.compareTo(d2.createdAt));
+            if (donations.isEmpty)
+              return SliverFillRemaining(child: Container());
+            return SliverPadding(
+              padding: EdgeInsets.fromLTRB(18, 10, 18, 100),
+              sliver: SliverGrid.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 5,
+                crossAxisSpacing: 5,
+                childAspectRatio: .8,
+                children: donations.map((d) => DonationWidget(d)).toList(),
               ),
             );
           }
 
-          return Center(child: CircularProgressIndicator());
+          return SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()));
         },
       ),
     );

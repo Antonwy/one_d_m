@@ -9,8 +9,15 @@ import 'Avatar.dart';
 class UserButton extends StatelessWidget {
   String id;
   User user;
+  Color color;
+  TextStyle textStyle;
+  double elevation;
 
-  UserButton(this.id, {this.user});
+  UserButton(this.id,
+      {this.user,
+      this.color = Colors.white,
+      this.textStyle = const TextStyle(color: Colors.black),
+      this.elevation = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +29,8 @@ class UserButton extends StatelessWidget {
             return Material(
               borderRadius: BorderRadius.circular(5),
               clipBehavior: Clip.antiAlias,
-              color: Colors.white,
+              color: color,
+              elevation: elevation,
               child: InkWell(
                 onTap: () {
                   Navigator.push(context, UserPageRoute(snapshot.data));
@@ -35,7 +43,8 @@ class UserButton extends StatelessWidget {
                       SizedBox(width: 10),
                       Text(
                         "${snapshot.data.firstname} ${snapshot.data.lastname}",
-                        style: Theme.of(context).textTheme.title,
+                        style:
+                            Theme.of(context).textTheme.title.merge(textStyle),
                       )
                     ],
                   ),

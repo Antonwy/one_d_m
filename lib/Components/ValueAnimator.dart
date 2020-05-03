@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ValueAnimator extends StatefulWidget {
-  dynamic value;
-  Widget Function(dynamic) builder;
-  Duration duration;
-  Curve curve;
-  TweenType tweenType;
+  final double value;
+  final Widget Function(BuildContext, Animation) builder;
+  final Duration duration;
+  final Curve curve;
 
   ValueAnimator(
       {Key key,
       @required this.value,
       @required this.builder,
       this.duration = const Duration(milliseconds: 500),
-      this.curve = Curves.linear,
-      this.tweenType = TweenType.VALUE})
+      this.curve = Curves.linear})
       : super(key: key);
 
   @override
@@ -23,9 +21,9 @@ class ValueAnimator extends StatefulWidget {
 class _ValueAnimatorState extends State<ValueAnimator>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  Animation _tween;
+  Animation<double> _tween;
 
-  dynamic _currVal, _oldVal;
+  double _currVal, _oldVal;
 
   @override
   void initState() {
@@ -63,21 +61,10 @@ class _ValueAnimatorState extends State<ValueAnimator>
         setState(() {});
       });
 
-    return widget.builder(_tween.value);
+    return widget.builder(context, _tween);
   }
 
   Animation _getTween() {
-    switch (widget.tweenType) {
-      case TweenType.VALUE:
-        return Tween(begin: _oldVal, end: _currVal)
-            .animate(CurvedAnimation(parent: _controller, curve: widget.curve));
-      case TweenType.COLOR:
-        return ColorTween(begin: _oldVal, end: _currVal)
-            .animate(CurvedAnimation(parent: _controller, curve: widget.curve));
-      case TweenType.INT:
-        return IntTween(begin: _oldVal, end: _currVal)
-            .animate(CurvedAnimation(parent: _controller, curve: widget.curve));
-    }
     return Tween<double>(begin: _oldVal, end: _currVal)
         .animate(CurvedAnimation(parent: _controller, curve: widget.curve));
   }

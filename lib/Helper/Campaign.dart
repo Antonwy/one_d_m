@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:one_d_m/Helper/ImageUrl.dart';
 
 class Campaign {
-  String name, description, shortDescription, city, imgUrl;
-  DateTime createdAt;
-  int amount, subscribedCount;
-  String authorId, id;
+  final String name, description, shortDescription, city;
+  final DateTime createdAt;
+  final int amount, subscribedCount;
+  final String authorId, id;
+  ImageUrl imgUrl;
 
   static final String ID = "id",
       NAME = "title",
@@ -28,8 +30,10 @@ class Campaign {
     this.authorId,
     this.subscribedCount,
     this.amount,
-    this.imgUrl,
-  });
+    String url,
+  }) {
+    this.imgUrl = ImageUrl(url);
+  }
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -41,7 +45,7 @@ class Campaign {
         shortDescription: snapshot[SHORTDESCRIPTION],
         subscribedCount: snapshot[SUBSCRIBEDCOUNT] ?? 0,
         createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
-        imgUrl: snapshot[IMAGEURL],
+        url: snapshot[IMAGEURL],
         authorId: snapshot[AUTHORID]);
   }
 
@@ -59,7 +63,7 @@ class Campaign {
       CREATEDAT: Timestamp.now(),
       AUTHORID: authorId,
       AMOUNT: amount,
-      IMAGEURL: imgUrl,
+      IMAGEURL: imgUrl.url,
     };
   }
 

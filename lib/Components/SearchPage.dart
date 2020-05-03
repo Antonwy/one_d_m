@@ -1,151 +1,70 @@
 import 'package:flutter/material.dart';
-
-import 'SearchResultsList.dart';
+import 'package:flutter/rendering.dart';
+import 'package:one_d_m/Components/SearchResultsList.dart';
 
 class SearchPage extends StatefulWidget {
-  Size size;
-  Offset offset;
-
-  SearchPage({this.size, this.offset});
-
   @override
   _SearchPageState createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
-  Offset _offset;
-  Size _size;
-  AnimationController _controller;
-  AnimationController _fadeController;
+class _SearchPageState extends State<SearchPage> {
   Size _displaySize;
+
   String _query = "";
-  CurvedAnimation _curvedAnimation;
-
-  @override
-  void initState() {
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-
-    _curvedAnimation =
-        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-
-    _fadeController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-
-    _controller.forward().whenComplete(() {
-      _fadeController.forward();
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    _offset = widget.offset;
-    _size = widget.size;
     _displaySize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: <Widget>[
-          AnimatedBuilder(
-              animation: _controller,
-              builder: (context, snapshot) {
-                return Positioned(
-                  top: Tween(begin: _offset.dy, end: 0.0)
-                      .animate(_curvedAnimation)
-                      .value,
-                  left: Tween(begin: _offset.dx, end: 0.0)
-                      .animate(_curvedAnimation)
-                      .value,
-                  child: Container(
-                    width: Tween(begin: _size.width, end: _displaySize.width)
-                        .animate(_curvedAnimation)
-                        .value,
-                    height: Tween(begin: _size.height, end: _displaySize.height)
-                        .animate(_curvedAnimation)
-                        .value,
+        backgroundColor: Colors.white,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.white,
+              iconTheme: IconThemeData(color: Colors.black),
+              expandedHeight: 80,
+              flexibleSpace: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 60,
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
                     child: Material(
-                      elevation: 1,
-                      borderRadius: BorderRadius.circular(4.0),
+                      borderRadius: BorderRadius.circular(5),
+                      elevation: 2,
                       color: Colors.white,
-                    ),
-                  ),
-                );
-              }),
-          AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return Positioned(
-                  left: _offset.dx,
-                  top: Tween(
-                          begin: _offset.dy,
-                          end: MediaQuery.of(context).padding.top)
-                      .animate(_curvedAnimation)
-                      .value,
-                  child: SizedBox(
-                      width: _size.width,
-                      height: _size.height,
-                      child: Card(
-                        margin: EdgeInsets.zero,
-                        child: Stack(
-                          alignment: Alignment.centerLeft,
+                      child: Center(
+                          child: Padding(
+                        padding: const EdgeInsets.only(right: 18.0),
+                        child: Row(
                           children: <Widget>[
-                            ScaleTransition(
-                              scale: _controller,
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios),
-                                onPressed: () {
-                                  if (_controller.isAnimating) return;
-                                  _fadeController.reverse().whenComplete(() {
-                                    _controller.reverse().whenComplete(() {
-                                      Navigator.pop(context);
-                                    });
+                            BackButton(),
+                            Expanded(
+                              child: TextField(
+                                textCapitalization: TextCapitalization.words,
+                                onChanged: (text) {
+                                  setState(() {
+                                    _query = text;
                                   });
                                 },
+                                decoration: InputDecoration.collapsed(
+                                    hintText: "Suchen"),
                               ),
                             ),
-                            Positioned(
-                                left: Tween(begin: 16.0, end: 50.0)
-                                    .animate(_controller)
-                                    .value,
-                                child: Container(
-                                    width: _size.width - 100,
-                                    child: TextField(
-                                      decoration: InputDecoration.collapsed(
-                                        hintText: "Suchen",
-                                      ),
-                                      onChanged: (text) {
-                                        setState(() {
-                                          _query = text;
-                                        });
-                                      },
-                                    ))),
+                            Icon(Icons.search)
                           ],
                         ),
                       )),
-                );
-              }),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + _size.height + 20,
-            child: FadeTransition(
-              opacity: _fadeController,
-              child: Container(
-                width: _displaySize.width,
-                height: _displaySize.height -
-                    (MediaQuery.of(context).padding.top + _size.height),
-                child: SearchResultsList(_query),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+            SearchResultsList(_query)
+          ],
+        ));
   }
 }

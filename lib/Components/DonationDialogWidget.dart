@@ -205,7 +205,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                       horizontal: 15.0, vertical: 8),
                                   child: Row(
                                     children: <Widget>[
-                                      Avatar(campaigns[index].imgUrl),
+                                      Avatar(campaigns[index].imgUrl.low),
                                       SizedBox(width: 10),
                                       Text(
                                         "${campaigns[index].name}",
@@ -259,6 +259,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
       _amount,
       campaignId: widget.campaign.id,
       alternativeCampaignId: widget.campaign.id,
+      campaignImgUrl: widget.campaign.imgUrl.url,
       userId: widget.user.id,
       campaignName: widget.campaign.name,
     );

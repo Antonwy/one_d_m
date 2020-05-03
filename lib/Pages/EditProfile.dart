@@ -19,7 +19,7 @@ class _EditProfileState extends State<EditProfile> {
   File _image;
   bool _deletedImage = false;
 
-  String _firstName, _lastName;
+  String _firstName, _lastName, _phoneNumber;
 
   bool _loading = false;
 
@@ -54,7 +54,6 @@ class _EditProfileState extends State<EditProfile> {
                         if (_image != null) {
                           StorageService service =
                               StorageService(file: _image, id: um.uid);
-                          await service.compressImage();
                           if (currUser.imgUrl != null)
                             await service.deleteOld(currUser.imgUrl);
                           currUser.imgUrl = await service.uploadImage();
@@ -66,6 +65,11 @@ class _EditProfileState extends State<EditProfile> {
                         if (_lastName != null &&
                             Validate.username(_lastName) == null)
                           currUser.lastname = _lastName;
+
+                        if (_phoneNumber != null &&
+                            Validate.telephone(_phoneNumber) == null)
+                          currUser.phoneNumber = _phoneNumber;
+                        print(Validate.telephone(_phoneNumber));
 
                         await um.updateUser();
 
@@ -96,12 +100,12 @@ class _EditProfileState extends State<EditProfile> {
                       backgroundImage: _imgWidget),
                   Row(
                     children: <Widget>[
-                      RaisedButton(
+                      OutlineButton(
                         onPressed: _getImage,
                         child: Text("Ändern"),
                       ),
                       SizedBox(width: 10),
-                      RaisedButton(
+                      OutlineButton(
                         onPressed: _deleteImage,
                         child: Text("Löschen"),
                       ),
@@ -109,7 +113,7 @@ class _EditProfileState extends State<EditProfile> {
                   )
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               _textView(
                   label: "Vorname",
                   initValue: um.user.firstname,
@@ -122,6 +126,13 @@ class _EditProfileState extends State<EditProfile> {
                   initValue: um.user.lastname,
                   onChanged: (text) {
                     _lastName = text;
+                  }),
+              SizedBox(height: 10),
+              _textView(
+                  label: "Telefonnummer",
+                  initValue: um.user.phoneNumber,
+                  onChanged: (text) {
+                    _phoneNumber = text;
                   }),
               SizedBox(height: 10),
             ],

@@ -6,8 +6,6 @@ import 'package:one_d_m/Helper/User.dart';
 class UserAvatar extends StatelessWidget {
   User user;
 
-  GlobalKey _key = GlobalKey();
-
   UserAvatar(this.user) : assert(user != null);
 
   @override

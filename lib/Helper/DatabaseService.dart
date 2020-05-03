@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
@@ -44,22 +47,7 @@ class DatabaseService {
   DatabaseService([this.uid]);
 
   // HELPER!!!
-  Future<void> updateDatabase() async {
-    for (User user in await getUsers()) {
-      QuerySnapshot qs = await followingCollection
-          .document(user.id)
-          .collection(USERS)
-          .getDocuments();
-
-      for (DocumentSnapshot ds in qs.documents) {
-        await followingCollection
-            .document(user.id)
-            .collection(USERS)
-            .document(ds.documentID)
-            .setData({"id": ds.documentID});
-      }
-    }
-  }
+  Future<void> updateDatabase() async {}
 
   // HELPER!!!
   Future<void> updateDatabaseDonations() async {}
@@ -73,6 +61,7 @@ class DatabaseService {
       User.FIRSTNAME: user.firstname,
       User.LASTNAME: user.lastname,
       User.IMAGEURL: user.imgUrl,
+      User.PHONE_NUMBER: user.phoneNumber
     });
   }
 
@@ -92,8 +81,19 @@ class DatabaseService {
   }
 
   Future<List<User>> getUsers() async {
-    return User.listFromSnapshots(
-        (await userCollection.limit(20).getDocuments()).documents);
+    return User.listFromSnapshots((await userCollection
+            .orderBy(User.DONATEDAMOUNT, descending: true)
+            .limit(20)
+            .getDocuments())
+        .documents);
+  }
+
+  Stream<List<User>> getUsersStream() {
+    return userCollection
+        .orderBy(User.DONATEDAMOUNT, descending: true)
+        .limit(20)
+        .snapshots()
+        .map((qs) => User.listFromSnapshots(qs.documents));
   }
 
   Stream<List<Campaign>> getCampaignFromQueryStream(String query) {
@@ -202,7 +202,7 @@ class DatabaseService {
 
   Future<void> deleteCampaign(Campaign campaign) async {
     await campaignsCollection.document(campaign.id).delete();
-    await StorageService().deleteOld(campaign.imgUrl);
+    await StorageService().deleteOld(campaign.imgUrl.url);
   }
 
   Future<List<News>> getNewsFromCampaign(Campaign campaign) async {
@@ -212,6 +212,13 @@ class DatabaseService {
         .documents
         .map((ds) => News.fromSnapshot(ds))
         .toList();
+  }
+
+  Stream<List<News>> getNewsFromCampaignStream(Campaign campaign) {
+    return newsCollection
+        .where(News.CAMPAIGNID, isEqualTo: campaign.id)
+        .snapshots()
+        .map((qs) => News.listFromSnapshot(qs.documents));
   }
 
   Future<List<News>> getNews(User user) async {
@@ -292,7 +299,8 @@ class DatabaseService {
   Stream<List<Donation>> getDonationFromCampaignStream(String campaignId) {
     return donationsCollection
         .where(Donation.CAMPAIGNID, isEqualTo: campaignId)
-        .limit(5)
+        .orderBy(Donation.CREATEDAT, descending: true)
+        .limit(6)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
@@ -301,7 +309,7 @@ class DatabaseService {
     return donationFeedCollection
         .document(uid)
         .collection(DONATIONS)
-        .limit(5)
+        .limit(20)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
@@ -319,6 +327,43 @@ class DatabaseService {
         .orderBy(Donation.CREATEDAT, descending: true)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
+  }
+
+  Future<List<User>> getUsersFromContacts(List<Contact> contacts) async {
+    List<User> userList = [];
+
+    Set<String> numbers = HashSet();
+
+    for (Contact c in contacts) {
+      List<String> contactNumbers = c.phones.map((item) => item.value).toList();
+      numbers.addAll(contactNumbers);
+      List<String> tempContactNumbers = List.of(contactNumbers);
+
+      for (String number in tempContactNumbers) {
+        if (number.startsWith("+49")) {
+          numbers.add(number.replaceFirst("+49", "0"));
+        } else if (number.startsWith("0")) {
+          numbers.add(number.replaceFirst("0", "+49"));
+        } else {
+          numbers.remove(number);
+        }
+      }
+    }
+
+    for (var i = 0; i < numbers.length; i += 10) {
+      List<String> queryNumbers = numbers
+          .toList()
+          .getRange(i, (i + 10) > numbers.length ? numbers.length : i + 10)
+          .toList();
+      QuerySnapshot qs = await userCollection
+          .where(User.PHONE_NUMBER, whereIn: queryNumbers)
+          .getDocuments();
+      if (qs.documents.isNotEmpty) {
+        userList.addAll(User.listFromSnapshots(qs.documents));
+      }
+    }
+
+    return userList;
   }
 
   DocumentReference get userReference => userCollection.document(uid);

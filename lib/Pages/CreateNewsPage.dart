@@ -134,12 +134,10 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
 
     StorageService service = StorageService(file: _image, id: _newsId);
 
-    await service.compressImage();
-
     News news = News(
         campaignId: widget.campaign.id,
         campaignName: widget.campaign.name,
-        campaignImgUrl: widget.campaign.imgUrl,
+        campaignImgUrl: widget.campaign.imgUrl.url,
         userId: um.uid,
         title: _postTitle,
         text: _postText,

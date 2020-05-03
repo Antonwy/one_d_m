@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/CircularRevealRoute.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 
 class RoundButtonHomePage extends StatelessWidget {
@@ -20,7 +21,7 @@ class RoundButtonHomePage extends StatelessWidget {
       height: 50,
       child: Material(
         clipBehavior: Clip.antiAlias,
-        color: Colors.indigo,
+        color: ColorTheme.profilePageRoundButton,
         shape: CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -38,7 +39,7 @@ class RoundButtonHomePage extends StatelessWidget {
           },
           child: Icon(
             icon,
-            color: Colors.white,
+            color: ColorTheme.white,
           ),
         ),
       ),

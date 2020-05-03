@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class Avatar extends StatelessWidget {
   String imageUrl;
@@ -18,19 +20,27 @@ class Avatar extends StatelessWidget {
           shape: CircleBorder(),
           clipBehavior: Clip.antiAlias,
           child: CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            child: imageUrl == null
-                ? Icon(
-                    icon ?? Icons.person,
-                    color: Colors.black87,
-                  )
-                : null,
-            backgroundImage: imageUrl == null
-                ? null
-                : CachedNetworkImageProvider(
-                    imageUrl,
+              backgroundColor: ColorTheme.avatar,
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: imageUrl != null
+                        ? FadeInImage(
+                            placeholder: MemoryImage(kTransparentImage),
+                            image: CachedNetworkImageProvider(imageUrl),
+                            fit: BoxFit.cover,
+                            fadeInDuration: Duration(milliseconds: 300),
+                          )
+                        : Container(),
                   ),
-          )),
+                  imageUrl == null
+                      ? Icon(
+                          icon ?? Icons.person,
+                          color: Colors.white,
+                        )
+                      : Container(),
+                ],
+              ))),
     );
   }
 }

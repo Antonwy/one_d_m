@@ -1,119 +1,72 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/NavBarSheet.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Pages/CampaignPage.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
 
-import 'CampaignBottomSheet.dart';
+import 'CustomOpenContainer.dart';
 
-class CampaignHeader extends StatelessWidget {
+class CampaignHeader extends StatefulWidget {
   Campaign campaign;
 
+  CampaignHeader(this.campaign);
+
+  @override
+  _CampaignHeaderState createState() => _CampaignHeaderState();
+}
+
+class _CampaignHeaderState extends State<CampaignHeader> {
   TextTheme textTheme;
-
-  BuildContext context;
-
-  bool isFollowed = false, expanded;
-
-  Function(bool) onExpand;
-
-  CampaignHeader(this.campaign, {this.onExpand, this.expanded = false});
-
-  GlobalKey _cardKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    this.context = context;
     textTheme = Theme.of(context).textTheme;
 
-    return _layout();
-  }
-
-  Widget _layout() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5),
-      child: Column(
-        children: <Widget>[
-          Material(
-            clipBehavior: Clip.antiAlias,
-            borderRadius: BorderRadius.circular(10),
-            elevation: 1,
-            child: InkWell(
-              onTap: () {
-                NavBarSheet.of(context)
-                    .withTopImage(campaign.imgUrl)
-                    .show(CampaignPage(campaign));
-                //Navigator.push(context, CampaignPageRoute(campaign));
-              },
-              child: Image(
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-                image: CachedNetworkImageProvider(
-                  campaign.imgUrl,
-                ),
-              ),
-            ),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 15),
+        child: CustomOpenContainer(
+          closedShape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          closedElevation: 18,
+          openBuilder: (context, close, scrollController) => NewCampaignPage(
+            widget.campaign,
+            scrollController: scrollController
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Card(
-            key: _cardKey,
-            clipBehavior: Clip.antiAlias,
-            margin: EdgeInsets.all(0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: ExpansionTile(
-              //onExpansionChanged: onExpand,
-              title: Text(
-                campaign.name,
-                style: textTheme.title,
-              ),
-              subtitle: campaign.shortDescription == null
-                  ? null
-                  : Text(campaign.shortDescription),
+          closedBuilder: (context, open) => InkWell(
+            onTap: () async {
+              await precacheImage(
+                  CachedNetworkImageProvider(widget.campaign.imgUrl.high),
+                  context,
+                  size: MediaQuery.of(context).size,
+                  onError: (context, stacktrace) => print(stacktrace));
+              open();
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                CachedNetworkImage(
+                  imageUrl: widget.campaign.imgUrl.middle,
+                  height: 230,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Text(
-                            "${campaign.amount} DC",
-                            style: textTheme.title,
-                          ),
-                          Text(
-                            "Spenden",
-                            style: textTheme.subtitle
-                                .copyWith(color: Colors.black54),
-                          ),
-                        ],
+                      Text(
+                        widget.campaign.name,
+                        style: textTheme.title,
                       ),
-                      SizedBox(width: 10),
-                      Column(
-                        children: <Widget>[
-                          Text(
-                            "${campaign.subscribedCount}",
-                            style: textTheme.title,
-                          ),
-                          Text(
-                            "Mitglieder",
-                            style: textTheme.subtitle
-                                .copyWith(color: Colors.black54),
-                          ),
-                        ],
-                      ),
+                      widget.campaign.shortDescription == null
+                          ? Container()
+                          : Text(widget.campaign.shortDescription),
                     ],
                   ),
-                ),
+                )
               ],
             ),
-          )
-        ],
-      ),
-    );
+          ),
+        ));
   }
 }

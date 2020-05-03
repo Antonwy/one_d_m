@@ -14,6 +14,15 @@ class Validate {
     return null;
   }
 
+  static String telephone(String text) {
+    if (text.length == 0) return null;
+
+    if (text.length < 8 || text.length > 15) {
+      return 'Bitte gib deine Telefonnummer ein.';
+    }
+    return null;
+  }
+
   static String password(String text) {
     if (text.length < 7 || text.length >= 32)
       return "Bitte gib ein richtiges Passwort ein!";
@@ -21,13 +30,12 @@ class Validate {
   }
 
   static String postTitle(String text) {
-    if(text.length < 3) return "Der Titel ist zu kurz!";
+    if (text.length < 3) return "Der Titel ist zu kurz!";
     return null;
   }
 
   static String postText(String text) {
-    if(text.length < 20) return "Beschreibung zu kurz!";
+    if (text.length < 20) return "Beschreibung zu kurz!";
     return null;
   }
-
 }

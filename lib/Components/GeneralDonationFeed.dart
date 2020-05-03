@@ -5,6 +5,8 @@ import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'PercentIndicator.dart';
 
 class GeneralDonationFeed extends StatelessWidget {
+  // PageController _pageController = PageController(viewportFraction: .5);
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DonationInfo>(
@@ -27,35 +29,43 @@ class GeneralDonationFeed extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 child: Text(
-                  "Unsere Ziele:",
+                  "Unsere Ziele",
                   style: Theme.of(context).textTheme.title,
                 ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
                   children: <Widget>[
+                    SizedBox(
+                      width: 18,
+                    ),
                     PercentIndicator(
                       currentValue: di.dailyAmount,
                       targetValue: di.dailyAmountTarget,
-                      color: Colors.indigo,
-                      description: "Tagesziel",
+                      description: "Heute",
                       onTap: () {},
+                    ),
+                    SizedBox(
+                      height: 10,
                     ),
                     PercentIndicator(
                       currentValue: di.monthlyAmount,
                       targetValue: di.monthlyAmountTarget,
-                      color: Colors.red,
-                      description: "Monatsziel",
+                      description: "Monat",
                       onTap: () {},
+                    ),
+                    SizedBox(
+                      height: 10,
                     ),
                     PercentIndicator(
                       currentValue: di.yearlyAmount,
                       targetValue: di.yearlyAmountTarget,
-                      color: Colors.orange,
-                      description: "Jahresziel",
+                      description: "Jahr",
                       onTap: () {},
+                    ),
+                    SizedBox(
+                      height: 10,
                     ),
                   ],
                 ),

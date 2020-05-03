@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 
 class User {
-  String email, firstname, lastname, password;
-  String imgUrl;
-  String id;
+  String email, firstname, lastname, password, imgUrl, id, phoneNumber;
   int donatedAmount;
   bool admin;
   List<String> subscribedCampaignsIds = List<String>();
@@ -13,6 +11,7 @@ class User {
   static final String FIRSTNAME = "first_name",
       LASTNAME = "last_name",
       EMAIL = "email_address",
+      PHONE_NUMBER = "phone_number",
       ADMIN = "admin",
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       DONATEDAMOUNT = "donated_amount",
@@ -27,6 +26,7 @@ class User {
     this.subscribedCampaignsIds,
     this.donatedAmount = 0,
     this.imgUrl,
+    this.phoneNumber,
     this.admin,
   });
 
@@ -38,7 +38,8 @@ class User {
         lastname: snapshot[User.LASTNAME],
         email: snapshot[User.EMAIL],
         admin: snapshot[User.ADMIN],
-        donatedAmount: snapshot[DONATEDAMOUNT] ?? 0,
+        donatedAmount: snapshot[DONATEDAMOUNT],
+        phoneNumber: snapshot[PHONE_NUMBER] ?? "",
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
             : List.from(snapshot[User.SUBSCRIBEDCAMPAIGNS]),
@@ -56,6 +57,7 @@ class User {
       EMAIL: email,
       ADMIN: false,
       IMAGEURL: imgUrl,
+      PHONE_NUMBER: phoneNumber,
       SUBSCRIBEDCAMPAIGNS: []
     };
   }

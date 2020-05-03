@@ -1,8 +1,8 @@
-import 'dart:math';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
+import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -13,6 +13,7 @@ import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FollowersListPage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
 import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class UserPage extends StatefulWidget {
   User user;
@@ -149,18 +150,14 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                           builder: (context, child) {
                             return Container(
                               decoration: BoxDecoration(
-                                  color: Colors.indigo,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.indigo.withOpacity(.2),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 10))
-                                  ],
-                                  borderRadius: BorderRadius.vertical(
-                                      bottom: Radius.circular(
-                                          Tween(begin: 30.0, end: 0.0)
-                                              .animate(_controller)
-                                              .value))),
+                                color: Colors.indigo,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.indigo.withOpacity(.2),
+                                      blurRadius: 10,
+                                      offset: Offset(0, 10))
+                                ],
+                              ),
                               child: ClipRect(
                                 child: SizedOverflowBox(
                                   size: Size(
@@ -168,118 +165,142 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                       (_headerHeight - _scrollOffset).clamp(
                                           _headerTop, _headerHeight + 400)),
                                   child: Container(
-                                    height: _headerHeight,
+                                    height: _scrollOffset < 0
+                                        ? (_headerHeight - _scrollOffset).clamp(
+                                            _headerTop, _headerHeight + 400)
+                                        : _headerHeight,
                                     width: mq.size.width,
-                                    padding: EdgeInsets.only(top: _headerTop),
                                     child: Opacity(
                                       opacity: 1 -
                                           CurvedAnimation(
                                                   parent: _controller,
                                                   curve: Interval(.5, 1.0))
                                               .value,
-                                      child: Column(
+                                      child: Stack(
                                         children: <Widget>[
+                                          user?.imgUrl == null
+                                              ? SizedBox()
+                                              : FadeInImage(
+                                                  height: double.infinity,
+                                                  width: double.infinity,
+                                                  placeholder: MemoryImage(
+                                                      kTransparentImage),
+                                                  fadeInDuration: Duration(
+                                                      milliseconds: 300),
+                                                  image:
+                                                      CachedNetworkImageProvider(
+                                                          user.imgUrl),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                          user?.imgUrl == null
+                                              ? Container()
+                                              : Container(
+                                                  height: double.infinity,
+                                                  width: double.infinity,
+                                                  color: Colors.black
+                                                      .withOpacity(.6),
+                                                ),
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0),
-                                            child: Container(
-                                              height: 120,
-                                              width: 120,
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                      width: 8,
-                                                      color: Colors.white)),
-                                              child: Avatar(
-                                                user.imgUrl,
-                                                elevation: 10,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 20,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "${user?.firstname} ${user?.lastname}",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 30,
-                                                  fontWeight: FontWeight.w500),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(18.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                            padding: EdgeInsets.only(
+                                                top: _headerTop),
+                                            child: Column(
                                               children: <Widget>[
-                                                _followersCollumn(
-                                                    text: "Abonnenten",
-                                                    stream: DatabaseService()
-                                                        .getFollowedUsersStream(
-                                                            user),
-                                                    alignment:
-                                                        CrossAxisAlignment
-                                                            .start),
-                                                Material(
-                                                  color: Colors.transparent,
-                                                  clipBehavior: Clip.antiAlias,
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                  child: InkWell(
-                                                    onTap:
-                                                        user.donatedAmount > 0
-                                                            ? () {
-                                                                Navigator.push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                        builder:
-                                                                            (c) =>
-                                                                                UsersDonationsPage(user)));
-                                                              }
-                                                            : null,
-                                                    child: _textNumberColumn(
-                                                        text: "Gespendet",
-                                                        number:
-                                                            "${user.donatedAmount} DC"
-                                                                .toString()),
+                                                Expanded(child: Container()),
+                                                Center(
+                                                  child: Text(
+                                                    "${user?.firstname} ${user?.lastname}",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 50,
+                                                        fontWeight:
+                                                            FontWeight.w500),
                                                   ),
                                                 ),
-                                                _followersCollumn(
-                                                    text: "Abonniert",
-                                                    stream: DatabaseService()
-                                                        .getFollowingUsersStream(
-                                                            user),
-                                                    alignment:
-                                                        CrossAxisAlignment.end),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      18.0),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: <Widget>[
+                                                      _followersCollumn(
+                                                          text: "Abonnenten",
+                                                          stream: DatabaseService()
+                                                              .getFollowedUsersStream(
+                                                                  user),
+                                                          alignment:
+                                                              CrossAxisAlignment
+                                                                  .start),
+                                                      Material(
+                                                        color:
+                                                            Colors.transparent,
+                                                        clipBehavior:
+                                                            Clip.antiAlias,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5),
+                                                        child: InkWell(
+                                                          onTap: (user?.donatedAmount ==
+                                                                  null
+                                                              ? 0
+                                                              : user.donatedAmount) >
+                                                                      0
+                                                                  ? () {
+                                                                      Navigator.push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (c) => UsersDonationsPage(user)));
+                                                                    }
+                                                                  : null,
+                                                          child: _textNumberColumn(
+                                                              text: "Gespendet",
+                                                              number:
+                                                                  "${user.donatedAmount ?? 0} DC"
+                                                                      .toString()),
+                                                        ),
+                                                      ),
+                                                      _followersCollumn(
+                                                          text: "Abonniert",
+                                                          stream: DatabaseService()
+                                                              .getFollowingUsersStream(
+                                                                  user),
+                                                          alignment:
+                                                              CrossAxisAlignment
+                                                                  .end),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Opacity(
+                                                    opacity:
+                                                        1 - _controller.value,
+                                                    child: _isOwnPage
+                                                        ? Center(
+                                                            child:
+                                                                FloatingActionButton(
+                                                            elevation: 0,
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            onPressed: () {
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder:
+                                                                          (c) =>
+                                                                              EditProfile()));
+                                                            },
+                                                            child: Icon(
+                                                              Icons.edit,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                          ))
+                                                        : _followButton()),
+                                                Expanded(child: Container())
                                               ],
                                             ),
                                           ),
-                                          Opacity(
-                                              opacity: 1 - _controller.value,
-                                              child: _isOwnPage
-                                                  ? Center(
-                                                      child:
-                                                          FloatingActionButton(
-                                                      elevation: 0,
-                                                      backgroundColor:
-                                                          Colors.white,
-                                                      onPressed: () {
-                                                        Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (c) =>
-                                                                    EditProfile()));
-                                                      },
-                                                      child: Icon(
-                                                        Icons.edit,
-                                                        color: Colors.black87,
-                                                      ),
-                                                    ))
-                                                  : _followButton()),
                                         ],
                                       ),
                                     ),
@@ -312,21 +333,20 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                 Icons.arrow_back_ios,
                                 color: Colors.white,
                               ),
-                              onPressed: () {
-                                if (_transitionController.isAnimating) return;
-                                _transitionController.duration =
-                                    Duration(milliseconds: 300);
-                                _transitionController
-                                    .reverse()
-                                    .whenComplete(() {
-                                  Navigator.pop(context);
-                                });
-                              }),
+                              onPressed: _pop),
                         );
                       }),
                 ),
               ]);
             }));
+  }
+
+  void _pop() {
+    if (_transitionController.isAnimating) return;
+    _transitionController.duration = Duration(milliseconds: 300);
+    _transitionController.reverse().whenComplete(() {
+      Navigator.pop(context);
+    });
   }
 
   Widget _followersCollumn(
@@ -380,7 +400,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
           Text(
             text,
             style: _theme.accentTextTheme.body1.copyWith(
-                color: _theme.accentTextTheme.body1.color.withOpacity(.75)),
+                color: _theme.accentTextTheme.body1.color.withOpacity(.95)),
           )
         ],
       ),
@@ -405,37 +425,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
           }
 
           return Center(
-              child: AnimatedBuilder(
-                  animation: _followController,
-                  builder: (context, child) {
-                    return FloatingActionButton(
-                      elevation: 0,
-                      backgroundColor:
-                          ColorTween(begin: Colors.white, end: Colors.red)
-                              .animate(_followController)
-                              .value,
-                      onPressed: snapshot.hasData ? _toggleFollow : null,
-                      child: Transform.rotate(
-                          angle: Tween<double>(begin: 0, end: degreesToRads(45))
-                              .animate(CurvedAnimation(
-                                parent: _followController,
-                                curve: Curves.easeOut,
-                              ))
-                              .value,
-                          child: Icon(
-                            Icons.add,
-                            color: ColorTween(
-                                    begin: Colors.black87, end: Colors.white)
-                                .animate(_followController)
-                                .value,
-                          )),
-                    );
-                  }));
+              child: FollowButton(
+            followed: _followed,
+            onPressed: snapshot.hasData ? _toggleFollow : null,
+          ));
         });
-  }
-
-  double degreesToRads(double deg) {
-    return (deg * pi) / 180.0;
   }
 
   List<Widget> _generateChildren() {

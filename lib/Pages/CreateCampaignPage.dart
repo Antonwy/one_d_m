@@ -364,15 +364,13 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
 
     StorageService service = StorageService(file: _image, id: _postId);
 
-    await service.compressImage();
-
     Campaign campaign = Campaign(
       amount: 0,
       name: _name,
       description: _description,
       shortDescription: _shortDescription,
       city: _place.name,
-      imgUrl: await service.uploadImage(),
+      url: await service.uploadImage(),
       authorId: um.uid,
     );
 

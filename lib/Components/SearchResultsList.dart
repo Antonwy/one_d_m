@@ -1,25 +1,20 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CampaignPageRoute.dart';
+import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:provider/provider.dart';
-
-import 'Avatar.dart';
+import 'CampaignButton.dart';
 
 class SearchResultsList extends StatelessWidget {
   String query;
-  BuildContext _context;
 
   SearchResultsList(this.query);
 
   @override
   Widget build(BuildContext context) {
-    _context = context;
     return Consumer<CampaignsManager>(builder: (context, cm, child) {
       return FutureBuilder<List<User>>(
           future: DatabaseService().getUsersFromQuery(query),
@@ -27,30 +22,44 @@ class SearchResultsList extends StatelessWidget {
             if (snapshot.hasData) {
               List<Campaign> resCampaigns = cm.queryCampaigns(query);
               List<User> resUsers = snapshot.data;
-              return ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  resCampaigns.isEmpty
-                      ? Container()
-                      : Padding(
-                          padding: const EdgeInsets.only(left: 20, bottom: 10),
-                          child: Text("Projekte"),
-                        ),
-                  ..._buildCampaigns(resCampaigns),
+              return SliverList(
+                  delegate: SliverChildListDelegate(
+                [
+                  SizedBox(
+                    height: 10,
+                  ),
                   resUsers.isEmpty
                       ? Container()
                       : Padding(
                           padding: const EdgeInsets.only(
                               left: 20, bottom: 10, top: 10),
-                          child: Text("Nutzer"),
+                          child: Text(
+                            "Nutzer",
+                            style: Theme.of(context).textTheme.title,
+                          ),
                         ),
                   ..._buildUsers(resUsers),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  resCampaigns.isEmpty
+                      ? Container()
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 20, bottom: 10),
+                          child: Text(
+                            "Projekte",
+                            style: Theme.of(context).textTheme.title,
+                          ),
+                        ),
+                  ..._buildCampaigns(resCampaigns),
                   SizedBox(height: 50)
                 ],
-              );
+              ));
             }
-            return Center(
-              child: CircularProgressIndicator(),
+            return SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           });
     });
@@ -68,17 +77,12 @@ class SearchResultsList extends StatelessWidget {
 
   _buildCampaign(Campaign campaign) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        child: ListTile(
-          onTap: () {
-            Navigator.push(_context, CampaignPageRoute(campaign));
-          },
-          leading: Avatar(
-            campaign.imgUrl,
-          ),
-          title: Text(campaign.name),
-        ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: CampaignButton(
+        campaign.id,
+        textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
+        campaign: campaign,
+        elevation: 1,
       ),
     );
   }
@@ -94,15 +98,11 @@ class SearchResultsList extends StatelessWidget {
 
   _buildUser(User user) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        child: ListTile(
-          onTap: () {
-            Navigator.push(_context, UserPageRoute(user));
-          },
-          leading: Avatar(user.imgUrl),
-          title: Text("${user.firstname} ${user.lastname}"),
-        ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: UserButton(
+        user.id,
+        user: user,
+        textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
       ),
     );
   }

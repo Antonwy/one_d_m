@@ -9,9 +9,9 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class NewsPost extends StatelessWidget {
   News news;
-  bool withCampaign, isDark;
+  bool withCampaign;
 
-  NewsPost(this.news, {this.withCampaign = true, this.isDark = false});
+  NewsPost(this.news, {this.withCampaign = true});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class NewsPost extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
         clipBehavior: Clip.antiAlias,
-        color: isDark ? ColorTheme.darkBlue : Colors.white,
+        color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
             side: BorderSide(color: Colors.black12),
@@ -31,7 +31,7 @@ class NewsPost extends StatelessWidget {
                     news.campaignId,
                     textStyle: TextStyle(),
                     campaign: Campaign(
-                        url: news.campaignImgUrl,
+                        imgUrl: news.campaignImgUrl,
                         id: news.campaignId,
                         name: news.campaignName),
                   )
@@ -76,34 +76,42 @@ class NewsPost extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    news.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .title
-                        .copyWith(color: isDark ? Colors.white : Colors.black),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    news.shortText,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black),
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    news.text,
-                    style:
-                        TextStyle(color: isDark ? Colors.white : Colors.black),
-                  ),
-                ],
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      news.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .title
+                          .copyWith(color: Colors.black),
+                    ),
+                    news.shortText.isEmpty ? Container() : SizedBox(height: 5),
+                    news.shortText.isEmpty
+                        ? Container()
+                        : Text(
+                            news.shortText,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                    news.text.isEmpty
+                        ? Container()
+                        : SizedBox(
+                            height: 5,
+                          ),
+                    news.text.isEmpty
+                        ? Container()
+                        : Text(
+                            news.text,
+                            style: TextStyle(color: Colors.black),
+                          ),
+                  ],
+                ),
               ),
             )
           ],

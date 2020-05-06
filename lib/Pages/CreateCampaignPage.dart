@@ -28,7 +28,7 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
 
   UserManager um;
 
-  String _postId = Uuid().v4();
+  String _campaignId = Uuid().v4();
 
   bool isUploading = false;
 
@@ -362,19 +362,21 @@ class _CreateCampaignState extends State<CreateCampaignPage> {
       isUploading = true;
     });
 
-    StorageService service = StorageService(file: _image, id: _postId);
+    StorageService service = StorageService(file: _image);
 
     Campaign campaign = Campaign(
+      id: _campaignId,
       amount: 0,
       name: _name,
       description: _description,
       shortDescription: _shortDescription,
       city: _place.name,
-      url: await service.uploadImage(),
+      imgUrl: await service
+          .uploadImage(StorageService.campaignImageName(_campaignId)),
       authorId: um.uid,
     );
 
-    await DatabaseService(um.uid).createCampaign(campaign);
+    await DatabaseService.createCampaign(campaign);
     Navigator.pop(context);
   }
 

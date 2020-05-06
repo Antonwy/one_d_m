@@ -14,7 +14,7 @@ class UserAvatar extends StatelessWidget {
       Container(
         width: 70,
         height: 70,
-        child: Avatar(user.imgUrl, onTap: () {
+        child: Avatar(user?.thumbnailUrl ?? user.imgUrl, onTap: () {
           Navigator.push(context, UserPageRoute(user));
         }),
       ),

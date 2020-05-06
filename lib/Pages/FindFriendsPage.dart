@@ -19,7 +19,6 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
 
   @override
   void initState() {
-    
     WidgetsBinding.instance.addPostFrameCallback((d) => _getContacts());
 
     super.initState();
@@ -69,7 +68,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
               : Expanded(
                   child: FutureBuilder<List<User>>(
                       future: _memoizer.runOnce(() =>
-                          DatabaseService().getUsersFromContacts(_contacts)),
+                          DatabaseService.getUsersFromContacts(_contacts)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData)
                           return Align(

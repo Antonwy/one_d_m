@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:one_d_m/Helper/ImageUrl.dart';
 import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -50,13 +51,10 @@ class _EditProfileState extends State<EditProfile> {
 
                         User currUser = um.user;
                         if (_deletedImage) currUser.imgUrl = null;
-
                         if (_image != null) {
-                          StorageService service =
-                              StorageService(file: _image, id: um.uid);
-                          if (currUser.imgUrl != null)
-                            await service.deleteOld(currUser.imgUrl);
-                          currUser.imgUrl = await service.uploadImage();
+                          StorageService service = StorageService(file: _image);
+                          currUser.imgUrl = await service.uploadImage(
+                              StorageService.userImageName(um.uid));
                         }
 
                         if (_firstName != null &&
@@ -65,11 +63,9 @@ class _EditProfileState extends State<EditProfile> {
                         if (_lastName != null &&
                             Validate.username(_lastName) == null)
                           currUser.lastname = _lastName;
-
                         if (_phoneNumber != null &&
                             Validate.telephone(_phoneNumber) == null)
                           currUser.phoneNumber = _phoneNumber;
-                        print(Validate.telephone(_phoneNumber));
 
                         await um.updateUser();
 
@@ -142,11 +138,11 @@ class _EditProfileState extends State<EditProfile> {
 
   _showImage() {
     if (_deletedImage) return null;
-    if (um.user.imgUrl == null && _image == null) return null;
-
+    if ((um.user.thumbnailUrl ?? um.user.imgUrl) == null && _image == null)
+      return null;
     if (_image != null) return FileImage(_image);
 
-    return NetworkImage(um.user.imgUrl);
+    return NetworkImage(um.user.thumbnailUrl ?? um.user.imgUrl);
   }
 
   _getImage() async {
@@ -160,6 +156,7 @@ class _EditProfileState extends State<EditProfile> {
   _deleteImage() {
     setState(() {
       _deletedImage = true;
+      _image = null;
     });
   }
 

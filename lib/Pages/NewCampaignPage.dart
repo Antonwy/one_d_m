@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
@@ -14,6 +13,7 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:provider/provider.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -35,7 +35,11 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
   ScrollController _scrollController;
   ValueNotifier _scrollOffset;
 
+  Stream<Campaign> _campaignStream;
+  Stream<List<Donation>> _donationStream;
+
   bool _subscribingLoading = false;
+  bool _isAuthorOfCampaign = false;
 
   @override
   void initState() {
@@ -47,6 +51,10 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
       _scrollOffset.value = _scrollController.offset;
     });
 
+    _campaignStream = DatabaseService.getCampaignStream(widget.campaign.id);
+    _donationStream =
+        DatabaseService.getDonationFromCampaignStream(widget.campaign.id);
+
     super.initState();
   }
 
@@ -57,23 +65,42 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
     return Scaffold(
         floatingActionButton:
             Consumer<UserManager>(builder: (context, um, child) {
-          return FloatingActionButton.extended(
-              label: Text("Spenden"),
-              onPressed: () {
-                BottomDialog bd = BottomDialog(context);
-                bd.show(DonationDialogWidget(
-                  campaign: widget.campaign,
-                  user: um.user,
-                  context: context,
-                  close: bd.close,
-                ));
+          return StreamBuilder<Campaign>(
+              initialData: widget.campaign,
+              stream: _campaignStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data.authorId != null) {
+                  _isAuthorOfCampaign = snapshot.data.authorId == um.uid;
+                }
+
+                return FloatingActionButton.extended(
+                    label: _isAuthorOfCampaign
+                        ? Text("Post erstellen")
+                        : Text("Spenden"),
+                    onPressed: _isAuthorOfCampaign
+                        ? () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (c) => CreateNewsPage(campaign)));
+                          }
+                        : () {
+                            BottomDialog bd = BottomDialog(context);
+                            bd.show(DonationDialogWidget(
+                              campaign: snapshot.data,
+                              user: um.user,
+                              context: context,
+                              close: bd.close,
+                            ));
+                          });
               });
         }),
         body: StreamBuilder<Campaign>(
             initialData: widget.campaign,
-            stream: DatabaseService().getCampaignStream(widget.campaign.id),
+            stream: _campaignStream,
             builder: (context, snapshot) {
               campaign = snapshot.data;
+
               return Stack(
                 children: <Widget>[
                   Align(
@@ -84,7 +111,7 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                           image: DecorationImage(
                               fit: BoxFit.cover,
                               image: CachedNetworkImageProvider(
-                                  widget.campaign.imgUrl.url))),
+                                  widget.campaign.imgUrl))),
                     ),
                   ),
                   Align(
@@ -131,14 +158,20 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                                             .copyWith(fontSize: 40),
                                       ),
                                     ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
                                     Consumer<UserManager>(
                                         builder: (context, um, child) {
                                       return FollowButton(
                                         onPressed: () {
                                           _toggleSubscribed(um.uid);
                                         },
-                                        followed: um.user.subscribedCampaignsIds
-                                            .contains(widget.campaign.id),
+                                        followed: um
+                                                .user?.subscribedCampaignsIds
+                                                ?.contains(
+                                                    widget.campaign.id) ??
+                                            false,
                                       );
                                     }),
                                   ],
@@ -176,16 +209,29 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                                       fontWeight: FontWeight.w400,
                                       fontSize: 18),
                                 ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Text("Spenden", style: _textTheme.title),
+                                StreamBuilder<List<Donation>>(
+                                    stream: _donationStream,
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) return Container();
+                                      if (snapshot.data.isEmpty)
+                                        return Container();
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Text("Spenden",
+                                              style: _textTheme.title),
+                                        ],
+                                      );
+                                    }),
                               ]),
                             ),
                           ),
                           StreamBuilder<List<Donation>>(
-                              stream: DatabaseService()
-                                  .getDonationFromCampaignStream(campaign.id),
+                              stream: _donationStream,
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData)
                                   return SliverToBoxAdapter();
@@ -206,8 +252,8 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                                 );
                               }),
                           StreamBuilder<List<News>>(
-                              stream: DatabaseService()
-                                  .getNewsFromCampaignStream(campaign),
+                              stream: DatabaseService.getNewsFromCampaignStream(
+                                  campaign),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData ||
                                     (snapshot.hasData && snapshot.data.isEmpty))
@@ -223,12 +269,13 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 18.0),
-                                      child: Text("Neuigkeiten",
+                                      child: Text(
+                                          "Neuigkeiten (${snapshot.data.length})",
                                           style: _textTheme.title),
                                     ),
                                     ...snapshot.data
-                                        .map((n) => NewsPost(n,
-                                            withCampaign: false, isDark: true))
+                                        .map((n) =>
+                                            NewsPost(n, withCampaign: false))
                                         .toList()
                                   ])),
                                 );
@@ -255,6 +302,43 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
                     top: MediaQuery.of(context).padding.top,
                     left: 0,
                   ),
+                  Consumer<UserManager>(
+                    builder: (context, um, child) => StreamBuilder<Campaign>(
+                        initialData: widget.campaign,
+                        stream: _campaignStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData &&
+                              snapshot.data.authorId != null &&
+                              snapshot.data.authorId != um.uid)
+                            return Container();
+
+                          return Positioned(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 12.0),
+                              child: Material(
+                                clipBehavior: Clip.antiAlias,
+                                shape: CircleBorder(),
+                                elevation: 10,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        DatabaseService.deleteCampaign(
+                                            campaign);
+                                      }),
+                                ),
+                              ),
+                            ),
+                            top: MediaQuery.of(context).padding.top,
+                            right: 0,
+                          );
+                        }),
+                  ),
                 ],
               );
             }));
@@ -264,9 +348,9 @@ class _NewCampaignPageState extends State<NewCampaignPage> {
     if (_subscribingLoading) return;
     _subscribingLoading = true;
     if (_subscribed)
-      await DatabaseService(uid).deleteSubscription(campaign);
+      await DatabaseService.deleteSubscription(campaign, uid);
     else
-      await DatabaseService(uid).createSubscription(campaign);
+      await DatabaseService.createSubscription(campaign, uid);
     _subscribed = !_subscribed;
     _subscribingLoading = false;
   }

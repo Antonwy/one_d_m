@@ -548,6 +548,7 @@ class _OpenContainerRoute extends ModalRoute<void> {
   final RectTween _rectTween = RectTween();
 
   bool _scrollingEnabled = true;
+  bool _dragging = false;
 
   ScrollController _scrollController;
   VelocityTracker _velocityTracker = VelocityTracker();
@@ -676,6 +677,7 @@ class _OpenContainerRoute extends ModalRoute<void> {
 
   void _handleDragStart() {
     navigator.didStartUserGesture();
+    _dragging = true;
     _takeMeasurements(
         navigatorContext: subtreeContext, delayForSourceRoute: true);
   }
@@ -683,9 +685,9 @@ class _OpenContainerRoute extends ModalRoute<void> {
   void _handlePointerMove(PointerMoveEvent event) {
     if (!_scrollingEnabled) {
       if (!navigator.userGestureInProgress) _handleDragStart();
-
       _velocityTracker.addPosition(event.timeStamp, event.position);
       controller.value -= event.delta.dy / subtreeContext.size.width;
+      _dragging = true;
     }
 
     if (_scrollController.hasClients &&
@@ -699,7 +701,14 @@ class _OpenContainerRoute extends ModalRoute<void> {
   }
 
   void _handlePointerUp(PointerUpEvent event) {
-    if (_scrollingEnabled && animation.isCompleted) return;
+    if (_scrollingEnabled && animation.isCompleted) {
+      if (navigator.userGestureInProgress) {
+        navigator.didStopUserGesture();
+      }
+      return;
+    }
+
+    _dragging = true;
 
     double velocity = _velocityTracker.getVelocity().pixelsPerSecond.dx /
         subtreeContext.size.width;

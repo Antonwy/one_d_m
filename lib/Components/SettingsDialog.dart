@@ -3,6 +3,7 @@ import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
+import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
 import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,8 @@ class SettingsDialog extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(5.0),
                             child: Container(
-                              child: Avatar(um.user.imgUrl),
+                              child: Avatar(
+                                  um.user?.thumbnailUrl ?? um.user.imgUrl),
                               width: 50,
                               height: 50,
                             ),
@@ -64,6 +66,19 @@ class SettingsDialog extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
+              ListTile(
+                title: Text("FAQ"),
+                subtitle: Text("Häufig gestellte Fragen."),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => FaqPage()));
+                },
+              ),
               ListTile(
                 title: Text("Meine Projekte"),
                 subtitle: Text("Projekte die du erstellt hast."),

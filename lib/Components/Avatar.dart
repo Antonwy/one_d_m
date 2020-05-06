@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-class Avatar extends StatelessWidget {
+class Avatar extends StatefulWidget {
   String imageUrl;
   IconData icon;
   Function onTap;
@@ -12,11 +12,18 @@ class Avatar extends StatelessWidget {
   Avatar(this.imageUrl, {this.icon, this.onTap, this.elevation = 0.0});
 
   @override
+  _AvatarState createState() => _AvatarState();
+}
+
+class _AvatarState extends State<Avatar> {
+  bool _error = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Material(
-          elevation: elevation,
+          elevation: widget.elevation,
           shape: CircleBorder(),
           clipBehavior: Clip.antiAlias,
           child: CircleAvatar(
@@ -24,18 +31,23 @@ class Avatar extends StatelessWidget {
               child: Stack(
                 children: <Widget>[
                   Positioned.fill(
-                    child: imageUrl != null
+                    child: widget.imageUrl != null
                         ? FadeInImage(
                             placeholder: MemoryImage(kTransparentImage),
-                            image: CachedNetworkImageProvider(imageUrl),
+                            image: CachedNetworkImageProvider(widget.imageUrl,
+                                errorListener: () {
+                              setState(() {
+                                _error = true;
+                              });
+                            }),
                             fit: BoxFit.cover,
                             fadeInDuration: Duration(milliseconds: 300),
                           )
                         : Container(),
                   ),
-                  imageUrl == null
+                  widget.imageUrl == null || _error
                       ? Icon(
-                          icon ?? Icons.person,
+                          widget.icon ?? Icons.person,
                           color: Colors.white,
                         )
                       : Container(),

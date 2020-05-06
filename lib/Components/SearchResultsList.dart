@@ -17,7 +17,7 @@ class SearchResultsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CampaignsManager>(builder: (context, cm, child) {
       return FutureBuilder<List<User>>(
-          future: DatabaseService().getUsersFromQuery(query),
+          future: DatabaseService.getUsersFromQuery(query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               List<Campaign> resCampaigns = cm.queryCampaigns(query);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Components/UserPageRoute.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
@@ -17,39 +18,18 @@ class FollowersListPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: ListView.builder(
-          itemBuilder: (context, index) {
-            return AnimatedFutureBuilder<User>(
-                future: DatabaseService().getUserFromId(userIDs[index]),
-                builder: (context, snapshot) {
-                  User user = snapshot.data;
-                  return Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(context, UserPageRoute(user));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: <Widget>[
-                            Avatar(
-                              user?.imgUrl,
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              user != null
-                                  ? "${user.firstname} ${user.lastname}"
-                                  : "Laden...",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                });
-          },
-          itemCount: userIDs.length),
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: ListView.builder(
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: UserButton(userIDs[index]),
+              );
+              
+            },
+            itemCount: userIDs.length),
+      ),
     );
   }
 }

@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/Avatar.dart';
+import 'package:flutter/services.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -42,6 +44,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   static final double _staticHeight = 430;
   static final double _staticHeaderTop = 76;
 
+  Stream _donationStream;
+
   double _headerHeight = _staticHeight,
       _headerTop = _staticHeaderTop,
       _scrollOffset = 0.0;
@@ -51,6 +55,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+    user = widget.user;
 
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -70,6 +76,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
               Helper.mapValue(_scrollOffset, 0, _headerHeight - 76, 0, 1);
         });
       });
+
+    _donationStream = DatabaseService.getDonationsFromUserLimit(widget.user.id);
   }
 
   @override
@@ -92,253 +100,311 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
     return Scaffold(
         backgroundColor: Colors.transparent,
-        body: StreamBuilder<User>(
-            initialData: widget.user,
-            stream: DatabaseService().getUserStream(widget.user.id),
-            builder: (context, snapshot) {
-              user = snapshot.data;
-              return Stack(overflow: Overflow.clip, children: <Widget>[
-                Positioned(
-                  height: mq.size.height,
-                  width: mq.size.width,
-                  top: 0,
-                  child: FadeTransition(
-                    opacity: _transitionController,
-                    child: Container(
-                      color: Colors.white,
-                      child: Consumer<CampaignsManager>(
-                          builder: (context, cm, child) {
-                        campaigns = cm.getSubscribedCampaigns(user);
-                        if (campaigns.isEmpty) {
-                          return Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Image.asset(
-                                  "assets/images/clip-no-comments.png",
-                                  height: mq.size.height - _headerHeight,
+        body: Consumer<UserManager>(
+          builder: (context, um, child) => StreamBuilder<User>(
+              initialData: widget.user,
+              stream: DatabaseService.getUserStream(widget.user.id),
+              builder: (context, snapshot) {
+                user = snapshot.data;
+                return Stack(overflow: Overflow.clip, children: <Widget>[
+                  Positioned.fill(
+                    child: FadeTransition(
+                      opacity: _transitionController,
+                      child: Container(
+                        color: Colors.white,
+                        child: Consumer<CampaignsManager>(
+                            builder: (context, cm, child) {
+                          campaigns = cm.getSubscribedCampaigns(user);
+                          if (campaigns.isEmpty) {
+                            return Align(
+                              alignment: Alignment.bottomCenter,
+                              child: SafeArea(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Image.asset(
+                                      "assets/images/clip-no-comments.png",
+                                      height: mq.size.height - _headerHeight,
+                                    ),
+                                    Text(
+                                        "${um.uid == user.id ? "Du" : "${user.firstname} ${user.lastname}"} ${um.uid == user.id ? "hast" : "hat"} noch keine Projekte abonniert!"),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                  ],
                                 ),
-                                Text("Du hast noch keine Projekte abonniert!"),
-                                SizedBox(
-                                  height: 10,
+                              ),
+                            );
+                          }
+                          return CustomScrollView(
+                              controller: _scrollController,
+                              slivers: [
+                                SliverToBoxAdapter(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height:
+                                            _headerHeight - mq.padding.top + 25,
+                                      ),
+                                      StreamBuilder<List<Donation>>(
+                                          stream: _donationStream,
+                                          builder: (context, snapshot) {
+                                            if (!snapshot.hasData)
+                                              return Container();
+                                            if (snapshot.data.isEmpty)
+                                              return Container();
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(18.0),
+                                              child: Text(
+                                                "Letzte Spenden",
+                                                style: _theme.textTheme.title,
+                                              ),
+                                            );
+                                          })
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          );
-                        }
-                        return ListView(
-                          controller: _scrollController,
-                          children: _generateChildren(),
-                        );
-                      }),
+                                StreamBuilder<List<Donation>>(
+                                    stream: DatabaseService
+                                        .getDonationsFromUserLimit(user.id),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData)
+                                        return SliverToBoxAdapter();
+                                      return SliverPadding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18),
+                                        sliver: SliverGrid.count(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 10,
+                                            mainAxisSpacing: 10,
+                                            childAspectRatio: 1.5,
+                                            children: _generateDonations(
+                                                snapshot.data)),
+                                      );
+                                    }),
+                                SliverList(
+                                  delegate: SliverChildListDelegate(
+                                      _generateChildren()),
+                                ),
+                              ]);
+                        }),
+                      ),
                     ),
                   ),
-                ),
-                AnimatedBuilder(
-                    animation: _transitionController,
-                    builder: (context, snapshot) {
-                      return Positioned(
-                        top: Tween(begin: -(_headerHeight), end: -20.0)
-                            .animate(CurvedAnimation(
-                                parent: _transitionController,
-                                curve: ElasticOutCurve(1.4),
-                                reverseCurve: Curves.easeOut))
-                            .value,
-                        child: AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, child) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.indigo,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.indigo.withOpacity(.2),
-                                      blurRadius: 10,
-                                      offset: Offset(0, 10))
-                                ],
-                              ),
-                              child: ClipRect(
-                                child: SizedOverflowBox(
-                                  size: Size(
-                                      mq.size.width,
-                                      (_headerHeight - _scrollOffset).clamp(
-                                          _headerTop, _headerHeight + 400)),
-                                  child: Container(
-                                    height: _scrollOffset < 0
-                                        ? (_headerHeight - _scrollOffset).clamp(
-                                            _headerTop, _headerHeight + 400)
-                                        : _headerHeight,
-                                    width: mq.size.width,
-                                    child: Opacity(
-                                      opacity: 1 -
-                                          CurvedAnimation(
-                                                  parent: _controller,
-                                                  curve: Interval(.5, 1.0))
-                                              .value,
-                                      child: Stack(
-                                        children: <Widget>[
-                                          user?.imgUrl == null
-                                              ? SizedBox()
-                                              : FadeInImage(
-                                                  height: double.infinity,
-                                                  width: double.infinity,
-                                                  placeholder: MemoryImage(
-                                                      kTransparentImage),
-                                                  fadeInDuration: Duration(
-                                                      milliseconds: 300),
-                                                  image:
-                                                      CachedNetworkImageProvider(
-                                                          user.imgUrl),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                          user?.imgUrl == null
-                                              ? Container()
-                                              : Container(
-                                                  height: double.infinity,
-                                                  width: double.infinity,
-                                                  color: Colors.black
-                                                      .withOpacity(.6),
-                                                ),
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                                top: _headerTop),
-                                            child: Column(
-                                              children: <Widget>[
-                                                Expanded(child: Container()),
-                                                Center(
-                                                  child: Text(
-                                                    "${user?.firstname} ${user?.lastname}",
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 50,
-                                                        fontWeight:
-                                                            FontWeight.w500),
+                  AnimatedBuilder(
+                      animation: _transitionController,
+                      builder: (context, snapshot) {
+                        return Positioned(
+                          top: Tween(begin: -(_headerHeight), end: -20.0)
+                              .animate(CurvedAnimation(
+                                  parent: _transitionController,
+                                  curve: ElasticOutCurve(1.4),
+                                  reverseCurve: Curves.easeOut))
+                              .value,
+                          child: AnimatedBuilder(
+                            animation: _controller,
+                            builder: (context, child) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.indigo,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.indigo.withOpacity(.2),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 10))
+                                  ],
+                                ),
+                                child: ClipRect(
+                                  child: SizedOverflowBox(
+                                    size: Size(
+                                        mq.size.width,
+                                        (_headerHeight - _scrollOffset).clamp(
+                                            _headerTop, _headerHeight + 400)),
+                                    child: Container(
+                                      height: _scrollOffset < 0
+                                          ? (_headerHeight - _scrollOffset)
+                                              .clamp(_headerTop,
+                                                  _headerHeight + 400)
+                                          : _headerHeight,
+                                      width: mq.size.width,
+                                      child: Opacity(
+                                        opacity: 1 -
+                                            CurvedAnimation(
+                                                    parent: _controller,
+                                                    curve: Interval(.5, 1.0))
+                                                .value,
+                                        child: Stack(
+                                          children: <Widget>[
+                                            user?.imgUrl == null
+                                                ? SizedBox()
+                                                : FadeInImage(
+                                                    height: double.infinity,
+                                                    width: double.infinity,
+                                                    placeholder: MemoryImage(
+                                                        kTransparentImage),
+                                                    fadeInDuration: Duration(
+                                                        milliseconds: 300),
+                                                    image:
+                                                        CachedNetworkImageProvider(
+                                                            user.imgUrl),
+                                                    fit: BoxFit.cover,
                                                   ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      18.0),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: <Widget>[
-                                                      _followersCollumn(
-                                                          text: "Abonnenten",
-                                                          stream: DatabaseService()
-                                                              .getFollowedUsersStream(
-                                                                  user),
-                                                          alignment:
-                                                              CrossAxisAlignment
-                                                                  .start),
-                                                      Material(
-                                                        color:
-                                                            Colors.transparent,
-                                                        clipBehavior:
-                                                            Clip.antiAlias,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(5),
-                                                        child: InkWell(
-                                                          onTap: (user?.donatedAmount ==
-                                                                  null
-                                                              ? 0
-                                                              : user.donatedAmount) >
-                                                                      0
-                                                                  ? () {
-                                                                      Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                              builder: (c) => UsersDonationsPage(user)));
-                                                                    }
-                                                                  : null,
-                                                          child: _textNumberColumn(
-                                                              text: "Gespendet",
-                                                              number:
-                                                                  "${user.donatedAmount ?? 0} DC"
-                                                                      .toString()),
+                                            user?.imgUrl == null
+                                                ? Container()
+                                                : Container(
+                                                    height: double.infinity,
+                                                    width: double.infinity,
+                                                    color: Colors.black
+                                                        .withOpacity(.6),
+                                                  ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: _headerTop),
+                                              child: Column(
+                                                children: <Widget>[
+                                                  Expanded(child: Container()),
+                                                  Center(
+                                                    child: Text(
+                                                      "${user?.firstname} ${user?.lastname}",
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 50,
+                                                          fontWeight:
+                                                              FontWeight.w500),
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            18.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: <Widget>[
+                                                        _followersCollumn(
+                                                            text: "Abonnenten",
+                                                            stream: DatabaseService
+                                                                .getFollowedUsersStream(
+                                                                    user.id),
+                                                            alignment:
+                                                                CrossAxisAlignment
+                                                                    .start),
+                                                        Material(
+                                                          color: Colors
+                                                              .transparent,
+                                                          clipBehavior:
+                                                              Clip.antiAlias,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(5),
+                                                          child: InkWell(
+                                                            onTap: (user?.donatedAmount ==
+                                                                            null
+                                                                        ? 0
+                                                                        : user
+                                                                            .donatedAmount) >
+                                                                    0
+                                                                ? () {
+                                                                    Navigator.push(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                            builder: (c) =>
+                                                                                UsersDonationsPage(user)));
+                                                                  }
+                                                                : null,
+                                                            child: _textNumberColumn(
+                                                                text:
+                                                                    "Gespendet",
+                                                                number: "${user.donatedAmount ?? 0} DC"
+                                                                    .toString()),
+                                                          ),
                                                         ),
-                                                      ),
-                                                      _followersCollumn(
-                                                          text: "Abonniert",
-                                                          stream: DatabaseService()
-                                                              .getFollowingUsersStream(
-                                                                  user),
-                                                          alignment:
-                                                              CrossAxisAlignment
-                                                                  .end),
-                                                    ],
+                                                        _followersCollumn(
+                                                            text: "Abonniert",
+                                                            stream: DatabaseService
+                                                                .getFollowingUsersStream(
+                                                                    user.id),
+                                                            alignment:
+                                                                CrossAxisAlignment
+                                                                    .end),
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                                Opacity(
-                                                    opacity:
-                                                        1 - _controller.value,
-                                                    child: _isOwnPage
-                                                        ? Center(
-                                                            child:
-                                                                FloatingActionButton(
-                                                            elevation: 0,
-                                                            backgroundColor:
-                                                                Colors.white,
-                                                            onPressed: () {
-                                                              Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (c) =>
-                                                                              EditProfile()));
-                                                            },
-                                                            child: Icon(
-                                                              Icons.edit,
-                                                              color: Colors
-                                                                  .black87,
-                                                            ),
-                                                          ))
-                                                        : _followButton()),
-                                                Expanded(child: Container())
-                                              ],
+                                                  Opacity(
+                                                      opacity:
+                                                          1 - _controller.value,
+                                                      child: _isOwnPage
+                                                          ? Center(
+                                                              child:
+                                                                  FloatingActionButton(
+                                                              heroTag: "",
+                                                              elevation: 0,
+                                                              backgroundColor:
+                                                                  Colors.white,
+                                                              onPressed: () {
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (c) =>
+                                                                                EditProfile()));
+                                                              },
+                                                              child: Icon(
+                                                                Icons.edit,
+                                                                color: Colors
+                                                                    .black87,
+                                                              ),
+                                                            ))
+                                                          : _followButton()),
+                                                  Expanded(child: Container())
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    }),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        return AppBar(
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          title: FadeTransition(
-                              opacity: CurvedAnimation(
-                                  parent: _controller,
-                                  curve: Interval(.85, 1.0)),
-                              child:
-                                  Text("${user.firstname} ${user.lastname}")),
-                          leading: IconButton(
-                              icon: Icon(
-                                Icons.arrow_back_ios,
-                                color: Colors.white,
-                              ),
-                              onPressed: _pop),
+                              );
+                            },
+                          ),
                         );
                       }),
-                ),
-              ]);
-            }));
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return AppBar(
+                            elevation: 0,
+                            backgroundColor: Colors.transparent,
+                            title: FadeTransition(
+                                opacity: CurvedAnimation(
+                                    parent: _controller,
+                                    curve: Interval(.85, 1.0)),
+                                child:
+                                    Text("${user.firstname} ${user.lastname}")),
+                            leading: IconButton(
+                                icon: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _pop),
+                          );
+                        }),
+                  ),
+                ]);
+              }),
+        ));
   }
 
   void _pop() {
@@ -391,7 +457,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Column(
-        crossAxisAlignment: alignment,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Text(
             number.toString(),
@@ -409,15 +475,15 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   void _toggleFollow() async {
     if (_followed) {
-      await DatabaseService(um.uid).deleteFollow(user);
+      await DatabaseService.deleteFollow(um.uid, user.id);
     } else {
-      await DatabaseService(um.uid).createFollow(user);
+      await DatabaseService.createFollow(um.uid, user.id);
     }
   }
 
   Widget _followButton() {
     return StreamBuilder<bool>(
-        stream: DatabaseService(um.uid).getFollowStream(user),
+        stream: DatabaseService.getFollowStream(um.uid, user.id),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             _followed = snapshot.data;
@@ -432,12 +498,17 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         });
   }
 
+  List<Widget> _generateDonations(List<Donation> donations) {
+    return donations
+        .map((d) => DonationWidget(
+              d,
+              withUsername: false,
+            ))
+        .toList();
+  }
+
   List<Widget> _generateChildren() {
     List<Widget> list = [];
-
-    list.add(SizedBox(
-      height: _headerHeight - 20 - mq.padding.top,
-    ));
 
     list.add(Padding(
       padding: const EdgeInsets.only(left: 20.0, bottom: 10, top: 20),

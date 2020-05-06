@@ -28,7 +28,7 @@ class CampaignButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedFutureBuilder<Campaign>(
         future: campaign == null
-            ? DatabaseService().getCampaign(id)
+            ? DatabaseService.getCampaign(id)
             : Future.value(campaign),
         builder: (context, snapshot) {
           if (snapshot.hasData)
@@ -37,7 +37,7 @@ class CampaignButton extends StatelessWidget {
                 snapshot.data.description == null
                     ? Campaign(
                         id: campaign.id,
-                        url: campaign.imgUrl.url,
+                        imgUrl: campaign.imgUrl,
                         name: campaign.name)
                     : snapshot.data,
                 scrollController: scrollController,
@@ -58,7 +58,8 @@ class CampaignButton extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: <Widget>[
-                      Avatar(snapshot.data.imgUrl.low),
+                      Avatar(
+                          snapshot.data.thumbnailUrl ?? snapshot.data.imgUrl),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(

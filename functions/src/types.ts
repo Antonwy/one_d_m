@@ -11,11 +11,16 @@ export interface Donation {
 export interface User {
   admin: boolean;
   donated_amount: number;
-  email_address: string;
-  first_name: string;
-  last_name: string;
-  image_url: string;
+  first_name: string | null;
+  last_name: string | null;
+  image_url: string | null;
   subscribed_campaigns: string[];
+}
+
+export interface PrivateUserData {
+  email_address: string;
+  phone_number: string;
+  customer_id: string;
 }
 
 export interface Campaign {
@@ -32,13 +37,13 @@ export interface Campaign {
 }
 
 export interface News {
-    campaign_id: string,
-    campaign_img_url: string,
-    campaign_name: string, 
-    created_at: any,
-    image_url: string,
-    short_text: string,
-    text: string, 
-    title: string,
-    user_id: string,
+  campaign_id: string;
+  campaign_img_url: string;
+  campaign_name: string;
+  created_at: any;
+  image_url: string;
+  short_text: string;
+  text: string;
+  title: string;
+  user_id: string;
 }

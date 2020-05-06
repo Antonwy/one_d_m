@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Components/ValueAnimator.dart';
@@ -10,7 +12,6 @@ import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/Validate.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -33,6 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
   List<String> _images = [
     "assets/images/clip-payment.png",
     "assets/images/clip-sign-up.png",
+    "assets/images/clip-virtual-reality.png",
     "assets/images/clip-virtual-reality.png"
   ];
 
@@ -61,6 +63,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     um = Provider.of<UserManager>(context);
 
+    if (um.status == Status.Unverified)
+      _currentPage = RegisterPages.VERIFYEMAIL;
+    else if (um.status == Status.NEEDSMOREINFORMATION)
+      _currentPage = RegisterPages.INFOS;
+
     return Scaffold(
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(left: 35.0),
@@ -68,10 +75,14 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               IgnorePointer(
-                ignoring: _currentPage.index == 0 || _login,
+                ignoring: (_currentPage?.index ?? 0) == 0 || _login,
                 child: AnimatedOpacity(
                   duration: Duration(milliseconds: 250),
-                  opacity: _currentPage.index == 0 || _login ? 0 : 1,
+                  opacity: (_currentPage?.index ?? 0) == 0 ||
+                          _login ||
+                          nextPage == null
+                      ? 0
+                      : 1,
                   child: FloatingActionButton(
                     child: Icon(Icons.navigate_before),
                     onPressed: _prevPage,
@@ -100,6 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: FlexibleSpaceBar(
                       title: Text(
                         "One Dollar Movement",
+                        textAlign: TextAlign.center,
                         style: accentTextTheme.headline.copyWith(fontSize: 25),
                       ),
                       background: AnimatedSwitcher(
@@ -110,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   ValueAnimator(
                       curve: Curves.fastOutSlowIn,
-                      value: Helper.mapValue(_currentPage.index, 0,
+                      value: Helper.mapValue(_currentPage?.index ?? 0, 0,
                           RegisterPages.values.length, 0, 1),
                       builder: (context, value) {
                         return LinearProgressIndicator(
@@ -122,21 +134,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
             ),
-            SliverFillRemaining(
-                child: SingleChildScrollView(
-              child: Form(
+            SliverList(
+                delegate: SliverChildListDelegate([
+              Form(
                 key: _formKey,
                 child: AnimatedSwitcher(
                     duration: Duration(milliseconds: 500),
                     child: _getCurrentPage()),
               ),
-            )),
+              SizedBox(
+                height: 100,
+              )
+            ])),
           ],
         ));
   }
 
   Widget _getImage() {
-    String img = _images[_currentPage.index];
+    String img = _images[_currentPage?.index ?? 0];
     return Image.asset(
       img,
       key: Key(img),
@@ -155,6 +170,8 @@ class _RegisterPageState extends State<RegisterPage> {
         return _passwordWidget();
       case RegisterPages.INFOS:
         return _infoWidget();
+      case RegisterPages.VERIFYEMAIL:
+        return _verifyEmailWidget();
       default:
         return _emailWidget();
     }
@@ -213,6 +230,103 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  Widget _verifyEmailWidget() {
+    return Padding(
+      key: Key("VerifyEmail"),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            height: 40,
+          ),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Email verifizieren",
+                    style: textTheme.title,
+                  ),
+                  Text(
+                    "Um fortzufahren musst du deine Email verifizieren!",
+                    style: textTheme.caption,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Wir schicken dir eine Email mit einem Link an ${um.fireUser.email}!",
+                    style: textTheme.body2,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Klicke auf diesen link um dich zu verifizieren!",
+                    style: textTheme.body2,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Nach dem du dich verifiziert hast, klicke auf Aktualisieren! Solltest du keine Email bekommen haben, klicke auf Email senden.",
+                    style: textTheme.body2,
+                  ),
+                ],
+              )),
+          SizedBox(
+            height: 20,
+          ),
+          Wrap(
+            children: <Widget>[
+              Builder(builder: (context) {
+                return OutlineButton.icon(
+                  onPressed: () async {
+                    ApiResult res = await um.sendEmailVerification();
+                    if (res.hasError())
+                      showDialog(
+                          context: context,
+                          child: AlertDialog(
+                            title: Text(
+                              "Error",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            content: Text(res.message),
+                          ));
+                    Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text("Email wurde gesendet!")));
+                  },
+                  label: Text("Email senden"),
+                  icon: Icon(Icons.send),
+                );
+              }),
+              SizedBox(
+                width: 10,
+              ),
+              OutlineButton.icon(
+                onPressed: () async {
+                  await um.fireUser.reload();
+                  um.fireUser = await FirebaseAuth.instance.currentUser();
+
+                  if (um.fireUser.isEmailVerified) {
+                    um.status = Status.NEEDSMOREINFORMATION;
+                  }
+                },
+                label: Text("Aktualisieren"),
+                icon: Icon(Icons.replay),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
         ],
       ),
     );
@@ -425,23 +539,6 @@ class _RegisterPageState extends State<RegisterPage> {
               inputType: TextInputType.phone,
               validator: Validate.telephone),
           SizedBox(
-            height: 10,
-          ),
-          Material(
-            borderRadius: BorderRadius.circular(3),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: _showLogin,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Sie haben bereits ein Account?",
-                  style: textTheme.button,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
             height: 100,
           ),
         ],
@@ -529,14 +626,35 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    if (_currentPage.index < RegisterPages.values.length - 1) {
-      setState(() {
-        _currentPage = RegisterPages.values[_currentPage.index + 1];
-      });
+    if (nextPage == RegisterPages.VERIFYEMAIL) {
+      _showLoading(true);
+      bool res = await _registerAuthUser();
+      if (res) _currentPage = nextPage;
+      _showLoading(false);
     } else {
+      setState(() {
+        _currentPage = nextPage;
+      });
+    }
+    if (nextPage == null) {
       _showLoading(true);
       bool res = await _registerUser();
       if (res) _pushNextPage();
+    }
+  }
+
+  RegisterPages get nextPage {
+    switch (_currentPage) {
+      case RegisterPages.EMAIL:
+        return RegisterPages.PASSWORD;
+      case RegisterPages.PASSWORD:
+        return RegisterPages.VERIFYEMAIL;
+      case RegisterPages.VERIFYEMAIL:
+        return RegisterPages.EMAIL;
+      case RegisterPages.INFOS:
+        return null;
+      default:
+        return null;
     }
   }
 
@@ -548,7 +666,7 @@ class _RegisterPageState extends State<RegisterPage> {
           valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
         ),
       );
-    return _currentPage.index == RegisterPages.values.length - 1 || _login
+    return _currentPage == RegisterPages.PASSWORD || _login || nextPage == null
         ? Icon(Icons.done)
         : Icon(Icons.navigate_next);
   }
@@ -560,9 +678,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _prevPage() {
-    if (_currentPage.index != 0) {
+    if ((_currentPage?.index ?? 0) != 0) {
       setState(() {
-        _currentPage = RegisterPages.values[_currentPage.index - 1];
+        _currentPage = RegisterPages.values[(_currentPage?.index ?? 1) - 1];
       });
     }
   }
@@ -580,25 +698,28 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _pushNextPage() {
-    Navigator.push(
-        context,
-        CircularRevealRoute(
-            page: HomePage(),
-            color: Theme.of(context).primaryColor,
-            startColor: Theme.of(context).primaryColor,
-            offset: Helper.getCenteredPositionFromKey(_fabKey),
-            duration: Duration(milliseconds: 400)));
+    Navigator.push(context, MaterialPageRoute(builder: (c) => HomePage()));
+  }
+
+  Future _registerAuthUser() async {
+    ApiResult res = await um.signUpAuth(
+        email: email.toLowerCase().trim(), password: password1.trim());
+    if (res.hasError()) {
+      _showError(res.getMessage());
+    }
+
+    return !res.hasError();
   }
 
   Future _registerUser() async {
     User user = User(
-        email: email.toLowerCase(),
-        firstname: firstName,
-        lastname: lastName,
-        phoneNumber: telephone,
+        email: email.toLowerCase().trim(),
+        firstname: firstName.trim(),
+        lastname: lastName.trim(),
+        phoneNumber: telephone.trim(),
         password: password1);
 
-    ApiResult result = await um.signUp(user, _file);
+    ApiResult result = await um.uploadAdditionalInformations(user, _file);
 
     if (result.hasError()) {
       _showError(result.getMessage());
@@ -648,4 +769,4 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
-enum RegisterPages { EMAIL, PASSWORD, INFOS }
+enum RegisterPages { EMAIL, PASSWORD, VERIFYEMAIL, INFOS }

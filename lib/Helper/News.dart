@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:one_d_m/Helper/ImageUrl.dart';
 
 class News {
   static final String CAMPAIGNID = "campaign_id",
@@ -16,23 +17,24 @@ class News {
       campaignName,
       campaignImgUrl,
       title,
-      imageUrl,
       text,
       shortText,
+      imageUrl,
       id;
   DateTime createdAt;
 
-  News(
-      {this.campaignId,
-      this.id,
-      this.userId,
-      this.title,
-      this.campaignImgUrl,
-      this.imageUrl,
-      this.text,
-      this.shortText,
-      this.createdAt,
-      this.campaignName});
+  News({
+    this.campaignId,
+    this.id,
+    this.userId,
+    this.title,
+    this.campaignImgUrl,
+    this.text,
+    this.shortText,
+    this.createdAt,
+    this.campaignName,
+    this.imageUrl,
+  });
 
   Map<String, dynamic> toMap() {
     return {

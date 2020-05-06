@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/ActivityDonationFeed.dart';
-import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +17,13 @@ class NewsHomePage extends StatefulWidget {
 class _NewsHomePageState extends State<NewsHomePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme _textTheme;
+  Future<List<News>> _newsFuture;
+  List<String> _subscribedCampaigns = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +52,13 @@ class _NewsHomePageState extends State<NewsHomePage>
         ),
         Consumer<UserManager>(
           builder: (context, um, child) {
+            if (um.user.subscribedCampaignsIds != _subscribedCampaigns)
+              _newsFuture = DatabaseService.getNews(um.user);
+
+            _subscribedCampaigns = um.user.subscribedCampaignsIds;
+
             return FutureBuilder<List<News>>(
-                future: DatabaseService().getNews(um.user),
+                future: _newsFuture,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return SliverFillRemaining(
@@ -58,14 +67,55 @@ class _NewsHomePageState extends State<NewsHomePage>
                       ),
                     );
 
+                  if (_subscribedCampaigns.isEmpty)
+                    return SliverFillRemaining(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 50,
+                            ),
+                            Image.asset(
+                                "assets/images/clip-virtual-reality.png"),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text("Du hast noch keine abonnierten Projekte!")
+                          ],
+                        ),
+                      ),
+                    );
+
+                  if (snapshot.data.isEmpty)
+                    return SliverFillRemaining(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 50,
+                            ),
+                            Image.asset(
+                                "assets/images/clip-virtual-reality.png"),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                                "Keins deiner abonnierten Projekte hat bis jetzt etwas gepostet!")
+                          ],
+                        ),
+                      ),
+                    );
                   return SliverPadding(
                     padding: EdgeInsets.only(top: 10),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate(snapshot.data
                           .map((News news) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: NewsPost(news),
-                          ))
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
+                                child: NewsPost(news),
+                              ))
                           .toList()),
                     ),
                   );

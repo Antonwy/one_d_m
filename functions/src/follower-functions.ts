@@ -70,5 +70,5 @@ exports.deleteFollower = functions.firestore
       .where('user_id', '==', followingId)
       .get();
 
-    toDelete.docs.forEach((ds) => ds.ref.delete());
+    toDelete.docs.forEach(async (ds) => await ds.ref.delete());
   });

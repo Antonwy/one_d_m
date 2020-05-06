@@ -39,6 +39,15 @@ exports.onDeleteCampaign = functions.firestore
         })
     );
 
+    // deleting all donations
+    (
+      await admin
+        .firestore()
+        .collection('donations')
+        .where('campaign_id', '==', campaignId)
+        .get()
+    ).forEach(async (camp) => await camp.ref.delete());
+
     // deleting campaign
     await admin.firestore().collection('campaigns').doc(campaignId).delete();
   });
@@ -56,7 +65,7 @@ exports.onUpdateCampaign = functions.firestore
         .firestore()
         .collection('news')
         .where('campaign_id', '==', campaignId);
-        
+
       (await toUpdateNewsQuery.get()).forEach(
         async (doc) =>
           await doc.ref.update({

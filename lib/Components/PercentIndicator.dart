@@ -6,11 +6,12 @@ class PercentIndicator extends StatefulWidget {
   String description;
   Function onTap;
 
-  PercentIndicator(
-      {this.currentValue,
-      this.targetValue,
-      this.description,
-      this.onTap,});
+  PercentIndicator({
+    this.currentValue,
+    this.targetValue,
+    this.description,
+    this.onTap,
+  });
 
   @override
   _PercentIndicatorState createState() => _PercentIndicatorState();
@@ -62,36 +63,42 @@ class _PercentIndicatorState extends State<PercentIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 50,
-            child: Text(
-              widget.description,
-              style: Theme.of(context).textTheme.body1,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              height: 13,
-              child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(7),
-                                          child: LinearProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(ColorTheme.percentSlider),
-                        value: _valueTween.evaluate(_controller),
-                        backgroundColor: ColorTheme.lightGrey,
-                      ),
-                    );
-                  }),
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      children: <Widget>[
+        AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Stack(
+                      children: <Widget>[
+                        Center(
+                            child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "${widget.currentValue}/${widget.targetValue} DC",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )),
+                        Positioned.fill(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation(ColorTheme.white),
+                            value: _valueTween.evaluate(_controller),
+                            backgroundColor: Colors.white24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+      ],
     );
   }
 }

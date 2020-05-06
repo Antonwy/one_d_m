@@ -1,12 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
 
 class User {
-  String email, firstname, lastname, password, imgUrl, id, phoneNumber;
+  String email,
+      firstname,
+      lastname,
+      password,
+      id,
+      phoneNumber,
+      imgUrl,
+      thumbnailUrl;
   int donatedAmount;
   bool admin;
-  List<String> subscribedCampaignsIds = List<String>();
-  List<Campaign> subscribedCampaigns = List<Campaign>();
+  List<String> subscribedCampaignsIds = [];
 
   static final String FIRSTNAME = "first_name",
       LASTNAME = "last_name",
@@ -15,20 +20,22 @@ class User {
       ADMIN = "admin",
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       DONATEDAMOUNT = "donated_amount",
-      IMAGEURL = "image_url";
+      IMAGEURL = "image_url",
+      THUMBNAILURL = "thumbnail_url";
 
-  User({
-    this.email,
-    this.firstname,
-    this.lastname,
-    this.password,
-    this.id,
-    this.subscribedCampaignsIds,
-    this.donatedAmount = 0,
-    this.imgUrl,
-    this.phoneNumber,
-    this.admin,
-  });
+  User(
+      {this.email,
+      this.firstname,
+      this.lastname,
+      this.password,
+      this.id,
+      this.donatedAmount = 0,
+      this.phoneNumber,
+      this.admin,
+      List<String> subscribedCampaignsIds,
+      this.imgUrl,
+      this.thumbnailUrl})
+      : this.subscribedCampaignsIds = subscribedCampaignsIds ?? [];
 
   static User fromSnapshot(DocumentSnapshot snapshot) {
     if (snapshot.data == null) return User();
@@ -36,29 +43,34 @@ class User {
         id: snapshot.documentID,
         firstname: snapshot[User.FIRSTNAME],
         lastname: snapshot[User.LASTNAME],
-        email: snapshot[User.EMAIL],
         admin: snapshot[User.ADMIN],
         donatedAmount: snapshot[DONATEDAMOUNT],
-        phoneNumber: snapshot[PHONE_NUMBER] ?? "",
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
             : List.from(snapshot[User.SUBSCRIBEDCAMPAIGNS]),
-        imgUrl: snapshot[IMAGEURL]);
+        imgUrl: snapshot[IMAGEURL],
+        thumbnailUrl: snapshot[THUMBNAILURL]);
   }
 
   static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {
     return snapshots.map((ss) => fromSnapshot(ss)).toList();
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> publicDataToMap() {
     return {
       FIRSTNAME: firstname,
       LASTNAME: lastname,
-      EMAIL: email,
       ADMIN: false,
       IMAGEURL: imgUrl,
+      SUBSCRIBEDCAMPAIGNS: [],
+      DONATEDAMOUNT: 0
+    };
+  }
+
+  Map<String, dynamic> privateDataToMap() {
+    return {
+      EMAIL: email,
       PHONE_NUMBER: phoneNumber,
-      SUBSCRIBEDCAMPAIGNS: []
     };
   }
 

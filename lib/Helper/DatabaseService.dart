@@ -9,13 +9,13 @@ import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
-import 'package:one_d_m/Helper/StorageService.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 import 'Campaign.dart';
 import 'Donation.dart';
 import 'User.dart';
 
 class DatabaseService {
-  static final String CAMPAIGNS = "campaigns",
+  static const String CAMPAIGNS = "campaigns",
       USER = "user",
       USERS = "users",
       NEWS = "news",
@@ -25,62 +25,77 @@ class DatabaseService {
       FOLLOWED = "followed",
       CAMPAIGNNEWS = "campaign_news",
       DONATIONS = "donations",
-      DONATIONFEED = "donation_feed";
+      DONATIONFEED = "donation_feed",
+      STATISTICS = "statistics",
+      DONATIONINFO = "donation_info",
+      CARDS = "cards",
+      PRIVATEDATA = "private_data",
+      DATA = "data";
 
-  final String uid;
   static final Firestore firestore = Firestore.instance;
-  final CollectionReference userCollection = firestore.collection(USER);
-  final CollectionReference campaignsCollection =
+  static final CollectionReference userCollection = firestore.collection(USER);
+  static final CollectionReference campaignsCollection =
       firestore.collection(CAMPAIGNS);
-  final CollectionReference newsCollection = firestore.collection(NEWS);
-  final CollectionReference subscribedCampaignsCollection =
+  static final CollectionReference newsCollection = firestore.collection(NEWS);
+  static final CollectionReference subscribedCampaignsCollection =
       firestore.collection(SUBSCRIBEDCAMPAIGNS);
-  final CollectionReference feedCollection = firestore.collection(FEED);
-  final CollectionReference followingCollection =
+  static final CollectionReference feedCollection = firestore.collection(FEED);
+  static final CollectionReference followingCollection =
       firestore.collection(FOLLOWING);
-  final CollectionReference followedCollection = firestore.collection(FOLLOWED);
-  final CollectionReference donationsCollection =
+  static final CollectionReference followedCollection =
+      firestore.collection(FOLLOWED);
+  static final CollectionReference donationsCollection =
       firestore.collection(DONATIONS);
-  final CollectionReference donationFeedCollection =
+  static final CollectionReference donationFeedCollection =
       firestore.collection(DONATIONFEED);
+  static final CollectionReference statisticsCollection =
+      firestore.collection(STATISTICS);
 
-  DatabaseService([this.uid]);
+  static Future<void> addUser(User user) async {
+    userCollection.document(user.id).setData(user.publicDataToMap());
 
-  // HELPER!!!
-  Future<void> updateDatabase() async {}
-
-  // HELPER!!!
-  Future<void> updateDatabaseDonations() async {}
-
-  Future<void> addUser(User user) async {
-    return userCollection.document(uid).setData(user.toMap());
+    DocumentSnapshot doc = await userCollection
+        .document(user.id)
+        .collection(PRIVATEDATA)
+        .document(DATA)
+        .get();
+    if (doc.exists) {
+      return userCollection
+          .document(user.id)
+          .collection(PRIVATEDATA)
+          .document(DATA)
+          .updateData(user.privateDataToMap());
+    } else {
+      return userCollection
+        ..document(user.id)
+            .collection(PRIVATEDATA)
+            .document(DATA)
+            .setData(user.privateDataToMap());
+    }
   }
 
-  Future<void> updateUser(User user) async {
-    return userCollection.document(uid).updateData({
+  static Future<void> updateUser(User user) async {
+    return userCollection.document(user.id).updateData({
       User.FIRSTNAME: user.firstname,
       User.LASTNAME: user.lastname,
       User.IMAGEURL: user.imgUrl,
+      User.THUMBNAILURL: user.imgUrl == null ? null : user.thumbnailUrl,
       User.PHONE_NUMBER: user.phoneNumber
     });
   }
 
-  Future<User> getUser() async {
+  static Future<User> getUser(String uid) async {
     return User.fromSnapshot(await userCollection.document(uid).get());
   }
 
-  Future<User> getUserFromId(String userId) async {
-    return User.fromSnapshot(await userCollection.document(userId).get());
-  }
-
-  Stream<User> getUserStream(String id) {
+  static Stream<User> getUserStream(String id) {
     return userCollection
         .document(id)
         .snapshots()
         .map((ds) => User.fromSnapshot(ds));
   }
 
-  Future<List<User>> getUsers() async {
+  static Future<List<User>> getUsers() async {
     return User.listFromSnapshots((await userCollection
             .orderBy(User.DONATEDAMOUNT, descending: true)
             .limit(20)
@@ -88,7 +103,7 @@ class DatabaseService {
         .documents);
   }
 
-  Stream<List<User>> getUsersStream() {
+  static Stream<List<User>> getUsersStream() {
     return userCollection
         .orderBy(User.DONATEDAMOUNT, descending: true)
         .limit(20)
@@ -96,20 +111,20 @@ class DatabaseService {
         .map((qs) => User.listFromSnapshots(qs.documents));
   }
 
-  Stream<List<Campaign>> getCampaignFromQueryStream(String query) {
+  static Stream<List<Campaign>> getCampaignFromQueryStream(String query) {
     return campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
         .snapshots()
         .map((qs) => Campaign.listFromSnapshot(qs.documents));
   }
 
-  Future<SearchResult> getSearchResultFromQuery(String query) async {
+  static Future<SearchResult> getSearchResultFromQuery(String query) async {
     List<Campaign> campaigns = await getCampaignFromQuery(query);
     List<User> users = await getUsersFromQuery(query);
     return SearchResult(campaigns: campaigns, users: users);
   }
 
-  Future<List<Campaign>> getCampaignFromQuery(String query) async {
+  static Future<List<Campaign>> getCampaignFromQuery(String query) async {
     QuerySnapshot qs = await campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
         .getDocuments();
@@ -122,7 +137,7 @@ class DatabaseService {
     return campaigns;
   }
 
-  Future<List<User>> getUsersFromQuery(String query) async {
+  static Future<List<User>> getUsersFromQuery(String query) async {
     QuerySnapshot firstnameSnapshot = await userCollection
         .where(User.FIRSTNAME, isGreaterThanOrEqualTo: query)
         .limit(5)
@@ -149,32 +164,26 @@ class DatabaseService {
     return userMap.values.toList();
   }
 
-  Future<void> createSubscription(Campaign campaign) async {
-    feedCollection.document(uid).collection(NEWS);
-
-    firestore.runTransaction((tx) async {
-      campaignsCollection
-          .document(campaign.id)
-          .updateData({Campaign.SUBSCRIBEDCOUNT: FieldValue.increment(1)});
-    });
+  static Future<void> createSubscription(Campaign campaign, String uid) async {
+    await campaignsCollection
+        .document(campaign.id)
+        .updateData({Campaign.SUBSCRIBEDCOUNT: FieldValue.increment(1)});
 
     await userCollection.document(uid).updateData({
       User.SUBSCRIBEDCAMPAIGNS: FieldValue.arrayUnion([campaign.id])
     });
   }
 
-  Future<void> deleteSubscription(Campaign campaign) async {
-    firestore.runTransaction((tx) async {
-      campaignsCollection
-          .document(campaign.id)
-          .updateData({Campaign.SUBSCRIBEDCOUNT: FieldValue.increment(-1)});
-    });
+  static Future<void> deleteSubscription(Campaign campaign, String uid) async {
+    await campaignsCollection
+        .document(campaign.id)
+        .updateData({Campaign.SUBSCRIBEDCOUNT: FieldValue.increment(-1)});
     await userCollection.document(uid).updateData({
       User.SUBSCRIBEDCAMPAIGNS: FieldValue.arrayRemove([campaign.id])
     });
   }
 
-  Future<List<Campaign>> getSubscribedCampaigns(User user) async {
+  static Future<List<Campaign>> getSubscribedCampaigns(User user) async {
     List<Campaign> campaigns = [];
     for (String id in user.subscribedCampaignsIds) {
       campaigns.add(
@@ -184,28 +193,27 @@ class DatabaseService {
     return campaigns;
   }
 
-  Future<Campaign> getCampaign(String id) async {
+  static Future<Campaign> getCampaign(String id) async {
     DocumentSnapshot ss = await campaignsCollection.document(id).get();
     return Campaign.fromSnapshot(ss);
   }
 
-  Stream<Campaign> getCampaignStream(String id) {
+  static Stream<Campaign> getCampaignStream(String id) {
     return campaignsCollection
         .document(id)
         .snapshots()
         .map(Campaign.fromSnapshot);
   }
 
-  Future<DocumentReference> createCampaign(Campaign campaign) async {
-    await campaignsCollection.add(campaign.toMap());
+  static Future<void> createCampaign(Campaign campaign) async {
+    await campaignsCollection.document(campaign.id).setData(campaign.toMap());
   }
 
-  Future<void> deleteCampaign(Campaign campaign) async {
+  static Future<void> deleteCampaign(Campaign campaign) async {
     await campaignsCollection.document(campaign.id).delete();
-    await StorageService().deleteOld(campaign.imgUrl.url);
   }
 
-  Future<List<News>> getNewsFromCampaign(Campaign campaign) async {
+  static Future<List<News>> getNewsFromCampaign(Campaign campaign) async {
     return (await newsCollection
             .where(News.CAMPAIGNID, isEqualTo: campaign.id)
             .getDocuments())
@@ -214,14 +222,15 @@ class DatabaseService {
         .toList();
   }
 
-  Stream<List<News>> getNewsFromCampaignStream(Campaign campaign) {
+  static Stream<List<News>> getNewsFromCampaignStream(Campaign campaign) {
     return newsCollection
         .where(News.CAMPAIGNID, isEqualTo: campaign.id)
         .snapshots()
         .map((qs) => News.listFromSnapshot(qs.documents));
   }
 
-  Future<List<News>> getNews(User user) async {
+  static Future<List<News>> getNews(User user) async {
+    if (user.subscribedCampaignsIds == null) return [];
     List<News> news = [];
 
     for (String id in user.subscribedCampaignsIds) {
@@ -231,57 +240,57 @@ class DatabaseService {
     return news;
   }
 
-  Future<ApiResult> createNews(News news) async {
+  static Future<ApiResult> createNews(News news) async {
     try {
-      await newsCollection.add(news.toMap());
+      await newsCollection.document(news.id).setData(news.toMap());
       return ApiSuccess();
     } on PlatformException catch (e) {
       return ApiError(e.message);
     }
   }
 
-  Future<void> createFollow(User user) async {
+  static Future<void> createFollow(String meId, String toId) async {
     followingCollection
-        .document(uid)
+        .document(meId)
         .collection(USERS)
-        .document(user.id)
-        .setData({"id": user.id});
+        .document(toId)
+        .setData({"id": toId});
   }
 
-  Future<void> deleteFollow(User user) async {
+  static Future<void> deleteFollow(String meId, String toId) async {
     followingCollection
-        .document(uid)
+        .document(meId)
         .collection(USERS)
-        .document(user.id)
+        .document(toId)
         .delete();
   }
 
-  Stream<bool> getFollowStream(User user) {
+  static Stream<bool> getFollowStream(String meId, String toId) {
     return followingCollection
-        .document(uid)
+        .document(meId)
         .collection(USERS)
-        .document(user.id)
+        .document(toId)
         .snapshots()
         .map((ss) => ss.exists);
   }
 
-  Stream<List<String>> getFollowingUsersStream(User user) {
+  static Stream<List<String>> getFollowingUsersStream(String uid) {
     return followingCollection
-        .document(user.id)
+        .document(uid)
         .collection(USERS)
         .snapshots()
         .map((qs) => qs.documents.map((ds) => ds.documentID).toList());
   }
 
-  Stream<List<String>> getFollowedUsersStream(User user) {
+  static Stream<List<String>> getFollowedUsersStream(String uid) {
     return followedCollection
-        .document(user.id)
+        .document(uid)
         .collection(USERS)
         .snapshots()
         .map((qs) => qs.documents.map((ds) => ds.documentID).toList());
   }
 
-  Future<List<Campaign>> getCampaignListFromIds(List<String> ids) async {
+  static Future<List<Campaign>> getCampaignListFromIds(List<String> ids) async {
     List<Campaign> campaigns = [];
 
     for (String id in ids) {
@@ -292,11 +301,12 @@ class DatabaseService {
     return campaigns;
   }
 
-  Future<void> donate(Donation donation) async {
+  static Future<void> donate(Donation donation) async {
     await donationsCollection.add(donation.toMap());
   }
 
-  Stream<List<Donation>> getDonationFromCampaignStream(String campaignId) {
+  static Stream<List<Donation>> getDonationFromCampaignStream(
+      String campaignId) {
     return donationsCollection
         .where(Donation.CAMPAIGNID, isEqualTo: campaignId)
         .orderBy(Donation.CREATEDAT, descending: true)
@@ -305,7 +315,7 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
-  Stream<List<Donation>> getDonationFeedStream() {
+  static Stream<List<Donation>> getDonationFeedStream(String uid) {
     return donationFeedCollection
         .document(uid)
         .collection(DONATIONS)
@@ -314,22 +324,31 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
-  Stream<DonationInfo> getDonationInfo() {
-    return donationsCollection
-        .document("info")
+  static Stream<DonationInfo> getDonationInfo() {
+    return statisticsCollection
+        .document(DONATIONINFO)
         .snapshots()
         .map((ds) => DonationInfo.fromSnapshot(ds));
   }
 
-  Stream<List<Donation>> getDonationsFromUser(User user) {
+  static Stream<List<Donation>> getDonationsFromUser(String uid) {
     return donationsCollection
-        .where(Donation.USERID, isEqualTo: user.id)
+        .where(Donation.USERID, isEqualTo: uid)
         .orderBy(Donation.CREATEDAT, descending: true)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
-  Future<List<User>> getUsersFromContacts(List<Contact> contacts) async {
+  static Stream<List<Donation>> getDonationsFromUserLimit(String uid) {
+    return donationsCollection
+        .where(Donation.USERID, isEqualTo: uid)
+        .orderBy(Donation.CREATEDAT, descending: true)
+        .limit(4)
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.documents));
+  }
+
+  static Future<List<User>> getUsersFromContacts(List<Contact> contacts) async {
     List<User> userList = [];
 
     Set<String> numbers = HashSet();
@@ -355,16 +374,49 @@ class DatabaseService {
           .toList()
           .getRange(i, (i + 10) > numbers.length ? numbers.length : i + 10)
           .toList();
-      QuerySnapshot qs = await userCollection
+      QuerySnapshot qs = await firestore
+          .collectionGroup(PRIVATEDATA)
           .where(User.PHONE_NUMBER, whereIn: queryNumbers)
           .getDocuments();
       if (qs.documents.isNotEmpty) {
-        userList.addAll(User.listFromSnapshots(qs.documents));
+        for (DocumentSnapshot doc in qs.documents) {
+          userList.add(
+              User.fromSnapshot(await doc.reference.parent().parent().get()));
+        }
       }
     }
 
     return userList;
   }
 
-  DocumentReference get userReference => userCollection.document(uid);
+  static Future<void> addCard({PaymentMethod card, String uid}) {
+    return userCollection
+        .document(uid)
+        .collection(CARDS)
+        .document(card.id)
+        .setData(card.toJson());
+  }
+
+  static Future<void> deleteCard({PaymentMethod card, String uid}) {
+    return userCollection
+        .document(uid)
+        .collection(CARDS)
+        .document(card.id)
+        .delete();
+  }
+
+  static Stream<List<PaymentMethod>> getCards(String uid) {
+    return userCollection.document(uid).collection(CARDS).snapshots().map(
+        (qs) => qs.documents
+            .map((doc) => PaymentMethod.fromJson(doc.data))
+            .toList());
+  }
+
+  static Stream<bool> hasPaymentMethod(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(CARDS)
+        .snapshots()
+        .map((qs) => qs.documents.isNotEmpty);
+  }
 }

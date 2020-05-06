@@ -22,8 +22,7 @@ class UserButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedFutureBuilder<User>(
-        future:
-            user == null ? DatabaseService(id).getUser() : Future.value(user),
+        future: user == null ? DatabaseService.getUser(id) : Future.value(user),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Material(
@@ -39,7 +38,8 @@ class UserButton extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: <Widget>[
-                      Avatar(snapshot.data.imgUrl),
+                      Avatar(
+                          snapshot.data?.thumbnailUrl ?? snapshot.data.imgUrl),
                       SizedBox(width: 10),
                       Text(
                         "${snapshot.data.firstname} ${snapshot.data.lastname}",

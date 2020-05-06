@@ -1,6 +1,10 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Donation } from './types';
+import { Donation, PrivateUserData } from './types';
+import Stripe from 'stripe';
+const stripe = new Stripe(functions.config().stripe.token, {
+  apiVersion: '2020-03-02',
+});
 
 exports.onCreateDonation = functions.firestore
   .document('donations/{donationId}')
@@ -30,8 +34,8 @@ exports.onCreateDonation = functions.firestore
     // update the daily/monthly/yearly donations
     await admin
       .firestore()
-      .collection('donations')
-      .doc('info')
+      .collection('statistics')
+      .doc('donation_info')
       .update({
         daily_amount: admin.firestore.FieldValue.increment(donation.amount),
         monthly_amount: admin.firestore.FieldValue.increment(donation.amount),
@@ -65,6 +69,34 @@ exports.onCreateDonation = functions.firestore
         .doc(context.params.donationId)
         .set(donationFeedItem);
     });
+
+    const privateUserData: PrivateUserData = (
+      await admin
+        .firestore()
+        .collection('user')
+        .doc(donation.user_id)
+        .collection('private_data')
+        .doc('data')
+        .get()
+    ).data() as PrivateUserData;
+
+    const paymentMethod = (
+      await admin
+        .firestore()
+        .collection('user')
+        .doc(donation.user_id)
+        .collection('cards')
+        .get()
+    ).docs[0];
+
+    await stripe.paymentIntents.create({
+      amount: donation.amount * 100,
+      currency: 'eur',
+      customer: privateUserData.customer_id,
+      payment_method: paymentMethod.id,
+      off_session: true,
+      confirm: true,
+    });
   });
 
 exports.onUpdateDonation = functions.firestore
@@ -73,8 +105,6 @@ exports.onUpdateDonation = functions.firestore
     const donationId: string = context.params.donationId;
     const donation: Donation = snapshot.after.data() as Donation;
     console.log(`Updating ${donation}`);
-
-    if (donationId == 'info') return;
 
     // get followed Users of the donation author
     const followedUser = await admin
@@ -112,7 +142,7 @@ exports.onDeleteDonation = functions.firestore
     const donation: Donation = snapshot.data() as Donation;
     console.log(`Deleting ${donation}`);
 
-    if (donationId == 'info') return;
+    if (donationId === 'info') return;
 
     // get followed Users of the donation author
     const followedUser = await admin

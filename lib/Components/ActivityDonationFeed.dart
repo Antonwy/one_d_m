@@ -10,10 +10,26 @@ class ActivityDonationFeed extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserManager>(
       builder: (context, um, child) => StreamBuilder<List<Donation>>(
-        stream: DatabaseService(um.uid).getDonationFeedStream(),
+        stream: DatabaseService.getDonationFeedStream(um.uid),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<Donation> donations = snapshot.data;
+
+            if (donations.isEmpty)
+              return SliverFillRemaining(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 20),
+                      Image.asset("assets/images/clip-no-comments.png"),
+                      Text(
+                          "Keiner deiner Freunde hat bis jetzt etwas gespendet."),
+                    ],
+                  ),
+                ),
+              );
+
             donations.sort((d2, d1) => d1.createdAt.compareTo(d2.createdAt));
             if (donations.isEmpty)
               return SliverFillRemaining(child: Container());

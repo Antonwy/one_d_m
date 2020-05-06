@@ -26,17 +26,16 @@ class _CampaignHeaderState extends State<CampaignHeader> {
         child: CustomOpenContainer(
           closedShape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          closedElevation: 18,
+          closedElevation: 12,
           openBuilder: (context, close, scrollController) => NewCampaignPage(
-            widget.campaign,
-            scrollController: scrollController
-          ),
+              widget.campaign,
+              scrollController: scrollController),
           closedBuilder: (context, open) => InkWell(
             onTap: () async {
               await precacheImage(
-                  CachedNetworkImageProvider(widget.campaign.imgUrl.high),
-                  context,
-                  size: MediaQuery.of(context).size,
+                  CachedNetworkImageProvider(widget.campaign.imgUrl), context,
+                  size: Size(MediaQuery.of(context).size.width,
+                      MediaQuery.of(context).size.height * .3 + 30),
                   onError: (context, stacktrace) => print(stacktrace));
               open();
             },
@@ -44,7 +43,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 CachedNetworkImage(
-                  imageUrl: widget.campaign.imgUrl.middle,
+                  imageUrl: widget.campaign.imgUrl,
                   height: 230,
                   width: double.infinity,
                   fit: BoxFit.cover,

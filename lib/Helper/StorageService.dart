@@ -5,22 +5,16 @@ class StorageService {
   final StorageReference storageRef = FirebaseStorage.instance.ref();
 
   File file;
-  String id;
 
-  StorageService({this.file, this.id});
+  StorageService({this.file});
 
-  Future<String> uploadImage() async {
-    StorageUploadTask task = storageRef.child("campaign_$id.jpg").putFile(file);
+  Future<String> uploadImage(String name) async {
+    StorageUploadTask task = storageRef.child("$name.jpg").putFile(file);
     StorageTaskSnapshot snapshot = await task.onComplete;
     return await snapshot.ref.getDownloadURL();
   }
 
-  Future<void> deleteOld(String url) async {
-    RegExp expr = RegExp("campaign_(.*).jpg");
-    RegExpMatch match = expr.firstMatch(url);
-    if (match != null) {
-      String name = url.substring(match.start, match.end);
-      await storageRef.child(name).delete();
-    }
-  }
+  static String userImageName(String uid) => "user_$uid";
+  static String campaignImageName(String id) => "campaign_$id";
+  static String newsImageName(String id) => "news_$id";
 }

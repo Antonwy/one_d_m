@@ -29,6 +29,11 @@ class CampaignsManager with ChangeNotifier {
     return _campaigns.where((Campaign c) => c.authorId == id).toList();
   }
 
+  List<Campaign> getCampaignFromCategoryId(int catId) {
+    if (catId < 0 || catId > 2) return getAllCampaigns();
+    return _campaigns.where((Campaign c) => c.categoryId == catId).toList();
+  }
+
   List<Campaign> getAllCampaigns() {
     return _campaigns;
   }

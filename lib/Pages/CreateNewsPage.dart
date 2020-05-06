@@ -49,7 +49,7 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
     um = Provider.of<UserManager>(context);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.indigo,
       appBar: AppBar(
         elevation: 0,
         actions: <Widget>[
@@ -98,7 +98,6 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
                     subtitle: "Gebe eine kurze Beschreibung deines Posts ein!"),
                 _textField(
                     hint: "z.B. Projekt Update!",
-                    validator: Validate.postText,
                     maxLength: 50,
                     onSaved: (text) {
                       _postShortText = text;
@@ -110,7 +109,6 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
                     hint: "z.B. Projekt Update Beschreibung!",
                     multiline: true,
                     maxLength: 200,
-                    validator: Validate.postText,
                     onSaved: (text) {
                       _postText = text;
                     }),
@@ -124,7 +122,7 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
   }
 
   Future<void> _createNews() async {
-    if (!_formKey.currentState.validate()) return;
+    if (!_formKey.currentState.validate() || _image == null) return;
 
     _formKey.currentState.save();
 
@@ -132,19 +130,21 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
       _isLoading = true;
     });
 
-    StorageService service = StorageService(file: _image, id: _newsId);
+    StorageService service = StorageService(file: _image);
 
     News news = News(
+        id: _newsId,
         campaignId: widget.campaign.id,
         campaignName: widget.campaign.name,
-        campaignImgUrl: widget.campaign.imgUrl.url,
+        campaignImgUrl: widget.campaign.thumbnailUrl ?? widget.campaign.imgUrl,
         userId: um.uid,
         title: _postTitle,
         text: _postText,
         shortText: _postShortText,
-        imageUrl: await service.uploadImage());
+        imageUrl:
+            await service.uploadImage(StorageService.newsImageName(_newsId)));
 
-    ApiResult res = await DatabaseService().createNews(news);
+    ApiResult res = await DatabaseService.createNews(news);
 
     if (res.hasError())
       return Helper.showAlert(

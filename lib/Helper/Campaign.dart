@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:one_d_m/Helper/ImageUrl.dart';
 
 class Campaign {
   final String name, description, shortDescription, city;
   final DateTime createdAt;
-  final int amount, subscribedCount;
-  final String authorId, id;
-  ImageUrl imgUrl;
+  final int amount, subscribedCount, categoryId;
+  final String authorId, id, imgUrl, thumbnailUrl;
 
   static final String ID = "id",
       NAME = "title",
@@ -18,22 +16,23 @@ class Campaign {
       AUTHORID = "authorId",
       AMOUNT = "current_amount",
       IMAGEURL = "image_url",
-      FINALAMOUNT = "target_amount";
+      THUMBNAILURL = "thumbnail_url",
+      FINALAMOUNT = "target_amount",
+      CATEGORYID = "category_id";
 
-  Campaign({
-    this.id,
-    this.name,
-    this.description,
-    this.shortDescription,
-    this.city,
-    this.createdAt,
-    this.authorId,
-    this.subscribedCount,
-    this.amount,
-    String url,
-  }) {
-    this.imgUrl = ImageUrl(url);
-  }
+  Campaign(
+      {this.id,
+      this.name,
+      this.description,
+      this.shortDescription,
+      this.city,
+      this.createdAt,
+      this.authorId,
+      this.subscribedCount,
+      this.amount,
+      this.imgUrl,
+      this.thumbnailUrl,
+      this.categoryId});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -45,8 +44,10 @@ class Campaign {
         shortDescription: snapshot[SHORTDESCRIPTION],
         subscribedCount: snapshot[SUBSCRIBEDCOUNT] ?? 0,
         createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
-        url: snapshot[IMAGEURL],
-        authorId: snapshot[AUTHORID]);
+        imgUrl: snapshot[IMAGEURL],
+        thumbnailUrl: snapshot[THUMBNAILURL],
+        authorId: snapshot[AUTHORID],
+        categoryId: snapshot[CATEGORYID]);
   }
 
   static List<Campaign> listFromSnapshot(List<DocumentSnapshot> list) {
@@ -63,7 +64,8 @@ class Campaign {
       CREATEDAT: Timestamp.now(),
       AUTHORID: authorId,
       AMOUNT: amount,
-      IMAGEURL: imgUrl.url,
+      IMAGEURL: imgUrl,
+      CATEGORYID: 0
     };
   }
 

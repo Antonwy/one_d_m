@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
+import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Components/UserAvatar.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
@@ -19,12 +20,13 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme textTheme;
+  int _categoryId = 4;
 
   Stream<List<User>> _userStream;
 
   @override
   void initState() {
-    _userStream = DatabaseService().getUsersStream();
+    _userStream = DatabaseService.getUsersStream();
     super.initState();
   }
 
@@ -39,7 +41,7 @@ class _ExplorePageState extends State<ExplorePage>
           centerTitle: false,
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
-            preferredSize: Size(0, 200),
+            preferredSize: Size(0, 80),
             child: Container(),
           ),
           flexibleSpace: SafeArea(
@@ -47,36 +49,89 @@ class _ExplorePageState extends State<ExplorePage>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                  child: Text("Entdecken", style: textTheme.title),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                      child: Text("Entdecken", style: textTheme.title),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                      child: Container(
+                        height: 40,
+                        child: Material(
+                          color: ColorTheme.blue,
+                          borderRadius: BorderRadius.circular(20),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (c) => FindFriendsPage()));
+                            },
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Freunde finden",
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(
-                  height: 10,
+                  height: 18,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18.0),
                   child: SearchBar(),
                 ),
-                SizedBox(height: 20),
-                StreamBuilder<List<User>>(
-                    stream: _userStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return Container();
-                      if (snapshot.hasData && snapshot.data.isEmpty)
-                        return Container();
-                      return Container(
-                        height: 110,
-                        child: UserAvatarList(snapshot.data),
-                      );
-                    })
               ],
             ),
           ),
         ),
+        // StreamBuilder<List<User>>(
+        //     stream: _userStream,
+        //     builder: (context, snapshot) {
+        //       if (!snapshot.hasData) return SliverToBoxAdapter();
+        //       if (snapshot.data.isEmpty) return SliverToBoxAdapter();
+        //       return SliverToBoxAdapter(
+        //         child: Container(
+        //           height: 110,
+        //           child: UserAvatarList(snapshot.data),
+        //         ),
+        //       );
+        //     }),
+        SliverToBoxAdapter(
+          child: Container(
+              height: 115,
+              margin: EdgeInsets.symmetric(vertical: 18),
+              child: CategoriesList((catId) {
+                setState(() {
+                  _categoryId = catId;
+                });
+              })),
+        ),
         Consumer<CampaignsManager>(builder: (context, cm, child) {
           return CampaignList(
-            campaigns: cm.getAllCampaigns(),
+            campaigns: cm.getCampaignFromCategoryId(_categoryId),
           );
         })
       ],
@@ -103,7 +158,7 @@ class UserAvatarList extends StatelessWidget {
       itemBuilder: (context, index) => Padding(
         padding: index == 0
             ? const EdgeInsets.only(left: 18.0)
-            : index == userList.length - 1
+            : index == userList.length
                 ? const EdgeInsets.only(right: 18.0)
                 : const EdgeInsets.all(0),
         child: index == 0

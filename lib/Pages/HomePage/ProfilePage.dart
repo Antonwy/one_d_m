@@ -10,6 +10,7 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
+import 'package:one_d_m/Pages/PaymentInfosPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -68,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage>
                         Consumer<UserManager>(
                           builder: (context, um, child) => Container(
                             child: Avatar(
-                              um.user?.imgUrl,
+                              um.user?.thumbnailUrl ?? um.user.imgUrl,
                               onTap: () {
                                 Navigator.push(context, UserPageRoute(um.user));
                               },
@@ -108,7 +109,10 @@ class _ProfilePageState extends State<ProfilePage>
                                   Icons.credit_card, // toPage: BuyCoinsPage(),
                               // toPage: BuyCoinsPage(),
                               onTap: () {
-                                DatabaseService().updateDatabase();
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (c) => PaymentInfosPage()));
                               },
                             ),
                             SizedBox(

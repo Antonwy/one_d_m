@@ -40,6 +40,8 @@ exports.onCreateDonation = functions.firestore
         daily_amount: admin.firestore.FieldValue.increment(donation.amount),
         monthly_amount: admin.firestore.FieldValue.increment(donation.amount),
         yearly_amount: admin.firestore.FieldValue.increment(donation.amount),
+        donations_count: admin.firestore.FieldValue.increment(1),
+        all_donations: admin.firestore.FieldValue.increment(donation.amount),
       });
 
     // get followed Users of the donation author

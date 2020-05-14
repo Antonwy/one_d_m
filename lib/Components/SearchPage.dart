@@ -44,7 +44,6 @@ class _SearchPageState extends State<SearchPage> {
                             BackButton(),
                             Expanded(
                               child: TextField(
-                                textCapitalization: TextCapitalization.words,
                                 onChanged: (text) {
                                   setState(() {
                                     _query = text;

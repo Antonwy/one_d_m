@@ -64,8 +64,15 @@ class _NavBarState extends State<NavBar> {
                 width: _mq.size.width,
                 curve: Curves.fastLinearToSlowEaseIn,
                 decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          color: ColorTheme.black.withOpacity(.10),
+                          blurRadius: 30,
+                          offset: Offset(0, -5)),
+                    ],
                     color: ColorTheme.navBar,
-                    borderRadius: BorderRadius.circular(30)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(30))),
                 child: AnimatedOpacity(
                   curve: Curves.fastLinearToSlowEaseIn,
                   duration: _animDuration,
@@ -155,7 +162,8 @@ class _NavBarState extends State<NavBar> {
                     child: Icon(
                       _iconList[i],
                       color: ColorTween(
-                              begin: ColorTheme.navBar, end: Colors.white)
+                              begin: ColorTheme.navBar,
+                              end: ColorTheme.navBarDisabled)
                           .transform(
                               _getAnimatedValue(i, _npm?.position ?? 1.0)),
                     ),

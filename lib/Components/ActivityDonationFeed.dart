@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -15,16 +16,23 @@ class ActivityDonationFeed extends StatelessWidget {
           if (snapshot.hasData) {
             List<Donation> donations = snapshot.data;
 
+
             if (donations.isEmpty)
-              return SliverFillRemaining(
+              return SliverToBoxAdapter(
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: Column(
                     children: <Widget>[
+                      SizedBox(height: 30),
+                      SvgPicture.asset(
+                        "assets/images/no-donations.svg",
+                        height: 200,
+                      ),
                       SizedBox(height: 20),
-                      Image.asset("assets/images/clip-no-comments.png"),
                       Text(
-                          "Keiner deiner Freunde hat bis jetzt etwas gespendet."),
+                        "Keiner deiner Freunde hat bis jetzt etwas gespendet.",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                 ),

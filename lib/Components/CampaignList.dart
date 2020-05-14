@@ -28,12 +28,13 @@ class _CampaignListState extends State<CampaignList> {
             ),
             Text(
               widget.emptyMessage,
-              style: Theme.of(context).textTheme.body2,
+              style: Theme.of(context).textTheme.bodyText2,
             ),
           ],
         )),
       );
     }
+
     return SliverList(
         delegate: SliverChildListDelegate(_buildChildren(widget.campaigns)));
   }

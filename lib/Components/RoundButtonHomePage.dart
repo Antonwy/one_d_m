@@ -39,7 +39,7 @@ class RoundButtonHomePage extends StatelessWidget {
           },
           child: Icon(
             icon,
-            color: ColorTheme.white,
+            color: ColorTheme.whiteBlue,
           ),
         ),
       ),

@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 
 class ColorTheme {
-  static final Color black = Helper.hexToColor("#000000");
-  static final Color darkBlue = Helper.hexToColor("#293241");
-  static final Color blue = Helper.hexToColor("#3d5a80");
-  static final Color lightBlue = Helper.hexToColor("#98c1d9");
-  static final Color whiteBlue = Helper.hexToColor("#e0fbfc");
-  static final Color red = Helper.hexToColor("#ee6c4d");
-  static final Color orange = Helper.hexToColor("#fca311");
-  static final Color lightGrey = Helper.hexToColor("#e5e5e5");
-  static final Color white = Helper.hexToColor("#ffffff");
+  static const Color black = Color.fromARGB(255, 0, 0, 0);
+  static const Color white = Color.fromARGB(255, 255, 255, 255);
 
-  static final Color homePage = white;
-  static final Color navBar = blue;
-  static final Color navBarHighlight = white;
-  static final Color percentSlider = red;
-  static final Color profilePageRoundButton = blue;
-  static final Color donationWidget = darkBlue;
-  static final Color donationWidgetText = whiteBlue;
-  static final Color textOnDark = white;
-  static final Color avatar = blue;
+  static const Color blue = Color.fromARGB(255, 19, 33, 60);
+  static const Color red = Color.fromARGB(255, 252, 163, 16);
+  static const Color green = Color.fromARGB(255, 0, 191, 166);
+  static const Color orange = Color.fromARGB(255, 252, 163, 16);
+  static const Color yellow = Color.fromARGB(255, 253, 205, 89);
+
+  static const Color lightBlue = Color.fromARGB(255, 246, 245, 250);
+  static const Color whiteBlue = Color.fromARGB(255, 246, 245, 250);
+  static const Color lightGrey = Color.fromARGB(255, 246, 245, 250);
+
+  static const Color darkOrange = Color.fromARGB(255, 255, 100, 86);
+
+  static const Color homePage = white;
+  static const Color navBar = whiteBlue;
+  static const Color navBarHighlight = blue;
+  static const Color navBarDisabled = Color.fromARGB(150, 19, 33, 60);
+  static const Color percentSlider = red;
+  static const Color profilePageRoundButton = red;
+  static const Color donationWidget = blue;
+  static const Color donationWidgetText = whiteBlue;
+  static const Color textOnDark = white;
+  static const Color avatar = blue;
 }

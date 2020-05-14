@@ -2,6 +2,16 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { Campaign } from './types';
 
+exports.onUpdateCampaign = functions.firestore
+  .document('campaigns/{campaignId}')
+  .onCreate(async (snapshot, context) => {
+    return admin
+      .firestore()
+      .collection('statistics')
+      .doc('campaigns_info')
+      .update({ campaign_count: admin.firestore.FieldValue.increment(1) });
+  });
+
 exports.onDeleteCampaign = functions.firestore
   .document('campaigns/{campaignId}')
   .onDelete(async (snapshot, context) => {
@@ -50,6 +60,12 @@ exports.onDeleteCampaign = functions.firestore
 
     // deleting campaign
     await admin.firestore().collection('campaigns').doc(campaignId).delete();
+
+    return admin
+      .firestore()
+      .collection('statistics')
+      .doc('campaigns_info')
+      .update({ campaign_count: admin.firestore.FieldValue.increment(-1) });
   });
 
 exports.onUpdateCampaign = functions.firestore

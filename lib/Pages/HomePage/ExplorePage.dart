@@ -9,6 +9,7 @@ import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 import 'package:provider/provider.dart';
 
@@ -37,7 +38,7 @@ class _ExplorePageState extends State<ExplorePage>
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
           centerTitle: false,
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
@@ -64,13 +65,23 @@ class _ExplorePageState extends State<ExplorePage>
                           color: ColorTheme.blue,
                           borderRadius: BorderRadius.circular(20),
                           clipBehavior: Clip.antiAlias,
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (c) => FindFriendsPage()));
-                            },
+                          child: Consumer<UserManager>(
+                            builder: (context, um, child) => InkWell(
+                              onTap: () async {
+                                List<String> userIds =
+                                    await DatabaseService.getFriends(um.uid);
+
+                                if (userIds.isEmpty) return;
+
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (c) => FindFriendsPage(
+                                              userIds: userIds,
+                                            )));
+                              },
+                              child: child,
+                            ),
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8.0),
@@ -107,21 +118,9 @@ class _ExplorePageState extends State<ExplorePage>
             ),
           ),
         ),
-        // StreamBuilder<List<User>>(
-        //     stream: _userStream,
-        //     builder: (context, snapshot) {
-        //       if (!snapshot.hasData) return SliverToBoxAdapter();
-        //       if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-        //       return SliverToBoxAdapter(
-        //         child: Container(
-        //           height: 110,
-        //           child: UserAvatarList(snapshot.data),
-        //         ),
-        //       );
-        //     }),
         SliverToBoxAdapter(
           child: Container(
-              height: 115,
+              height: 95,
               margin: EdgeInsets.symmetric(vertical: 18),
               child: CategoriesList((catId) {
                 setState(() {
@@ -140,63 +139,4 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class UserAvatarList extends StatelessWidget {
-  final List<User> userList;
-
-  UserAvatarList(this.userList);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: userList.length + 1,
-      separatorBuilder: (context, index) => SizedBox(
-        width: 10,
-      ),
-      itemBuilder: (context, index) => Padding(
-        padding: index == 0
-            ? const EdgeInsets.only(left: 18.0)
-            : index == userList.length
-                ? const EdgeInsets.only(right: 18.0)
-                : const EdgeInsets.all(0),
-        child: index == 0
-            ? _getAddFriendsButton()
-            : UserAvatar(userList[index - 1]),
-      ),
-    );
-  }
-
-  _getAddFriendsButton() {
-    return Container(
-      height: 110,
-      width: 70,
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: 70,
-            height: 70,
-            child: OpenContainer(
-              tappable: true,
-              closedColor: ColorTheme.avatar,
-              closedShape: CircleBorder(),
-              openBuilder: (context, close) => FindFriendsPage(),
-              closedBuilder: (context, open) => Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          Text(
-            "Freunde finden",
-            textAlign: TextAlign.center,
-          )
-        ],
-      ),
-    );
-  }
 }

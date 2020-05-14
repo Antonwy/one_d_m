@@ -8,7 +8,6 @@ import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/ImageUrl.dart';
 import 'StorageService.dart';
 import 'User.dart';
 
@@ -18,7 +17,6 @@ enum Status {
   Authenticating,
   Unauthenticated,
   Unverified,
-  NEEDSMOREINFORMATION
 }
 
 class UserManager extends ChangeNotifier {
@@ -37,21 +35,23 @@ class UserManager extends ChangeNotifier {
 
   String get uid => _fireUser.uid;
   FirebaseUser get fireUser => _fireUser;
-  set fireUser(FirebaseUser firebaseUser) => _fireUser = firebaseUser;
+  set fireUser(FirebaseUser fUser) {
+    _fireUser = fUser;
+  }
+
   FirebaseAuth get auth => _auth;
 
   UserManager.instance() : _auth = FirebaseAuth.instance {
     _auth.onAuthStateChanged.listen(_onAuthStateChanged);
   }
 
-  void initListener(DocumentSnapshot qs) {
-    _user = User.fromSnapshot(qs);
-    notifyListeners();
-  }
-
   Future<User> getUser() async {
     if (user != null) return _user;
     return DatabaseService.getUser((await _auth.currentUser()).uid);
+  }
+
+  Future<void> delete() {
+    return fireUser.delete();
   }
 
   Future<ApiResult<FirebaseUser>> signIn(String email, String password) async {
@@ -60,11 +60,10 @@ class UserManager extends ChangeNotifier {
       notifyListeners();
       AuthResult res = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-      _status = Status.Authenticated;
-      notifyListeners();
       return ApiSuccess(data: res.user);
     } on PlatformException catch (e) {
       _status = Status.Unauthenticated;
+      notifyListeners();
       return ApiError(e.message);
     }
   }
@@ -121,8 +120,16 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult<FirebaseUser>> signUp(User user, File image) async {
     try {
-      _status = Status.Authenticating;
-      notifyListeners();
+      status = Status.Authenticating;
+
+      if (!await DatabaseService.checkUsernameAvailable(user.name)) {
+        status = Status.Unauthenticated;
+        return ApiError(
+            "Nutzername gibt es bereits, bitte wähle einen anderen!");
+      }
+
+      print(user);
+
       AuthResult res = await _auth.createUserWithEmailAndPassword(
           email: user.email, password: user.password);
 
@@ -135,49 +142,43 @@ class UserManager extends ChangeNotifier {
       user.id = res.user.uid;
       await DatabaseService.addUser(user);
       _user = user;
-      _status = Status.Authenticated;
-      notifyListeners();
       return ApiSuccess(data: res.user);
     } on PlatformException catch (e) {
       _status = Status.Unauthenticated;
+      notifyListeners();
       return ApiError(e.message);
     }
   }
 
-  Future<void> updateUser() async {
+  Future<ApiResult> updateUser(User updatedUser) async {
+    if (updatedUser.name != user.name &&
+        !await DatabaseService.checkUsernameAvailable(user.name)) {
+      return ApiError("Nutzername existiert bereits!");
+    }
+    user.name = updatedUser.name;
+    user.imgUrl = updatedUser.imgUrl;
+    user.thumbnailUrl = updatedUser.thumbnailUrl;
+    user.phoneNumber = updatedUser.phoneNumber;
     await DatabaseService.updateUser(user);
+    return ApiSuccess();
   }
 
   Future<void> logout() async {
     await _auth.signOut();
-    _status = Status.Unauthenticated;
-    notifyListeners();
+    status = Status.Unauthenticated;
   }
 
   Future<void> _onAuthStateChanged(FirebaseUser firebaseUser) async {
     if (firebaseUser == null) {
-      _status = Status.Unauthenticated;
+      status = Status.Unauthenticated;
     } else {
-      if (!firebaseUser.isEmailVerified)
-        _status = Status.Unverified;
-      else {
-        DocumentSnapshot userDoc = await Firestore.instance
-            .collection('user')
-            .document(firebaseUser.uid)
-            .get(source: Source.serverAndCache);
-        if (!userDoc.exists) {
-          _status = Status.NEEDSMOREINFORMATION;
-        } else {
-          Firestore.instance
-              .collection("user")
-              .document(firebaseUser.uid)
-              .snapshots()
-              .listen(initListener);
-          _status = Status.Authenticated;
-        }
-      }
       _fireUser = firebaseUser;
+      _user = await DatabaseService.getUser(firebaseUser.uid);
+      if (!firebaseUser.isEmailVerified) {
+        status = Status.Unverified;
+      } else {
+        status = Status.Authenticated;
+      }
     }
-    notifyListeners();
   }
 }

@@ -25,7 +25,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
   const id = splittedName[1];
 
   if (imageType === 'news') {
-    if (resulution == '1080x1920')
+    if (resulution === '1080x1920')
       await firestore
         .collection('news')
         .doc(id)
@@ -36,7 +36,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
           { merge: true }
         );
   } else if (imageType === 'campaign') {
-    if (resulution == '1080x1920')
+    if (resulution === '1080x1920')
       await firestore
         .collection('campaigns')
         .doc(id)
@@ -57,7 +57,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
           { merge: true }
         );
   } else {
-    if (resulution == '1080x1920')
+    if (resulution === '1080x1920')
       await firestore
         .collection('user')
         .doc(id)

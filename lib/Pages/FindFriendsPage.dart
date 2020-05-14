@@ -1,115 +1,95 @@
+import 'dart:collection';
+
 import 'package:async/async.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class FindFriendsPage extends StatefulWidget {
-  @override
-  _FindFriendsPageState createState() => _FindFriendsPageState();
-}
+class FindFriendsPage extends StatelessWidget {
+  bool afterRegister;
+  List<String> userIds;
 
-class _FindFriendsPageState extends State<FindFriendsPage> {
+  FindFriendsPage({this.afterRegister = false, this.userIds});
+
   TextTheme _textTheme;
-  List<Contact> _contacts;
   AsyncMemoizer<List<User>> _memoizer = AsyncMemoizer();
-
-  @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((d) => _getContacts());
-
-    super.initState();
-  }
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: ColorTheme.avatar,
-      appBar: AppBar(
-        backgroundColor: ColorTheme.avatar,
-        elevation: 0,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Text(
-              "Freunde finden",
-              style: _textTheme.title.copyWith(color: Colors.white),
+      appBar: afterRegister
+          ? null
+          : AppBar(
+              brightness: Brightness.dark,
+              backgroundColor: ColorTheme.avatar,
+              elevation: 0,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Text(
-              "Wir nutzen die Nummern deines Telefonbuchs und gleichen sie mit unserer Datenbank ab.",
-              style: _textTheme.caption.copyWith(color: Colors.white),
+      floatingActionButton: afterRegister
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (c) => HomePage()));
+              },
+              backgroundColor: ColorTheme.red,
+              child: Icon(Icons.arrow_forward),
+            )
+          : null,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+              height: 30,
             ),
-          ),
-          SizedBox(
-            height: 18,
-          ),
-          _contacts == null
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                  child: RaisedButton(
-                    onPressed: _getContacts,
-                    child: Text("Freunde finden"),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: Text(
+                afterRegister ? "Letzter Schritt!" : "Freunde finden",
+                style: _textTheme.headline5.copyWith(color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: Text(
+                "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
+                style: _textTheme.subtitle2.copyWith(color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              height: 18,
+            ),
+            Expanded(
+                child: ListView.builder(
+              itemCount: userIds.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5),
+                  child: UserButton(
+                    userIds[index],
+                    color: ColorTheme.blue,
+                    textStyle: TextStyle(color: Colors.white),
+                    elevation: 0,
                   ),
-                )
-              : Expanded(
-                  child: FutureBuilder<List<User>>(
-                      future: _memoizer.runOnce(() =>
-                          DatabaseService.getUsersFromContacts(_contacts)),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData)
-                          return Align(
-                              alignment: Alignment.topLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.all(18.0),
-                                child: CircularProgressIndicator(
-                                  valueColor:
-                                      AlwaysStoppedAnimation(Colors.white),
-                                ),
-                              ));
-                        if (snapshot.data.isEmpty)
-                          return Align(
-                              alignment: Alignment.topLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.all(18.0),
-                                child: Text(
-                                  "Keiner deiner Freunde nutzt die App bis jetzt.",
-                                  style: _textTheme.body1
-                                      .copyWith(color: Colors.white),
-                                ),
-                              ));
-                        return ListView.builder(
-                          itemCount: snapshot.data.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 18.0, vertical: 5),
-                              child: UserButton(
-                                snapshot.data[index].id,
-                                user: snapshot.data[index],
-                                color: ColorTheme.blue,
-                                textStyle: TextStyle(color: Colors.white),
-                                elevation: 0,
-                              ),
-                            );
-                          },
-                        );
-                      }),
-                ),
-        ],
+                );
+              },
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -117,15 +97,35 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
   Future<void> _getContacts() async {
     final PermissionStatus permissionStatus = await _getPermission();
     if (permissionStatus != PermissionStatus.granted) {
-      Scaffold.of(context).showSnackBar(SnackBar(
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
           content: Text(
               "Bitte erteile uns die Berechtigung deine Kontakte zu lesen.")));
       return;
     } else {
       Iterable<Contact> contacts = await ContactsService.getContacts();
-      setState(() {
-        _contacts = contacts.toList();
-      });
+
+      Set<String> numbers = HashSet();
+
+      for (Contact c in contacts) {
+        List<String> contactNumbers =
+            c.phones.map((item) => item.value).toList();
+        numbers.addAll(contactNumbers);
+        List<String> tempContactNumbers = List.of(contactNumbers);
+
+        for (String number in tempContactNumbers) {
+          if (number.startsWith("+49")) {
+            numbers.add(number.replaceFirst("+49", "0"));
+          } else if (number.startsWith("0")) {
+            numbers.add(number.replaceFirst("0", "+49"));
+          } else {
+            numbers.remove(number);
+          }
+        }
+      }
+
+      CloudFunctions.instance
+          .getHttpsCallable(functionName: "httpFunctions-findFriends")
+          .call(numbers.toList());
     }
   }
 

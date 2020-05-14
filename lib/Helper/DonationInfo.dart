@@ -6,14 +6,18 @@ class DonationInfo {
       monthlyAmount,
       monthlyAmountTarget,
       yearlyAmount,
-      yearlyAmountTarget;
+      yearlyAmountTarget,
+      donationsCount,
+      allDonations;
 
   static final String DAILYAMOUNT = "daily_amount",
       DAILYAMOUNTTARGET = "daily_amount_target",
       MONTHLYAMOUNT = "monthly_amount",
       MONTHLYAMOUNTTARGET = "monthly_amount_target",
       YEARLYAMOUNT = "yearly_amount",
-      YEARLYAMOUNTTARGET = "yearly_amount_target";
+      YEARLYAMOUNTTARGET = "yearly_amount_target",
+      DONATIONSCOUNT = "donations_count",
+      ALLDONATIONS = "all_donations";
 
   DonationInfo(
       {this.dailyAmount,
@@ -21,16 +25,19 @@ class DonationInfo {
       this.monthlyAmount,
       this.monthlyAmountTarget,
       this.yearlyAmount,
-      this.yearlyAmountTarget});
+      this.yearlyAmountTarget,
+      this.donationsCount,
+      this.allDonations});
 
   static DonationInfo fromSnapshot(DocumentSnapshot ds) {
     return DonationInfo(
-      dailyAmount: ds[DAILYAMOUNT],
-      dailyAmountTarget: ds[DAILYAMOUNTTARGET],
-      monthlyAmount: ds[MONTHLYAMOUNT],
-      monthlyAmountTarget: ds[MONTHLYAMOUNTTARGET],
-      yearlyAmount: ds[YEARLYAMOUNT],
-      yearlyAmountTarget: ds[YEARLYAMOUNTTARGET],
-    );
+        dailyAmount: ds[DAILYAMOUNT],
+        dailyAmountTarget: ds[DAILYAMOUNTTARGET],
+        monthlyAmount: ds[MONTHLYAMOUNT],
+        monthlyAmountTarget: ds[MONTHLYAMOUNTTARGET],
+        yearlyAmount: ds[YEARLYAMOUNT],
+        yearlyAmountTarget: ds[YEARLYAMOUNTTARGET],
+        donationsCount: ds[DONATIONSCOUNT],
+        allDonations: ds[ALLDONATIONS]);
   }
 }

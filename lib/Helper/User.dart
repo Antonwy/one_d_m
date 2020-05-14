@@ -1,20 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  String email,
-      firstname,
-      lastname,
-      password,
-      id,
-      phoneNumber,
-      imgUrl,
-      thumbnailUrl;
+  String email, name, password, id, phoneNumber, imgUrl, thumbnailUrl;
   int donatedAmount;
   bool admin;
   List<String> subscribedCampaignsIds = [];
 
-  static final String FIRSTNAME = "first_name",
-      LASTNAME = "last_name",
+  static final String NAME = "name",
       EMAIL = "email_address",
       PHONE_NUMBER = "phone_number",
       ADMIN = "admin",
@@ -25,8 +17,7 @@ class User {
 
   User(
       {this.email,
-      this.firstname,
-      this.lastname,
+      this.name,
       this.password,
       this.id,
       this.donatedAmount = 0,
@@ -41,8 +32,7 @@ class User {
     if (snapshot.data == null) return User();
     return User(
         id: snapshot.documentID,
-        firstname: snapshot[User.FIRSTNAME],
-        lastname: snapshot[User.LASTNAME],
+        name: snapshot[User.NAME] ?? "No name",
         admin: snapshot[User.ADMIN],
         donatedAmount: snapshot[DONATEDAMOUNT],
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
@@ -58,8 +48,7 @@ class User {
 
   Map<String, dynamic> publicDataToMap() {
     return {
-      FIRSTNAME: firstname,
-      LASTNAME: lastname,
+      NAME: name,
       ADMIN: false,
       IMAGEURL: imgUrl,
       SUBSCRIBEDCAMPAIGNS: [],
@@ -76,6 +65,6 @@ class User {
 
   @override
   String toString() {
-    return 'User{email: $email, firstname: $firstname, lastname: $lastname, password: $password, profileImage: $imgUrl, id: $id}';
+    return 'User{email: $email, name: $name, password: $password, profileImage: $imgUrl, id: $id}';
   }
 }

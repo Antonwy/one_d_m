@@ -32,7 +32,7 @@ class FollowButton extends StatelessWidget {
               child: TweenAnimationBuilder(
                   tween: ColorTween(
                       begin: Colors.indigo,
-                      end: followed ? Colors.white : ColorTheme.darkBlue),
+                      end: followed ? Colors.white : Colors.black),
                   duration: _duration,
                   builder: (context, color, child) =>
                       Icon(Icons.add, color: color))),

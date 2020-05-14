@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
-import 'package:one_d_m/Pages/RegisterPage.dart';
 import 'package:provider/provider.dart';
 import 'UserPageRoute.dart';
 
@@ -22,10 +22,8 @@ class SettingsDialog extends StatelessWidget {
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       child: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Theme(
-          data: Theme.of(context).copyWith(
-            textTheme: _textTheme,
-          ),
+        child: DefaultTextStyle(
+          style: TextStyle(color: ColorTheme.blue),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -47,18 +45,19 @@ class SettingsDialog extends StatelessWidget {
                             padding: const EdgeInsets.all(5.0),
                             child: Container(
                               child: Avatar(
-                                  um.user?.thumbnailUrl ?? um.user.imgUrl),
+                                  um.user?.thumbnailUrl ?? um.user?.imgUrl),
                               width: 50,
                               height: 50,
                             ),
                           ),
-                          color: Colors.white,
+                          color: ColorTheme.red,
                           shape: CircleBorder(),
                         ),
                         SizedBox(width: 10),
                         Text(
-                          "${um.user.firstname} ${um.user.lastname}",
-                          style: _textTheme.title,
+                          "${um.user?.name}",
+                          style: _textTheme.headline6
+                              .copyWith(color: ColorTheme.blue),
                         )
                       ],
                     ),
@@ -72,7 +71,6 @@ class SettingsDialog extends StatelessWidget {
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.white,
                 ),
                 onTap: () {
                   Navigator.push(context,
@@ -85,7 +83,6 @@ class SettingsDialog extends StatelessWidget {
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.white,
                 ),
                 onTap: () async {
                   Navigator.push(
@@ -96,11 +93,10 @@ class SettingsDialog extends StatelessWidget {
               ),
               ListTile(
                 title: Text("Profil Einstellungen"),
-                subtitle: Text("${um.user.firstname} ${um.user.lastname}"),
+                subtitle: Text("${um.user?.name}"),
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.white,
                 ),
                 onTap: () async {
                   Navigator.push(context,
@@ -112,7 +108,6 @@ class SettingsDialog extends StatelessWidget {
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.white,
                 ),
                 onTap: () async {
                   showLicensePage(context: context);
@@ -123,7 +118,6 @@ class SettingsDialog extends StatelessWidget {
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.white,
                 ),
                 onTap: () async {
                   showAboutDialog(
@@ -137,12 +131,13 @@ class SettingsDialog extends StatelessWidget {
                 trailing: Icon(
                   Icons.power_settings_new,
                   size: 24,
-                  color: Colors.white,
                 ),
                 onTap: () async {
                   await um.logout();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (c) => RegisterPage()));
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) => ChooseLoginMethodPage()));
                 },
               ),
               SizedBox(height: 20),

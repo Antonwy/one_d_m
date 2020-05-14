@@ -20,7 +20,7 @@ class UserAvatar extends StatelessWidget {
       ),
       SizedBox(height: 5),
       Text(
-        "${user.firstname ?? "Laden..."}\n${user.lastname ?? ""}",
+        "${user.name ?? "Laden..."}",
         textAlign: TextAlign.center,
       )
     ]);

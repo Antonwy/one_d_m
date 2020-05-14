@@ -3,7 +3,8 @@ import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
-import 'package:one_d_m/Pages/RegisterPage.dart';
+import 'package:one_d_m/Pages/VerifyEmailPage.dart';
+import 'package:one_d_m/Pages/WelcomeScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
@@ -31,26 +32,24 @@ class _MyAppState extends State<MyApp> {
       title: 'One Dollar Movement',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          appBarTheme: AppBarTheme(brightness: Brightness.light),
-          primarySwatch: Colors.indigo,
-          pageTransitionsTheme: PageTransitionsTheme(builders: {
-            TargetPlatform.android: ZoomPageTransitionsBuilder(),
-            TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-          }),
-          textTheme: TextTheme(
-              title: TextStyle(
-                  fontWeight: FontWeight.w600, color: ColorTheme.darkBlue))),
+        appBarTheme: AppBarTheme(brightness: Brightness.light),
+        primarySwatch: Colors.indigo,
+        pageTransitionsTheme: PageTransitionsTheme(builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        }),
+      ),
       home: Consumer<UserManager>(builder: (context, um, child) {
         switch (um.status) {
           case Status.Uninitialized:
             return Splash();
           case Status.Authenticated:
             return HomePage();
-          case Status.NEEDSMOREINFORMATION:
           case Status.Unverified:
+            return VerifyEmailPage();
           case Status.Unauthenticated:
           case Status.Authenticating:
-            return RegisterPage();
+            return WelcomeScreen();
           default:
             return Splash();
         }

@@ -6,6 +6,7 @@ import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -127,7 +128,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                       height: mq.size.height - _headerHeight,
                                     ),
                                     Text(
-                                        "${um.uid == user.id ? "Du" : "${user.firstname} ${user.lastname}"} ${um.uid == user.id ? "hast" : "hat"} noch keine Projekte abonniert!"),
+                                        "${um.uid == user.id ? "Du" : "${user.name}"} ${um.uid == user.id ? "hast" : "hat"} noch keine Projekte abonniert!"),
                                     SizedBox(
                                       height: 10,
                                     ),
@@ -209,10 +210,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                             builder: (context, child) {
                               return Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.indigo,
+                                  color: ColorTheme.blue,
                                   boxShadow: [
                                     BoxShadow(
-                                        color: Colors.indigo.withOpacity(.2),
+                                        color: ColorTheme.blue.withOpacity(.2),
                                         blurRadius: 10,
                                         offset: Offset(0, 10))
                                   ],
@@ -268,7 +269,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                                   Expanded(child: Container()),
                                                   Center(
                                                     child: Text(
-                                                      "${user?.firstname} ${user?.lastname}",
+                                                      "${user?.name}",
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
@@ -385,14 +386,14 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                         animation: _controller,
                         builder: (context, child) {
                           return AppBar(
+                            brightness: Brightness.dark,
                             elevation: 0,
                             backgroundColor: Colors.transparent,
                             title: FadeTransition(
                                 opacity: CurvedAnimation(
                                     parent: _controller,
                                     curve: Interval(.85, 1.0)),
-                                child:
-                                    Text("${user.firstname} ${user.lastname}")),
+                                child: Text("${user.name}")),
                             leading: IconButton(
                                 icon: Icon(
                                   Icons.arrow_back_ios,

@@ -37,15 +37,22 @@ class UserButton extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Avatar(
-                          snapshot.data?.thumbnailUrl ?? snapshot.data.imgUrl),
-                      SizedBox(width: 10),
-                      Text(
-                        "${snapshot.data.firstname} ${snapshot.data.lastname}",
-                        style:
-                            Theme.of(context).textTheme.title.merge(textStyle),
-                      )
+                      Row(
+                        children: <Widget>[
+                          Avatar(snapshot.data?.thumbnailUrl ??
+                              snapshot.data.imgUrl),
+                          SizedBox(width: 10),
+                          Text(
+                            "${snapshot.data.name}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .title
+                                .merge(textStyle),
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 ),

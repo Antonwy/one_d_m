@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/CreditCardWidget.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +36,7 @@ class PaymentInfosPage extends StatelessWidget {
               print(e);
             }
           },
+          backgroundColor: ColorTheme.blue,
           label: Text("Neue Karte"),
           icon: Icon(Icons.credit_card),
         ),
@@ -55,11 +58,17 @@ class PaymentInfosPage extends StatelessWidget {
                         SizedBox(
                           height: 20,
                         ),
-                        Image.asset("assets/images/credit-card.png"),
-                        SizedBox(
-                          height: 10,
+                        SvgPicture.asset(
+                          "assets/images/no-cards.svg",
+                          height: 200,
                         ),
-                        Text("Du hast noch keine Bezahlmethode hinzugefügt!")
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Du hast noch keine Bezahlmethode hinzugefügt!",
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        )
                       ],
                     ),
                   );

@@ -7,9 +7,7 @@ const stripe = new Stripe(functions.config().stripe.token, {
 });
 
 exports.onCreateAuthUser = functions.auth.user().onCreate(async (user) => {
-  const customer: Stripe.Customer = await stripe.customers.create({
-    email: user.email,
-  });
+  const customer: Stripe.Customer = await stripe.customers.create({});
 
   await admin
     .firestore()
@@ -25,10 +23,17 @@ exports.onCreateAuthUser = functions.auth.user().onCreate(async (user) => {
       } as PrivateUserData,
       { merge: true }
     );
+
+  return admin
+    .firestore()
+    .collection('statistics')
+    .doc('users_info')
+    .update({ user_count: admin.firestore.FieldValue.increment(1) });
 });
 
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
-  const userRef = admin.firestore().collection('user').doc(user.uid);
+  const firestore = admin.firestore();
+  const userRef = firestore.collection('user').doc(user.uid);
   const privateUserData: PrivateUserData = (
     await userRef.collection('private_data').doc('data').get()
   ).data() as PrivateUserData;
@@ -36,6 +41,15 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     async (c) => await c.ref.delete()
   );
   await userRef.collection('private_data').doc('data').delete();
+
+  (
+    await firestore
+      .collection('friends')
+      .doc(user.uid)
+      .collection('users')
+      .get()
+  ).forEach(async (doc) => await doc.ref.delete());
+
   if (privateUserData.customer_id !== undefined)
     await stripe.customers.del(privateUserData.customer_id);
 

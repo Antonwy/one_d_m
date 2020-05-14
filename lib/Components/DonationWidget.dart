@@ -98,7 +98,7 @@ class DonationWidget extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
-                                      "${snapshot.hasData ? "${user.firstname} ${user.lastname}" : "Laden..."}",
+                                      "${snapshot.hasData ? "${user.name}" : "Laden..."}",
                                       style: _textTheme.body1.copyWith(
                                           color: ColorTheme.white,
                                           fontWeight: FontWeight.bold),
@@ -169,14 +169,14 @@ class DonationWidget extends StatelessWidget {
                   children: <Widget>[
                     CampaignButton(
                       donation.campaignId,
-                      color: ColorTheme.blue,
+                      color: ColorTheme.navBar,
                       textStyle: _textTheme.title.copyWith(color: Colors.white),
                       elevation: 0,
                     ),
                     UserButton(
                       user.id,
                       user: user,
-                      color: ColorTheme.blue,
+                      color: ColorTheme.navBar,
                       elevation: 0,
                       textStyle: _textTheme.title.copyWith(color: Colors.white),
                     )
@@ -230,22 +230,23 @@ class DonationWidget extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
                                     Container(
-                                        height: 30,
-                                        width: 30,
+                                        height: 35,
+                                        width: 35,
                                         child: Avatar(
                                             snapshot.data?.thumbnailUrl ??
-                                                snapshot.data?.imgUrl)),
+                                                snapshot.data?.imgUrl,)),
                                     SizedBox(
                                       width: 10,
                                     ),
                                     Expanded(
+                                      
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            "${snapshot.hasData ? "${user.firstname} ${user.lastname}" : "Laden..."}",
+                                            "${snapshot.hasData ? "${user.name}" : "Laden..."}",
                                             style: _textTheme.body1.copyWith(
                                                 color: ColorTheme.white,
                                                 fontWeight: FontWeight.bold),

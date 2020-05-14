@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/User.dart';
@@ -146,7 +148,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                               CrossAxisAlignment.start,
                                           children: <Widget>[
                                             Material(
-                                              color: Colors.indigo[100],
+                                              color: ColorTheme.blue
+                                                  .withOpacity(.1),
                                               shape: CircleBorder(),
                                               child: Padding(
                                                 padding: EdgeInsets.all(8.0),
@@ -154,14 +157,14 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                   "\$",
                                                   style: TextStyle(
                                                       fontSize: 20,
-                                                      color: Colors.indigo),
+                                                      color: ColorTheme.blue),
                                                 ),
                                               ),
                                             ),
                                             SizedBox(height: 10),
                                             Text(
                                               "${values[index]}.00",
-                                              style: _theme.textTheme.title,
+                                              style: _theme.textTheme.headline6,
                                             ),
                                           ],
                                         ),
@@ -281,7 +284,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             elevation: 0,
-                            color: Colors.indigo,
+                            color: ColorTheme.blue,
                             disabledColor: Colors.grey,
                             onPressed:
                                 _amount != null && _alternativCampaign != null
@@ -317,10 +320,11 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Image.asset(
-                                "assets/images/thank-you.png",
+                              SvgPicture.asset(
+                                "assets/images/thank-you.svg",
                                 width: 300,
                               ),
+                              SizedBox(height: 20,),
                               Text(
                                 "Vielen dank für deine Spende!",
                                 style: _theme.textTheme.title,
@@ -333,7 +337,13 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                         ),
                       ),
                     )),
-                    Positioned(top: 20, right: 20, child: _closeButton())
+                    Positioned(
+                        top: 20,
+                        right: 20,
+                        child: AnimatedOpacity(
+                            duration: Duration(milliseconds: 250),
+                            opacity: _showThankYou ? 1 : 0,
+                            child: _closeButton()))
                   ],
                 );
               });

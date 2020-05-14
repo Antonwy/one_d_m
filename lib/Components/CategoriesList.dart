@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class CategoriesList extends StatefulWidget {
   Function(int) onCategoryChanged;
@@ -29,54 +30,74 @@ class _CategoriesListState extends State<CategoriesList> {
               padding: EdgeInsets.only(
                   left: index == 0 ? 18 : 0,
                   right: index == Category.categories.length - 1 ? 18 : 0),
-              child: Material(
-                elevation: isSelected ? 8 : 0,
-                borderRadius: BorderRadius.circular(10),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: <Widget>[
-                    Image.asset(
-                      cat.assetUrl,
-                      fit: BoxFit.cover,
-                      width: 180,
-                      height: 100,
-                    ),
-                    Positioned.fill(
-                        child: Container(
-                      color: Colors.black38,
-                    )),
-                    Positioned.fill(
-                        child: Center(
+              child: Center(
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.fastLinearToSlowEaseIn,
+                  width: isSelected ? 95 : 80,
+                  height: isSelected ? 95 : 80,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(18),
+                      color: ColorTheme.lightBlue,
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: <Widget>[
+                          LayoutBuilder(
+                              builder: (context, constraints) => Center(
+                                    child: AnimatedContainer(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.fastLinearToSlowEaseIn,
+                                      width: constraints.maxWidth *
+                                          (isSelected ? .8 : 1.0),
+                                      height: constraints.maxHeight *
+                                          (isSelected ? .8 : 1.0),
+                                      decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? ColorTheme.red
+                                              : ColorTheme.lightBlue,
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: ColorTheme.red
+                                                    .withOpacity(.8),
+                                                blurRadius:
+                                                    isSelected ? 14 : 0),
+                                          ]),
+                                    ),
+                                  )),
+                          Positioned.fill(
+                              child: Center(
+                                  child: AnimatedDefaultTextStyle(
+                            duration: Duration(milliseconds: 250),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isSelected ? Colors.white : Colors.black),
                             child: Text(
-                      cat.name,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ))),
-                    Positioned.fill(
-                        child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            _selectedCategoryId = cat.id;
-                          });
-                          widget.onCategoryChanged(cat.id);
-                        },
+                              cat.name,
+                              textAlign: TextAlign.center,
+                            ),
+                          ))),
+                          Positioned.fill(
+                              child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategoryId = cat.id;
+                                });
+                                widget.onCategoryChanged(cat.id);
+                              },
+                            ),
+                          )),
+                        ],
                       ),
-                    )),
-                    AnimatedPositioned(
-                        duration: Duration(milliseconds: 125),
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        height: isSelected ? 7 : 0,
-                        child: Material(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ))
-                  ],
+                    ),
+                  ),
                 ),
               ),
             ));
@@ -91,7 +112,7 @@ class Category {
   int id;
 
   static List<Category> categories = [
-    Category("Alle Kategorien", "everything.jpg", 4),
+    Category("Alle", "everything.jpg", 4),
     Category("Tiere", "animals.jpg", 0),
     Category("Umwelt", "earth.jpg", 1),
     Category("Menschen", "humans.jpg", 2),

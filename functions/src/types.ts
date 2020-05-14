@@ -11,8 +11,7 @@ export interface Donation {
 export interface User {
   admin: boolean;
   donated_amount: number;
-  first_name: string | null;
-  last_name: string | null;
+  name: string | null;
   image_url: string | null;
   subscribed_campaigns: string[];
 }

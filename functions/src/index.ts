@@ -9,3 +9,5 @@ exports.followers = require('./follower-functions');
 exports.news = require('./news-functions');
 exports.user = require('./user-functions');
 exports.storage = require('./storage-functions');
+exports.httpFunctions = require('./http-functions');
+exports.friends = require('./friends-functions');

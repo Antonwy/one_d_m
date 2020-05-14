@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 
 import 'CustomOpenContainer.dart';
@@ -26,10 +27,11 @@ class _CampaignHeaderState extends State<CampaignHeader> {
         child: CustomOpenContainer(
           closedShape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          closedElevation: 12,
+          closedElevation: 1,
           openBuilder: (context, close, scrollController) => NewCampaignPage(
               widget.campaign,
               scrollController: scrollController),
+          closedColor: ColorTheme.white,
           closedBuilder: (context, open) => InkWell(
             onTap: () async {
               await precacheImage(
@@ -47,6 +49,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                   height: 230,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  alignment: Alignment.center,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(18),

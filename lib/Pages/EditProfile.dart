@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:one_d_m/Helper/ImageUrl.dart';
+import 'package:one_d_m/Helper/API/ApiResult.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -20,8 +21,8 @@ class _EditProfileState extends State<EditProfile> {
   File _image;
   bool _deletedImage = false;
 
-  String _firstName, _lastName, _phoneNumber;
-
+  String _name, _phoneNumber;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool _loading = false;
 
   @override
@@ -31,7 +32,9 @@ class _EditProfileState extends State<EditProfile> {
     ImageProvider _imgWidget = _showImage();
 
     return Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
+          backgroundColor: ColorTheme.blue,
           title: Text("Profil ändern"),
           actions: <Widget>[
             Padding(
@@ -49,7 +52,12 @@ class _EditProfileState extends State<EditProfile> {
                           _loading = true;
                         });
 
-                        User currUser = um.user;
+                        User currUser = User(
+                            name: um.user.name,
+                            imgUrl: um.user.imgUrl,
+                            thumbnailUrl: um.user.thumbnailUrl,
+                            phoneNumber: um.user.phoneNumber);
+
                         if (_deletedImage) currUser.imgUrl = null;
                         if (_image != null) {
                           StorageService service = StorageService(file: _image);
@@ -57,17 +65,22 @@ class _EditProfileState extends State<EditProfile> {
                               StorageService.userImageName(um.uid));
                         }
 
-                        if (_firstName != null &&
-                            Validate.username(_firstName) == null)
-                          currUser.firstname = _firstName;
-                        if (_lastName != null &&
-                            Validate.username(_lastName) == null)
-                          currUser.lastname = _lastName;
+                        if (_name != null && Validate.username(_name) == null)
+                          currUser.name = _name;
                         if (_phoneNumber != null &&
                             Validate.telephone(_phoneNumber) == null)
                           currUser.phoneNumber = _phoneNumber;
 
-                        await um.updateUser();
+                        ApiResult res = await um.updateUser(currUser);
+
+                        if (res.hasError()) {
+                          _scaffoldKey.currentState.showSnackBar(
+                              SnackBar(content: Text(res.message)));
+                          setState(() {
+                            _loading = false;
+                          });
+                          return;
+                        }
 
                         Navigator.pop(context);
                       }),
@@ -112,16 +125,9 @@ class _EditProfileState extends State<EditProfile> {
               SizedBox(height: 20),
               _textView(
                   label: "Vorname",
-                  initValue: um.user.firstname,
+                  initValue: um.user.name,
                   onChanged: (text) {
-                    _firstName = text;
-                  }),
-              SizedBox(height: 10),
-              _textView(
-                  label: "Nachname",
-                  initValue: um.user.lastname,
-                  onChanged: (text) {
-                    _lastName = text;
+                    _name = text;
                   }),
               SizedBox(height: 10),
               _textView(

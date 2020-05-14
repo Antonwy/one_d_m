@@ -85,9 +85,20 @@ class _PlaceSearchState extends State<PlaceSearch> {
         SizedBox(
           height: 10,
         ),
-        OutlineButton(
-          onPressed: widget.onPrev,
-          child: Text("Zurück"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            OutlineButton(
+              onPressed: widget.onPrev,
+              child: Text("Zurück"),
+            ),
+            OutlineButton(
+              onPressed: () {
+                widget.onNext(Place(name: _controller.text));
+              },
+              child: Text("Weiter"),
+            ),
+          ],
         )
       ],
     );
@@ -101,15 +112,21 @@ class _PlaceSearchState extends State<PlaceSearch> {
       _loading = true;
     });
 
-    http.Response res = await http.get(reqUrl);
-
-    List<dynamic> body = json.decode(res.body);
+    List<dynamic> body;
+    try {
+      http.Response res = await http.get(reqUrl);
+      body = json.decode(res.body);
+    } catch (e) {
+      print(e);
+      return;
+    }
 
     List<Place> placesList = [];
 
     if (body.isNotEmpty) {
       for (dynamic place in body) {
-        if (place["type"] == "city") {
+        if (place["type"] == "city" || place["type"] == "administrative yo") {
+          print(place);
           Place p = Place.fromJson(place);
           placesList.add(p);
         }

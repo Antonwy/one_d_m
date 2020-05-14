@@ -87,7 +87,7 @@ class NewsPost extends StatelessWidget {
                       news.title,
                       style: Theme.of(context)
                           .textTheme
-                          .title
+                          .headline6
                           .copyWith(color: Colors.black),
                     ),
                     news.shortText.isEmpty ? Container() : SizedBox(height: 5),

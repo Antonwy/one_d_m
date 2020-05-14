@@ -70,7 +70,7 @@ class CreditCardWidget extends StatelessWidget {
                   children: <Widget>[
                     _columnWidget(
                         title: "CARD HOLDER",
-                        text: "${um.user.firstname} ${um.user.lastname}"),
+                        text: "${um.user.name}"),
                     Expanded(child: Container()),
                     Row(
                       children: <Widget>[

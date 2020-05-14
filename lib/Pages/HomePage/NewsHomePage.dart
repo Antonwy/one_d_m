@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -21,104 +24,117 @@ class _NewsHomePageState extends State<NewsHomePage>
   List<String> _subscribedCampaigns = [];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
 
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
+          brightness: Brightness.dark,
           elevation: 0,
-          backgroundColor: Colors.white,
+          backgroundColor: ColorTheme.blue,
           automaticallyImplyLeading: false,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 "Neuigkeiten",
-                style: _textTheme.title,
+                style:
+                    _textTheme.headline6.copyWith(color: ColorTheme.whiteBlue),
               ),
               Text(
                 "Updates deiner abonnierten Projekte",
-                style: _textTheme.body1,
+                style:
+                    _textTheme.bodyText1.copyWith(color: ColorTheme.whiteBlue),
               ),
+              SizedBox(
+                height: 10,
+              )
             ],
           ),
           centerTitle: false,
         ),
         Consumer<UserManager>(
           builder: (context, um, child) {
-            if (um.user.subscribedCampaignsIds != _subscribedCampaigns)
-              _newsFuture = DatabaseService.getNews(um.user);
-
-            _subscribedCampaigns = um.user.subscribedCampaignsIds;
-
-            return FutureBuilder<List<News>>(
-                future: _newsFuture,
+            return StreamBuilder<User>(
+                initialData: um.user,
+                stream: DatabaseService.getUserStream(um.uid),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
+                  User user = snapshot.data;
+                  if (user?.subscribedCampaignsIds != null &&
+                      user?.subscribedCampaignsIds != _subscribedCampaigns)
+                    _newsFuture = DatabaseService.getNews(user);
 
-                  if (_subscribedCampaigns.isEmpty)
-                    return SliverFillRemaining(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                              height: 50,
+                  _subscribedCampaigns = user?.subscribedCampaignsIds ?? [];
+                  return FutureBuilder<List<News>>(
+                      future: _newsFuture,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData)
+                          return SliverFillRemaining(
+                            child: Center(
+                              child: CircularProgressIndicator(),
                             ),
-                            Image.asset(
-                                "assets/images/clip-virtual-reality.png"),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text("Du hast noch keine abonnierten Projekte!")
-                          ],
-                        ),
-                      ),
-                    );
+                          );
 
-                  if (snapshot.data.isEmpty)
-                    return SliverFillRemaining(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                              height: 50,
+                        if (_subscribedCampaigns.isEmpty)
+                          return SliverFillRemaining(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Column(
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 50,
+                                  ),
+                                  SvgPicture.asset(
+                                    "assets/images/no-news.svg",
+                                    height: 200,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    "Du hast noch keine abonnierten Projekte!",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w500),
+                                  )
+                                ],
+                              ),
                             ),
-                            Image.asset(
-                                "assets/images/clip-virtual-reality.png"),
-                            SizedBox(
-                              height: 10,
+                          );
+
+                        if (snapshot.data.isEmpty)
+                          return SliverFillRemaining(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Column(
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 50,
+                                  ),
+                                  Image.asset(
+                                      "assets/images/clip-virtual-reality.png"),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                      "Keins deiner abonnierten Projekte hat bis jetzt etwas gepostet!")
+                                ],
+                              ),
                             ),
-                            Text(
-                                "Keins deiner abonnierten Projekte hat bis jetzt etwas gepostet!")
-                          ],
-                        ),
-                      ),
-                    );
-                  return SliverPadding(
-                    padding: EdgeInsets.only(top: 10),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate(snapshot.data
-                          .map((News news) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 18),
-                                child: NewsPost(news),
-                              ))
-                          .toList()),
-                    ),
-                  );
+                          );
+                        return SliverPadding(
+                          padding: EdgeInsets.only(top: 10),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate(snapshot.data
+                                .map((News news) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 18),
+                                      child: NewsPost(news),
+                                    ))
+                                .toList()),
+                          ),
+                        );
+                      });
                 });
           },
         ),

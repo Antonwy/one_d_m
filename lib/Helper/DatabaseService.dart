@@ -9,6 +9,7 @@ import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
+import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 import 'Campaign.dart';
 import 'Donation.dart';
@@ -20,6 +21,7 @@ class DatabaseService {
       USERS = "users",
       NEWS = "news",
       FEED = "feed",
+      FRIENDS = "friends",
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       FOLLOWING = "following",
       FOLLOWED = "followed",
@@ -50,38 +52,38 @@ class DatabaseService {
       firestore.collection(DONATIONFEED);
   static final CollectionReference statisticsCollection =
       firestore.collection(STATISTICS);
+  static final CollectionReference friendsCollection =
+      firestore.collection(FRIENDS);
+
+  static Future<bool> checkUsernameAvailable(String username) async {
+    return (await userCollection
+            .where(User.NAME, isEqualTo: username)
+            .getDocuments())
+        .documents
+        .isEmpty;
+  }
 
   static Future<void> addUser(User user) async {
-    userCollection.document(user.id).setData(user.publicDataToMap());
+    await userCollection.document(user.id).setData(user.publicDataToMap());
 
-    DocumentSnapshot doc = await userCollection
-        .document(user.id)
-        .collection(PRIVATEDATA)
-        .document(DATA)
-        .get();
-    if (doc.exists) {
-      return userCollection
-          .document(user.id)
+    return userCollection
+      ..document(user.id)
           .collection(PRIVATEDATA)
           .document(DATA)
-          .updateData(user.privateDataToMap());
-    } else {
-      return userCollection
-        ..document(user.id)
-            .collection(PRIVATEDATA)
-            .document(DATA)
-            .setData(user.privateDataToMap());
-    }
+          .setData(user.privateDataToMap(), merge: true);
   }
 
   static Future<void> updateUser(User user) async {
-    return userCollection.document(user.id).updateData({
-      User.FIRSTNAME: user.firstname,
-      User.LASTNAME: user.lastname,
+    await userCollection.document(user.id).updateData({
+      User.NAME: user.name,
       User.IMAGEURL: user.imgUrl,
       User.THUMBNAILURL: user.imgUrl == null ? null : user.thumbnailUrl,
-      User.PHONE_NUMBER: user.phoneNumber
     });
+    return userCollection
+        .document(user.id)
+        .collection(PRIVATEDATA)
+        .document(DATA)
+        .updateData({User.PHONE_NUMBER: user.phoneNumber});
   }
 
   static Future<User> getUser(String uid) async {
@@ -138,30 +140,15 @@ class DatabaseService {
   }
 
   static Future<List<User>> getUsersFromQuery(String query) async {
-    QuerySnapshot firstnameSnapshot = await userCollection
-        .where(User.FIRSTNAME, isGreaterThanOrEqualTo: query)
-        .limit(5)
-        .getDocuments();
-    QuerySnapshot lastnameSnapshot = await userCollection
-        .where(User.LASTNAME, isGreaterThanOrEqualTo: query)
+    QuerySnapshot nameSnapshot = await userCollection
+        .where(User.NAME, isGreaterThanOrEqualTo: query)
         .limit(5)
         .getDocuments();
 
-    List<User> firstnameList =
-        firstnameSnapshot.documents.map(User.fromSnapshot).toList();
+    List<User> nameList =
+        nameSnapshot.documents.map(User.fromSnapshot).toList();
 
-    Map<String, User> userMap = Map.fromIterable(firstnameList,
-        key: (user) => user.id, value: (user) => user);
-
-    List<User> lastnameList =
-        lastnameSnapshot.documents.map(User.fromSnapshot).toList();
-
-    userMap.addAll(Map.fromIterable(lastnameList,
-        key: (user) => user.id, value: (user) => user));
-
-    userMap.removeWhere((String str, User user) =>
-        !user.firstname.contains(query) && !user.lastname.contains(query));
-    return userMap.values.toList();
+    return nameList;
   }
 
   static Future<void> createSubscription(Campaign campaign, String uid) async {
@@ -348,6 +335,10 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
+  static Stream<Statistics> getStatistics() {
+    return statisticsCollection.snapshots().map(Statistics.fromQuerySnapshot);
+  }
+
   static Future<List<User>> getUsersFromContacts(List<Contact> contacts) async {
     List<User> userList = [];
 
@@ -418,5 +409,15 @@ class DatabaseService {
         .collection(CARDS)
         .snapshots()
         .map((qs) => qs.documents.isNotEmpty);
+  }
+
+  static Future<List<String>> getFriends(String uid) async {
+    return (await friendsCollection
+            .document(uid)
+            .collection('users')
+            .getDocuments())
+        .documents
+        .map((doc) => doc.documentID)
+        .toList();
   }
 }

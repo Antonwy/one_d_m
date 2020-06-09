@@ -20,15 +20,14 @@ class NewsPost extends StatelessWidget {
       child: Material(
         clipBehavior: Clip.antiAlias,
         color: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.black12),
-            borderRadius: BorderRadius.circular(5)),
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: <Widget>[
             withCampaign
                 ? CampaignButton(
                     news.campaignId,
+                    borderRadius: 0,
                     textStyle: TextStyle(),
                     campaign: Campaign(
                         imgUrl: news.campaignImgUrl,
@@ -43,6 +42,11 @@ class NewsPost extends StatelessWidget {
                   CachedNetworkImage(
                     width: double.infinity,
                     imageUrl: news.imageUrl,
+                    errorWidget: (_, __, ___) => Center(
+                        child: Icon(
+                      Icons.error,
+                      color: ColorTheme.orange,
+                    )),
                     placeholder: (context, url) => Center(
                       child: CircularProgressIndicator(),
                     ),

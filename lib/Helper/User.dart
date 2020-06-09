@@ -13,7 +13,7 @@ class User {
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       DONATEDAMOUNT = "donated_amount",
       IMAGEURL = "image_url",
-      THUMBNAILURL = "thumbnail_url";
+      THUMBNAILURL = "thumbnail_url", DEVICETOKEN = "device_token";
 
   User(
       {this.email,

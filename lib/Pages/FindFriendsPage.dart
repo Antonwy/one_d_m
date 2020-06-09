@@ -1,25 +1,41 @@
 import 'dart:collection';
-
-import 'package:async/async.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
-class FindFriendsPage extends StatelessWidget {
+class FindFriendsPage extends StatefulWidget {
   bool afterRegister;
-  List<String> userIds;
+  ScrollController scrollController;
 
-  FindFriendsPage({this.afterRegister = false, this.userIds});
+  FindFriendsPage({this.afterRegister = false, this.scrollController});
 
+  @override
+  _FindFriendsPageState createState() => _FindFriendsPageState();
+}
+
+class _FindFriendsPageState extends State<FindFriendsPage> {
   TextTheme _textTheme;
-  AsyncMemoizer<List<User>> _memoizer = AsyncMemoizer();
+
+  Stream<List<String>> _contactsStream;
+  Future<List<User>> _topRankingUsersFuture;
+
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _topRankingUsersFuture = DatabaseService.getUsers(10);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,69 +43,232 @@ class FindFriendsPage extends StatelessWidget {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTheme.avatar,
-      appBar: afterRegister
-          ? null
-          : AppBar(
-              brightness: Brightness.dark,
-              backgroundColor: ColorTheme.avatar,
-              elevation: 0,
-            ),
-      floatingActionButton: afterRegister
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (c) => HomePage()));
-              },
-              backgroundColor: ColorTheme.red,
-              child: Icon(Icons.arrow_forward),
+      backgroundColor: ColorTheme.orange,
+      floatingActionButton: widget.afterRegister
+          ? Consumer<UserManager>(
+              builder: (context, um, child) => FloatingActionButton(
+                onPressed: () {
+                  final homepage = HomePage();
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (c) => homepage),
+                      (route) => route.isFirst);
+                },
+                backgroundColor: ColorTheme.orange,
+                child: Icon(Icons.arrow_forward),
+              ),
             )
           : null,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              height: 30,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-              child: Text(
-                afterRegister ? "Letzter Schritt!" : "Freunde finden",
-                style: _textTheme.headline5.copyWith(color: Colors.white),
+        bottom: false,
+        child: CustomScrollView(controller: widget.scrollController, slivers: <
+            Widget>[
+          SliverAppBar(
+            title: widget.afterRegister ? Text("Finde Freunde") : null,
+            brightness: Brightness.dark,
+            backgroundColor: ColorTheme.orange,
+            elevation: 0,
+            automaticallyImplyLeading: !widget.afterRegister,
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: SvgPicture.asset(
+                "assets/images/explore.svg",
+                height: MediaQuery.of(context).size.height * .25,
               ),
             ),
-            SizedBox(
-              height: 5,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-              child: Text(
-                "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
-                style: _textTheme.subtitle2.copyWith(color: Colors.white),
-              ),
-            ),
-            SizedBox(
-              height: 18,
-            ),
-            Expanded(
-                child: ListView.builder(
-              itemCount: userIds.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5),
-                  child: UserButton(
-                    userIds[index],
-                    color: ColorTheme.blue,
-                    textStyle: TextStyle(color: Colors.white),
-                    elevation: 0,
+          ),
+          Consumer<UserManager>(
+            builder: (context, um, child) {
+              if (_contactsStream == null) {
+                _contactsStream = DatabaseService.getFriendsStream(um.uid);
+              }
+              return StreamBuilder<List<String>>(
+                  stream: _contactsStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData)
+                      return SliverPadding(
+                        padding: const EdgeInsets.all(18.0),
+                        sliver: SliverToBoxAdapter(
+                          child: Row(
+                            children: <Widget>[
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation(
+                                    ColorTheme.whiteBlue),
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              AutoSizeText(
+                                "Laden...",
+                                maxLines: 1,
+                                style: TextStyle(color: ColorTheme.whiteBlue),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+
+                    if (snapshot.data.isEmpty) return SliverToBoxAdapter();
+
+                    return SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Text(
+                              "Nutzer aus deinen Kontakten",
+                              style: _textTheme.headline5
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Text(
+                              "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
+                              style: _textTheme.caption
+                                  .copyWith(color: Colors.white70),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+            },
+          ),
+          Consumer<UserManager>(
+            builder: (context, um, child) {
+              if (_contactsStream == null) {
+                _contactsStream = DatabaseService.getFriendsStream(um.uid);
+              }
+              return StreamBuilder<List<String>>(
+                  stream: _contactsStream,
+                  builder: (context, snapshot) {
+                    print(snapshot);
+                    if (!snapshot.hasData) return SliverToBoxAdapter();
+
+                    return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                      (context, index) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 5),
+                        child: UserButton(
+                          snapshot.data[index],
+                          withAddButton: true,
+                          color: ColorTheme.whiteBlue,
+                          textStyle: TextStyle(color: ColorTheme.blue),
+                          elevation: 1,
+                          avatarColor: ColorTheme.blue,
+                        ),
+                      ),
+                      childCount: snapshot.data.length,
+                    ));
+                  });
+            },
+          ),
+          FutureBuilder<List<User>>(
+              future: _topRankingUsersFuture,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return SliverPadding(
+                    padding: const EdgeInsets.all(18.0),
+                    sliver: SliverToBoxAdapter(
+                      child: Row(
+                        children: <Widget>[
+                          CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation(ColorTheme.whiteBlue),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Text(
+                            "Laden...",
+                            style: TextStyle(color: ColorTheme.whiteBlue),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+
+                if (snapshot.data.isEmpty) return SliverToBoxAdapter();
+
+                return SliverPadding(
+                  padding: const EdgeInsets.only(top: 20),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Text(
+                            "Beliebte Nutzer",
+                            style: _textTheme.headline5
+                                .copyWith(color: Colors.white),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Text(
+                            "Diese Nutzer gehören zu den beliebtesten Nutzern auf unserer Platform!",
+                            style: _textTheme.caption
+                                .copyWith(color: Colors.white70),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
-              },
-            )),
-          ],
-        ),
+              }),
+          Consumer<UserManager>(
+            builder: (context, um, child) => FutureBuilder<List<User>>(
+                future: _topRankingUsersFuture,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return SliverToBoxAdapter();
+
+                  List<User> users = snapshot.data;
+                  users.removeWhere((user) => user.id == um.uid);
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                      (context, index) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 5),
+                        child: UserButton(
+                          users[index].id,
+                          user: users[index],
+                          withAddButton: true,
+                          color: ColorTheme.whiteBlue,
+                          textStyle: TextStyle(color: ColorTheme.blue),
+                          elevation: 1,
+                          avatarColor: ColorTheme.blue,
+                        ),
+                      ),
+                      childCount: users.length,
+                    )),
+                  );
+                }),
+          ),
+          widget.afterRegister
+              ? SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 80,
+                  ),
+                )
+              : SliverToBoxAdapter()
+        ]),
       ),
     );
   }

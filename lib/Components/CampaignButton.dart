@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
@@ -16,13 +17,15 @@ class CampaignButton extends StatelessWidget {
   TextStyle textStyle;
   double elevation;
   Function(Campaign) onPressed;
+  double borderRadius;
 
   CampaignButton(this.id,
       {this.campaign,
       this.color = Colors.white,
       this.textStyle = const TextStyle(color: Colors.black),
       this.onPressed,
-      this.elevation = 1});
+      this.elevation = 1,
+      this.borderRadius = 5});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class CampaignButton extends StatelessWidget {
               closedColor: color,
               closedElevation: elevation,
               closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
+                  borderRadius: BorderRadius.circular(borderRadius)),
               closedBuilder: (context, open) => InkWell(
                 onTap: () {
                   if (onPressed != null) {
@@ -62,12 +65,13 @@ class CampaignButton extends StatelessWidget {
                           snapshot.data.thumbnailUrl ?? snapshot.data.imgUrl),
                       SizedBox(width: 10),
                       Expanded(
-                        child: Text(
+                        child: AutoSizeText(
                           "${snapshot.data.name}",
+                          maxLines: 1,
                           style: Theme.of(context)
                               .textTheme
-                              .title
-                              .merge(textStyle),
+                              .bodyText1
+                              .copyWith(color: textStyle.color),
                         ),
                       )
                     ],

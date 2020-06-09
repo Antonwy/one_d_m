@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CampaignsManager.dart';
-import 'package:one_d_m/Helper/Helper.dart';
-import 'package:one_d_m/Helper/RectRevealRoute.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/CreateCampaignPage.dart';
 import 'package:provider/provider.dart';
 
 class MyCampaignsPage extends StatefulWidget {

@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:one_d_m/Helper/ImageUrl.dart';
 
 class Donation {
-  int amount;
+  final int amount;
+  final bool anonym;
   final String campaignId,
       alternativeCampaignId,
       userId,
       campaignName,
       campaignImgUrl;
-  DateTime createdAt;
+  final DateTime createdAt;
 
   static final String AMOUNT = "amount",
       ALTERNATIVECAMPAIGNID = "alternative_campaign_id",
@@ -16,6 +16,7 @@ class Donation {
       CAMPAIGNIMGURL = "campaign_img_url",
       CAMPAIGNNAME = "campaign_name",
       USERID = "user_id",
+      ISANONYM = "anonym",
       CREATEDAT = "created_at";
 
   Donation(this.amount,
@@ -24,7 +25,8 @@ class Donation {
       this.userId,
       this.campaignName,
       this.campaignImgUrl,
-      this.createdAt});
+      this.createdAt,
+      this.anonym});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
     return Donation(doc[AMOUNT],
@@ -33,6 +35,7 @@ class Donation {
         userId: doc[USERID],
         campaignImgUrl: doc[CAMPAIGNIMGURL],
         campaignName: doc[CAMPAIGNNAME],
+        anonym: doc[ISANONYM] ?? false,
         createdAt: (doc[CREATEDAT] as Timestamp).toDate());
   }
 
@@ -48,7 +51,8 @@ class Donation {
       CAMPAIGNNAME: campaignName,
       CAMPAIGNIMGURL: campaignImgUrl,
       USERID: userId,
-      CREATEDAT: Timestamp.now()
+      CREATEDAT: Timestamp.now(),
+      ISANONYM: anonym
     };
   }
 

@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -33,8 +36,11 @@ class _EditProfileState extends State<EditProfile> {
 
     return Scaffold(
         key: _scaffoldKey,
+        backgroundColor: ColorTheme.blue,
         appBar: AppBar(
+          elevation: 0,
           backgroundColor: ColorTheme.blue,
+          brightness: Brightness.dark,
           title: Text("Profil ändern"),
           actions: <Widget>[
             Padding(
@@ -45,100 +51,161 @@ class _EditProfileState extends State<EditProfile> {
                         valueColor: AlwaysStoppedAnimation(Colors.white),
                       ),
                     )
-                  : IconButton(
-                      icon: Icon(Icons.done),
-                      onPressed: () async {
-                        setState(() {
-                          _loading = true;
-                        });
+                  : OfflineBuilder(
+                      child: Container(),
+                      connectivityBuilder: (c, connection, child) {
+                        return IconButton(
+                            icon: Icon(Icons.done),
+                            onPressed: () async {
+                              if (connection == ConnectivityResult.none) {
+                                Helper.showConnectionSnackBar(context);
+                                return;
+                              }
 
-                        User currUser = User(
-                            name: um.user.name,
-                            imgUrl: um.user.imgUrl,
-                            thumbnailUrl: um.user.thumbnailUrl,
-                            phoneNumber: um.user.phoneNumber);
+                              setState(() {
+                                _loading = true;
+                              });
 
-                        if (_deletedImage) currUser.imgUrl = null;
-                        if (_image != null) {
-                          StorageService service = StorageService(file: _image);
-                          currUser.imgUrl = await service.uploadImage(
-                              StorageService.userImageName(um.uid));
-                        }
+                              User currUser = User(
+                                  name: um.user.name,
+                                  imgUrl: um.user.imgUrl,
+                                  thumbnailUrl: um.user.thumbnailUrl,
+                                  phoneNumber: um.user.phoneNumber);
 
-                        if (_name != null && Validate.username(_name) == null)
-                          currUser.name = _name;
-                        if (_phoneNumber != null &&
-                            Validate.telephone(_phoneNumber) == null)
-                          currUser.phoneNumber = _phoneNumber;
+                              if (_deletedImage) currUser.imgUrl = null;
+                              if (_image != null) {
+                                StorageService service =
+                                    StorageService(file: _image);
+                                currUser.imgUrl = await service.uploadImage(
+                                    StorageService.userImageName(um.uid));
+                              }
 
-                        ApiResult res = await um.updateUser(currUser);
+                              if (_name != null &&
+                                  Validate.username(_name) == null)
+                                currUser.name = _name;
+                              if (_phoneNumber != null &&
+                                  Validate.telephone(_phoneNumber) == null)
+                                currUser.phoneNumber = _phoneNumber;
 
-                        if (res.hasError()) {
-                          _scaffoldKey.currentState.showSnackBar(
-                              SnackBar(content: Text(res.message)));
-                          setState(() {
-                            _loading = false;
-                          });
-                          return;
-                        }
+                              ApiResult res = await um.updateUser(currUser);
 
-                        Navigator.pop(context);
+                              if (res.hasError()) {
+                                _scaffoldKey.currentState.showSnackBar(
+                                    SnackBar(content: Text(res.message)));
+                                setState(() {
+                                  _loading = false;
+                                });
+                                return;
+                              }
+
+                              Navigator.pop(context);
+                            });
                       }),
             )
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          child: SingleChildScrollView(
-              child: Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               SizedBox(height: 20),
               Text(
                 "Account Daten ändern:",
-                style: Theme.of(context).textTheme.headline,
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: ColorTheme.whiteBlue),
               ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  CircleAvatar(
+                  GestureDetector(
+                    onTap: _getImage,
+                    child: CircleAvatar(
                       child: _imgWidget == null ? Icon(Icons.person) : null,
                       radius: 30,
                       backgroundColor: Colors.grey[200],
-                      backgroundImage: _imgWidget),
-                  Row(
-                    children: <Widget>[
-                      OutlineButton(
-                        onPressed: _getImage,
-                        child: Text("Ändern"),
-                      ),
-                      SizedBox(width: 10),
-                      OutlineButton(
-                        onPressed: _deleteImage,
-                        child: Text("Löschen"),
-                      ),
-                    ],
+                      backgroundImage: _imgWidget,
+                      onBackgroundImageError:
+                          _imgWidget != null ? (e, strc) => print(strc) : null,
+                    ),
+                  ),
+                  Theme(
+                    data: ThemeData.dark(),
+                    child: Row(
+                      children: <Widget>[
+                        OutlineButton(
+                          onPressed: _getImage,
+                          textColor: ColorTheme.whiteBlue,
+                          child: Text("Ändern"),
+                          highlightedBorderColor: ColorTheme.orange,
+                        ),
+                        SizedBox(width: 10),
+                        OutlineButton(
+                          onPressed: _deleteImage,
+                          textColor: ColorTheme.whiteBlue,
+                          child: Text("Löschen"),
+                          highlightedBorderColor: ColorTheme.orange,
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),
               SizedBox(height: 20),
               _textView(
-                  label: "Vorname",
+                  label: "Nutzername",
                   initValue: um.user.name,
                   onChanged: (text) {
                     _name = text;
                   }),
               SizedBox(height: 10),
-              _textView(
-                  label: "Telefonnummer",
-                  initValue: um.user.phoneNumber,
-                  onChanged: (text) {
-                    _phoneNumber = text;
+              StreamBuilder<String>(
+                  initialData: um.user.phoneNumber,
+                  stream: DatabaseService.getPhoneNumber(um.uid),
+                  builder: (context, snapshot) {
+                    return _textView(
+                        key: Key(snapshot.data),
+                        label: "Telefonnummer",
+                        initValue: snapshot.data,
+                        onChanged: (text) {
+                          _phoneNumber = text;
+                        });
                   }),
               SizedBox(height: 10),
+              OfflineBuilder(
+                  child: Container(),
+                  connectivityBuilder: (context, connection, child) {
+                    return Consumer<UserManager>(
+                      builder: (context, um, child) => Theme(
+                        data: ThemeData.dark(),
+                        child: OutlineButton.icon(
+                            onPressed: () async {
+                              if (connection == ConnectivityResult.none) {
+                                Helper.showConnectionSnackBar(context);
+                                return;
+                              }
+                              setState(() {
+                                _loading = true;
+                              });
+                              await um.resetPassword();
+                              setState(() {
+                                _loading = false;
+                              });
+                              Scaffold.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      "Wir haben dir eine Email zum Zurücksetzen deines Passwortes geschickt!")));
+                            },
+                            highlightedBorderColor: ColorTheme.orange,
+                            icon: Icon(Icons.restore),
+                            label: Text("Passwort zurücksetzen")),
+                      ),
+                    );
+                  })
             ],
-          )),
+          ),
         ));
   }
 
@@ -166,11 +233,16 @@ class _EditProfileState extends State<EditProfile> {
     });
   }
 
-  Widget _textView({String label, Function onChanged, String initValue}) =>
-      TextFormField(
-        initialValue: initValue,
-        onChanged: onChanged,
-        decoration:
-            InputDecoration(labelText: label, border: OutlineInputBorder()),
+  Widget _textView(
+          {Key key, String label, Function onChanged, String initValue}) =>
+      Theme(
+        key: key,
+        data: ThemeData.dark().copyWith(accentColor: ColorTheme.orange),
+        child: TextFormField(
+          initialValue: initValue,
+          onChanged: onChanged,
+          decoration:
+              InputDecoration(labelText: label, border: OutlineInputBorder()),
+        ),
       );
 }

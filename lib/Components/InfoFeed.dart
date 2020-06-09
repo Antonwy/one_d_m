@@ -5,147 +5,25 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 
-class GeneralDonationFeed extends StatefulWidget {
+class InfoFeed extends StatefulWidget {
   // PageController _pageController = PageController(viewportFraction: .5);
 
   @override
-  _GeneralDonationFeedState createState() => _GeneralDonationFeedState();
+  _InfoFeedState createState() => _InfoFeedState();
 }
 
-class _GeneralDonationFeedState extends State<GeneralDonationFeed> {
-  int _currentPage = 0;
-  PageController _pageController = PageController(viewportFraction: .5);
-
+class _InfoFeedState extends State<InfoFeed> {
   @override
   Widget build(BuildContext context) {
     return _layout();
-
-    /* return StreamBuilder<DonationInfo>(
-        stream: DatabaseService.getDonationInfo(),
-        builder: (context, snapshot) {
-          DonationInfo di = snapshot.data;
-
-          if (!snapshot.hasData)
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
-              ),
-            );
-
-          return Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Material(
-              color: ColorTheme.red,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-              shadowColor: ColorTheme.red,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 10),
-                    child: Text(
-                      "Unsere Ziele",
-                      style: Theme.of(context)
-                          .textTheme
-                          .title
-                          .copyWith(color: Colors.white),
-                    ),
-                  ),
-                  Container(
-                    height: 130,
-                    width: double.infinity,
-                    child: PageView(
-                      controller: _pageController,
-                      onPageChanged: (page) {
-                        setState(() {
-                          _currentPage = page;
-                        });
-                      },
-                      children: <Widget>[
-                        PercentIndicator(
-                          currentValue: di.dailyAmount,
-                          targetValue: di.dailyAmountTarget,
-                          description: "Täglich",
-                          onTap: () {},
-                        ),
-                        PercentIndicator(
-                          currentValue: di.monthlyAmount,
-                          targetValue: di.monthlyAmountTarget,
-                          description: "Monatlich",
-                          onTap: () {},
-                        ),
-                        PercentIndicator(
-                          currentValue: di.yearlyAmount,
-                          targetValue: di.yearlyAmountTarget,
-                          description: "Jährlich",
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Center(
-                    child: CupertinoTabBar(
-                      Colors.white38,
-                      ColorTheme.red,
-                      [
-                        Text(
-                          "Tag",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.75,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          "Monat",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.75,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          "Jahr",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.75,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                      () => _currentPage,
-                      (i) {
-                        _pageController.animateToPage(i,
-                            duration: Duration(milliseconds: 250),
-                            curve: Curves.easeOut);
-                      },
-                      duration: Duration(milliseconds: 125),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }); */
   }
 
   Widget _layout() {
-    return Padding(
-      padding: const EdgeInsets.all(18.0),
-      child: LineChart(),
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10.0, 14.0, 10.0, 8),
+        child: LineChart(),
+      ),
     );
   }
 }
@@ -164,7 +42,7 @@ class _LineChartState extends State<LineChart> {
       color: ColorTheme.blue,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 182,
+        height: 177,
         child: StreamBuilder<Statistics>(
             stream: DatabaseService.getStatistics(),
             builder: (context, snapshot) {
@@ -192,9 +70,6 @@ class _LineChartState extends State<LineChart> {
                                     color: Colors.white,
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(
-                                height: 5,
                               ),
                               Text(
                                 "Tägliche, monatliche, jährliche Spendenziele",
@@ -313,7 +188,9 @@ class _CollumnStat extends StatelessWidget {
         Text(
           Numeral(value).value(),
           style: TextStyle(
-              color: ColorTheme.red, fontSize: 50, fontWeight: FontWeight.w600),
+              color: ColorTheme.orange,
+              fontSize: 50,
+              fontWeight: FontWeight.w600),
         ),
         Text(
           desc,
@@ -351,7 +228,7 @@ class _PercentLine extends StatelessWidget {
                   child: Material(
                     borderRadius: BorderRadius.horizontal(
                         right: Radius.circular(_height / 2)),
-                    color: ColorTheme.red,
+                    color: ColorTheme.orange,
                   ),
                 ),
               ),

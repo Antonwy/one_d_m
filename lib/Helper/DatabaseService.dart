@@ -7,7 +7,9 @@ import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
+import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/Ranking.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -27,6 +29,7 @@ class DatabaseService {
       FOLLOWED = "followed",
       CAMPAIGNNEWS = "campaign_news",
       DONATIONS = "donations",
+      SORTEDDONATIONS = "sorted_donations",
       DONATIONFEED = "donation_feed",
       STATISTICS = "statistics",
       DONATIONINFO = "donation_info",
@@ -55,6 +58,11 @@ class DatabaseService {
   static final CollectionReference friendsCollection =
       firestore.collection(FRIENDS);
 
+  static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
+    DocumentSnapshot ds = await userCollection.document(uid).get();
+    return ds.exists && ds.data.containsKey(User.NAME);
+  }
+
   static Future<bool> checkUsernameAvailable(String username) async {
     return (await userCollection
             .where(User.NAME, isEqualTo: username)
@@ -67,10 +75,10 @@ class DatabaseService {
     await userCollection.document(user.id).setData(user.publicDataToMap());
 
     return userCollection
-      ..document(user.id)
-          .collection(PRIVATEDATA)
-          .document(DATA)
-          .setData(user.privateDataToMap(), merge: true);
+        .document(user.id)
+        .collection(PRIVATEDATA)
+        .document(DATA)
+        .setData(user.privateDataToMap(), merge: true);
   }
 
   static Future<void> updateUser(User user) async {
@@ -90,17 +98,26 @@ class DatabaseService {
     return User.fromSnapshot(await userCollection.document(uid).get());
   }
 
-  static Stream<User> getUserStream(String id) {
+  static Stream<User> getUserStream(String uid) {
     return userCollection
-        .document(id)
+        .document(uid)
         .snapshots()
         .map((ds) => User.fromSnapshot(ds));
   }
 
-  static Future<List<User>> getUsers() async {
+  static Stream<String> getPhoneNumber(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(PRIVATEDATA)
+        .document(DATA)
+        .snapshots()
+        .map((doc) => doc[User.PHONE_NUMBER]);
+  }
+
+  static Future<List<User>> getUsers([int limit = 20]) async {
     return User.listFromSnapshots((await userCollection
             .orderBy(User.DONATEDAMOUNT, descending: true)
-            .limit(20)
+            .limit(limit)
             .getDocuments())
         .documents);
   }
@@ -237,6 +254,7 @@ class DatabaseService {
   }
 
   static Future<void> createFollow(String meId, String toId) async {
+    if (meId == toId) return;
     followingCollection
         .document(meId)
         .collection(USERS)
@@ -245,6 +263,7 @@ class DatabaseService {
   }
 
   static Future<void> deleteFollow(String meId, String toId) async {
+    if (meId == toId) return;
     followingCollection
         .document(meId)
         .collection(USERS)
@@ -306,9 +325,28 @@ class DatabaseService {
     return donationFeedCollection
         .document(uid)
         .collection(DONATIONS)
+        .orderBy(Donation.CREATEDAT, descending: true)
         .limit(20)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
+  }
+
+  static Stream<List<DonationsGroup>> getDonationsFeedFromDate(String uid,
+      [DateTime dt]) {
+    DateTime searchedDate = dt ?? DateTime.now();
+
+    DateTime searchStartDate =
+        DateTime(searchedDate.year, searchedDate.month, searchedDate.day);
+    DateTime searchEndDate = searchStartDate.add(Duration(days: 1));
+    return donationFeedCollection
+        .document(uid)
+        .collection(DONATIONS)
+        .where(Donation.CREATEDAT,
+            isGreaterThan: Timestamp.fromDate(searchStartDate))
+        .where(Donation.CREATEDAT,
+            isLessThan: Timestamp.fromDate(searchEndDate))
+        .snapshots()
+        .map(DonationsGroup.fromQuerySnapshot);
   }
 
   static Stream<DonationInfo> getDonationInfo() {
@@ -321,6 +359,7 @@ class DatabaseService {
   static Stream<List<Donation>> getDonationsFromUser(String uid) {
     return donationsCollection
         .where(Donation.USERID, isEqualTo: uid)
+        .where(Donation.ISANONYM, isEqualTo: false)
         .orderBy(Donation.CREATEDAT, descending: true)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
@@ -329,6 +368,7 @@ class DatabaseService {
   static Stream<List<Donation>> getDonationsFromUserLimit(String uid) {
     return donationsCollection
         .where(Donation.USERID, isEqualTo: uid)
+        .where(Donation.ISANONYM, isEqualTo: false)
         .orderBy(Donation.CREATEDAT, descending: true)
         .limit(4)
         .snapshots()
@@ -414,10 +454,87 @@ class DatabaseService {
   static Future<List<String>> getFriends(String uid) async {
     return (await friendsCollection
             .document(uid)
-            .collection('users')
+            .collection(USERS)
             .getDocuments())
         .documents
         .map((doc) => doc.documentID)
         .toList();
+  }
+
+  static Stream<List<String>> getFriendsStream(String uid) {
+    return friendsCollection
+        .document(uid)
+        .collection(USERS)
+        .snapshots()
+        .map((qs) => qs.documents.map((doc) => doc.documentID).toList());
+  }
+
+  static Future<void> saveDeviceToken(String uid, String token) async {
+    return (await userCollection
+        .document(uid)
+        .collection(PRIVATEDATA)
+        .document(DATA)
+        .setData({User.DEVICETOKEN: token}, merge: true));
+  }
+
+  static Stream<bool> hasRankingContentForToday(String uid, {DateTime date}) {
+    return donationFeedCollection
+        .document(uid)
+        .collection(Ranking.DAILYRANKINGS)
+        .document(Ranking.getFormatedDate(date))
+        .snapshots()
+        .map((doc) => doc.exists);
+  }
+
+  static Stream<FriendsRanking> getFriendsRanking(String uid, {DateTime date}) {
+    return donationFeedCollection
+        .document(uid)
+        .collection(Ranking.DAILYRANKINGS)
+        .document(Ranking.getFormatedDate(date))
+        .collection(Ranking.USERS)
+        .orderBy(Ranking.AMOUNT, descending: true)
+        .limit(5)
+        .snapshots()
+        .map(FriendsRanking.fromQuery);
+  }
+
+  static Stream<CampaignsRanking> getCampaignsRanking(String uid,
+      {DateTime date}) {
+    return donationFeedCollection
+        .document(uid)
+        .collection(Ranking.DAILYRANKINGS)
+        .document(Ranking.getFormatedDate(date))
+        .collection(Ranking.CAMPAIGNS)
+        .orderBy(Ranking.AMOUNT, descending: true)
+        .limit(5)
+        .snapshots()
+        .map(CampaignsRanking.fromQuery);
+  }
+
+  static Stream<int> getDailyDonationsAmount(String uid, {DateTime date}) {
+    return donationFeedCollection
+        .document(uid)
+        .collection(Ranking.DAILYRANKINGS)
+        .document(Ranking.getFormatedDate(date))
+        .collection(Ranking.USERS)
+        .document(uid)
+        .snapshots()
+        .map(((doc) {
+      if (!doc.exists) return 0;
+      return doc[Ranking.AMOUNT];
+    }));
+  }
+
+  static Stream<int> getDailyFriendsDonationsAmount(String uid,
+      {DateTime date}) {
+    return donationFeedCollection
+        .document(uid)
+        .collection(Ranking.DAILYRANKINGS)
+        .document(Ranking.getFormatedDate(date))
+        .snapshots()
+        .map(((doc) {
+      if (!doc.exists) return 0;
+      return doc[Ranking.AMOUNT];
+    }));
   }
 }

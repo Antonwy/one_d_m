@@ -34,9 +34,9 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     _um = Provider.of<UserManager>(context);
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTheme.red,
+      backgroundColor: ColorTheme.orange,
       appBar: AppBar(
-        backgroundColor: ColorTheme.red,
+        backgroundColor: ColorTheme.orange,
         elevation: 0,
         leading: BackButton(
             color: ColorTheme.blue,
@@ -49,7 +49,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       floatingActionButton: OpenContainer(
         openBuilder: (context, close) => _openWidget,
         closedShape: CircleBorder(),
-        closedColor: ColorTheme.black,
+        closedColor: ColorTheme.blue,
         closedBuilder: (context, open) => Container(
           width: 56,
           height: 56,
@@ -63,12 +63,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     await _um.fireUser.reload();
                     _um.fireUser = await _um.auth.currentUser();
                     if (_um.fireUser.isEmailVerified) {
-                      List<String> friendsIds =
-                          await DatabaseService.getFriends(_um.uid);
-                      _openWidget = friendsIds.isEmpty
-                          ? HomePage()
-                          : FindFriendsPage(
-                              afterRegister: true, userIds: friendsIds);
+                      _openWidget = FindFriendsPage(afterRegister: true);
                       open();
                     } else
                       _showSnackBar("Email noch nicht verifiziert.");
@@ -99,7 +94,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             Center(
               child: SvgPicture.asset(
                 "assets/images/verify.svg",
-                height: 200,
+                height: MediaQuery.of(context).size.height * .25,
               ),
             ),
             SizedBox(
@@ -114,7 +109,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             ),
             Text(
               "Dies läuft wie folgt ab: \nWenn du auf \"Email senden\" klickst, schicken wir dir eine Email mit einem Link an ${_um.fireUser.email}. Bitte klicke auf den Link um dich zu verifizieren. Danach kannst du wieder in die App zurückkehren und auf weiter klicken!",
-              style: _textTheme.bodyText1.copyWith(color: ColorTheme.blue),
+              style: _textTheme.bodyText1
+                  .copyWith(color: ColorTheme.blue.withOpacity(.75)),
             ),
             SizedBox(
               height: 20,

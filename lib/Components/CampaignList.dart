@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 
 import 'CampaignHeader.dart';
 
 class CampaignList extends StatefulWidget {
   List<Campaign> campaigns;
-  ImageProvider emptyImage;
-  String emptyMessage;
 
-  CampaignList({Key key, this.campaigns, this.emptyImage, this.emptyMessage})
-      : super(key: key);
+  CampaignList({Key key, this.campaigns}) : super(key: key);
 
   @override
   _CampaignListState createState() => _CampaignListState();
@@ -18,16 +16,14 @@ class CampaignList extends StatefulWidget {
 class _CampaignListState extends State<CampaignList> {
   @override
   Widget build(BuildContext context) {
-    if (widget.campaigns.isEmpty && widget.emptyImage != null) {
+    if (widget.campaigns.isEmpty) {
       return SliverFillRemaining(
         child: Center(
             child: Column(
           children: <Widget>[
-            Image(
-              image: widget.emptyImage,
-            ),
+            SvgPicture.asset("assets/images/no-news.svg"),
             Text(
-              widget.emptyMessage,
+              "Keine Projekte vorhanden",
               style: Theme.of(context).textTheme.bodyText2,
             ),
           ],

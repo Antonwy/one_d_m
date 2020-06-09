@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
+import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
-import 'UserPageRoute.dart';
 
 class SettingsDialog extends StatelessWidget {
   UserManager um;
@@ -28,38 +29,42 @@ class SettingsDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Material(
-                borderRadius: BorderRadius.circular(5),
-                clipBehavior: Clip.antiAlias,
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(context, UserPageRoute(um.user));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: <Widget>[
-                        Material(
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Container(
-                              child: Avatar(
-                                  um.user?.thumbnailUrl ?? um.user?.imgUrl),
-                              width: 50,
-                              height: 50,
+              CustomOpenContainer(
+                openBuilder: (context, close, controller) =>
+                    UserPage(um.user, scrollController: controller),
+                closedElevation: 0,
+                closedColor: ColorTheme.whiteBlue,
+                closedBuilder: (context, open) => Material(
+                  borderRadius: BorderRadius.circular(5),
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: open,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: <Widget>[
+                          Material(
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Container(
+                                child: Avatar(
+                                    um.user?.thumbnailUrl ?? um.user?.imgUrl),
+                                width: 50,
+                                height: 50,
+                              ),
                             ),
+                            color: ColorTheme.orange,
+                            shape: CircleBorder(),
                           ),
-                          color: ColorTheme.red,
-                          shape: CircleBorder(),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "${um.user?.name}",
-                          style: _textTheme.headline6
-                              .copyWith(color: ColorTheme.blue),
-                        )
-                      ],
+                          SizedBox(width: 10),
+                          Text(
+                            "${um.user?.name}",
+                            style: _textTheme.headline6
+                                .copyWith(color: ColorTheme.blue),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -99,8 +104,9 @@ class SettingsDialog extends StatelessWidget {
                   size: 18,
                 ),
                 onTap: () async {
+                  final editProfile = EditProfile();
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditProfile()));
+                      MaterialPageRoute(builder: (context) => editProfile));
                 },
               ),
               ListTile(
@@ -134,16 +140,15 @@ class SettingsDialog extends StatelessWidget {
                 ),
                 onTap: () async {
                   await um.logout();
-                  Navigator.pushReplacement(
+
+                  print(um.status);
+
+                  Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (c) => ChooseLoginMethodPage()));
+                          builder: (c) => ChooseLoginMethodPage()),
+                      (route) => route.isFirst);
                 },
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Illustrations by Ouch.pics: https://icons8.com",
-                style: _textTheme.body1,
               ),
               SizedBox(
                 height: 10 + MediaQuery.of(context).padding.bottom,

@@ -11,8 +11,7 @@ class SearchBar extends StatelessWidget {
       width: double.infinity,
       height: 60,
       child: OpenContainer(
-        openBuilder: (context, close
-        ) => SearchPage(),
+        openBuilder: (context, close) => SearchPage(),
         closedBuilder: (context, open) => InkWell(
           child: Align(
             child: Padding(

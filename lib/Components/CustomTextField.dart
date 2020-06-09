@@ -27,9 +27,10 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-          primaryColor: focusedColor,
-          hintColor: activeColor,
-          errorColor: Colors.red),
+        primaryColor: focusedColor,
+        hintColor: activeColor,
+        errorColor: Colors.red,
+      ),
       child: TextFormField(
         autocorrect: autoCorrect,
         cursorColor: focusedColor,
@@ -39,10 +40,12 @@ class CustomTextField extends StatelessWidget {
         obscureText: obscureText,
         style: TextStyle(color: textColor),
         decoration: InputDecoration(
-          prefixIcon: Icon(
-            preficIcon.icon,
-            color: activeColor,
-          ),
+          prefixIcon: preficIcon == null
+              ? null
+              : Icon(
+                  preficIcon.icon,
+                  color: ColorTheme.whiteBlue.withOpacity(.5),
+                ),
           border: OutlineInputBorder(),
           enabledBorder:
               OutlineInputBorder(borderSide: BorderSide(color: activeColor)),

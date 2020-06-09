@@ -17,7 +17,7 @@ class CreditCardWidget extends StatelessWidget {
       child: Material(
         color: ColorTheme.blue,
         elevation: 20,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(18.0),
           child: Column(
@@ -30,7 +30,7 @@ class CreditCardWidget extends StatelessWidget {
                     width: 40,
                     height: 40,
                     child: Material(
-                      color: Colors.green,
+                      color: ColorTheme.green,
                       shape: CircleBorder(),
                       child: Icon(
                         Icons.done,
@@ -43,7 +43,7 @@ class CreditCardWidget extends StatelessWidget {
                     height: 40,
                     child: Material(
                       elevation: 10,
-                      color: ColorTheme.red,
+                      color: ColorTheme.orange,
                       shape: CircleBorder(),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
@@ -62,15 +62,14 @@ class CreditCardWidget extends StatelessWidget {
               ),
               Text(
                 "**** **** **** ${creditCard.last4}",
-                style: TextStyle(color: Colors.white, fontSize: 25),
+                style: TextStyle(color: ColorTheme.whiteBlue, fontSize: 25),
               ),
               Expanded(child: Container()),
               Consumer<UserManager>(builder: (context, um, child) {
                 return Row(
                   children: <Widget>[
                     _columnWidget(
-                        title: "CARD HOLDER",
-                        text: "${um.user.name}"),
+                        title: "CARD HOLDER", text: "${um.user.name}"),
                     Expanded(child: Container()),
                     Row(
                       children: <Widget>[
@@ -108,7 +107,9 @@ class CreditCardWidget extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              color: ColorTheme.whiteBlue,
+              fontWeight: FontWeight.bold,
+              fontSize: 18),
         ),
       ],
     );

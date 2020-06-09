@@ -4,8 +4,9 @@ export interface Donation {
   campaign_id: string;
   campaign_img_url: string;
   campaign_name: string;
-  created_at: any;
+  created_at: FirebaseFirestore.Timestamp;
   user_id: string;
+  anonym: boolean;
 }
 
 export interface User {
@@ -20,6 +21,7 @@ export interface PrivateUserData {
   email_address: string;
   phone_number: string;
   customer_id: string;
+  device_token: string;
 }
 
 export interface Campaign {

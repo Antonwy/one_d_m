@@ -53,7 +53,7 @@ class _SearchPageState extends State<SearchPage> {
                                     hintText: "Suchen"),
                               ),
                             ),
-                            Icon(Icons.search)
+                            Icon(Icons.search),
                           ],
                         ),
                       )),

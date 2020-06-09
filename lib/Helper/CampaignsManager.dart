@@ -43,4 +43,7 @@ class CampaignsManager with ChangeNotifier {
         .where((Campaign c) => user.subscribedCampaignsIds.contains(c.id))
         .toList();
   }
+
+  Campaign getCampaign(String id) =>
+      _campaigns.firstWhere((element) => element.id == id);
 }

@@ -1,6 +1,74 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
+const firestore = admin.firestore();
+
+// exports.updateDb = functions.https.onCall(async (req, res) => {
+//   console.log('Updating the DB...');
+
+//   const donations = (await firestore.collection('donations').get()).docs;
+
+//   console.log(donations);
+
+//   donations.forEach(async (value) => {
+//     const donation: Donation = value.data() as Donation;
+
+//     const authorId = donation.user_id;
+
+//     const followedUsers = (
+//       await firestore
+//         .collection('followed')
+//         .doc(authorId)
+//         .collection('users')
+//         .get()
+//     ).docs;
+
+//     console.log(followedUsers);
+
+//     followedUsers.forEach(async (doc) => {
+//       const id = doc.id;
+//       await firestore
+//         .collection('donation_feed')
+//         .doc(id)
+//         .collection('sorted_donations')
+//         .doc(getDate(donation.created_at.toDate()))
+//         .collection('users')
+//         .doc(donation.user_id)
+//         .collection('donations')
+//         .doc(donation.campaign_id)
+//         .set({
+//           amount: admin.firestore.FieldValue.increment(donation.amount),
+//           user_id: donation.user_id,
+//           campaign_name: donation.campaign_name,
+//           campaign_id: donation.campaign_id,
+//           campaign_img_url: donation.campaign_img_url,
+//         });
+//     });
+//   });
+// });
+
+// function getDate(nowDate: Date): string {
+//   return `${nowDate.getFullYear()}-${
+//     nowDate.getMonth() + 1
+//   }-${nowDate.getDate()}`;
+// }
+
+// exports.updateDonations = functions.https.onCall(async (req, res) => {
+//   console.log('Updating donations');
+
+//   const donations = await firestore.collection('donations').get();
+
+//   donations.forEach(
+//     async (doc) =>
+//       await doc.ref.set(
+//         {
+//           anonym: false,
+//         },
+//         { merge: true }
+//       )
+//   );
+// });
+
 exports.findFriends = functions.https.onCall(async (req, res) => {
   console.log(`Finding friends...`);
   if (res.auth?.uid === undefined) return;
@@ -8,7 +76,6 @@ exports.findFriends = functions.https.onCall(async (req, res) => {
   const authId: string = res.auth.uid;
   const numbers = req as string[];
 
-  const firestore = admin.firestore();
   const userPrivateCollection = firestore.collectionGroup('private_data');
 
   const userIdList: string[] = [];
@@ -45,12 +112,12 @@ exports.findFriends = functions.https.onCall(async (req, res) => {
     if (qs.docs.length !== null) {
       for (const document of qs.docs) {
         const probUserId = document.ref.parent.parent?.id;
-        if (probUserId != undefined) userIdList.push(probUserId);
+        if (probUserId !== undefined) userIdList.push(probUserId);
       }
     }
   }
 
-  console.log(iterCounter);
+  console.log(`Found ${userIdList.length} Friends`);
 
   userIdList.forEach(async (id) => {
     if (id === authId) return;

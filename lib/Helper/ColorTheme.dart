@@ -5,9 +5,8 @@ class ColorTheme {
   static const Color white = Color.fromARGB(255, 255, 255, 255);
 
   static const Color blue = Color.fromARGB(255, 19, 33, 60);
-  static const Color red = Color.fromARGB(255, 252, 163, 16);
-  static const Color green = Color.fromARGB(255, 0, 191, 166);
   static const Color orange = Color.fromARGB(255, 252, 163, 16);
+  static const Color green = Color.fromARGB(255, 0, 191, 166);
   static const Color yellow = Color.fromARGB(255, 253, 205, 89);
 
   static const Color lightBlue = Color.fromARGB(255, 246, 245, 250);
@@ -20,8 +19,8 @@ class ColorTheme {
   static const Color navBar = whiteBlue;
   static const Color navBarHighlight = blue;
   static const Color navBarDisabled = Color.fromARGB(150, 19, 33, 60);
-  static const Color percentSlider = red;
-  static const Color profilePageRoundButton = red;
+  static const Color percentSlider = orange;
+  static const Color profilePageRoundButton = orange;
   static const Color donationWidget = blue;
   static const Color donationWidgetText = whiteBlue;
   static const Color textOnDark = white;

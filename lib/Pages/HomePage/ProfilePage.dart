@@ -1,18 +1,20 @@
-import 'package:animations/animations.dart';
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/ActivityDonationFeed.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
-import 'package:one_d_m/Components/GeneralDonationFeed.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/DailyReportFeed.dart';
+import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
-import 'package:one_d_m/Components/UserPageRoute.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
+import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -48,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage>
                     preferredSize: Size(MediaQuery.of(context).size.width, 110),
                     child: SafeArea(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 18.0),
+                        padding: EdgeInsets.symmetric(horizontal: 10.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -61,23 +63,28 @@ class _ProfilePageState extends State<ProfilePage>
                                   children: <Widget>[
                                     Text(
                                       "Willkommen,",
-                                      style: _theme.textTheme.headline5,
+                                      style: _theme.textTheme.headline5
+                                          .copyWith(fontSize: 32),
                                     ),
                                     Text(
                                       "${user?.name}",
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500),
+                                      style: _theme.textTheme.headline5
+                                          .copyWith(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
                                 Container(
-                                  child: Avatar(
-                                    user?.thumbnailUrl ?? user?.imgUrl,
-                                    onTap: () {
-                                      Navigator.push(
-                                          context, UserPageRoute(user));
-                                    },
+                                  child: CustomOpenContainer(
+                                    openBuilder: (context, close, controller) =>
+                                        UserPage(user, scrollController: controller),
+                                    closedShape: CircleBorder(),
+                                    closedElevation: 0,
+                                    closedBuilder: (context, open) => Avatar(
+                                      user?.thumbnailUrl ?? user?.imgUrl,
+                                      onTap: open,
+                                    ),
                                   ),
                                   width: 60,
                                   height: 60,
@@ -98,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       style: TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "${user?.donatedAmount ?? 0} DC",
+                                      "${Numeral(user?.donatedAmount ?? 0).value()} DC",
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold),
@@ -111,7 +118,19 @@ class _ProfilePageState extends State<ProfilePage>
                                       icon: Icons
                                           .credit_card, // toPage: BuyCoinsPage(),
                                       // toPage: BuyCoinsPage(),
-                                      onTap: () {
+                                      onTap: () async {
+                                        // PushNotification.of(context).show(
+                                        //     NotificationContent(
+                                        //         title: "Text", body: ""));
+
+                                        // final res = await CloudFunctions
+                                        //     .instance
+                                        //     .getHttpsCallable(
+                                        //         functionName:
+                                        //             "httpFunctions-updateDonations")
+                                        //     .call();
+                                        // print(res.data);
+
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -122,12 +141,18 @@ class _ProfilePageState extends State<ProfilePage>
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    RoundButtonHomePage(
-                                      icon: Icons.person,
-                                      onTap: () {
-                                        Navigator.push(
-                                            context, UserPageRoute(user));
-                                      },
+                                    CustomOpenContainer(
+                                      openBuilder:
+                                          (context, close, controller) =>
+                                              UserPage(user, scrollController: controller),
+                                      closedShape: CircleBorder(),
+                                      closedElevation: 0,
+                                      closedColor: ColorTheme.orange,
+                                      closedBuilder: (context, open) =>
+                                          RoundButtonHomePage(
+                                        icon: Icons.person,
+                                        onTap: open,
+                                      ),
                                     ),
                                     SizedBox(
                                       width: 10,
@@ -171,25 +196,11 @@ class _ProfilePageState extends State<ProfilePage>
                 );
               }),
         ),
-        SliverList(
-            delegate: SliverChildListDelegate([
-          GeneralDonationFeed(),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18),
-            child: Text(
-              "Spenden ",
-              style: Theme.of(context).textTheme.title,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18),
-            child: Text(
-              "Das haben deine Freunde in letzter Zeit gespendet:",
-              style: Theme.of(context).textTheme.body1,
-            ),
-          ),
-        ])),
-        ActivityDonationFeed(),
+        InfoFeed(),
+        ChangeNotifierProvider.value(
+            value: DailyReportManager(), child: DailyReportFeed()),
+        ChangeNotifierProvider.value(
+            value: DailyReportManager(), child: ActivityDonationFeed()),
       ],
     );
   }

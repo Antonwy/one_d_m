@@ -759,7 +759,8 @@ class _OpenContainerRoute extends ModalRoute<void> {
       };
       controller.addStatusListener(animationStatusCallback);
     } else {
-      Navigator.of(subtreeContext).didStopUserGesture();
+      if (Navigator.of(subtreeContext).userGestureInProgress)
+        Navigator.of(subtreeContext).didStopUserGesture();
     }
   }
 

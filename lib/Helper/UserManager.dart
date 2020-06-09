@@ -1,9 +1,8 @@
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
@@ -13,6 +12,7 @@ import 'User.dart';
 
 enum Status {
   Uninitialized,
+  NEEDSMOREINFORMATIONS,
   Authenticated,
   Authenticating,
   Unauthenticated,
@@ -24,6 +24,7 @@ class UserManager extends ChangeNotifier {
   FirebaseAuth _auth;
   FirebaseUser _fireUser;
   Status _status = Status.Uninitialized;
+  GoogleSignIn _googleSignIn;
 
   Status get status => _status;
   set status(Status status) {
@@ -33,7 +34,7 @@ class UserManager extends ChangeNotifier {
 
   User get user => _user;
 
-  String get uid => _fireUser.uid;
+  String get uid => _fireUser?.uid;
   FirebaseUser get fireUser => _fireUser;
   set fireUser(FirebaseUser fUser) {
     _fireUser = fUser;
@@ -41,7 +42,12 @@ class UserManager extends ChangeNotifier {
 
   FirebaseAuth get auth => _auth;
 
-  UserManager.instance() : _auth = FirebaseAuth.instance {
+  UserManager.instance() {
+    _googleSignIn = GoogleSignIn(scopes: [
+      'profile',
+      'email',
+    ]);
+    _auth = FirebaseAuth.instance;
     _auth.onAuthStateChanged.listen(_onAuthStateChanged);
   }
 
@@ -54,33 +60,47 @@ class UserManager extends ChangeNotifier {
     return fireUser.delete();
   }
 
-  Future<ApiResult<FirebaseUser>> signIn(String email, String password) async {
-    try {
-      _status = Status.Authenticating;
-      notifyListeners();
-      AuthResult res = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      return ApiSuccess(data: res.user);
-    } on PlatformException catch (e) {
-      _status = Status.Unauthenticated;
-      notifyListeners();
-      return ApiError(e.message);
+  Future<ApiResult<FirebaseUser>> signInWithGoogle() async {
+//    await _googleSignIn.signOut();
+    bool isSignedIn = await _googleSignIn.isSignedIn();
+
+    if (isSignedIn) {
+      _fireUser = await _auth.currentUser();
+      return ApiSuccess(data: _fireUser, message: "Bereits eingeloggt");
     }
+
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+
+    if (googleUser == null) return ApiError("Etwas ist schief gelaufen!");
+
+    GoogleSignInAuthentication googleAuthentication;
+
+    try {
+      googleAuthentication = await googleUser.authentication;
+    } on PlatformException catch (exc) {
+      return ApiError(exc.message);
+    }
+
+    if (googleAuthentication == null)
+      return ApiError("Etwas ist schief gelaufen!");
+//:A_p6Z&fHR@D
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleAuthentication.idToken,
+        accessToken: googleAuthentication.accessToken);
+
+    _fireUser = (await _auth.signInWithCredential(credential)).user;
+    return ApiSuccess(data: _fireUser);
   }
 
-  Future<ApiResult<FirebaseUser>> signUpAuth(
-      {String email, String password}) async {
+  Future<ApiResult<FirebaseUser>> signIn(String email, String password) async {
     try {
-      _status = Status.Authenticating;
-      notifyListeners();
-      AuthResult res = await _auth.createUserWithEmailAndPassword(
+      status = Status.Authenticating;
+      AuthResult res = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-
-      _fireUser = res.user;
-
+      status = Status.Authenticated;
       return ApiSuccess(data: res.user);
     } on PlatformException catch (e) {
-      _status = Status.Unauthenticated;
+      status = Status.Unauthenticated;
       return ApiError(e.message);
     }
   }
@@ -118,6 +138,23 @@ class UserManager extends ChangeNotifier {
     }
   }
 
+  Future<ApiResult> createSocialUserDocument(
+      String username, String phonenumber) async {
+    User user = User(
+        phoneNumber: phonenumber,
+        name: username,
+        email: fireUser.email,
+        imgUrl: fireUser.photoUrl,
+        id: fireUser.uid);
+    try {
+      await DatabaseService.addUser(user);
+      _user = user;
+      return ApiSuccess();
+    } catch (e) {
+      return ApiError("Etwas ist schief gelaufen! Versuche es später erneut!");
+    }
+  }
+
   Future<ApiResult<FirebaseUser>> signUp(User user, File image) async {
     try {
       status = Status.Authenticating;
@@ -152,7 +189,7 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> updateUser(User updatedUser) async {
     if (updatedUser.name != user.name &&
-        !await DatabaseService.checkUsernameAvailable(user.name)) {
+        !await DatabaseService.checkUsernameAvailable(updatedUser.name)) {
       return ApiError("Nutzername existiert bereits!");
     }
     user.name = updatedUser.name;
@@ -165,20 +202,31 @@ class UserManager extends ChangeNotifier {
 
   Future<void> logout() async {
     await _auth.signOut();
+    await _googleSignIn.signOut();
     status = Status.Unauthenticated;
   }
 
   Future<void> _onAuthStateChanged(FirebaseUser firebaseUser) async {
+    print(firebaseUser);
     if (firebaseUser == null) {
       status = Status.Unauthenticated;
     } else {
       _fireUser = firebaseUser;
-      _user = await DatabaseService.getUser(firebaseUser.uid);
       if (!firebaseUser.isEmailVerified) {
         status = Status.Unverified;
       } else {
-        status = Status.Authenticated;
+        _user = await DatabaseService.getUser(firebaseUser.uid);
+        if (user?.name == null) {
+          status = Status.NEEDSMOREINFORMATIONS;
+        } else {
+          status = Status.Authenticated;
+        }
       }
     }
+  }
+
+  Future<void> resetPassword() {
+    print(_fireUser.email);
+    return _auth.sendPasswordResetEmail(email: _fireUser.email);
   }
 }

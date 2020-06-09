@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
-import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/UserButton.dart';
-import 'package:one_d_m/Components/UserPageRoute.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class FollowersListPage extends StatelessWidget {
   String title;
@@ -17,16 +13,25 @@ class FollowersListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        backgroundColor: ColorTheme.blue,
+        brightness: Brightness.dark,
+        elevation: 0,
       ),
+      backgroundColor: ColorTheme.blue,
       body: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.all(10.0),
         child: ListView.builder(
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: UserButton(userIDs[index]),
+                child: UserButton(
+                  userIDs[index],
+                  color: ColorTheme.blue,
+                  textStyle: TextStyle(color: ColorTheme.whiteBlue),
+                  elevation: 0,
+                  avatarColor: ColorTheme.whiteBlue,
+                ),
               );
-              
             },
             itemCount: userIDs.length),
       ),

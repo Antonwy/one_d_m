@@ -19,111 +19,68 @@ class _NavBarState extends State<NavBar> {
 
   NavBarManager _npm;
 
-  Duration _animDuration = Duration(milliseconds: 500);
-
-  double _openHeight, _closeHeight;
-
-  NavBarState _state = NavBarState.open;
-
-  void open() {
-    setState(() {
-      _state = NavBarState.open;
-    });
-  }
-
-  void close() {
-    setState(() {
-      _state = NavBarState.collapsed;
-    });
-  }
-
-  void toggle() {
-    if (_state == NavBarState.collapsed)
-      open();
-    else
-      close();
-  }
+  double _openHeight;
 
   @override
   Widget build(BuildContext context) {
     _mq = MediaQuery.of(context);
 
-    _openHeight = _mq.padding.bottom == 0 ? 50 : 55 + _mq.padding.bottom;
-    _closeHeight = _mq.padding.bottom == 0 ? 30 : _mq.padding.bottom;
+    _openHeight = _mq.padding.bottom == 0 ? 75 : 55 + _mq.padding.bottom;
 
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          GestureDetector(
-            onTap: toggle,
-            child: AnimatedContainer(
-                duration: _animDuration,
-                height: _state == NavBarState.open ? _openHeight : _closeHeight,
-                width: _mq.size.width,
-                curve: Curves.fastLinearToSlowEaseIn,
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: ColorTheme.black.withOpacity(.10),
-                          blurRadius: 30,
-                          offset: Offset(0, -5)),
-                    ],
-                    color: ColorTheme.navBar,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(30))),
-                child: AnimatedOpacity(
-                  curve: Curves.fastLinearToSlowEaseIn,
-                  duration: _animDuration,
-                  opacity: _state != NavBarState.open ? 0.0 : 1.0,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Container(
+      child: Container(
+          height: _openHeight,
+          width: _mq.size.width,
+          decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: ColorTheme.black.withOpacity(.2),
+                    blurRadius: 30,
+                    offset: Offset(0, -5)),
+              ],
+              color: ColorTheme.navBar,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: Center(
+                    child: Container(
+                      width: _mq.size.width * .75,
+                      child: Consumer<NavBarManager>(
+                          builder: (context, npm, child) {
+                        return Align(
+                            alignment: Alignment(npm.position - 1, 0),
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                  color: ColorTheme.navBarHighlight,
+                                  shape: BoxShape.circle),
+                            ));
+                      }),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child:
+                      Consumer<NavBarManager>(builder: (context, npm, child) {
+                    _npm = npm;
+                    return Center(
+                      child: Container(
                         width: _mq.size.width * .75,
-                        margin: EdgeInsets.only(bottom: 5),
-                        child: Consumer<NavBarManager>(
-                            builder: (context, npm, child) {
-                          return Align(
-                              alignment: Alignment(npm.position - 1, 0),
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                child: Center(
-                                  child: AnimatedContainer(
-                                    curve: Curves.fastLinearToSlowEaseIn,
-                                    duration: _animDuration,
-                                    height:
-                                        _state != NavBarState.open ? 0.0 : 40,
-                                    decoration: BoxDecoration(
-                                        color: ColorTheme.navBarHighlight,
-                                        shape: BoxShape.circle),
-                                  ),
-                                ),
-                              ));
-                        }),
-                      ),
-                      Center(
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 5),
-                          width: _mq.size.width * .75,
-                          child: Consumer<NavBarManager>(
-                              builder: (context, npm, child) {
-                            _npm = npm;
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: _generateIcons(),
-                            );
-                          }),
+                        child: Row(
+                          children: _generateIcons(),
                         ),
                       ),
-                    ],
-                  ),
-                )),
-          ),
-        ],
-      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -131,45 +88,27 @@ class _NavBarState extends State<NavBar> {
     List<Widget> icons = [];
 
     for (int i = 0; i < _iconList.length; i++) {
-      EdgeInsets padding;
-
-      switch (i) {
-        case 0:
-          padding = EdgeInsets.only(left: 5);
-          break;
-        case 1:
-          padding = EdgeInsets.only(left: 0);
-          break;
-        case 2:
-          padding = EdgeInsets.only(right: 5);
-          break;
-      }
-
-      icons.add(Padding(
-          padding: padding,
-          child: IgnorePointer(
-            ignoring: _state == NavBarState.collapsed,
-            child: GestureDetector(
-                onTap: () {
-                  widget.changePage(i);
-                },
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  child: Opacity(
-                    opacity: Tween<double>(begin: 1.0, end: .5)
-                        .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
-                    child: Icon(
-                      _iconList[i],
-                      color: ColorTween(
-                              begin: ColorTheme.navBar,
-                              end: ColorTheme.navBarDisabled)
-                          .transform(
-                              _getAnimatedValue(i, _npm?.position ?? 1.0)),
-                    ),
-                  ),
-                )),
-          )));
+      icons.add(Expanded(
+        flex: i == 1 ? 1 : 0,
+        child: Container(
+          margin: EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 2 ? 8 : 0),
+          child: GestureDetector(
+              onTap: () {
+                widget.changePage(i);
+              },
+              child: Opacity(
+                opacity: Tween<double>(begin: 1.0, end: .5)
+                    .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
+                child: Icon(
+                  _iconList[i],
+                  color: ColorTween(
+                          begin: ColorTheme.navBar,
+                          end: ColorTheme.navBarDisabled)
+                      .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
+                ),
+              )),
+        ),
+      ));
     }
 
     return icons;

@@ -6,11 +6,12 @@ const stripe = new Stripe(functions.config().stripe.token, {
   apiVersion: '2020-03-02',
 });
 
+const firestore = admin.firestore();
+
 exports.onCreateAuthUser = functions.auth.user().onCreate(async (user) => {
   const customer: Stripe.Customer = await stripe.customers.create({});
 
-  await admin
-    .firestore()
+  await firestore
     .collection('user')
     .doc(user.uid)
     .collection('private_data')
@@ -24,16 +25,15 @@ exports.onCreateAuthUser = functions.auth.user().onCreate(async (user) => {
       { merge: true }
     );
 
-  return admin
-    .firestore()
+  return firestore
     .collection('statistics')
     .doc('users_info')
     .update({ user_count: admin.firestore.FieldValue.increment(1) });
 });
 
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
-  const firestore = admin.firestore();
   const userRef = firestore.collection('user').doc(user.uid);
+
   const privateUserData: PrivateUserData = (
     await userRef.collection('private_data').doc('data').get()
   ).data() as PrivateUserData;
@@ -41,6 +41,8 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     async (c) => await c.ref.delete()
   );
   await userRef.collection('private_data').doc('data').delete();
+
+  if (!(await userRef.get()).exists) return;
 
   (
     await firestore
@@ -85,17 +87,36 @@ exports.onDeleteUser = functions.firestore
     const user: User = snapshot.data() as User;
 
     // delete following
-    const followingUserColl = await admin
-      .firestore()
+    const followingUserColl = await firestore
       .collection('following')
       .doc(userId)
       .collection('users')
       .get();
-    followingUserColl.forEach(async (doc) => await doc.ref.delete());
+
+    // delete follow and FriendRanking
+    followingUserColl.forEach(async (doc) => {
+      const dailyDonationsRanking = await firestore
+        .collection('donation_feed')
+        .doc(doc.id)
+        .collection('daily_rankings')
+        .get();
+      dailyDonationsRanking.forEach(async (dailyDoc) => {
+        const foundDailyDoc = await firestore
+          .collection('donation_feed')
+          .doc(doc.id)
+          .collection('daily_rankings')
+          .doc(dailyDoc.id)
+          .collection('users')
+          .doc(userId)
+          .get();
+
+        if (dailyDoc.exists) await foundDailyDoc.ref.delete();
+      });
+      await doc.ref.delete();
+    });
 
     // delete donations
-    const qs = await admin
-      .firestore()
+    const qs = await firestore
       .collection('donations')
       .where('user_id', '==', userId)
       .get();
@@ -104,8 +125,7 @@ exports.onDeleteUser = functions.firestore
     // decrement campaign subscribe count
     user.subscribed_campaigns.forEach(
       async (id) =>
-        await admin
-          .firestore()
+        await firestore
           .collection('campaigns')
           .doc(id)
           .update({
@@ -113,17 +133,21 @@ exports.onDeleteUser = functions.firestore
           })
     );
 
-    if (user.image_url === null) return;
+    await firestore
+      .collection('statistics')
+      .doc('users_info')
+      .update({ user_count: admin.firestore.FieldValue.increment(-1) });
+
+    if (user.image_url === null || !user.image_url.startsWith('user_')) return;
 
     // delete image
-    await admin.storage().bucket().file(`user_${userId}.jpg`).delete();
-    await admin.storage().bucket().file(`user_${userId}_100x100.jpg`).delete();
-    await admin.storage().bucket().file(`user_${userId}_800x400.jpg`).delete();
     await admin
       .storage()
       .bucket()
       .file(`user_${userId}_1080x1920.jpg`)
       .delete();
+    await admin.storage().bucket().file(`user_${userId}_300x300.jpg`).delete();
+    await admin.storage().bucket().file(`user_${userId}.jpg`).delete();
   });
 
 exports.onAddCard = functions.firestore
@@ -133,8 +157,7 @@ exports.onAddCard = functions.firestore
     const userId: string = context.params.userId;
 
     const privateUserData: PrivateUserData = (
-      await admin
-        .firestore()
+      await firestore
         .collection('user')
         .doc(userId)
         .collection('private_data')

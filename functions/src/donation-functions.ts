@@ -6,47 +6,48 @@ const stripe = new Stripe(functions.config().stripe.token, {
   apiVersion: '2020-03-02',
 });
 
-exports.onCreateDonation = functions.firestore
-  .document('donations/{donationId}')
+const firestore = admin.firestore();
+const increment = admin.firestore.FieldValue.increment;
+
+exports.onCreateDonation = functions
+  .region('europe-west3')
+  .firestore.document('donations/{donationId}')
   .onCreate(async (snapshot, context) => {
     if (snapshot.data() === undefined) return;
 
     const donation: Donation = snapshot.data() as Donation;
+    const donationId: string = context.params.donationId;
 
     // update the donation amount of the user that created the donation
-    await admin
-      .firestore()
+    await firestore
       .collection('user')
       .doc(donation.user_id)
       .update({
-        donated_amount: admin.firestore.FieldValue.increment(donation.amount),
+        donated_amount: increment(donation.amount),
       });
 
     // update the amounts of donations from the campaign
-    await admin
-      .firestore()
+    await firestore
       .collection('campaigns')
       .doc(donation.campaign_id)
       .update({
-        current_amount: admin.firestore.FieldValue.increment(donation.amount),
+        current_amount: increment(donation.amount),
       });
 
     // update the daily/monthly/yearly donations
-    await admin
-      .firestore()
+    await firestore
       .collection('statistics')
       .doc('donation_info')
       .update({
-        daily_amount: admin.firestore.FieldValue.increment(donation.amount),
-        monthly_amount: admin.firestore.FieldValue.increment(donation.amount),
-        yearly_amount: admin.firestore.FieldValue.increment(donation.amount),
-        donations_count: admin.firestore.FieldValue.increment(1),
-        all_donations: admin.firestore.FieldValue.increment(donation.amount),
+        daily_amount: increment(donation.amount),
+        monthly_amount: increment(donation.amount),
+        yearly_amount: increment(donation.amount),
+        donations_count: increment(1),
+        all_donations: increment(donation.amount),
       });
 
     // get followed Users of the donation author
-    const followedUser = await admin
-      .firestore()
+    const followedUsers = await firestore
       .collection('followed')
       .doc(donation.user_id)
       .collection('users')
@@ -59,22 +60,107 @@ exports.onCreateDonation = functions.firestore
       campaign_id: donation.campaign_id,
       created_at: donation.created_at,
       campaign_img_url: donation.campaign_img_url,
+      anonym: donation?.anonym,
     };
 
-    // add the donation to the feed of the followed users.
-    followedUser.docs.forEach(async (user) => {
-      await admin
-        .firestore()
+    followedUsers.forEach(async (user) => {
+      // add the donation to the feed of the followed users
+      await firestore
         .collection('donation_feed')
         .doc(user.id)
         .collection('donations')
-        .doc(context.params.donationId)
+        .doc(donationId)
         .set(donationFeedItem);
+
+      // increment DailyAmount => users in followed FriendRankings
+      await firestore
+        .collection('donation_feed')
+        .doc(user.id)
+        .collection('daily_rankings')
+        .doc(getDate(donation.created_at.toDate()))
+        .collection('users')
+        .doc(donation.user_id)
+        .set(
+          {
+            amount: increment(donation.amount),
+          },
+          { merge: true }
+        );
+
+      // increment DailyAmount => CampaignRankings
+      await firestore
+        .collection('donation_feed')
+        .doc(user.id)
+        .collection('daily_rankings')
+        .doc(getDate(donation.created_at.toDate()))
+        .collection('campaigns')
+        .doc(donation.campaign_id)
+        .set(
+          {
+            amount: increment(donation.amount),
+          },
+          { merge: true }
+        );
+
+      // increment DailyAmount statistics
+      await firestore
+        .collection('donation_feed')
+        .doc(user.id)
+        .collection('daily_rankings')
+        .doc(getDate(donation.created_at.toDate()))
+        .set(
+          {
+            amount: increment(donation.amount),
+          },
+          { merge: true }
+        );
     });
 
+    // increment DailyAmount in own => users FriendRanking
+    await firestore
+      .collection('donation_feed')
+      .doc(donation.user_id)
+      .collection('daily_rankings')
+      .doc(getDate(donation.created_at.toDate()))
+      .collection('users')
+      .doc(donation.user_id)
+      .set(
+        {
+          amount: increment(donation.amount),
+        },
+        { merge: true }
+      );
+
+    // increment DailyAmount in own => CampaignRankings
+    await firestore
+      .collection('donation_feed')
+      .doc(donation.user_id)
+      .collection('daily_rankings')
+      .doc(getDate(donation.created_at.toDate()))
+      .collection('campaigns')
+      .doc(donation.campaign_id)
+      .set(
+        {
+          amount: increment(donation.amount),
+        },
+        { merge: true }
+      );
+
+    // increment DailyAmount statistics
+    await firestore
+      .collection('donation_feed')
+      .doc(donation.user_id)
+      .collection('daily_rankings')
+      .doc(getDate(donation.created_at.toDate()))
+      .set(
+        {
+          amount: increment(donation.amount),
+        },
+        { merge: true }
+      );
+
     const privateUserData: PrivateUserData = (
-      await admin
-        .firestore()
+      await firestore
         .collection('user')
         .doc(donation.user_id)
         .collection('private_data')
@@ -83,8 +169,7 @@ exports.onCreateDonation = functions.firestore
     ).data() as PrivateUserData;
 
     const paymentMethod = (
-      await admin
-        .firestore()
+      await firestore
         .collection('user')
         .doc(donation.user_id)
         .collection('cards')
@@ -95,11 +180,18 @@ exports.onCreateDonation = functions.firestore
       amount: donation.amount * 100,
       currency: 'eur',
       customer: privateUserData.customer_id,
+      description: donation.campaign_id,
       payment_method: paymentMethod.id,
       off_session: true,
       confirm: true,
     });
   });
+
+function getDate(nowDate: Date): string {
+  return `${nowDate.getFullYear()}-${
+    nowDate.getMonth() + 1
+  }-${nowDate.getDate()}`;
+}
 
 exports.onUpdateDonation = functions.firestore
   .document('donations/{donationId}')
@@ -109,8 +201,7 @@ exports.onUpdateDonation = functions.firestore
     console.log(`Updating ${donation}`);
 
     // get followed Users of the donation author
-    const followedUser = await admin
-      .firestore()
+    const followedUser = await firestore
       .collection('followed')
       .doc(donation.user_id)
       .collection('users')
@@ -123,12 +214,12 @@ exports.onUpdateDonation = functions.firestore
       campaign_id: donation.campaign_id,
       created_at: donation.created_at,
       campaign_img_url: donation.campaign_img_url,
+      anonym: donation.anonym,
     };
 
     // add the donation to the feed of the followed users.
     followedUser.forEach(async (user) => {
-      await admin
-        .firestore()
+      await firestore
         .collection('donation_feed')
         .doc(user.id)
         .collection('donations')
@@ -147,8 +238,7 @@ exports.onDeleteDonation = functions.firestore
     if (donationId === 'info') return;
 
     // get followed Users of the donation author
-    const followedUser = await admin
-      .firestore()
+    const followedUser = await firestore
       .collection('followed')
       .doc(donation.user_id)
       .collection('users')
@@ -156,8 +246,7 @@ exports.onDeleteDonation = functions.firestore
 
     // delete the donation to the feed of the followed users.
     followedUser.forEach(async (user) => {
-      await admin
-        .firestore()
+      await firestore
         .collection('donation_feed')
         .doc(user.id)
         .collection('donations')

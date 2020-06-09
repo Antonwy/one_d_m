@@ -1,7 +1,9 @@
 class Validate {
   static String username(String text) {
-    if (text.length < 3 || text.length >= 32)
+    if (text.length < 3) {
       return "Bitte gib einen richtigen Namen ein!";
+    }
+    if (text.length >= 15) return "Dieser Name ist zu lang!";
     return null;
   }
 
@@ -15,8 +17,6 @@ class Validate {
   }
 
   static String telephone(String text) {
-    if (text.length == 0) return null;
-
     if (text.length < 8 || text.length > 15) {
       return 'Bitte gib deine Telefonnummer ein.';
     }
@@ -24,8 +24,10 @@ class Validate {
   }
 
   static String password(String text) {
-    if (text.length < 7 || text.length >= 32)
-      return "Bitte gib ein richtiges Passwort ein!";
+    if (text.length < 7)
+      return "Das Passwort muss aus mindestens 8 Zeichen bestehen!";
+    if (text.length >= 32)
+      return "Das Passwort darf maximal aus 32 Zeichen besthen!";
     return null;
   }
 

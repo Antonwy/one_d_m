@@ -83,6 +83,8 @@ class PaymentInfosPage extends StatelessWidget {
                         bool shouldDelete = await showDialog<bool>(
                             context: context,
                             builder: (c) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
                                   title: Text("Löschen"),
                                   content: Text(
                                       "Bist du dir sicher, dass du die Karte löschen willst?"),
@@ -91,7 +93,11 @@ class PaymentInfosPage extends StatelessWidget {
                                         onPressed: () {
                                           Navigator.pop(c, false);
                                         },
-                                        child: Text("Abbrechen")),
+                                        child: Text(
+                                          "Abbrechen",
+                                          style:
+                                              TextStyle(color: ColorTheme.blue),
+                                        )),
                                     FlatButton(
                                       onPressed: () {
                                         Navigator.pop(c, true);
@@ -99,7 +105,7 @@ class PaymentInfosPage extends StatelessWidget {
                                       child: Text(
                                         "Löschen",
                                         style: TextStyle(
-                                          color: Colors.red,
+                                          color: ColorTheme.orange,
                                         ),
                                       ),
                                     ),

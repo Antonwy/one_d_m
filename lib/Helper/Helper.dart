@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class Helper {
@@ -60,6 +62,13 @@ class Helper {
             ));
   }
 
-  
+  static num degreesToRads(num deg) {
+    return (deg * pi) / 180.0;
+  }
 
+  static Future<void> showConnectionSnackBar(BuildContext context) {
+    return Scaffold.of(context)
+        .showSnackBar(SnackBar(content: Text("Stelle eine Verbindung her!")))
+        .closed;
+  }
 }

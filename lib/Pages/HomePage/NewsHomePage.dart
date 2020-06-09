@@ -32,20 +32,18 @@ class _NewsHomePageState extends State<NewsHomePage>
         SliverAppBar(
           brightness: Brightness.dark,
           elevation: 0,
-          backgroundColor: ColorTheme.blue,
+          backgroundColor: Colors.transparent,
           automaticallyImplyLeading: false,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 "Neuigkeiten",
-                style:
-                    _textTheme.headline6.copyWith(color: ColorTheme.whiteBlue),
+                style: _textTheme.headline6,
               ),
               Text(
                 "Updates deiner abonnierten Projekte",
-                style:
-                    _textTheme.bodyText1.copyWith(color: ColorTheme.whiteBlue),
+                style: _textTheme.bodyText1,
               ),
               SizedBox(
                 height: 10,
@@ -111,8 +109,7 @@ class _NewsHomePageState extends State<NewsHomePage>
                                   SizedBox(
                                     height: 50,
                                   ),
-                                  Image.asset(
-                                      "assets/images/clip-virtual-reality.png"),
+                                  SvgPicture.asset("assets/images/no-news.svg"),
                                   SizedBox(
                                     height: 10,
                                   ),
@@ -128,7 +125,7 @@ class _NewsHomePageState extends State<NewsHomePage>
                             delegate: SliverChildListDelegate(snapshot.data
                                 .map((News news) => Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 18),
+                                          horizontal: 10),
                                       child: NewsPost(news),
                                     ))
                                 .toList()),

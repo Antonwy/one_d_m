@@ -1,3 +1,5 @@
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
@@ -16,10 +18,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   double _page = 0.0;
   List<Color> _pageColors = [
     ColorTheme.blue,
-    ColorTheme.red,
     ColorTheme.whiteBlue,
+    ColorTheme.orange,
     ColorTheme.white,
-    ColorTheme.red,
+    ColorTheme.orange,
     ColorTheme.blue,
     ColorTheme.black,
   ];
@@ -68,54 +70,58 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       backgroundColor: _getBackgroundColor(),
       body: Stack(
         children: <Widget>[
-          Positioned.fill(
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            top: 0,
             child: PageView(
               controller: _pageController,
               children: <Widget>[
                 _WelcomePage(
                   svgName: "welcome",
                   title: "Wir sind\n One Dollar Movement!",
-                  titleText: RichText(
+                  titleText: AutoSizeText.rich(
+                    TextSpan(children: [
+                      TextSpan(
+                          text: "Wir sind\n",
+                          style: TextStyle(fontWeight: FontWeight.w200)),
+                      TextSpan(
+                          text: "One Dollar Movement",
+                          style: TextStyle(fontWeight: FontWeight.w500)),
+                    ]),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline4
+                        .copyWith(color: ColorTheme.whiteBlue),
                     textAlign: TextAlign.center,
-                    text: TextSpan(
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline4
-                            .copyWith(color: ColorTheme.whiteBlue),
-                        children: [
-                          TextSpan(
-                              text: "Wir sind\n",
-                              style: TextStyle(fontWeight: FontWeight.w200)),
-                          TextSpan(
-                              text: "One Dollar Movement",
-                              style: TextStyle(fontWeight: FontWeight.w500)),
-                        ]),
+                    maxLines: 2,
                   ),
                   description:
-                      "One Dollar Movement ist eine Plattform auf der kleine Geldbeträge gespendet werden können. Durch uns wird spenden einfach, schnell und unterhaltsam.",
+                      "One Dollar Movement ist eine Plattform, auf der kleine Geldbeträge gespendet werden können. Durch uns wird spenden einfach, schnell und unterhaltsam.",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
-                _WelcomePage(
-                    svgName: "landing-page",
-                    title: "Startseite",
-                    description:
-                        "Auf der Startseite werden die Spenden deiner Freunde und die jeweiligen Tagesziele angezeigt. So hast Du immer im Blick wer an was gespendet hat und wie viele Donation Credits noch bis zum Ende des Tages gesammelt werden sollten, um das Tagesziel zu erreichen.",
-                    animatedValue: _getAnimatedValue(1, _page),
-                    onPressed: () => _animateToPage(2)),
                 _WelcomePage(
                     svgName: "donation-credits",
                     title: "Donation Credits",
                     description:
                         "Ein Donation Credit entspricht 10 Cent. Wir nutzen das als App interne „Währung“ um ein schnelles und reibungsloses Spenden zu ermöglichen.",
                     darkText: true,
+                    animatedValue: _getAnimatedValue(1, _page),
+                    onPressed: () => _animateToPage(2)),
+                _WelcomePage(
+                    svgName: "landing-page",
+                    title: "Startseite",
+                    description:
+                        "Auf der Startseite werden die Spenden deiner Freunde und die jeweiligen Tagesziele angezeigt. So hast Du immer im Blick, wer an was gespendet hat und wie viele Donation Credits noch bis zum Ende des Tages gesammelt werden sollten, um das Tagesziel zu erreichen.",
                     animatedValue: _getAnimatedValue(2, _page),
                     onPressed: () => _animateToPage(3)),
                 _WelcomePage(
                     svgName: "projects",
                     title: "Projekte",
                     description:
-                        "Die Projekte an die gespendet werden kann, sind primär Wohltätigkeitsorganisationen die ohne finanzielle Unterstützung ihrer Arbeit nicht mehr nachgehen könnten.",
+                        "Die Projekte, an die gespendet werden kann, sind primär Wohltätigkeitsorganisationen, die ohne finanzielle Unterstützung ihrer Arbeit nicht mehr nachgehen könnten.",
                     darkText: true,
                     animatedValue: _getAnimatedValue(3, _page),
                     onPressed: () => _animateToPage(4)),
@@ -130,15 +136,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   svgName: "donation",
                   title: "Spendenablauf",
                   description:
-                      "Alle Donation Credits die du spendest werden bis zum Ende des Monats auf deinem Account gesammelt und in einer Sammelüberweisung auf unser Konto überwiesen. Von dort aus wird das Geld an die Projekte verteilt.",
+                      "Alle Donation Credits, die du spendest, werden bis zum Ende des Monats auf deinem Account gesammelt und in einer Sammelüberweisung auf unser Konto überwiesen. Von dort aus wird das Geld an die Projekte verteilt.",
                   animatedValue: _getAnimatedValue(5, _page),
                   onPressed: () => _animateToPage(6),
                 ),
                 _WelcomePage(
                   svgName: "contacts",
-                  title: "Kontakte",
+                  title: "Berechtigungen",
                   description:
-                      "Um dir besser Freunde vorschlagen zu können, brauchen wir Zugriff zu deinen Kontakten! Keine sorge, wir speichern deine Kontakte nicht, sondern gleichen sie nur mit unserer Datenbank ab!",
+                      "Damit wir dir eine angenehme User-Experience geben können, brauchen wir einige Berechtigungen von dir.",
                   animatedValue: _getAnimatedValue(6, _page),
                   onPressed: _loading
                       ? null
@@ -148,6 +154,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           });
 
                           await _getPermission();
+
+                          await FirebaseMessaging()
+                              .requestNotificationPermissions(
+                                  IosNotificationSettings());
 
                           Navigator.push(
                               context,
@@ -178,6 +188,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
+              minimum: EdgeInsets.only(bottom: 15),
               child: InkPageIndicator(
                 gap: 18,
                 padding: 0,
@@ -229,7 +240,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 class _WelcomePage extends StatelessWidget {
   String svgName, imageName, title, description;
   double animatedValue;
-  RichText titleText;
+  AutoSizeText titleText;
   VoidCallback onPressed;
   bool isLastPage, loading, darkText;
 
@@ -270,9 +281,9 @@ class _WelcomePage extends StatelessWidget {
                         )
                       : SvgPicture.asset(
                           "assets/images/$svgName.svg",
-                          width: 300,
+                          height: MediaQuery.of(context).size.height * .25,
                           placeholderBuilder: (context) => Container(
-                            height: 200,
+                            height: MediaQuery.of(context).size.height * .25,
                           ),
                         ),
                 ),
@@ -286,8 +297,9 @@ class _WelcomePage extends StatelessWidget {
               child: Transform.translate(
                 offset: Offset(_mq.size.width * animatedValue * .3, 0),
                 child: titleText ??
-                    Text(
+                    AutoSizeText(
                       title,
+                      maxLines: 1,
                       style: _textTheme.headline3.copyWith(
                         color:
                             darkText ? ColorTheme.blue : ColorTheme.whiteBlue,
@@ -340,7 +352,7 @@ class _WelcomePage extends StatelessWidget {
                                             Colors.white),
                                       ),
                                     )
-                                  : Icon(Icons.contact_phone),
+                                  : Icon(Icons.done),
                               elevation: 0,
                               backgroundColor: Colors.white12,
                             ),

@@ -23,7 +23,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
     textTheme = Theme.of(context).textTheme;
 
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
         child: CustomOpenContainer(
           closedShape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -33,14 +33,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
               scrollController: scrollController),
           closedColor: ColorTheme.white,
           closedBuilder: (context, open) => InkWell(
-            onTap: () async {
-              await precacheImage(
-                  CachedNetworkImageProvider(widget.campaign.imgUrl), context,
-                  size: Size(MediaQuery.of(context).size.width,
-                      MediaQuery.of(context).size.height * .3 + 30),
-                  onError: (context, stacktrace) => print(stacktrace));
-              open();
-            },
+            onTap: open,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -49,6 +42,11 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                   height: 230,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) => Center(
+                      child: Icon(
+                    Icons.error,
+                    color: ColorTheme.orange,
+                  )),
                   alignment: Alignment.center,
                 ),
                 Padding(
@@ -58,7 +56,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                     children: <Widget>[
                       Text(
                         widget.campaign.name,
-                        style: textTheme.title,
+                        style: textTheme.headline6,
                       ),
                       widget.campaign.shortDescription == null
                           ? Container()

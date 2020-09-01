@@ -55,6 +55,8 @@ class Helper {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               title: Text("Error", style: TextStyle(color: Colors.red)),
               content: Text(
                 message,

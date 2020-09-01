@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>135941554667-lkla2g788uivj09jnvm9i4u418lmkkqk.apps.googleusercontent.com</string>
+	<string>135941554667-dkft0f11rfgki41msm2vf6tdclsghi35.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.135941554667-lkla2g788uivj09jnvm9i4u418lmkkqk</string>
+	<string>com.googleusercontent.apps.135941554667-dkft0f11rfgki41msm2vf6tdclsghi35</string>
 	<key>API_KEY</key>
 	<string>AIzaSyA6jEqspJGU5gV2GidbPZ3aANSTTYnSQ1w</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.antonwy.oneDm</string>
+	<string>com.odm.onedollarmovement</string>
 	<key>PROJECT_ID</key>
 	<string>one-dollar-movement</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:135941554667:ios:8c664c33fca6f9ec8a59ae</string>
+	<string>1:135941554667:ios:24c1557b0985e13b8a59ae</string>
 	<key>DATABASE_URL</key>
 	<string>https://one-dollar-movement.firebaseio.com</string>
 </dict>

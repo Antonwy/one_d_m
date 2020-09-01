@@ -18,6 +18,7 @@ import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
+import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:provider/provider.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -190,8 +191,23 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                         controller: _scrollController,
                         slivers: [
                           SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: _mq.size.height * .3,
+                            child: GestureDetector(
+                              onTap: () {
+                                print("TAP");
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => FullscreenImages([
+                                              campaign.imgUrl,
+                                              ...campaign.moreImages
+                                            ])));
+                              },
+                              child: SizedBox(
+                                height: _mq.size.height * .3,
+                                child: Container(
+                                  color: Colors.transparent,
+                                ),
+                              ),
                             ),
                           ),
                           SliverPadding(
@@ -228,21 +244,17 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     ),
                                     Consumer<UserManager>(
                                         builder: (context, um, child) {
-                                      return StreamBuilder<User>(
-                                          initialData: um.user,
-                                          stream: DatabaseService.getUserStream(
-                                              um.uid),
+                                      return StreamBuilder<bool>(
+                                          initialData: false,
+                                          stream: DatabaseService
+                                              .hasSubscribedCampaignStream(
+                                                  um.uid, campaign.id),
                                           builder: (context, snapshot) {
-                                            _subscribed = snapshot
-                                                .data?.subscribedCampaignsIds
-                                                ?.contains(widget.campaign.id);
-                                            um.user.subscribedCampaignsIds =
-                                                snapshot.data
-                                                    .subscribedCampaignsIds;
+                                            _subscribed = snapshot.data;
                                             return FollowButton(
                                               onPressed: () async =>
                                                   _toggleSubscribed(um.uid),
-                                              followed: _subscribed ?? false,
+                                              followed: _subscribed,
                                             );
                                           });
                                     }),

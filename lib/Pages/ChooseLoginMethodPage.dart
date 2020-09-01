@@ -12,6 +12,7 @@ import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/LoginPage.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'HomePage/HomePage.dart';
 
@@ -28,7 +29,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: ColorTheme.blue,
+      backgroundColor: ColorTheme.whiteBlue,
       body: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(
@@ -44,25 +45,18 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
             ),
             Text(
               "Willkommen",
-              style: _theme.textTheme.headline5
-                  .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              style: _theme.textTheme.headline5.copyWith(
+                  color: ColorTheme.blue, fontWeight: FontWeight.bold),
             ),
             SizedBox(
               height: 10,
             ),
             Text(
               "Logge dich ein, um Mitglied von One Dollar Movement zu werden!",
-              style: _theme.textTheme.subtitle1.copyWith(color: Colors.white54),
+              style: _theme.textTheme.subtitle1
+                  .copyWith(color: ColorTheme.blue.withOpacity(.5)),
               textAlign: TextAlign.center,
             ),
-
-            // SignInWithAppleButton(
-            //   onPressed: () {},
-            //   text: "Mit Apple anmelden",
-            //   height: 52,
-            //   style: SignInWithAppleButtonStyle.white,
-            //   borderRadius: BorderRadius.circular(26),
-            // ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 18.0),
               child: Row(
@@ -77,49 +71,18 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
                 ],
               ),
             ),
-            Consumer<UserManager>(
-              builder: (context, um, child) => SignInButton(
-                Buttons.GoogleDark,
-                text: "Mit Google einloggen",
-                onPressed: () async {
-                  setState(() {
-                    _loading = true;
-                  });
-                  ApiResult<FirebaseUser> res = await um.signInWithGoogle();
-
-                  print(res);
-
-                  if (res.hasError() || res.data == null) {
-                    setState(() {
-                      _loading = false;
-                    });
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text(res.message)));
-                    return;
-                  }
-
-                  if (await DatabaseService.checkIfUserHasAlreadyAnAccount(
-                      res.data.uid)) {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
-                        (route) => route.isFirst);
-                    return;
-                  }
-
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NewRegisterPage(
-                                socialSignIn: true,
-                              )));
-                },
-              ),
+            SignInWithAppleButton(
+              onPressed: _appleSignIn,
+              text: "Mit Apple anmelden",
+              height: 52,
+              style: SignInWithAppleButtonStyle.white,
+              borderRadius: BorderRadius.circular(12),
             ),
-            // SignInButton(
-            //   Buttons.Apple,
-            //   onPressed: () {},
-            // ),
+            SizedBox(
+              height: 10,
+            ),
+            SignInButton(Buttons.Google,
+                text: "Mit Google einloggen", onPressed: _googleSignIn),
             _loading
                 ? SizedBox(
                     height: 20,
@@ -137,6 +100,50 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
       ),
     );
   }
+
+  void _appleSignIn() async {
+    UserManager um = Provider.of<UserManager>(context, listen: false);
+    setState(() {
+      _loading = true;
+    });
+
+    _nextStepsSocialSignIn(await um.signInWithApple());
+  }
+
+  void _googleSignIn() async {
+    UserManager um = Provider.of<UserManager>(context, listen: false);
+    setState(() {
+      _loading = true;
+    });
+    _nextStepsSocialSignIn(await um.signInWithGoogle());
+  }
+
+  void _nextStepsSocialSignIn(ApiResult res) async {
+    print(res);
+
+    if (res.hasError() || res.data == null) {
+      setState(() {
+        _loading = false;
+      });
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(res.message)));
+      return;
+    }
+
+    if (await DatabaseService.checkIfUserHasAlreadyAnAccount(res.data.uid)) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+          (route) => route.isFirst);
+      return;
+    }
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NewRegisterPage(
+                  socialSignIn: true,
+                )));
+  }
 }
 
 class _RoundButton extends StatelessWidget {
@@ -152,18 +159,16 @@ class _RoundButton extends StatelessWidget {
       child: OpenContainer(
         openBuilder: (context, close) => toPage,
         closedShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         openColor: pageColor,
         closedElevation: 0,
         closedColor: isRegister ? ColorTheme.blue : ColorTheme.orange,
         closedBuilder: (context, open) => Container(
           height: 52,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
-              color: isRegister ? null : ColorTheme.orange,
-              border: isRegister
-                  ? Border.all(width: 2, color: Colors.white)
-                  : Border()),
+            borderRadius: BorderRadius.circular(26),
+            color: isRegister ? null : ColorTheme.orange,
+          ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(

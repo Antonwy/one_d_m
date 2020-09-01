@@ -5,7 +5,6 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
@@ -75,6 +74,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Consumer<UserManager>(builder: (context, um, child) {
+          if (um.user.ghost) _anonym = true;
           return StreamBuilder<bool>(
               initialData: true,
               stream: DatabaseService.hasPaymentMethod(um.uid),
@@ -343,141 +343,144 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           : Container(),
                                     ),
                                   ),
-                                  Consumer<CampaignsManager>(
-                                      builder: (context, cm, child) {
-                                    List<Campaign> possibleCampaigns =
-                                        List.from(
-                                            cm.getSubscribedCampaigns(um.user));
-                                    possibleCampaigns.removeWhere(
-                                        (c) => c.id == widget.campaign.id);
-                                    List<Campaign> campaigns = List.from(
-                                        possibleCampaigns.isNotEmpty
-                                            ? cm.getSubscribedCampaigns(um.user)
-                                            : cm.getAllCampaigns());
+                                  FutureBuilder<List<Campaign>>(
+                                      future: _getPossibleCampaigns(),
+                                      builder: (context, snapshot) {
+                                        List<Campaign> campaigns = [];
+                                        if (snapshot.hasData) {
+                                          campaigns = snapshot.data;
+                                          campaigns.removeWhere((c) =>
+                                              c.id == widget.campaign.id);
 
-                                    campaigns.removeWhere(
-                                        (c) => c.id == widget.campaign.id);
+                                          if (_alternativCampaign == null)
+                                            _alternativCampaign = campaigns[0];
+                                        }
 
-                                    if (_alternativCampaign == null)
-                                      _alternativCampaign = campaigns[0];
-
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 20.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: <Widget>[
-                                              Text(
-                                                "Alternatives Projekt: ",
-                                                style:
-                                                    _theme.textTheme.headline6,
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  left: 20.0, right: 20),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: <Widget>[
+                                                  Text(
+                                                    "Alternatives Projekt: ",
+                                                    style: _theme
+                                                        .textTheme.headline6,
+                                                  ),
+                                                  AutoSizeText(
+                                                    "Wähle ein Projekt an das wir alternativ spenden können.",
+                                                    maxLines: 1,
+                                                    style: _theme
+                                                        .textTheme.caption,
+                                                  ),
+                                                ],
                                               ),
-                                              Text(
-                                                "Auswahl aus ${possibleCampaigns.isNotEmpty ? "deinen abonnierten" : "allen"} Projekten",
-                                                style:
-                                                    _theme.textTheme.bodyText1,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(
-                                            height: 100,
-                                            child: ListView.builder(
-                                              scrollDirection: Axis.horizontal,
-                                              itemBuilder: (context, index) {
-                                                return Center(
-                                                  child: Container(
-                                                    height: 80,
-                                                    margin: index == 0
-                                                        ? EdgeInsets.only(
-                                                            left: 20)
-                                                        : index ==
-                                                                campaigns
-                                                                        .length -
-                                                                    1
+                                            ),
+                                            SizedBox(
+                                                height: 100,
+                                                child: ListView.builder(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    return Center(
+                                                      child: Container(
+                                                        height: 80,
+                                                        margin: index == 0
                                                             ? EdgeInsets.only(
-                                                                right: 20)
-                                                            : null,
-                                                    child: Card(
-                                                      elevation:
-                                                          _alternativCampaign
-                                                                      ?.id ==
-                                                                  campaigns[
-                                                                          index]
-                                                                      .id
-                                                              ? 2
-                                                              : 0,
-                                                      clipBehavior:
-                                                          Clip.antiAlias,
-                                                      shape:
-                                                          RoundedRectangleBorder(
+                                                                left: 20)
+                                                            : index ==
+                                                                    campaigns
+                                                                            .length -
+                                                                        1
+                                                                ? EdgeInsets
+                                                                    .only(
+                                                                        right:
+                                                                            20)
+                                                                : null,
+                                                        child: Card(
+                                                          elevation:
+                                                              _alternativCampaign
+                                                                          ?.id ==
+                                                                      campaigns[
+                                                                              index]
+                                                                          .id
+                                                                  ? 2
+                                                                  : 0,
+                                                          clipBehavior:
+                                                              Clip.antiAlias,
+                                                          shape: RoundedRectangleBorder(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
                                                                           10)),
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          setState(() {
-                                                            _alternativCampaign =
-                                                                campaigns[
-                                                                    index];
-                                                          });
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              setState(() {
+                                                                _alternativCampaign =
+                                                                    campaigns[
+                                                                        index];
+                                                              });
+                                                            },
+                                                            child: Padding(
+                                                              padding: const EdgeInsets
                                                                       .symmetric(
                                                                   horizontal:
                                                                       15.0,
                                                                   vertical: 8),
-                                                          child: Row(
-                                                            children: <Widget>[
-                                                              Avatar(campaigns[
-                                                                          index]
-                                                                      .thumbnailUrl ??
-                                                                  campaigns[
-                                                                          index]
-                                                                      .imgUrl),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              Text(
-                                                                "${campaigns[index].name}",
-                                                                style: _theme
-                                                                    .textTheme
-                                                                    .headline6,
+                                                              child: Row(
+                                                                children: <
+                                                                    Widget>[
+                                                                  Avatar(campaigns[
+                                                                              index]
+                                                                          .thumbnailUrl ??
+                                                                      campaigns[
+                                                                              index]
+                                                                          .imgUrl),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          10),
+                                                                  Text(
+                                                                    "${campaigns[index].name}",
+                                                                    style: _theme
+                                                                        .textTheme
+                                                                        .headline6,
+                                                                  ),
+                                                                ],
                                                               ),
-                                                            ],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              itemCount: campaigns.length,
-                                            )),
-                                      ],
-                                    );
-                                  }),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 4.0),
-                                    child: CheckboxListTile(
-                                      value: _anonym,
-                                      onChanged: (checked) {
-                                        setState(() {
-                                          _anonym = checked;
-                                        });
-                                      },
-                                      title: Text("Anonym spenden"),
-                                      subtitle: Text(
-                                          "Wenn aktiviert, wird diese Spende nicht in deinem Profil angezeigt"),
-                                    ),
-                                  ),
+                                                    );
+                                                  },
+                                                  itemCount: campaigns.length,
+                                                )),
+                                          ],
+                                        );
+                                      }),
+                                  um.user.ghost
+                                      ? Container()
+                                      : Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 4.0),
+                                          child: CheckboxListTile(
+                                            value: _anonym,
+                                            onChanged: (checked) {
+                                              setState(() {
+                                                _anonym = checked;
+                                              });
+                                            },
+                                            title: Text("Anonym spenden"),
+                                            subtitle: Text(
+                                                "Wenn aktiviert, wird diese Spende nicht in deinem Profil angezeigt"),
+                                          ),
+                                        ),
                                   SizedBox(
                                     height: 10,
                                   ),
@@ -590,6 +593,17 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }),
       ),
     );
+  }
+
+  Future<List<Campaign>> _getPossibleCampaigns() async {
+    UserManager um = Provider.of<UserManager>(context, listen: false);
+    List<Campaign> possibleCampaigns =
+        await DatabaseService.getSubscribedCampaigns(um.uid);
+    possibleCampaigns.removeWhere((c) => c.id == widget.campaign.id);
+    if (possibleCampaigns.isEmpty)
+      possibleCampaigns = await DatabaseService.getTopCampaigns();
+
+    return possibleCampaigns;
   }
 
   Widget _closeButton() {

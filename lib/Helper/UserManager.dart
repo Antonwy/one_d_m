@@ -7,6 +7,7 @@ import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'StorageService.dart';
 import 'User.dart';
 
@@ -60,6 +61,32 @@ class UserManager extends ChangeNotifier {
     return fireUser.delete();
   }
 
+  Future<ApiResult<FirebaseUser>> signInWithApple() async {
+    try {
+      final AuthorizationCredentialAppleID appleResult =
+          await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final AuthCredential credential =
+          OAuthProvider(providerId: 'apple.com').getCredential(
+        accessToken: appleResult.authorizationCode,
+        idToken: appleResult.identityToken,
+      );
+
+      AuthResult firebaseResult = await _auth.signInWithCredential(credential);
+      _fireUser = firebaseResult.user;
+
+      return ApiSuccess(data: _fireUser);
+    } catch (error) {
+      print(error);
+      return ApiError("Etwas ist schief gelaufen!");
+    }
+  }
+
   Future<ApiResult<FirebaseUser>> signInWithGoogle() async {
 //    await _googleSignIn.signOut();
     bool isSignedIn = await _googleSignIn.isSignedIn();
@@ -83,7 +110,6 @@ class UserManager extends ChangeNotifier {
 
     if (googleAuthentication == null)
       return ApiError("Etwas ist schief gelaufen!");
-//:A_p6Z&fHR@D
     final AuthCredential credential = GoogleAuthProvider.getCredential(
         idToken: googleAuthentication.idToken,
         accessToken: googleAuthentication.accessToken);
@@ -140,6 +166,10 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> createSocialUserDocument(
       String username, String phonenumber) async {
+    if (!await DatabaseService.checkUsernameAvailable(username)) {
+      return ApiError("Nutzername nicht verfügbar!");
+    }
+
     User user = User(
         phoneNumber: phonenumber,
         name: username,
@@ -176,6 +206,11 @@ class UserManager extends ChangeNotifier {
             .uploadImage(StorageService.userImageName(res.user.uid));
       }
 
+      UserUpdateInfo uui = UserUpdateInfo();
+      uui.displayName = user.name;
+
+      await res.user.updateProfile(uui);
+
       user.id = res.user.uid;
       await DatabaseService.addUser(user);
       _user = user;
@@ -190,7 +225,7 @@ class UserManager extends ChangeNotifier {
   Future<ApiResult> updateUser(User updatedUser) async {
     if (updatedUser.name != user.name &&
         !await DatabaseService.checkUsernameAvailable(updatedUser.name)) {
-      return ApiError("Nutzername existiert bereits!");
+      return ApiError("Nutzername gibt es bereits, bitte wähle einen anderen!");
     }
     user.name = updatedUser.name;
     user.imgUrl = updatedUser.imgUrl;
@@ -201,6 +236,7 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await DatabaseService.deleteDeviceToken(uid);
     await _auth.signOut();
     await _googleSignIn.signOut();
     status = Status.Unauthenticated;

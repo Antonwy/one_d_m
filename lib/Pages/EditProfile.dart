@@ -36,19 +36,23 @@ class _EditProfileState extends State<EditProfile> {
 
     return Scaffold(
         key: _scaffoldKey,
-        backgroundColor: ColorTheme.blue,
+        backgroundColor: ColorTheme.whiteBlue,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: ColorTheme.blue,
+          backgroundColor: ColorTheme.whiteBlue,
+          iconTheme: IconThemeData(color: ColorTheme.blue),
           brightness: Brightness.dark,
-          title: Text("Profil ändern"),
+          title: Text(
+            "Profil ändern",
+            style: TextStyle(color: ColorTheme.blue),
+          ),
           actions: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 5.0),
               child: _loading
                   ? Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
                       ),
                     )
                   : OfflineBuilder(
@@ -115,7 +119,7 @@ class _EditProfileState extends State<EditProfile> {
                 style: Theme.of(context)
                     .textTheme
                     .headline6
-                    .copyWith(color: ColorTheme.whiteBlue),
+                    .copyWith(color: ColorTheme.blue),
               ),
               SizedBox(height: 20),
               Row(
@@ -133,21 +137,21 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                   ),
                   Theme(
-                    data: ThemeData.dark(),
+                    data: ThemeData.light(),
                     child: Row(
                       children: <Widget>[
                         OutlineButton(
                           onPressed: _getImage,
-                          textColor: ColorTheme.whiteBlue,
+                          textColor: ColorTheme.blue,
                           child: Text("Ändern"),
-                          highlightedBorderColor: ColorTheme.orange,
+                          highlightedBorderColor: ColorTheme.blue,
                         ),
                         SizedBox(width: 10),
                         OutlineButton(
                           onPressed: _deleteImage,
-                          textColor: ColorTheme.whiteBlue,
+                          textColor: ColorTheme.blue,
                           child: Text("Löschen"),
-                          highlightedBorderColor: ColorTheme.orange,
+                          highlightedBorderColor: ColorTheme.blue,
                         ),
                       ],
                     ),
@@ -180,7 +184,7 @@ class _EditProfileState extends State<EditProfile> {
                   connectivityBuilder: (context, connection, child) {
                     return Consumer<UserManager>(
                       builder: (context, um, child) => Theme(
-                        data: ThemeData.dark(),
+                        data: ThemeData.light(),
                         child: OutlineButton.icon(
                             onPressed: () async {
                               if (connection == ConnectivityResult.none) {
@@ -198,7 +202,7 @@ class _EditProfileState extends State<EditProfile> {
                                   content: Text(
                                       "Wir haben dir eine Email zum Zurücksetzen deines Passwortes geschickt!")));
                             },
-                            highlightedBorderColor: ColorTheme.orange,
+                            highlightedBorderColor: ColorTheme.blue,
                             icon: Icon(Icons.restore),
                             label: Text("Passwort zurücksetzen")),
                       ),
@@ -237,12 +241,19 @@ class _EditProfileState extends State<EditProfile> {
           {Key key, String label, Function onChanged, String initValue}) =>
       Theme(
         key: key,
-        data: ThemeData.dark().copyWith(accentColor: ColorTheme.orange),
+        data: ThemeData.dark().copyWith(accentColor: ColorTheme.blue),
         child: TextFormField(
+          style: TextStyle(color: ColorTheme.blue),
+          cursorColor: ColorTheme.blue,
           initialValue: initValue,
           onChanged: onChanged,
-          decoration:
-              InputDecoration(labelText: label, border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: label,
+              labelStyle: TextStyle(color: ColorTheme.blue),
+              border: OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      BorderSide(color: ColorTheme.blue.withOpacity(.5)))),
         ),
       );
 }

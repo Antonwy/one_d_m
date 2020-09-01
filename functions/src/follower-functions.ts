@@ -1,11 +1,14 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { User } from './types';
+import { UserType } from './types';
+import { DatabaseConstants, DonationFields } from './database-constants';
 
 const firestore = admin.firestore();
 
 exports.createFollower = functions.firestore
-  .document('following/{followedId}/users/{followingId}')
+  .document(
+    `${DatabaseConstants.following}/{followedId}/${DatabaseConstants.users}/{followingId}`
+  )
   .onCreate(async (snapshot, context) => {
     console.log('Create Follower', snapshot.data());
 
@@ -15,24 +18,24 @@ exports.createFollower = functions.firestore
     const followingId = context.params.followingId;
 
     await firestore
-      .collection('followed')
+      .collection(DatabaseConstants.followed)
       .doc(followingId)
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .doc(followedId)
       .set({ id: followedId });
 
     const donations = await firestore
-      .collection('donations')
-      .where('user_id', '==', followingId)
+      .collection(DatabaseConstants.donations)
+      .where(DonationFields.user_id, '==', followingId)
       .get();
 
     console.log('Copying data to ' + followedId);
     donations.docs.forEach(async (ds) => {
       const donation = ds.data();
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(followedId)
-        .collection('donations')
+        .collection(DatabaseConstants.donations)
         .add({
           amount: donation.amount,
           user_id: donation.user_id,
@@ -44,15 +47,15 @@ exports.createFollower = functions.firestore
     });
 
     const privateData = await firestore
-      .collection('user')
+      .collection(DatabaseConstants.user)
       .doc(followingId)
-      .collection('private_data')
-      .doc('data')
+      .collection(DatabaseConstants.private_data)
+      .doc(DatabaseConstants.data)
       .get();
 
-    const followedUser: User = (
-      await firestore.collection('user').doc(followedId).get()
-    ).data() as User;
+    const followedUser: UserType = (
+      await firestore.collection(DatabaseConstants.user).doc(followedId).get()
+    ).data() as UserType;
 
     const data = privateData.data();
     const deviceToken: string | undefined = data?.device_token;
@@ -62,6 +65,7 @@ exports.createFollower = functions.firestore
     if (
       data === undefined ||
       deviceToken === undefined ||
+      deviceToken === null ||
       deviceToken.length === 0
     )
       return;
@@ -83,7 +87,9 @@ exports.createFollower = functions.firestore
   });
 
 exports.deleteFollower = functions.firestore
-  .document('following/{followedId}/users/{followingId}')
+  .document(
+    `${DatabaseConstants.following}/{followedId}/${DatabaseConstants.users}/{followingId}`
+  )
   .onDelete(async (snapshot, context) => {
     console.log('Delete Follower', snapshot.data());
 
@@ -93,17 +99,17 @@ exports.deleteFollower = functions.firestore
     const followingId = context.params.followingId;
 
     await firestore
-      .collection('followed')
+      .collection(DatabaseConstants.followed)
       .doc(followingId)
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .doc(followedId)
       .delete();
 
     const toDelete = await firestore
-      .collection('donation_feed')
+      .collection(DatabaseConstants.donation_feed)
       .doc(followedId)
-      .collection('donations')
-      .where('user_id', '==', followingId)
+      .collection(DatabaseConstants.donations)
+      .where(DonationFields.user_id, '==', followingId)
       .get();
 
     toDelete.docs.forEach(async (ds) => await ds.ref.delete());

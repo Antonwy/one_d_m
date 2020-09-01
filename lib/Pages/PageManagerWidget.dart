@@ -67,9 +67,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   Widget build(BuildContext context) {
     _um = Provider.of<UserManager>(context);
     final HomePage _homePage = HomePage();
-    print("BUILD MANAGER");
-    print(_um.status);
-    print(_shouldLoad);
 
     if (_um.status == Status.NEEDSMOREINFORMATIONS) {
       return NewRegisterPage(

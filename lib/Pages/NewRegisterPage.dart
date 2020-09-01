@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Components/CustomTextField.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/ContactManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -14,6 +16,7 @@ import 'package:one_d_m/Helper/Validate.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 import 'package:one_d_m/Pages/VerifyEmailPage.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewRegisterPage extends StatefulWidget {
   bool socialSignIn;
@@ -36,7 +39,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
   GlobalKey<FormState> _formKey = GlobalKey();
 
   String _email, _username, _phone, _password1, _password2;
-  bool _loading = false, _socialSignIn;
+  bool _loading = false, _socialSignIn, _acceptedAGBs = false;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +88,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                     children: <Widget>[
                       _socialSignIn
                           ? AutoSizeText(
-                              "Zum Beenden deiner Registrierung brauchen wir noch ein paar daten!",
+                              "Zum Beenden deiner Registrierung brauchen wir noch ein paar Daten!",
                               maxLines: 2,
                               style: _textTheme.bodyText1
                                   .copyWith(color: ColorTheme.whiteBlue))
@@ -231,6 +234,50 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                       SizedBox(
                         height: 20,
                       ),
+                      Theme(
+                        data: ThemeData.dark(),
+                        child: CheckboxListTile(
+                          value: _acceptedAGBs,
+                          onChanged: (check) {
+                            setState(() {
+                              _acceptedAGBs = check;
+                            });
+                          },
+                          activeColor: ColorTheme.orange,
+                          title: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: ColorTheme.whiteBlue),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: 'Hiermit akzeptiere ich unsere '),
+                                TextSpan(
+                                    style: TextStyle(
+                                        decoration: TextDecoration.underline,
+                                        color: ColorTheme.orange),
+                                    text: 'Nutzungsbedingungen',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(
+                                            Constants.NUTZUNGSBEDINGUNGEN);
+                                      }),
+                                TextSpan(text: " und "),
+                                TextSpan(
+                                    style: TextStyle(
+                                        decoration: TextDecoration.underline,
+                                        color: ColorTheme.orange),
+                                    text: 'Datenschutzbedingungen',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Constants.DATENSCHUTZ);
+                                      }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 18.0),
                         child: FloatingActionButton.extended(
@@ -274,6 +321,12 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
         ]),
       ),
     );
+  }
+
+  void launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 
   void _register() async {

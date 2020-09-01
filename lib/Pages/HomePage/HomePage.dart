@@ -19,7 +19,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("BUILD HOME");
     return Scaffold(
         backgroundColor: ColorTheme.white,
         body: Stack(

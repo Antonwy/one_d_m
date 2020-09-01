@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +8,6 @@ import 'Pages/PageManagerWidget.dart';
 
 void main() => runApp(MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => UserManager.instance()),
-      ChangeNotifierProvider(create: (context) => CampaignsManager()),
       Provider(
         create: (context) => PushNotificationService(context),
       )

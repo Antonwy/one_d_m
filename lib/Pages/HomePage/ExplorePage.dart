@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
-import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/User.dart';
-import 'package:provider/provider.dart';
 
 class ExplorePage extends StatefulWidget {
   @override
@@ -16,15 +16,7 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme textTheme;
-  int _categoryId = 4;
-
-  Stream<List<User>> _userStream;
-
-  @override
-  void initState() {
-    _userStream = DatabaseService.getUsersStream();
-    super.initState();
-  }
+  int _categoryId = 100;
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +64,33 @@ class _ExplorePageState extends State<ExplorePage>
                 });
               })),
         ),
-        Consumer<CampaignsManager>(builder: (context, cm, child) {
-          return CampaignList(
-            campaigns: cm.getCampaignFromCategoryId(_categoryId),
-          );
-        })
+        StreamBuilder<List<Campaign>>(
+            stream: _categoryId == 100
+                ? DatabaseService.getTopCampaignsStream()
+                : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return SliverToBoxAdapter(
+                  child: Center(
+                      child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text("Lade Projekte")
+                    ],
+                  )),
+                );
+              return CampaignList(
+                campaigns: snapshot.data,
+              );
+            })
       ],
     );
   }

@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:one_d_m/Pages/UsersDonationsPage.dart';
+import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsDialog extends StatelessWidget {
   UserManager um;
@@ -70,6 +76,25 @@ class SettingsDialog extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
+              StreamBuilder<bool>(
+                  stream: DatabaseService.isGhost(um.uid),
+                  initialData: false,
+                  builder: (context, snapshot) {
+                    bool isGhost = snapshot.data;
+                    return ListTile(
+                      title: Text("Ghost Modus"),
+                      subtitle: Text(
+                          "${isGhost ? "Niemand" : "Jeder"} kann dein Profil sehen"),
+                      trailing: Icon(
+                        isGhost ? Icons.visibility_off : Icons.visibility,
+                        size: 18,
+                      ),
+                      onTap: () async {
+                        if (await showGhostDialog(context, isGhost) ?? false)
+                          DatabaseService.toggleGhost(um.uid, !isGhost);
+                      },
+                    );
+                  }),
               ListTile(
                 title: Text("FAQ"),
                 subtitle: Text("Häufig gestellte Fragen."),
@@ -83,17 +108,17 @@ class SettingsDialog extends StatelessWidget {
                 },
               ),
               ListTile(
-                title: Text("Meine Projekte"),
-                subtitle: Text("Projekte die du erstellt hast."),
+                title: Text("Meine Spenden"),
+                subtitle: Text("Alle deine Spenden aufgelistet."),
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MyCampaignsPage()));
+                          builder: (context) => UsersDonationsPage(um.user)));
                 },
               ),
               ListTile(
@@ -110,26 +135,23 @@ class SettingsDialog extends StatelessWidget {
                 },
               ),
               ListTile(
-                title: Text("Datenschutzerklärung"),
+                title: Text("Datenschutzbedingungen"),
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
                 ),
-                onTap: () async {
-                  showLicensePage(context: context);
+                onTap: () {
+                  launchUrl(Constants.DATENSCHUTZ);
                 },
               ),
               ListTile(
-                title: Text("AGB's"),
+                title: Text("Nutzungsbedingungen"),
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
                 ),
                 onTap: () async {
-                  showAboutDialog(
-                      context: context,
-                      applicationName: "One Dollar Movement",
-                      applicationVersion: "1.0.4");
+                  launchUrl(Constants.NUTZUNGSBEDINGUNGEN);
                 },
               ),
               ListTile(
@@ -158,5 +180,37 @@ class SettingsDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> showGhostDialog(BuildContext context, bool currentGhost) {
+    return showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              title: Text("Ghost Modus"),
+              content: Text(
+                  "Bist du dir sicher, dass du den Ghost Modus ${currentGhost ? "ausschalten" : "anschalten"} willst?\n\n${currentGhost ? "Wenn der Ghost Modus ausgeschaltet ist, kann dich jeder finden!" : "Wenn der Ghost modus eingeschaltet ist, kann dich niemand finden!"}"),
+              actions: [
+                FlatButton(
+                    textColor: ColorTheme.blue,
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    child: Text("Abbrechen")),
+                FlatButton(
+                    textColor: ColorTheme.orange,
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: Text(currentGhost ? "Ausschalten" : "Anschalten")),
+              ],
+            ));
+  }
+
+  void launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 }

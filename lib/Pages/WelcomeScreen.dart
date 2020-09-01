@@ -16,15 +16,6 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   PageIndicatorController _pageController = PageIndicatorController();
   double _page = 0.0;
-  List<Color> _pageColors = [
-    ColorTheme.blue,
-    ColorTheme.whiteBlue,
-    ColorTheme.orange,
-    ColorTheme.white,
-    ColorTheme.orange,
-    ColorTheme.blue,
-    ColorTheme.black,
-  ];
 
   bool _loading = false;
 
@@ -38,36 +29,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
   }
 
-  Color _getBackgroundColor() {
-    return TweenSequence([
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[0], end: _pageColors[1]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[1], end: _pageColors[2]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[2], end: _pageColors[3]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[3], end: _pageColors[4]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[4], end: _pageColors[5]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[5], end: _pageColors[6]),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: _pageColors[6], end: _pageColors[6]),
-          weight: 1),
-    ]).transform(_page / 7.0);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _getBackgroundColor(),
+      backgroundColor: ColorTheme.whiteBlue,
       body: Stack(
         children: <Widget>[
           Positioned(
@@ -79,7 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               controller: _pageController,
               children: <Widget>[
                 _WelcomePage(
-                  svgName: "welcome",
+                  svgName: "welcome-2",
                   title: "Wir sind\n One Dollar Movement!",
                   titleText: AutoSizeText.rich(
                     TextSpan(children: [
@@ -93,7 +58,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     style: Theme.of(context)
                         .textTheme
                         .headline4
-                        .copyWith(color: ColorTheme.whiteBlue),
+                        .copyWith(color: ColorTheme.blue),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                   ),
@@ -182,7 +147,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           },
                           child: Text(
                             "Überspringen",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: ColorTheme.blue),
                           ))))
               : Container(),
           Align(
@@ -193,15 +158,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 gap: 18,
                 padding: 0,
                 shape: IndicatorShape.circle(6),
-                inactiveColor: _page.round() >= 1 && _page.round() <= 4
-                    ? ColorTheme.blue.withOpacity(.5)
-                    : ColorTheme.whiteBlue.withOpacity(.5),
-                activeColor: _page.round() >= 1 && _page.round() <= 4
-                    ? ColorTheme.blue
-                    : ColorTheme.whiteBlue,
-                inkColor: _page.round() >= 1 && _page.round() <= 4
-                    ? ColorTheme.blue
-                    : ColorTheme.whiteBlue,
+                inactiveColor: ColorTheme.blue.withOpacity(.2),
+                activeColor: ColorTheme.blue,
+                inkColor: ColorTheme.blue,
                 controller: _pageController,
               ),
             ),
@@ -252,7 +211,7 @@ class _WelcomePage extends StatelessWidget {
       this.description,
       this.animatedValue,
       this.onPressed,
-      this.darkText = false,
+      this.darkText = true,
       this.loading = false,
       this.isLastPage = false});
 
@@ -335,9 +294,7 @@ class _WelcomePage extends StatelessWidget {
                 child: Transform.translate(
                   offset: Offset(_mq.size.width * animatedValue * .1, 0),
                   child: isLastPage
-                      ? Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 10,
+                      ? Column(
                           children: <Widget>[
                             FloatingActionButton.extended(
                               heroTag: "",
@@ -349,14 +306,18 @@ class _WelcomePage extends StatelessWidget {
                                       height: 30,
                                       child: CircularProgressIndicator(
                                         valueColor: AlwaysStoppedAnimation(
-                                            Colors.white),
+                                            ColorTheme.blue),
                                       ),
                                     )
                                   : Icon(Icons.done),
                               elevation: 0,
-                              backgroundColor: Colors.white12,
+                              backgroundColor: ColorTheme.blue,
                             ),
-                            FloatingActionButton(
+                            SizedBox(
+                              height: 10,
+                            ),
+                            FloatingActionButton.extended(
+                              icon: Icon(Icons.not_interested),
                               onPressed: () {
                                 Navigator.push(
                                     context,
@@ -364,18 +325,9 @@ class _WelcomePage extends StatelessWidget {
                                         builder: (c) =>
                                             ChooseLoginMethodPage()));
                               },
-                              child: loading
-                                  ? Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation(
-                                            Colors.white),
-                                      ),
-                                    )
-                                  : Icon(Icons.arrow_forward),
+                              label: Text("Nicht berechtigen"),
                               elevation: 0,
-                              backgroundColor: Colors.white12,
+                              backgroundColor: ColorTheme.blue,
                             ),
                           ],
                         )

@@ -5,6 +5,7 @@ class Campaign {
   final DateTime createdAt;
   final int amount, subscribedCount, categoryId;
   final String authorId, id, imgUrl, thumbnailUrl;
+  final List<String> moreImages;
 
   static final String ID = "id",
       NAME = "title",
@@ -16,6 +17,7 @@ class Campaign {
       AUTHORID = "authorId",
       AMOUNT = "current_amount",
       IMAGEURL = "image_url",
+      MOREIMAGES = "more_images_urls",
       THUMBNAILURL = "thumbnail_url",
       FINALAMOUNT = "target_amount",
       CATEGORYID = "category_id";
@@ -31,6 +33,7 @@ class Campaign {
       this.subscribedCount,
       this.amount,
       this.imgUrl,
+      this.moreImages,
       this.thumbnailUrl,
       this.categoryId});
 
@@ -47,11 +50,27 @@ class Campaign {
         imgUrl: snapshot[IMAGEURL],
         thumbnailUrl: snapshot[THUMBNAILURL],
         authorId: snapshot[AUTHORID],
-        categoryId: snapshot[CATEGORYID]);
+        categoryId: snapshot[CATEGORYID],
+        moreImages: snapshot[MOREIMAGES] == null
+            ? []
+            : List.from(snapshot[MOREIMAGES]));
+  }
+
+  static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {
+    return Campaign(
+      id: snapshot.documentID,
+      name: snapshot[NAME],
+      shortDescription: snapshot[SHORTDESCRIPTION],
+      imgUrl: snapshot[IMAGEURL],
+    );
   }
 
   static List<Campaign> listFromSnapshot(List<DocumentSnapshot> list) {
     return list.map(Campaign.fromSnapshot).toList();
+  }
+
+  static List<Campaign> listFromShortSnapshot(List<DocumentSnapshot> list) {
+    return list.map(Campaign.fromShortSnapshot).toList();
   }
 
   Map<String, dynamic> toMap() {
@@ -66,6 +85,14 @@ class Campaign {
       AMOUNT: amount,
       IMAGEURL: imgUrl,
       CATEGORYID: 0
+    };
+  }
+
+  Map<String, dynamic> toShortMap() {
+    return {
+      NAME: name,
+      SHORTDESCRIPTION: shortDescription,
+      IMAGEURL: imgUrl,
     };
   }
 

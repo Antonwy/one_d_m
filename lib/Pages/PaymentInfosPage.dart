@@ -9,6 +9,9 @@ import 'package:stripe_payment/stripe_payment.dart';
 
 class PaymentInfosPage extends StatelessWidget {
   ThemeData _theme;
+  final ScrollController scrollController;
+
+  PaymentInfosPage({Key key, this.scrollController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +76,7 @@ class PaymentInfosPage extends StatelessWidget {
                     ),
                   );
                 return ListView.separated(
+                  controller: scrollController,
                   itemCount: paymentMethods.length,
                   separatorBuilder: (context, index) => SizedBox(height: 20),
                   itemBuilder: (context, index) {

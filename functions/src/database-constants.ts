@@ -1,0 +1,58 @@
+export class DatabaseConstants {
+  static readonly campaigns: string = 'campaigns';
+  static readonly campaigns_info: string = 'campaigns_info';
+  static readonly campaigns_subscribed_users: string =
+    'campaigns_subscribed_users';
+  static readonly subscribed_campaigns: string = 'subscribed_campaigns';
+  static readonly donation_feed: string = 'donation_feed';
+  static readonly donations: string = 'donations';
+  static readonly donation_info: string = 'donation_info';
+  static readonly followed: string = 'followed';
+  static readonly following: string = 'following';
+  static readonly friends: string = 'friends';
+  static readonly news: string = 'news';
+  static readonly news_feed: string = 'news_feed';
+  static readonly statistics: string = 'statistics';
+  static readonly daily_rankings: string = 'daily_rankings';
+  static readonly users_info: string = 'users_info';
+  static readonly user: string = 'user';
+  static readonly users: string = 'users';
+  static readonly private_data: string = 'private_data';
+  static readonly data: string = 'data';
+  static readonly cards: string = 'cards';
+  static readonly organisations: string = 'organisations';
+}
+
+export class CampaignFields {
+  static readonly campaign_id: string = 'campaign_id';
+}
+
+export class DonationFields {
+  static readonly user_id: string = 'user_id';
+  static readonly created_at: string = 'created_at';
+}
+
+export class PrivateUserFields {
+  static readonly phone_number: string = 'phone_number';
+}
+
+export class ImageResolutions {
+  static readonly low: string = '300x300';
+  static readonly high: string = '1080x1920';
+}
+
+export class StorageConstants {
+  static readonly storageUrlStart: string =
+    'https://firebasestorage.googleapis.com/v0/b/one-dollar-movement.appspot.com/o/';
+  static readonly storageUrlEnd: string = '?alt=media&token=';
+}
+
+export class ImagePrefix {
+  static readonly campaign: string = 'campaign';
+  static readonly news: string = 'news';
+  static readonly user: string = 'user';
+}
+
+export class ImageSuffix {
+  static readonly dottJpg: string = '.jpg';
+}

@@ -6,7 +6,6 @@ import 'package:one_d_m/Components/CampaignButton.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CampaignsManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
@@ -14,7 +13,6 @@ import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
-import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class DonationWidget extends StatelessWidget {
@@ -93,41 +91,42 @@ class DonationWidget extends StatelessWidget {
 
   Widget _noCampaignPage() {
     if (!withUsername)
-      return Consumer<CampaignsManager>(
-        builder: (context, cm, child) => CustomOpenContainer(
-          openBuilder: (context, close, controller) => NewCampaignPage(
-            cm.getCampaign(donation.campaignId),
-            scrollController: controller,
+      return CustomOpenContainer(
+        openBuilder: (context, close, controller) => NewCampaignPage(
+          Campaign(
+              id: donation.campaignId,
+              name: donation.campaignName,
+              imgUrl: donation.campaignImgUrl),
+          scrollController: controller,
+        ),
+        closedElevation: 0,
+        closedColor: Colors.transparent,
+        closedBuilder: (context, open) => ListTile(
+          onTap: open,
+          leading: RoundedAvatar(
+            donation.campaignImgUrl,
+            backgroundLight: backgroundLight,
           ),
-          closedElevation: 0,
-          closedColor: Colors.transparent,
-          closedBuilder: (context, open) => ListTile(
-            onTap: open,
-            leading: RoundedAvatar(
-              donation.campaignImgUrl,
-              backgroundLight: backgroundLight,
-            ),
-            subtitle: Text(
-              timeago.format(donation.createdAt),
+          subtitle: Text(
+            timeago.format(donation.createdAt),
+            style: TextStyle(
+                color: backgroundLight
+                    ? ColorTheme.blue.withOpacity(.5)
+                    : ColorTheme.whiteBlue.withOpacity(.5)),
+          ),
+          title: AutoSizeText(donation.campaignName,
+              maxLines: 1,
               style: TextStyle(
+                  fontWeight: FontWeight.w500,
                   color: backgroundLight
-                      ? ColorTheme.blue.withOpacity(.5)
-                      : ColorTheme.whiteBlue.withOpacity(.5)),
-            ),
-            title: AutoSizeText(donation.campaignName,
-                maxLines: 1,
-                style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: backgroundLight
-                        ? ColorTheme.blue
-                        : ColorTheme.whiteBlue)),
-            trailing: Text(
-              "${Numeral(donation.amount).value()} DC",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color:
-                      backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
-            ),
+                      ? ColorTheme.blue
+                      : ColorTheme.whiteBlue)),
+          trailing: Text(
+            "${Numeral(donation.amount).value()} DC",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color:
+                    backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
           ),
         ),
       );

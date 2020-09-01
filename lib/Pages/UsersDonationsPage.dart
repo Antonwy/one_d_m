@@ -15,12 +15,16 @@ class UsersDonationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Spenden"),
-        backgroundColor: ColorTheme.blue,
-        brightness: Brightness.dark,
+        title: Text(
+          "Spenden",
+          style: TextStyle(color: ColorTheme.blue),
+        ),
+        iconTheme: IconThemeData(color: ColorTheme.blue),
+        backgroundColor: ColorTheme.whiteBlue,
+        brightness: Brightness.light,
         elevation: 0,
       ),
-      backgroundColor: ColorTheme.blue,
+      backgroundColor: ColorTheme.whiteBlue,
       body: Padding(
         padding: const EdgeInsets.only(top: 12.0),
         child: StreamBuilder<List<Donation>>(
@@ -31,7 +35,6 @@ class UsersDonationsPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return DonationWidget(
                     snapshot.data[index],
-                    backgroundLight: false,
                     withUsername: false,
                   );
                 },

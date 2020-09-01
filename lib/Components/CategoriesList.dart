@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/User.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
-import 'package:provider/provider.dart';
 
 class CategoriesList extends StatefulWidget {
   Function(int) onCategoryChanged;
@@ -17,7 +13,7 @@ class CategoriesList extends StatefulWidget {
 }
 
 class _CategoriesListState extends State<CategoriesList> {
-  int _selectedCategoryId = 4;
+  int _selectedCategoryId = 100;
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +153,7 @@ class Category {
   int id;
 
   static List<Category> categories = [
-    Category("Alle", "everything.jpg", 4),
+    Category("Alle", "everything.jpg", 100),
     Category("Tiere", "animals.jpg", 0),
     Category("Umwelt", "earth.jpg", 1),
     Category("Menschen", "humans.jpg", 2),

@@ -19,14 +19,26 @@ class _CampaignListState extends State<CampaignList> {
     if (widget.campaigns.isEmpty) {
       return SliverFillRemaining(
         child: Center(
-            child: Column(
-          children: <Widget>[
-            SvgPicture.asset("assets/images/no-news.svg"),
-            Text(
-              "Keine Projekte vorhanden",
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-          ],
+            child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 20,
+              ),
+              SvgPicture.asset(
+                "assets/images/no-news.svg",
+                height: MediaQuery.of(context).size.height * .25,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text(
+                "Keine Projekte vorhanden",
+                style: Theme.of(context).textTheme.bodyText2,
+              ),
+            ],
+          ),
         )),
       );
     }

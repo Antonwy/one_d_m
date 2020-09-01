@@ -64,21 +64,25 @@ class _ProfilePageState extends State<ProfilePage>
                                     Text(
                                       "Willkommen,",
                                       style: _theme.textTheme.headline5
-                                          .copyWith(fontSize: 32),
+                                          .copyWith(
+                                              fontSize: 32,
+                                              color: ColorTheme.blue),
                                     ),
                                     Text(
                                       "${user?.name}",
                                       style: _theme.textTheme.headline5
                                           .copyWith(
                                               fontSize: 30,
-                                              fontWeight: FontWeight.bold),
+                                              fontWeight: FontWeight.bold,
+                                              color: ColorTheme.blue),
                                     ),
                                   ],
                                 ),
                                 Container(
                                   child: CustomOpenContainer(
                                     openBuilder: (context, close, controller) =>
-                                        UserPage(user, scrollController: controller),
+                                        UserPage(user,
+                                            scrollController: controller),
                                     closedShape: CircleBorder(),
                                     closedElevation: 0,
                                     closedBuilder: (context, open) => Avatar(
@@ -102,41 +106,37 @@ class _ProfilePageState extends State<ProfilePage>
                                   children: <Widget>[
                                     Text(
                                       "Gespendet: ",
-                                      style: TextStyle(fontSize: 15),
+                                      style: TextStyle(
+                                          fontSize: 15, color: ColorTheme.blue),
                                     ),
                                     Text(
                                       "${Numeral(user?.donatedAmount ?? 0).value()} DC",
                                       style: TextStyle(
                                           fontSize: 17,
-                                          fontWeight: FontWeight.bold),
+                                          fontWeight: FontWeight.bold,
+                                          color: ColorTheme.blue),
                                     ),
                                   ],
                                 ),
                                 Row(
                                   children: <Widget>[
-                                    RoundButtonHomePage(
-                                      icon: Icons
-                                          .credit_card, // toPage: BuyCoinsPage(),
-                                      // toPage: BuyCoinsPage(),
-                                      onTap: () async {
-                                        // PushNotification.of(context).show(
-                                        //     NotificationContent(
-                                        //         title: "Text", body: ""));
-
-                                        // final res = await CloudFunctions
-                                        //     .instance
-                                        //     .getHttpsCallable(
-                                        //         functionName:
-                                        //             "httpFunctions-updateDonations")
-                                        //     .call();
-                                        // print(res.data);
-
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (c) =>
-                                                    PaymentInfosPage()));
-                                      },
+                                    CustomOpenContainer(
+                                      openBuilder:
+                                          (context, close, controller) =>
+                                              PaymentInfosPage(
+                                                  scrollController: controller),
+                                      closedShape: CircleBorder(),
+                                      closedElevation: 0,
+                                      closedColor: ColorTheme.orange,
+                                      closedBuilder: (context, open) =>
+                                          RoundButtonHomePage(
+                                        icon: Icons
+                                            .credit_card, // toPage: BuyCoinsPage(),
+                                        // toPage: BuyCoinsPage(),
+                                        onTap: () {
+                                          open();
+                                        },
+                                      ),
                                     ),
                                     SizedBox(
                                       width: 10,
@@ -144,7 +144,8 @@ class _ProfilePageState extends State<ProfilePage>
                                     CustomOpenContainer(
                                       openBuilder:
                                           (context, close, controller) =>
-                                              UserPage(user, scrollController: controller),
+                                              UserPage(user,
+                                                  scrollController: controller),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
                                       closedColor: ColorTheme.orange,

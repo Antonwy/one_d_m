@@ -1,7 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Donation, PrivateUserData } from './types';
+import { DonationType, PrivateUserDataType } from './types';
 import Stripe from 'stripe';
+import { DatabaseConstants } from './database-constants';
+
 const stripe = new Stripe(functions.config().stripe.token, {
   apiVersion: '2020-03-02',
 });
@@ -11,16 +13,16 @@ const increment = admin.firestore.FieldValue.increment;
 
 exports.onCreateDonation = functions
   .region('europe-west3')
-  .firestore.document('donations/{donationId}')
+  .firestore.document(`${DatabaseConstants.donations}/{donationId}`)
   .onCreate(async (snapshot, context) => {
     if (snapshot.data() === undefined) return;
 
-    const donation: Donation = snapshot.data() as Donation;
+    const donation: DonationType = snapshot.data() as DonationType;
     const donationId: string = context.params.donationId;
 
     // update the donation amount of the user that created the donation
     await firestore
-      .collection('user')
+      .collection(DatabaseConstants.user)
       .doc(donation.user_id)
       .update({
         donated_amount: increment(donation.amount),
@@ -28,7 +30,7 @@ exports.onCreateDonation = functions
 
     // update the amounts of donations from the campaign
     await firestore
-      .collection('campaigns')
+      .collection(DatabaseConstants.campaigns)
       .doc(donation.campaign_id)
       .update({
         current_amount: increment(donation.amount),
@@ -36,8 +38,8 @@ exports.onCreateDonation = functions
 
     // update the daily/monthly/yearly donations
     await firestore
-      .collection('statistics')
-      .doc('donation_info')
+      .collection(DatabaseConstants.statistics)
+      .doc(DatabaseConstants.donation_info)
       .update({
         daily_amount: increment(donation.amount),
         monthly_amount: increment(donation.amount),
@@ -48,12 +50,12 @@ exports.onCreateDonation = functions
 
     // get followed Users of the donation author
     const followedUsers = await firestore
-      .collection('followed')
+      .collection(DatabaseConstants.followed)
       .doc(donation.user_id)
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .get();
 
-    const donationFeedItem: Donation = {
+    const donationFeedItem: DonationType = {
       amount: donation.amount,
       user_id: donation.user_id,
       campaign_name: donation.campaign_name,
@@ -66,19 +68,19 @@ exports.onCreateDonation = functions
     followedUsers.forEach(async (user) => {
       // add the donation to the feed of the followed users
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('donations')
+        .collection(DatabaseConstants.donations)
         .doc(donationId)
         .set(donationFeedItem);
 
       // increment DailyAmount => users in followed FriendRankings
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('daily_rankings')
+        .collection(DatabaseConstants.daily_rankings)
         .doc(getDate(donation.created_at.toDate()))
-        .collection('users')
+        .collection(DatabaseConstants.users)
         .doc(donation.user_id)
         .set(
           {
@@ -89,11 +91,11 @@ exports.onCreateDonation = functions
 
       // increment DailyAmount => CampaignRankings
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('daily_rankings')
+        .collection(DatabaseConstants.daily_rankings)
         .doc(getDate(donation.created_at.toDate()))
-        .collection('campaigns')
+        .collection(DatabaseConstants.campaigns)
         .doc(donation.campaign_id)
         .set(
           {
@@ -104,9 +106,9 @@ exports.onCreateDonation = functions
 
       // increment DailyAmount statistics
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('daily_rankings')
+        .collection(DatabaseConstants.daily_rankings)
         .doc(getDate(donation.created_at.toDate()))
         .set(
           {
@@ -118,11 +120,11 @@ exports.onCreateDonation = functions
 
     // increment DailyAmount in own => users FriendRanking
     await firestore
-      .collection('donation_feed')
+      .collection(DatabaseConstants.donation_feed)
       .doc(donation.user_id)
-      .collection('daily_rankings')
+      .collection(DatabaseConstants.daily_rankings)
       .doc(getDate(donation.created_at.toDate()))
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .doc(donation.user_id)
       .set(
         {
@@ -133,11 +135,11 @@ exports.onCreateDonation = functions
 
     // increment DailyAmount in own => CampaignRankings
     await firestore
-      .collection('donation_feed')
+      .collection(DatabaseConstants.donation_feed)
       .doc(donation.user_id)
-      .collection('daily_rankings')
+      .collection(DatabaseConstants.daily_rankings)
       .doc(getDate(donation.created_at.toDate()))
-      .collection('campaigns')
+      .collection(DatabaseConstants.campaigns)
       .doc(donation.campaign_id)
       .set(
         {
@@ -148,9 +150,9 @@ exports.onCreateDonation = functions
 
     // increment DailyAmount statistics
     await firestore
-      .collection('donation_feed')
+      .collection(DatabaseConstants.donation_feed)
       .doc(donation.user_id)
-      .collection('daily_rankings')
+      .collection(DatabaseConstants.daily_rankings)
       .doc(getDate(donation.created_at.toDate()))
       .set(
         {
@@ -159,27 +161,28 @@ exports.onCreateDonation = functions
         { merge: true }
       );
 
-    const privateUserData: PrivateUserData = (
+    const privateUserData: PrivateUserDataType = (
       await firestore
-        .collection('user')
+        .collection(DatabaseConstants.user)
         .doc(donation.user_id)
-        .collection('private_data')
-        .doc('data')
+        .collection(DatabaseConstants.private_data)
+        .doc(DatabaseConstants.data)
         .get()
-    ).data() as PrivateUserData;
+    ).data() as PrivateUserDataType;
 
     const paymentMethod = (
       await firestore
-        .collection('user')
+        .collection(DatabaseConstants.user)
         .doc(donation.user_id)
-        .collection('cards')
+        .collection(DatabaseConstants.cards)
         .get()
     ).docs[0];
 
     await stripe.paymentIntents.create({
-      amount: donation.amount * 100,
+      amount: donation.amount / 10,
       currency: 'eur',
       customer: privateUserData.customer_id,
+      receipt_email: privateUserData.email_address,
       description: donation.campaign_id,
       payment_method: paymentMethod.id,
       off_session: true,
@@ -194,20 +197,20 @@ function getDate(nowDate: Date): string {
 }
 
 exports.onUpdateDonation = functions.firestore
-  .document('donations/{donationId}')
+  .document(`${DatabaseConstants.donations}/{donationId}`)
   .onUpdate(async (snapshot, context) => {
     const donationId: string = context.params.donationId;
-    const donation: Donation = snapshot.after.data() as Donation;
+    const donation: DonationType = snapshot.after.data() as DonationType;
     console.log(`Updating ${donation}`);
 
     // get followed Users of the donation author
     const followedUser = await firestore
-      .collection('followed')
+      .collection(DatabaseConstants.followed)
       .doc(donation.user_id)
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .get();
 
-    const donationFeedItem: Donation = {
+    const donationFeedItem: DonationType = {
       amount: donation.amount,
       user_id: donation.user_id,
       campaign_name: donation.campaign_name,
@@ -220,36 +223,34 @@ exports.onUpdateDonation = functions.firestore
     // add the donation to the feed of the followed users.
     followedUser.forEach(async (user) => {
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('donations')
+        .collection(DatabaseConstants.donations)
         .doc(donationId)
         .update(donationFeedItem);
     });
   });
 
 exports.onDeleteDonation = functions.firestore
-  .document('donations/{donationId}')
+  .document(`${DatabaseConstants.donations}/{donationId}`)
   .onDelete(async (snapshot, context) => {
     const donationId: string = context.params.donationId;
-    const donation: Donation = snapshot.data() as Donation;
+    const donation: DonationType = snapshot.data() as DonationType;
     console.log(`Deleting ${donation}`);
-
-    if (donationId === 'info') return;
 
     // get followed Users of the donation author
     const followedUser = await firestore
-      .collection('followed')
+      .collection(DatabaseConstants.followed)
       .doc(donation.user_id)
-      .collection('users')
+      .collection(DatabaseConstants.users)
       .get();
 
     // delete the donation to the feed of the followed users.
     followedUser.forEach(async (user) => {
       await firestore
-        .collection('donation_feed')
+        .collection(DatabaseConstants.donation_feed)
         .doc(user.id)
-        .collection('donations')
+        .collection(DatabaseConstants.donations)
         .doc(donationId)
         .delete();
     });

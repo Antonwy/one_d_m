@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class FaqPage extends StatelessWidget {
@@ -8,11 +9,12 @@ class FaqPage extends StatelessWidget {
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: ColorTheme.blue,
+      backgroundColor: ColorTheme.whiteBlue,
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backgroundColor: ColorTheme.blue,
+            backgroundColor: ColorTheme.whiteBlue,
+            iconTheme: IconThemeData(color: ColorTheme.blue),
             elevation: 0,
           ),
           SliverToBoxAdapter(
@@ -21,18 +23,27 @@ class FaqPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  Center(
+                    child: SvgPicture.asset(
+                      "assets/images/odm-logo.svg",
+                      height: 100,
+                    ),
+                  ),
+                  SizedBox(height: 40,),
                   Text(
                     "One Dollar Movement",
-                    style: _textTheme.body1.copyWith(color: Colors.white),
+                    style:
+                        _textTheme.bodyText1.copyWith(color: ColorTheme.blue),
                   ),
                   Text(
                     "FAQ",
-                    style: _textTheme.title
-                        .copyWith(color: Colors.white, fontSize: 28),
+                    style: _textTheme.headline6
+                        .copyWith(color: ColorTheme.blue, fontSize: 28),
                   ),
                   Text(
                     "Häufig gestellte Fragen.",
-                    style: _textTheme.caption.copyWith(color: Colors.white60),
+                    style: _textTheme.caption
+                        .copyWith(color: ColorTheme.blue.withOpacity(.6)),
                   ),
                 ],
               ),
@@ -43,19 +54,19 @@ class FaqPage extends StatelessWidget {
             Faq faq = Faq.faqs[index];
             return Theme(
               data: ThemeData(
-                  accentColor: Colors.white,
-                  unselectedWidgetColor: Colors.white.withOpacity(.7)),
+                  accentColor: ColorTheme.blue,
+                  unselectedWidgetColor: ColorTheme.blue.withOpacity(.5)),
               child: ExpansionTile(
                 title: Text(
                   faq.question,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: ColorTheme.blue),
                 ),
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(18.0),
                     child: Text(
                       faq.answer,
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: ColorTheme.blue.withOpacity(.7)),
                     ),
                   )
                 ],

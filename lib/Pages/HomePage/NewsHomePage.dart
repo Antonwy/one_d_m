@@ -20,8 +20,6 @@ class NewsHomePage extends StatefulWidget {
 class _NewsHomePageState extends State<NewsHomePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme _textTheme;
-  Future<List<News>> _newsFuture;
-  List<String> _subscribedCampaigns = [];
 
   @override
   Widget build(BuildContext context) {
@@ -54,84 +52,55 @@ class _NewsHomePageState extends State<NewsHomePage>
         ),
         Consumer<UserManager>(
           builder: (context, um, child) {
-            return StreamBuilder<User>(
-                initialData: um.user,
-                stream: DatabaseService.getUserStream(um.uid),
+            return StreamBuilder<List<News>>(
+                stream: DatabaseService.getNews(um.uid),
                 builder: (context, snapshot) {
-                  User user = snapshot.data;
-                  if (user?.subscribedCampaignsIds != null &&
-                      user?.subscribedCampaignsIds != _subscribedCampaigns)
-                    _newsFuture = DatabaseService.getNews(user);
+                  if (!snapshot.hasData)
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
 
-                  _subscribedCampaigns = user?.subscribedCampaignsIds ?? [];
-                  return FutureBuilder<List<News>>(
-                      future: _newsFuture,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData)
-                          return SliverFillRemaining(
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
+                  List<News> news = snapshot.data;
 
-                        if (_subscribedCampaigns.isEmpty)
-                          return SliverFillRemaining(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Column(
-                                children: <Widget>[
-                                  SizedBox(
-                                    height: 50,
-                                  ),
-                                  SvgPicture.asset(
-                                    "assets/images/no-news.svg",
-                                    height: 200,
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    "Du hast noch keine abonnierten Projekte!",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w500),
-                                  )
-                                ],
-                              ),
+                  if (news.isEmpty)
+                    return SliverFillRemaining(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 50,
                             ),
-                          );
+                            SvgPicture.asset(
+                              "assets/images/no-news.svg",
+                              height: 200,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Du hast noch keine Neuigkeiten!",
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
 
-                        if (snapshot.data.isEmpty)
-                          return SliverFillRemaining(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Column(
-                                children: <Widget>[
-                                  SizedBox(
-                                    height: 50,
-                                  ),
-                                  SvgPicture.asset("assets/images/no-news.svg"),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                      "Keins deiner abonnierten Projekte hat bis jetzt etwas gepostet!")
-                                ],
-                              ),
-                            ),
-                          );
-                        return SliverPadding(
-                          padding: EdgeInsets.only(top: 10),
-                          sliver: SliverList(
-                            delegate: SliverChildListDelegate(snapshot.data
-                                .map((News news) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10),
-                                      child: NewsPost(news),
-                                    ))
-                                .toList()),
-                          ),
-                        );
-                      });
+                  return SliverPadding(
+                    padding: EdgeInsets.only(top: 10),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(snapshot.data
+                          .map((News news) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: NewsPost(news),
+                              ))
+                          .toList()),
+                    ),
+                  );
                 });
           },
         ),

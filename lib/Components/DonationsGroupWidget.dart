@@ -2,8 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
-import 'package:one_d_m/Components/UserButton.dart';
-import 'package:one_d_m/Helper/CampaignsManager.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
@@ -71,31 +70,32 @@ class DonationsGroupWidget extends StatelessWidget {
     ];
 
     for (DonationCampaignInfo dci in donationsGroup.campaigns) {
-      widgetList.add(Consumer<CampaignsManager>(
-        builder: (context, cm, child) => CustomOpenContainer(
-          openBuilder: (context, close, scrollController) => NewCampaignPage(
-            cm.getCampaign(dci.campaignId),
-            scrollController: scrollController,
-          ),
-          closedElevation: 0,
-          closedColor: ColorTheme.whiteBlue,
-          closedBuilder: (context, open) => InkWell(
-            onTap: open,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: RoundedAvatar(dci.campaignImg),
-                title: AutoSizeText(
-                  dci.campaignName,
-                  maxLines: 1,
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text("${timeago.format(dci.createdAt)}"),
-                trailing: Text(
-                  "${Numeral(dci.amount).value()} DC",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+      widgetList.add(CustomOpenContainer(
+        openBuilder: (context, close, scrollController) => NewCampaignPage(
+          Campaign(
+              id: dci.campaignId,
+              name: dci.campaignName,
+              imgUrl: dci.campaignImg),
+          scrollController: scrollController,
+        ),
+        closedElevation: 0,
+        closedColor: ColorTheme.whiteBlue,
+        closedBuilder: (context, open) => InkWell(
+          onTap: open,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: RoundedAvatar(dci.campaignImg),
+              title: AutoSizeText(
+                dci.campaignName,
+                maxLines: 1,
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text("${timeago.format(dci.createdAt)}"),
+              trailing: Text(
+                "${Numeral(dci.amount).value()} DC",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),

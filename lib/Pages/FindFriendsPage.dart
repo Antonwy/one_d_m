@@ -34,6 +34,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
   @override
   void initState() {
     super.initState();
+    precachePicture(
+        SvgPicture.asset("assets/images/explore.svg").pictureProvider, null);
     _topRankingUsersFuture = DatabaseService.getUsers(10);
   }
 
@@ -43,7 +45,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTheme.orange,
+      backgroundColor: ColorTheme.whiteBlue,
       floatingActionButton: widget.afterRegister
           ? Consumer<UserManager>(
               builder: (context, um, child) => FloatingActionButton(
@@ -66,7 +68,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
           SliverAppBar(
             title: widget.afterRegister ? Text("Finde Freunde") : null,
             brightness: Brightness.dark,
-            backgroundColor: ColorTheme.orange,
+            backgroundColor: ColorTheme.whiteBlue,
+            iconTheme: IconThemeData(color: ColorTheme.blue),
             elevation: 0,
             automaticallyImplyLeading: !widget.afterRegister,
           ),
@@ -94,8 +97,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                           child: Row(
                             children: <Widget>[
                               CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation(
-                                    ColorTheme.whiteBlue),
+                                valueColor:
+                                    AlwaysStoppedAnimation(ColorTheme.blue),
                               ),
                               SizedBox(
                                 width: 20,
@@ -103,7 +106,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                               AutoSizeText(
                                 "Laden...",
                                 maxLines: 1,
-                                style: TextStyle(color: ColorTheme.whiteBlue),
+                                style: TextStyle(color: ColorTheme.blue),
                               ),
                             ],
                           ),
@@ -122,7 +125,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                             child: Text(
                               "Nutzer aus deinen Kontakten",
                               style: _textTheme.headline5
-                                  .copyWith(color: Colors.white),
+                                  .copyWith(color: ColorTheme.blue),
                             ),
                           ),
                           SizedBox(
@@ -133,10 +136,13 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                                 const EdgeInsets.symmetric(horizontal: 18.0),
                             child: Text(
                               "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
-                              style: _textTheme.caption
-                                  .copyWith(color: Colors.white70),
+                              style: _textTheme.caption.copyWith(
+                                  color: ColorTheme.blue.withOpacity(.5)),
                             ),
                           ),
+                          SizedBox(
+                            height: 10,
+                          )
                         ],
                       ),
                     );
@@ -151,7 +157,6 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
               return StreamBuilder<List<String>>(
                   stream: _contactsStream,
                   builder: (context, snapshot) {
-                    print(snapshot);
                     if (!snapshot.hasData) return SliverToBoxAdapter();
 
                     return SliverList(
@@ -183,15 +188,14 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                       child: Row(
                         children: <Widget>[
                           CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation(ColorTheme.whiteBlue),
+                            valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
                           ),
                           SizedBox(
                             width: 20,
                           ),
                           Text(
                             "Laden...",
-                            style: TextStyle(color: ColorTheme.whiteBlue),
+                            style: TextStyle(color: ColorTheme.blue),
                           ),
                         ],
                       ),
@@ -211,7 +215,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                           child: Text(
                             "Beliebte Nutzer",
                             style: _textTheme.headline5
-                                .copyWith(color: Colors.white),
+                                .copyWith(color: ColorTheme.blue),
                           ),
                         ),
                         SizedBox(
@@ -221,9 +225,12 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 18.0),
                           child: Text(
                             "Diese Nutzer gehören zu den beliebtesten Nutzern auf unserer Platform!",
-                            style: _textTheme.caption
-                                .copyWith(color: Colors.white70),
+                            style: _textTheme.caption.copyWith(
+                                color: ColorTheme.blue.withOpacity(.5)),
                           ),
+                        ),
+                        SizedBox(
+                          height: 10,
                         ),
                       ],
                     ),

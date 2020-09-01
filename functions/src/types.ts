@@ -1,4 +1,4 @@
-export interface Donation {
+export interface DonationType {
   alternative_campaign_id?: string;
   amount: number;
   campaign_id: string;
@@ -9,7 +9,7 @@ export interface Donation {
   anonym: boolean;
 }
 
-export interface User {
+export interface UserType {
   admin: boolean;
   donated_amount: number;
   name: string | null;
@@ -17,14 +17,14 @@ export interface User {
   subscribed_campaigns: string[];
 }
 
-export interface PrivateUserData {
+export interface PrivateUserDataType {
   email_address: string;
   phone_number: string;
   customer_id: string;
   device_token: string;
 }
 
-export interface Campaign {
+export interface CampaignType {
   authorId: string;
   city: string;
   created_at: any;
@@ -37,7 +37,7 @@ export interface Campaign {
   title: string;
 }
 
-export interface News {
+export interface NewsType {
   campaign_id: string;
   campaign_img_url: string;
   campaign_name: string;
@@ -47,4 +47,10 @@ export interface News {
   text: string;
   title: string;
   user_id: string;
+}
+
+export interface StatisticType {
+  yearly_amount?: number;
+  monthly_amount?: number;
+  daily_amount?: number;
 }

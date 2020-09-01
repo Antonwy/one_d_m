@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class User {
   String email, name, password, id, phoneNumber, imgUrl, thumbnailUrl;
   int donatedAmount;
-  bool admin;
+  bool admin, ghost;
   List<String> subscribedCampaignsIds = [];
 
   static final String NAME = "name",
@@ -13,7 +13,9 @@ class User {
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       DONATEDAMOUNT = "donated_amount",
       IMAGEURL = "image_url",
-      THUMBNAILURL = "thumbnail_url", DEVICETOKEN = "device_token";
+      THUMBNAILURL = "thumbnail_url",
+      DEVICETOKEN = "device_token",
+      GHOST = "ghost";
 
   User(
       {this.email,
@@ -23,6 +25,7 @@ class User {
       this.donatedAmount = 0,
       this.phoneNumber,
       this.admin,
+      this.ghost = false,
       List<String> subscribedCampaignsIds,
       this.imgUrl,
       this.thumbnailUrl})
@@ -34,6 +37,7 @@ class User {
         id: snapshot.documentID,
         name: snapshot[User.NAME] ?? "No name",
         admin: snapshot[User.ADMIN],
+        ghost: snapshot[User.GHOST],
         donatedAmount: snapshot[DONATEDAMOUNT],
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
@@ -65,6 +69,6 @@ class User {
 
   @override
   String toString() {
-    return 'User{email: $email, name: $name, password: $password, profileImage: $imgUrl, id: $id}';
+    return 'User{email: $email, name: $name, password: $password, profileImage: $imgUrl, id: $id, ghost: $ghost}';
   }
 }

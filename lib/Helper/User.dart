@@ -15,7 +15,9 @@ class User {
       IMAGEURL = "image_url",
       THUMBNAILURL = "thumbnail_url",
       DEVICETOKEN = "device_token",
-      GHOST = "ghost";
+      GHOST = "ghost",
+      NATIVE_AD_IMPRESSIONS = "native_ad_impressions",
+      INTERSTITIAL_IMPRESSIONS = "interstitial_impressions";
 
   User(
       {this.email,

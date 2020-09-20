@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
+import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -36,6 +37,9 @@ class DatabaseService {
       DONATIONINFO = "donation_info",
       CARDS = "cards",
       PRIVATEDATA = "private_data",
+      ADVERTISING_DATA = 'ad_data',
+      ADVERTISING_BALANCE = 'balance',
+      ADVERTISING_IMPRESSIONS = 'impressions',
       DATA = "data";
 
   static final Firestore firestore = Firestore.instance;
@@ -117,6 +121,37 @@ class DatabaseService {
 
   static Future<void> toggleGhost(String uid, bool to) {
     return userCollection.document(uid).updateData({User.GHOST: to});
+  }
+
+  static Future<void> addInterstitialImpression(String uid) async {
+    final userAdDocument = userCollection
+        .document(uid)
+        .collection(ADVERTISING_DATA)
+        .document(ADVERTISING_IMPRESSIONS);
+
+    return userAdDocument.setData({
+      User.INTERSTITIAL_IMPRESSIONS: FieldValue.increment(1),
+    }, merge: true);
+  }
+
+  static Future<void> addNativeAdImpression(String uid) async {
+    final userAdDocument = userCollection
+        .document(uid)
+        .collection(ADVERTISING_DATA)
+        .document(ADVERTISING_IMPRESSIONS);
+
+    return userAdDocument.setData({
+      User.NATIVE_AD_IMPRESSIONS: FieldValue.increment(1),
+    }, merge: true);
+  }
+
+  static Stream<AdBalance> getAdBalance(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(ADVERTISING_DATA)
+        .document(ADVERTISING_BALANCE)
+        .snapshots()
+        .map((snapshot) => AdBalance.fromSnapshot(snapshot));
   }
 
   static Stream<String> getPhoneNumber(String uid) {

@@ -8,6 +8,8 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    NativeAds.register(with: registrar(forPlugin: "Runner")!)
+    
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

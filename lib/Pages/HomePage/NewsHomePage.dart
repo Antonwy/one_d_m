@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -93,12 +94,12 @@ class _NewsHomePageState extends State<NewsHomePage>
                     padding: EdgeInsets.only(top: 10),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate(snapshot.data
-                          .map((News news) => Padding(
+                          .map<Widget>((News news) => Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 child: NewsPost(news),
                               ))
-                          .toList()),
+                          .expand((element) => [element, NewsNativeAd()]).toList()),
                     ),
                   );
                 });

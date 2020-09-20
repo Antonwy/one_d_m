@@ -1,4 +1,6 @@
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/NativeAds.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
+    NativeAds.initialize();
+    FirebaseAdMob.instance.initialize(appId: "ca-app-pub-3940256099942544~1458002511");
     StripePayment.setOptions(StripeOptions(
         publishableKey: "pk_test_mMYl6nvlrQmibKbJWw3CsdoK00lcfXjNKW"));
     super.initState();

@@ -54,3 +54,11 @@ export interface StatisticType {
   monthly_amount?: number;
   daily_amount?: number;
 }
+
+export interface ChargesType {
+  campaign_id?: string;
+  user_id?: string;
+  amount: FirebaseFirestore.FieldValue;
+  error?: boolean;
+  charged?: boolean;
+}

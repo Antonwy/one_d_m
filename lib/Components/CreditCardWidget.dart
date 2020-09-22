@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -12,10 +13,11 @@ class CreditCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return AspectRatio(
       aspectRatio: 8 / 5,
       child: Material(
-        color: ColorTheme.blue,
+        color: _bTheme.dark,
         elevation: 20,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -43,15 +45,13 @@ class CreditCardWidget extends StatelessWidget {
                     height: 40,
                     child: Material(
                       elevation: 10,
-                      color: ColorTheme.orange,
+                      color: _bTheme.contrast,
                       shape: CircleBorder(),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: onDelete,
-                        child: Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
+                        child:
+                            Icon(Icons.delete, color: _bTheme.textOnContrast),
                       ),
                     ),
                   ),

@@ -9,7 +9,8 @@ class StorageService {
   StorageService({this.file});
 
   Future<String> uploadImage(String name) async {
-    StorageUploadTask task = storageRef.child("$name.jpg").putFile(file);
+    StorageUploadTask task =
+        storageRef.child("users/$name/$name.jpg").putFile(file);
     StorageTaskSnapshot snapshot = await task.onComplete;
     return await snapshot.ref.getDownloadURL();
   }

@@ -10,6 +10,7 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
@@ -229,6 +230,7 @@ class RoundedAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return ConstrainedBox(
       constraints: BoxConstraints(
           minHeight: 20, minWidth: 20, maxHeight: 45, maxWidth: 45),
@@ -236,7 +238,7 @@ class RoundedAvatar extends StatelessWidget {
         return AspectRatio(
           aspectRatio: 1,
           child: Material(
-            color: backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue,
+            color: backgroundLight ? _bTheme.dark : _bTheme.darkerLight,
             borderRadius: BorderRadius.circular(constraints.maxHeight * .3),
             clipBehavior: Clip.antiAlias,
             child: imgUrl == null
@@ -247,18 +249,18 @@ class RoundedAvatar extends StatelessWidget {
                             height: 25,
                             child: CircularProgressIndicator(
                               valueColor:
-                                  AlwaysStoppedAnimation(ColorTheme.whiteBlue),
+                                  AlwaysStoppedAnimation(_bTheme.darkerLight),
                             )))
                     : Icon(
                         Icons.person,
-                        color: ColorTheme.orange,
+                        color: _bTheme.contrast,
                       )
                 : CachedNetworkImage(
                     imageUrl: imgUrl,
                     fit: BoxFit.cover,
                     errorWidget: (context, error, obj) => Icon(
                       Icons.error,
-                      color: ColorTheme.orange,
+                      color: _bTheme.contrast,
                     ),
                   ),
           ),

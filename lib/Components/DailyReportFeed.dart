@@ -9,6 +9,7 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Ranking.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
@@ -68,7 +69,7 @@ class _NoData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ColorTheme.whiteBlue,
+      color: ThemeManager.of(context).theme.darkerLight,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(14.0),
@@ -105,21 +106,22 @@ class _ChooseDateState extends State<ChooseDate>
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
         borderRadius: BorderRadius.circular(12),
-        color: ColorTheme.whiteBlue,
+        color: _bTheme.darkerLight,
         clipBehavior: Clip.antiAlias,
         child: Consumer<DailyReportManager>(builder: (context, dm, child) {
           return Theme(
-            data: ThemeData(primarySwatch: Colors.orange).copyWith(
+            data: ThemeData(primarySwatch: Colors.blueGrey).copyWith(
                 dialogTheme: DialogTheme(
-                    backgroundColor: ColorTheme.whiteBlue,
+                    backgroundColor: _bTheme.darkerLight,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12))),
                 colorScheme: Theme.of(context)
                     .colorScheme
-                    .copyWith(primary: ColorTheme.blue)),
+                    .copyWith(primary: _bTheme.dark)),
             child: Builder(builder: (context) {
               return InkWell(
                 onTap: () async {
@@ -156,8 +158,7 @@ class _ChooseDateState extends State<ChooseDate>
                                   key: Key(dm.beautifyDate),
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Icon(Icons.date_range,
-                                        color: ColorTheme.blue),
+                                    Icon(Icons.date_range, color: _bTheme.dark),
                                     SizedBox(
                                       width: 8,
                                     ),
@@ -166,7 +167,7 @@ class _ChooseDateState extends State<ChooseDate>
                                           DateTime.now()
                                               .subtract(Duration(days: index))),
                                       style: _textTheme.headline6
-                                          .copyWith(color: ColorTheme.blue),
+                                          .copyWith(color: _bTheme.dark),
                                     )
                                   ],
                                 )),
@@ -182,8 +183,8 @@ class _ChooseDateState extends State<ChooseDate>
                         top: 0,
                         bottom: 0,
                         child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios,
-                                color: ColorTheme.blue),
+                            icon:
+                                Icon(Icons.arrow_back_ios, color: _bTheme.dark),
                             onPressed: () {
                               _animatePage(1);
                             }),
@@ -203,7 +204,7 @@ class _ChooseDateState extends State<ChooseDate>
                                 : true,
                             child: IconButton(
                                 icon: Icon(Icons.arrow_forward_ios,
-                                    color: ColorTheme.blue),
+                                    color: _bTheme.dark),
                                 onPressed: () {
                                   _animatePage(-1);
                                 }),
@@ -241,11 +242,11 @@ class ShareDailyReport extends StatelessWidget {
         ),
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        closedColor: ColorTheme.whiteBlue,
+        closedColor: ThemeManager.of(context).theme.darkerLight,
         closedElevation: 0,
         closedBuilder: (context, open) => Material(
             borderRadius: BorderRadius.circular(12),
-            color: ColorTheme.whiteBlue,
+            color: ThemeManager.of(context).theme.darkerLight,
             clipBehavior: Clip.antiAlias,
             child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -272,9 +273,10 @@ class DailyDonatedAmountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
         borderRadius: BorderRadius.circular(12),
-        color: ColorTheme.whiteBlue,
+        color: _bTheme.darkerLight,
         child: Padding(
           padding: const EdgeInsets.all(14.0),
           child: Column(
@@ -283,7 +285,7 @@ class DailyDonatedAmountWidget extends StatelessWidget {
               Consumer<DailyReportManager>(
                 builder: (context, dm, child) => Text(
                   dm.beautifyDate,
-                  style: _textTheme.headline6.copyWith(color: ColorTheme.blue),
+                  style: _textTheme.headline6.copyWith(color: _bTheme.dark),
                 ),
               ),
               Text(
@@ -303,8 +305,7 @@ class DailyDonatedAmountWidget extends StatelessWidget {
                       return Text(
                         "${Numeral(snapshot.data).value()} DC",
                         style: _textTheme.headline5.copyWith(
-                            color: ColorTheme.blue,
-                            fontWeight: FontWeight.bold),
+                            color: _bTheme.dark, fontWeight: FontWeight.bold),
                       );
                     }),
               ),
@@ -319,9 +320,10 @@ class SummaryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
         borderRadius: BorderRadius.circular(12),
-        color: ColorTheme.whiteBlue,
+        color: _bTheme.darkerLight,
         child: Padding(
           padding: const EdgeInsets.all(14.0),
           child: Column(
@@ -330,22 +332,22 @@ class SummaryWidget extends StatelessWidget {
               AutoSizeText(
                 "Vielen Dank!",
                 maxLines: 1,
-                style: _textTheme.headline6.copyWith(color: ColorTheme.blue),
+                style: _textTheme.headline6.copyWith(color: _bTheme.dark),
               ),
               SizedBox(
                 height: 8,
               ),
               Text(
                 "Mit jeder Spende unterstützt du ein wohltätiges Projekt und bewirkts, dass irgendwo die Welt ein stückchen besser wird!",
-                style: _textTheme.caption.copyWith(color: ColorTheme.blue),
+                style: _textTheme.caption.copyWith(color: _bTheme.dark),
               ),
               SizedBox(
                 height: 8,
               ),
               Text(
                 "Dein ODM Team!",
-                style: _textTheme.caption.copyWith(
-                    color: ColorTheme.blue, fontWeight: FontWeight.w500),
+                style: _textTheme.caption
+                    .copyWith(color: _bTheme.dark, fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -361,9 +363,10 @@ class CampaignsRankingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
       borderRadius: BorderRadius.circular(12),
-      color: ColorTheme.whiteBlue,
+      color: _bTheme.darkerLight,
       child: Padding(
         padding: const EdgeInsets.all(14.0),
         child: Consumer2<UserManager, DailyReportManager>(
@@ -377,7 +380,7 @@ class CampaignsRankingWidget extends StatelessWidget {
                   return Column(
                     children: <Widget>[
                       CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                        valueColor: AlwaysStoppedAnimation(_bTheme.dark),
                       ),
                       SizedBox(
                         height: 12,
@@ -394,12 +397,12 @@ class CampaignsRankingWidget extends StatelessWidget {
                     Text(
                       "Projekte",
                       style: _theme.textTheme.headline6
-                          .copyWith(color: ColorTheme.blue),
+                          .copyWith(color: _bTheme.dark),
                     ),
                     Text(
                       "An diese Projekte wurde am meisten gespendet.",
                       style: _theme.textTheme.caption
-                          .copyWith(color: ColorTheme.blue.withOpacity(.7)),
+                          .copyWith(color: _bTheme.dark.withOpacity(.7)),
                     ),
                     SizedBox(
                       height: 4,
@@ -438,9 +441,10 @@ class FriendsRankingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
       borderRadius: BorderRadius.circular(12),
-      color: ColorTheme.whiteBlue,
+      color: _bTheme.darkerLight,
       child: Padding(
         padding: const EdgeInsets.all(14.0),
         child: Consumer2<UserManager, DailyReportManager>(
@@ -453,7 +457,7 @@ class FriendsRankingWidget extends StatelessWidget {
                   return Column(
                     children: <Widget>[
                       CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                        valueColor: AlwaysStoppedAnimation(_bTheme.dark),
                       ),
                       SizedBox(
                         height: 12,
@@ -470,12 +474,12 @@ class FriendsRankingWidget extends StatelessWidget {
                     Text(
                       "Freunde",
                       style: _theme.textTheme.headline6
-                          .copyWith(color: ColorTheme.blue),
+                          .copyWith(color: _bTheme.dark),
                     ),
                     Text(
                       "Das haben du und deine Freunde bis jetzt erreicht.",
                       style: _theme.textTheme.caption
-                          .copyWith(color: ColorTheme.blue.withOpacity(.7)),
+                          .copyWith(color: _bTheme.dark.withOpacity(.7)),
                     ),
                     SizedBox(
                       height: 4,
@@ -524,7 +528,7 @@ class RankingButton extends StatelessWidget {
 
             User user = snapshot.data;
             return CustomOpenContainer(
-              closedColor: ColorTheme.whiteBlue,
+              closedColor: ThemeManager.of(context).theme.darkerLight,
               closedElevation: 0,
               openBuilder: (context, close, controller) => UserPage(
                 user,
@@ -545,7 +549,7 @@ class RankingButton extends StatelessWidget {
           Campaign campaign = snapshot.data;
 
           return CustomOpenContainer(
-            closedColor: ColorTheme.whiteBlue,
+            closedColor: ThemeManager.of(context).theme.darkerLight,
             closedElevation: 0,
             openBuilder: (context, close, controller) => NewCampaignPage(
               campaign,

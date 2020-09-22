@@ -32,7 +32,7 @@ exports.findFriends = functions.https.onCall(async (req, res) => {
 
   console.log(`NumbersCount: ${numbers.length}`);
 
-  var iterCounter: number = 0;
+  let iterCounter: number = 0;
 
   for (let i = 0; i < numbers.length; i += 10) {
     const queryNumbers: string[] = numbers.slice(

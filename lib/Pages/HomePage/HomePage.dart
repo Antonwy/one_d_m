@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';
@@ -20,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ColorTheme.white,
+        backgroundColor: ThemeManager.of(context).theme.light,
         body: Stack(
           children: <Widget>[
             PageView(

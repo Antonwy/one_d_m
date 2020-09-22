@@ -5,6 +5,7 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
@@ -14,6 +15,7 @@ import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsDialog extends StatelessWidget {
@@ -60,7 +62,7 @@ class SettingsDialog extends StatelessWidget {
                                 height: 50,
                               ),
                             ),
-                            color: ColorTheme.orange,
+                            color: ThemeManager.of(context).theme.contrast,
                             shape: CircleBorder(),
                           ),
                           SizedBox(width: 10),
@@ -74,6 +76,52 @@ class SettingsDialog extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                height: 50,
+                padding: const EdgeInsets.only(left: 12),
+                child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: ThemeHolder.themes.length,
+                    separatorBuilder: (context, index) => SizedBox(
+                          width: 10,
+                        ),
+                    itemBuilder: (context, index) {
+                      BaseTheme bTheme = ThemeHolder.themes[index];
+                      return Material(
+                        clipBehavior: Clip.antiAlias,
+                        shape: CircleBorder(),
+                        child: InkWell(
+                          onTap: () async {
+                            ThemeManager.of(context, listen: false).theme =
+                                bTheme;
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.setInt(Constants.THEME_KEY, index);
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            color: bTheme.dark,
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 25,
+                                  color: bTheme.dark,
+                                ),
+                                Container(
+                                  width: 50,
+                                  height: 25,
+                                  color: bTheme.contrast,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
               ),
               SizedBox(height: 10),
               StreamBuilder<bool>(
@@ -162,8 +210,6 @@ class SettingsDialog extends StatelessWidget {
                 ),
                 onTap: () async {
                   await um.logout();
-
-                  print(um.status);
 
                   Navigator.pushAndRemoveUntil(
                       context,

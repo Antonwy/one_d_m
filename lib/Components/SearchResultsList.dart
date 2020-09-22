@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/OrganisationButton.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:provider/provider.dart';
 import 'CampaignButton.dart';
@@ -19,48 +21,73 @@ class SearchResultsList extends StatelessWidget {
           return FutureBuilder<List<User>>(
               future: DatabaseService.getUsersFromQuery(query),
               builder: (context, uSnapshot) {
-                if (uSnapshot.hasData && cSnapshot.hasData) {
-                  List<Campaign> resCampaigns = cSnapshot.data;
-                  List<User> resUsers = uSnapshot.data;
-                  return SliverList(
-                      delegate: SliverChildListDelegate(
-                    [
-                      SizedBox(
-                        height: 10,
+                return FutureBuilder<List<Organisation>>(
+                  future: DatabaseService.getOrganisationsFromQuery(query),
+                  builder: (context, oSnapshot) {
+                    if (uSnapshot.hasData && cSnapshot.hasData) {
+                      List<Campaign> resCampaigns = cSnapshot.data;
+                      List<User> resUsers = uSnapshot.data;
+                      List<Organisation> resOrganisations = oSnapshot.data;
+
+                      return SliverList(
+                          delegate: SliverChildListDelegate(
+                        [
+                          SizedBox(
+                            height: 10,
+                          ),
+                          resUsers.isEmpty
+                              ? Container()
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, bottom: 10, top: 10),
+                                  child: Text(
+                                    "Nutzer",
+                                    style:
+                                        Theme.of(context).textTheme.headline6,
+                                  ),
+                                ),
+                          ..._buildUsers(resUsers),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          resOrganisations.isEmpty
+                              ? Container()
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, bottom: 10),
+                                  child: Text(
+                                    "Organisationen",
+                                    style:
+                                        Theme.of(context).textTheme.headline6,
+                                  ),
+                                ),
+                          ..._buildOrganisations(resOrganisations),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          resCampaigns.isEmpty
+                              ? Container()
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, bottom: 10),
+                                  child: Text(
+                                    "Projekte",
+                                    style:
+                                        Theme.of(context).textTheme.headline6,
+                                  ),
+                                ),
+                          ..._buildCampaigns(resCampaigns),
+                          SizedBox(height: 50)
+                        ],
+                      ));
+                    }
+
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: CircularProgressIndicator(),
                       ),
-                      resUsers.isEmpty
-                          ? Container()
-                          : Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 20, bottom: 10, top: 10),
-                              child: Text(
-                                "Nutzer",
-                                style: Theme.of(context).textTheme.title,
-                              ),
-                            ),
-                      ..._buildUsers(resUsers),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      resCampaigns.isEmpty
-                          ? Container()
-                          : Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 20, bottom: 10),
-                              child: Text(
-                                "Projekte",
-                                style: Theme.of(context).textTheme.title,
-                              ),
-                            ),
-                      ..._buildCampaigns(resCampaigns),
-                      SizedBox(height: 50)
-                    ],
-                  ));
-                }
-                return SliverFillRemaining(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                    );
+                  },
                 );
               });
         });
@@ -83,6 +110,29 @@ class SearchResultsList extends StatelessWidget {
         campaign.id,
         textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
         campaign: campaign,
+        elevation: 1,
+      ),
+    );
+  }
+
+  _buildOrganisations(List<Organisation> organisations) {
+    List<Widget> res = [];
+
+    organisations.forEach((c) {
+      res.add(_buildOrganisation(c));
+    });
+
+    return res;
+  }
+
+  _buildOrganisation(Organisation organisation) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: OrganisationButton(
+        organisation.id,
+        textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
+        organisation: organisation,
+        color: Colors.white,
         elevation: 1,
       ),
     );

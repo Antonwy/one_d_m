@@ -1,12 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { DonationType, PrivateUserDataType } from './types';
-import Stripe from 'stripe';
+import { DonationType, ChargesType } from './types';
 import { DatabaseConstants } from './database-constants';
-
-const stripe = new Stripe(functions.config().stripe.token, {
-  apiVersion: '2020-03-02',
-});
 
 const firestore = admin.firestore();
 const increment = admin.firestore.FieldValue.increment;
@@ -161,33 +156,26 @@ exports.onCreateDonation = functions
         { merge: true }
       );
 
-    const privateUserData: PrivateUserDataType = (
-      await firestore
-        .collection(DatabaseConstants.user)
-        .doc(donation.user_id)
-        .collection(DatabaseConstants.private_data)
-        .doc(DatabaseConstants.data)
-        .get()
-    ).data() as PrivateUserDataType;
+    const userCharge: ChargesType = {
+      amount: increment(donation.amount),
+      user_id: donation.user_id,
+      error: false,
+    };
 
-    const paymentMethod = (
-      await firestore
-        .collection(DatabaseConstants.user)
-        .doc(donation.user_id)
-        .collection(DatabaseConstants.cards)
-        .get()
-    ).docs[0];
+    const campaignCharge: ChargesType = {
+      amount: increment(donation.amount),
+      campaign_id: donation.campaign_id,
+    };
 
-    await stripe.paymentIntents.create({
-      amount: donation.amount / 10,
-      currency: 'eur',
-      customer: privateUserData.customer_id,
-      receipt_email: privateUserData.email_address,
-      description: donation.campaign_id,
-      payment_method: paymentMethod.id,
-      off_session: true,
-      confirm: true,
-    });
+    await firestore
+      .collection(DatabaseConstants.charges_campaigns)
+      .doc(donation.campaign_id)
+      .set(campaignCharge, { merge: true });
+
+    await firestore
+      .collection(DatabaseConstants.charges_users)
+      .doc(donation.user_id)
+      .set(userCharge, { merge: true });
   });
 
 function getDate(nowDate: Date): string {

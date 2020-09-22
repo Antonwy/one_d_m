@@ -59,36 +59,7 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
       .delete();
   }
 
-  const userRef = firestore.collection(DatabaseConstants.user).doc(user.uid);
-
-  const privateUserData: PrivateUserDataType = (
-    await userRef
-      .collection(DatabaseConstants.private_data)
-      .doc(DatabaseConstants.data)
-      .get()
-  ).data() as PrivateUserDataType;
-  (await userRef.collection(DatabaseConstants.cards).get()).forEach(
-    async (c) => await c.ref.delete()
-  );
-  await userRef
-    .collection(DatabaseConstants.private_data)
-    .doc(DatabaseConstants.data)
-    .delete();
-
-  if (!(await userRef.get()).exists) return;
-
-  (
-    await firestore
-      .collection(DatabaseConstants.friends)
-      .doc(user.uid)
-      .collection(DatabaseConstants.users)
-      .get()
-  ).forEach(async (doc) => await doc.ref.delete());
-
-  if (privateUserData.customer_id !== undefined)
-    await stripe.customers.del(privateUserData.customer_id);
-
-  return userRef.delete();
+  return firestore.collection(DatabaseConstants.user).doc(user.uid).delete();
 });
 
 exports.onUpdateUser = functions.firestore
@@ -102,22 +73,9 @@ exports.onUpdateUser = functions.firestore
       await admin
         .storage()
         .bucket()
-        .file(`${ImagePrefix.user}_${userId}${ImageSuffix.dottJpg}`)
-        .delete();
-      await admin
-        .storage()
-        .bucket()
-        .file(
-          `${ImagePrefix.user}_${userId}_${ImageResolutions.low}${ImageSuffix.dottJpg}`
-        )
-        .delete();
-      await admin
-        .storage()
-        .bucket()
-        .file(
-          `${ImagePrefix.user}_${userId}_${ImageResolutions.high}${ImageSuffix.dottJpg}`
-        )
-        .delete();
+        .deleteFiles({
+          prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${userId}/`,
+        });
     }
   });
 
@@ -126,6 +84,35 @@ exports.onDeleteUser = functions.firestore
   .onDelete(async (snapshot, context) => {
     const userId: string = context.params.userId;
     const user: UserType = snapshot.data() as UserType;
+
+    const userRef = firestore.collection(DatabaseConstants.user).doc(userId);
+
+    const privateUserData: PrivateUserDataType = (
+      await userRef
+        .collection(DatabaseConstants.private_data)
+        .doc(DatabaseConstants.data)
+        .get()
+    ).data() as PrivateUserDataType;
+    (await userRef.collection(DatabaseConstants.cards).get()).forEach(
+      async (c) => await c.ref.delete()
+    );
+    await userRef
+      .collection(DatabaseConstants.private_data)
+      .doc(DatabaseConstants.data)
+      .delete();
+
+    if (!(await userRef.get()).exists) return;
+
+    (
+      await firestore
+        .collection(DatabaseConstants.friends)
+        .doc(userId)
+        .collection(DatabaseConstants.users)
+        .get()
+    ).forEach(async (doc) => await doc.ref.delete());
+
+    if (privateUserData.customer_id !== undefined)
+      await stripe.customers.del(privateUserData.customer_id);
 
     // delete following
     const followingUserColl = await firestore
@@ -181,26 +168,12 @@ exports.onDeleteUser = functions.firestore
 
     if (user.image_url === null || !user.image_url.startsWith('user_')) return;
 
-    // delete image
     await admin
       .storage()
       .bucket()
-      .file(
-        `${ImagePrefix.user}_${userId}_${ImageResolutions.high}${ImageSuffix.dottJpg}`
-      )
-      .delete();
-    await admin
-      .storage()
-      .bucket()
-      .file(
-        `${ImagePrefix.user}_${userId}_${ImageResolutions.low}${ImageSuffix.dottJpg}`
-      )
-      .delete();
-    await admin
-      .storage()
-      .bucket()
-      .file(`${ImagePrefix.user}_${userId}${ImageSuffix.dottJpg}`)
-      .delete();
+      .deleteFiles({
+        prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${userId}/`,
+      });
   });
 
 exports.onAddCard = functions.firestore

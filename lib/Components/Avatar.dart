@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class Avatar extends StatefulWidget {
   String imageUrl;
@@ -13,8 +14,8 @@ class Avatar extends StatefulWidget {
       {this.icon,
       this.onTap,
       this.elevation = 0.0,
-      this.color = ColorTheme.blue,
-      this.iconColor = ColorTheme.orange});
+      this.color,
+      this.iconColor});
 
   @override
   _AvatarState createState() => _AvatarState();
@@ -25,27 +26,30 @@ class _AvatarState extends State<Avatar> {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return GestureDetector(
       onTap: widget.onTap,
       child: CircleAvatar(
         backgroundImage: widget.imageUrl != null
             ? CachedNetworkImageProvider(widget.imageUrl)
             : null,
-        onBackgroundImageError: widget.imageUrl != null ? (exception, stackTrace) {
-          setState(() {
-            _hasError = true;
-          });
-        } : null,
-        backgroundColor: widget.color,
+        onBackgroundImageError: widget.imageUrl != null
+            ? (exception, stackTrace) {
+                setState(() {
+                  _hasError = true;
+                });
+              }
+            : null,
+        backgroundColor: widget.color ?? _bTheme.dark,
         child: _hasError
             ? Icon(
                 Icons.error,
-                color: ColorTheme.orange,
+                color: _bTheme.contrast,
               )
             : widget.imageUrl == null
                 ? Icon(
                     widget.icon ?? Icons.person,
-                    color: widget.iconColor,
+                    color: widget.iconColor ?? _bTheme.contrast,
                   )
                 : Container(),
       ),

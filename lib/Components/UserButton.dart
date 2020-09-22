@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
@@ -30,6 +31,7 @@ class UserButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return AnimatedFutureBuilder<User>(
         future: user == null ? DatabaseService.getUser(id) : Future.value(user),
         builder: (context, snapshot) {
@@ -106,22 +108,21 @@ class UserButton extends StatelessWidget {
                                                     child: Material(
                                                       shape: CircleBorder(),
                                                       color: ColorTween(
-                                                              begin: ColorTheme
-                                                                  .orange
+                                                              begin: _bTheme
+                                                                  .contrast
                                                                   .withOpacity(
                                                                       .3),
-                                                              end: ColorTheme
-                                                                  .orange)
+                                                              end: _bTheme
+                                                                  .contrast)
                                                           .transform(tween),
                                                       child: Center(
                                                         child: Icon(
                                                           Icons.add,
                                                           color: ColorTween(
-                                                                  begin:
-                                                                      ColorTheme
-                                                                          .orange,
-                                                                  end: Colors
-                                                                      .white)
+                                                                  begin: _bTheme
+                                                                      .dark,
+                                                                  end: _bTheme
+                                                                      .textOnContrast)
                                                               .transform(tween),
                                                         ),
                                                       ),

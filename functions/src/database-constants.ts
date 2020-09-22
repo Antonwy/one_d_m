@@ -21,6 +21,8 @@ export class DatabaseConstants {
   static readonly data: string = 'data';
   static readonly cards: string = 'cards';
   static readonly organisations: string = 'organisations';
+  static readonly charges_users: string = 'charges_users';
+  static readonly charges_campaigns: string = 'charges_campaigns';
 }
 
 export class CampaignFields {
@@ -55,4 +57,9 @@ export class ImagePrefix {
 
 export class ImageSuffix {
   static readonly dottJpg: string = '.jpg';
+}
+
+export class ChargesFields {
+  static readonly amount: string = 'amount';
+  static readonly user_id: string = 'user_id';
 }

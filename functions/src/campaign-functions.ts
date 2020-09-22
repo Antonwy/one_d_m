@@ -24,20 +24,7 @@ exports.onDeleteCampaign = functions.firestore
 
     const bucket = admin.storage().bucket();
 
-    await bucket.deleteFiles({prefix: `campaigns/campaign_${campaignId}/`})
-
-    // delete campaignImg from storage
-    // await admin
-    //   .storage()
-    //   .bucket()
-    //   .file(`campaign_${campaignId}_1080x1920.jpg`)
-    //   .delete();
-    // await admin
-    //   .storage()
-    //   .bucket()
-    //   .file(`campaign_${campaignId}_300x300.jpg`)
-    //   .delete();
-    // await admin.storage().bucket().file(`campaign_${campaignId}.jpg`).delete();
+    await bucket.deleteFiles({prefix: `campaigns/campaign_${campaignId}/`});
 
     // delete all news
     const newsQuery = firestore

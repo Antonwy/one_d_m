@@ -41,6 +41,7 @@ class NewsPost extends StatelessWidget {
                 children: <Widget>[
                   CachedNetworkImage(
                     width: double.infinity,
+                    height: 260,
                     imageUrl: news.imageUrl,
                     errorWidget: (_, __, ___) => Center(
                         child: Icon(

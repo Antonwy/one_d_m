@@ -4,10 +4,9 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class InfoFeed extends StatefulWidget {
-  // PageController _pageController = PageController(viewportFraction: .5);
-
   @override
   _InfoFeedState createState() => _InfoFeedState();
 }
@@ -15,10 +14,6 @@ class InfoFeed extends StatefulWidget {
 class _InfoFeedState extends State<InfoFeed> {
   @override
   Widget build(BuildContext context) {
-    return _layout();
-  }
-
-  Widget _layout() {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 14.0, 10.0, 8),
@@ -38,8 +33,9 @@ class _LineChartState extends State<LineChart> {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Material(
-      color: ColorTheme.blue,
+      color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 177,
@@ -67,14 +63,14 @@ class _LineChartState extends State<LineChart> {
                               Text(
                                 "Spendenziele",
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: _bTheme.light,
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 "Tägliche, monatliche, jährliche Spendenziele",
                                 style: TextStyle(
-                                    color: Colors.white54,
+                                    color: _bTheme.light.withOpacity(.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w400),
                               ),
@@ -181,6 +177,7 @@ class _CollumnStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -188,14 +185,14 @@ class _CollumnStat extends StatelessWidget {
         Text(
           Numeral(value).value(),
           style: TextStyle(
-              color: ColorTheme.orange,
+              color: _bTheme.contrast,
               fontSize: 50,
               fontWeight: FontWeight.w600),
         ),
         Text(
           desc,
           style: TextStyle(
-              color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              color: _bTheme.light, fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -210,11 +207,12 @@ class _PercentLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Container(
       width: double.infinity,
       height: _height,
       child: Material(
-        color: ColorTheme.whiteBlue.withOpacity(.1),
+        color: _bTheme.light.withOpacity(.1),
         borderRadius: BorderRadius.circular(_height / 2),
         clipBehavior: Clip.antiAlias,
         child: LayoutBuilder(builder: (context, constraints) {
@@ -228,7 +226,7 @@ class _PercentLine extends StatelessWidget {
                   child: Material(
                     borderRadius: BorderRadius.horizontal(
                         right: Radius.circular(_height / 2)),
-                    color: ColorTheme.orange,
+                    color: _bTheme.contrast,
                   ),
                 ),
               ),
@@ -236,7 +234,7 @@ class _PercentLine extends StatelessWidget {
                   child: Text(
                 "${Numeral(currValue).value()}/${Numeral(targetValue).value()}",
                 style: TextStyle(
-                    color: Colors.white,
+                    color: _bTheme.light,
                     fontSize: 10,
                     fontWeight: FontWeight.w700),
               )),

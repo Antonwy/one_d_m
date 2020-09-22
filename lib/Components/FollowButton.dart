@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class FollowButton extends StatefulWidget {
   Future<void> Function() onPressed;
@@ -21,6 +22,7 @@ class _FollowButtonState extends State<FollowButton> {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return OfflineBuilder(
         child: Container(),
         connectivityBuilder: (context, connection, child) {
@@ -52,7 +54,7 @@ class _FollowButtonState extends State<FollowButton> {
                 height: 56,
                 duration: _duration,
                 color: activated
-                    ? (widget.followed ? ColorTheme.orange : ColorTheme.whiteBlue)
+                    ? (widget.followed ? _bTheme.contrast : _bTheme.darkerLight)
                     : Colors.grey,
                 child: TweenAnimationBuilder(
                     duration: _duration,
@@ -63,10 +65,10 @@ class _FollowButtonState extends State<FollowButton> {
                         Transform.rotate(angle: value, child: child),
                     child: TweenAnimationBuilder(
                         tween: ColorTween(
-                            begin: ColorTheme.blue,
+                            begin: _bTheme.dark,
                             end: widget.followed
-                                ? ColorTheme.whiteBlue
-                                : ColorTheme.blue),
+                                ? _bTheme.textOnContrast
+                                : _bTheme.dark),
                         duration: _duration,
                         builder: (context, color, child) => Stack(
                               children: <Widget>[

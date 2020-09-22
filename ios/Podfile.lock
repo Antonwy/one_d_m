@@ -448,6 +448,8 @@ PODS:
   - Reachability (3.2)
   - share (0.0.1):
     - Flutter
+  - shared_preferences (0.0.1):
+    - Flutter
   - sign_in_with_apple (0.0.1):
     - Flutter
   - sqflite (0.0.1):
@@ -477,6 +479,7 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - share (from `.symlinks/plugins/share/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - stripe_payment (from `.symlinks/plugins/stripe_payment/ios`)
@@ -553,6 +556,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
   sign_in_with_apple:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
   sqflite:
@@ -603,7 +608,7 @@ SPEC CHECKSUMS:
   gRPC-Core: 325ba201411619a7302c621a1c8ee787719d4b9b
   GTMAppAuth: 4deac854479704f348309e7b66189e604cf5e01e
   GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
-  image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
+  image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
@@ -613,12 +618,13 @@ SPEC CHECKSUMS:
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sign_in_with_apple: 34f3f5456a45fd7ac5fb42905e2ad31dae061b4a
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   Stripe: d481c2dab9a892fd923f097f854661217f70dc7f
   stripe_payment: ad86f099179edb7b9fe12b9b62ac3746d5e56802
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
-PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
 COCOAPODS: 1.9.1

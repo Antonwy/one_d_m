@@ -9,6 +9,7 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
@@ -327,7 +328,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                 maxLength: 6,
                                                 inputFormatters: [
                                                   WhitelistingTextInputFormatter
-                                                      .digitsOnly
+                                                      .digitsOnly,
+                                                  LengthLimitingTextInputFormatter(
+                                                      500000),
                                                 ],
                                                 onChanged: (text) {
                                                   setState(() {
@@ -351,9 +354,6 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           campaigns = snapshot.data;
                                           campaigns.removeWhere((c) =>
                                               c.id == widget.campaign.id);
-
-                                          if (_alternativCampaign == null)
-                                            _alternativCampaign = campaigns[0];
                                         }
 
                                         return Column(
@@ -500,7 +500,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                 borderRadius:
                                                     BorderRadius.circular(10)),
                                             elevation: 0,
-                                            color: ColorTheme.blue,
+                                            color: ThemeManager.of(context)
+                                                .theme
+                                                .dark,
                                             disabledColor: Colors.grey,
                                             onPressed: _amount != null &&
                                                     _alternativCampaign !=

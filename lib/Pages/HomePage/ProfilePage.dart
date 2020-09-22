@@ -7,9 +7,9 @@ import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
@@ -29,10 +29,12 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin {
   ThemeData _theme;
+  BaseTheme _bTheme;
 
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
+    _bTheme = ThemeManager.of(context).theme;
     return CustomScrollView(
       slivers: <Widget>[
         Consumer<UserManager>(
@@ -66,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       style: _theme.textTheme.headline5
                                           .copyWith(
                                               fontSize: 32,
-                                              color: ColorTheme.blue),
+                                              color: _bTheme.dark),
                                     ),
                                     Text(
                                       "${user?.name}",
@@ -74,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage>
                                           .copyWith(
                                               fontSize: 30,
                                               fontWeight: FontWeight.bold,
-                                              color: ColorTheme.blue),
+                                              color: _bTheme.dark),
                                     ),
                                   ],
                                 ),
@@ -107,14 +109,14 @@ class _ProfilePageState extends State<ProfilePage>
                                     Text(
                                       "Gespendet: ",
                                       style: TextStyle(
-                                          fontSize: 15, color: ColorTheme.blue),
+                                          fontSize: 15, color: _bTheme.dark),
                                     ),
                                     Text(
                                       "${Numeral(user?.donatedAmount ?? 0).value()} DC",
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
-                                          color: ColorTheme.blue),
+                                          color: _bTheme.dark),
                                     ),
                                   ],
                                 ),
@@ -127,7 +129,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                   scrollController: controller),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
-                                      closedColor: ColorTheme.orange,
+                                      closedColor: _bTheme.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
                                         icon: Icons
@@ -148,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                   scrollController: controller),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
-                                      closedColor: ColorTheme.orange,
+                                      closedColor: _bTheme.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
                                         icon: Icons.person,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
 class CategoriesList extends StatefulWidget {
@@ -79,6 +80,7 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Padding(
       padding: EdgeInsets.only(
           right: index - 1 == Category.categories.length - 1 ? 10 : 0),
@@ -106,12 +108,12 @@ class CategoryItem extends StatelessWidget {
                                 constraints.maxHeight * (isSelected ? .8 : 1.0),
                             decoration: BoxDecoration(
                                 color: isSelected
-                                    ? ColorTheme.orange
+                                    ? _bTheme.contrast
                                     : ColorTheme.lightBlue,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: ColorTheme.orange.withOpacity(.8),
+                                      color: _bTheme.contrast.withOpacity(.8),
                                       blurRadius: isSelected ? 14 : 0),
                                 ]),
                           ),
@@ -123,7 +125,8 @@ class CategoryItem extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.black),
+                      color:
+                          isSelected ? _bTheme.textOnContrast : _bTheme.dark),
                   child: isAddFriendsButton
                       ? Icon(Icons.person_add)
                       : Text(

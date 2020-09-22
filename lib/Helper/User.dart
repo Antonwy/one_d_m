@@ -37,7 +37,7 @@ class User {
         id: snapshot.documentID,
         name: snapshot[User.NAME] ?? "No name",
         admin: snapshot[User.ADMIN],
-        ghost: snapshot[User.GHOST],
+        ghost: snapshot[User.GHOST] ?? false,
         donatedAmount: snapshot[DONATEDAMOUNT],
         subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
@@ -56,7 +56,8 @@ class User {
       ADMIN: false,
       IMAGEURL: imgUrl,
       SUBSCRIBEDCAMPAIGNS: [],
-      DONATEDAMOUNT: 0
+      DONATEDAMOUNT: 0,
+      GHOST: false
     };
   }
 

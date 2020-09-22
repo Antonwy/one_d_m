@@ -7,10 +7,10 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
-import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'CustomOpenContainer.dart';
@@ -22,6 +22,8 @@ class DonationsGroupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
+
     List<Widget> widgetList = [
       AnimatedFutureBuilder<User>(
         future: DatabaseService.getUser(donationsGroup.userId),
@@ -35,7 +37,7 @@ class DonationsGroupWidget extends StatelessWidget {
             ),
             tappable: false,
             closedElevation: 0,
-            closedColor: ColorTheme.whiteBlue,
+            closedColor: _bTheme.darkerLight,
             closedShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
             closedBuilder: (context, open) => InkWell(
@@ -79,7 +81,7 @@ class DonationsGroupWidget extends StatelessWidget {
           scrollController: scrollController,
         ),
         closedElevation: 0,
-        closedColor: ColorTheme.whiteBlue,
+        closedColor: _bTheme.darkerLight,
         closedBuilder: (context, open) => InkWell(
           onTap: open,
           child: Padding(
@@ -108,7 +110,7 @@ class DonationsGroupWidget extends StatelessWidget {
       child: Material(
         clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(12.0),
-        color: ColorTheme.whiteBlue,
+        color: _bTheme.darkerLight,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: widgetList,

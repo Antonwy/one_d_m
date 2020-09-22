@@ -15,10 +15,13 @@ import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/Organisation.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
+import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:provider/provider.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -35,6 +38,7 @@ class NewCampaignPage extends StatefulWidget {
 class _NewCampaignPageState extends State<NewCampaignPage>
     with SingleTickerProviderStateMixin {
   TextTheme _textTheme;
+  BaseTheme _bTheme;
   bool _subscribed = false;
   Campaign campaign;
   MediaQueryData _mq;
@@ -80,6 +84,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _mq = MediaQuery.of(context);
+    _bTheme = ThemeManager.of(context).theme;
     return Scaffold(
         floatingActionButton: OfflineBuilder(
             child: Container(),
@@ -114,7 +119,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     curve: Curves.fastLinearToSlowEaseIn)),
                             child: FloatingActionButton.extended(
                                 backgroundColor:
-                                    activated ? ColorTheme.blue : Colors.grey,
+                                    activated ? _bTheme.dark : Colors.grey,
                                 label: _isAuthorOfCampaign
                                     ? Text("Post erstellen")
                                     : Text("Spenden"),
@@ -193,7 +198,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           SliverToBoxAdapter(
                             child: GestureDetector(
                               onTap: () {
-                                print("TAP");
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -224,6 +228,51 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
+                                          Material(
+                                            color: _bTheme.dark,
+                                            clipBehavior: Clip.antiAlias,
+                                            borderRadius:
+                                                BorderRadius.circular(4.0),
+                                            child: FutureBuilder<Organisation>(
+                                                future: DatabaseService
+                                                    .getOrganisation(
+                                                        campaign.authorId),
+                                                builder: (context, snapshot) {
+                                                  Organisation organisation =
+                                                      snapshot.data;
+                                                  return InkWell(
+                                                    onTap: !snapshot.hasData
+                                                        ? null
+                                                        : () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder: (context) =>
+                                                                        OrganisationPage(
+                                                                            organisation)));
+                                                          },
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 8.0,
+                                                          vertical: 4.0),
+                                                      child: Text(
+                                                        organisation?.name ??
+                                                            "Laden...",
+                                                        style: _textTheme
+                                                            .bodyText1
+                                                            .copyWith(
+                                                                color: _bTheme
+                                                                    .contrast,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }),
+                                          ),
+                                          SizedBox(height: 5),
                                           Text(
                                             campaign.name,
                                             style: _textTheme.headline5
@@ -525,6 +574,7 @@ class _StatCollumn extends StatelessWidget {
   Widget build(BuildContext context) {
     Interval _interval = Interval(interval.begin, interval.end,
         curve: Curves.fastLinearToSlowEaseIn);
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Expanded(
       child: SlideTransition(
         position: Tween<Offset>(begin: Offset(0.0, .2), end: Offset.zero)
@@ -536,7 +586,7 @@ class _StatCollumn extends StatelessWidget {
             opacity: CurvedAnimation(parent: controller, curve: _interval),
             child: Card(
               elevation: 0,
-              color: isDark ? ColorTheme.blue : ColorTheme.orange,
+              color: isDark ? _bTheme.dark : _bTheme.contrast,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               child: Column(
@@ -546,7 +596,7 @@ class _StatCollumn extends StatelessWidget {
                     "${Numeral(value ?? 0).value()}",
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        color: isDark ? ColorTheme.orange : ColorTheme.blue,
+                        color: isDark ? _bTheme.contrast : _bTheme.dark,
                         fontWeight: FontWeight.bold,
                         fontSize: 30),
                   ),
@@ -556,7 +606,7 @@ class _StatCollumn extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                        color: isDark ? ColorTheme.orange : ColorTheme.blue,
+                        color: isDark ? _bTheme.contrast : _bTheme.dark,
                         fontSize: 12,
                         fontWeight: FontWeight.bold),
                   ),

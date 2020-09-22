@@ -9,9 +9,11 @@ import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/Ranking.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
+import 'package:one_d_m/Helper/UserCharge.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 import 'Campaign.dart';
 import 'Donation.dart';
@@ -20,6 +22,7 @@ import 'User.dart';
 class DatabaseService {
   static const String CAMPAIGNS = "campaigns",
       USER = "user",
+      CHARGESUSERS = "charges_users",
       USERS = "users",
       NEWS = "news",
       NEWSFEED = "news_feed",
@@ -36,7 +39,8 @@ class DatabaseService {
       DONATIONINFO = "donation_info",
       CARDS = "cards",
       PRIVATEDATA = "private_data",
-      DATA = "data";
+      DATA = "data",
+      ORGANISATIONS = "organisations";
 
   static final Firestore firestore = Firestore.instance;
   static final CollectionReference userCollection = firestore.collection(USER);
@@ -60,6 +64,10 @@ class DatabaseService {
       firestore.collection(STATISTICS);
   static final CollectionReference friendsCollection =
       firestore.collection(FRIENDS);
+  static final CollectionReference userChargeCollection =
+      firestore.collection(CHARGESUSERS);
+  static final CollectionReference organisationsCollection =
+      firestore.collection(ORGANISATIONS);
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.document(uid).get();
@@ -179,10 +187,19 @@ class DatabaseService {
         .limit(5)
         .getDocuments();
 
-    List<User> nameList =
-        nameSnapshot.documents.map(User.fromSnapshot).toList();
+    return nameSnapshot.documents.map(User.fromSnapshot).toList();
+  }
 
-    return nameList;
+  static Future<List<Organisation>> getOrganisationsFromQuery(
+      String query) async {
+    QuerySnapshot nameSnapshot = await organisationsCollection
+        .where(Organisation.NAME, isGreaterThanOrEqualTo: query)
+        .limit(5)
+        .getDocuments();
+
+    return nameSnapshot.documents
+        .map((doc) => Organisation.fromMap(doc))
+        .toList();
   }
 
   static Future<void> createSubscription(Campaign campaign, String uid) async {
@@ -443,6 +460,10 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.documents));
   }
 
+  static Future<UserCharge> getUserCharge(String uid) async {
+    return UserCharge.fromMap(await userChargeCollection.document(uid).get());
+  }
+
   static Stream<Statistics> getStatistics() {
     return statisticsCollection.snapshots().map(Statistics.fromQuerySnapshot);
   }
@@ -612,5 +633,17 @@ class DatabaseService {
       if (!doc.exists) return 0;
       return doc[Ranking.AMOUNT];
     }));
+  }
+
+  static Future<Organisation> getOrganisation(String oid) async {
+    return Organisation.fromMap(
+        await organisationsCollection.document(oid).get());
+  }
+
+  static Stream<List<Campaign>> getCampaignsOfOrganisation(String oid) {
+    return campaignsCollection
+        .where(Campaign.AUTHORID, isEqualTo: oid)
+        .snapshots()
+        .map((qs) => Campaign.listFromSnapshot(qs.documents));
   }
 }

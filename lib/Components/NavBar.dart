@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:provider/provider.dart';
 
 class NavBar extends StatefulWidget {
@@ -23,6 +24,7 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     _mq = MediaQuery.of(context);
 
     _openHeight = _mq.padding.bottom == 0 ? 75 : 55 + _mq.padding.bottom;
@@ -39,7 +41,7 @@ class _NavBarState extends State<NavBar> {
                     blurRadius: 30,
                     offset: Offset(0, -5)),
               ],
-              color: ColorTheme.navBar,
+              color: _bTheme.light,
               borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
           child: Padding(
             padding: EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
@@ -57,8 +59,7 @@ class _NavBarState extends State<NavBar> {
                               height: 40,
                               width: 40,
                               decoration: BoxDecoration(
-                                  color: ColorTheme.navBarHighlight,
-                                  shape: BoxShape.circle),
+                                  color: _bTheme.dark, shape: BoxShape.circle),
                             ));
                       }),
                     ),

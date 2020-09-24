@@ -49,7 +49,7 @@ class SearchResultsList extends StatelessWidget {
                                   const EdgeInsets.only(left: 20, bottom: 10),
                               child: Text(
                                 "Projekte",
-                                style: Theme.of(context).textTheme.title,
+                                style: Theme.of(context).textTheme.headline6,
                               ),
                             ),
                       ..._buildCampaigns(resCampaigns),

@@ -221,22 +221,31 @@ class _DCInformation extends StatelessWidget {
                   Expanded(
                     child: _GoalWidget(
                       title: 'Tagesziel',
-                      percent: (statistics?.donationStatistics?.dailyAmount ?? 0) /
-                          statistics?.donationStatistics?.dailyAmountTarget,
+                      percent: ((statistics?.donationStatistics?.dailyAmount ??
+                                  0) /
+                              statistics?.donationStatistics?.dailyAmountTarget)
+                          .clamp(0.0, 1.0),
                     ),
                   ),
                   Expanded(
                     child: _GoalWidget(
                       title: 'Monatsziel',
-                      percent: (statistics?.donationStatistics?.monthlyAmount ?? 0) /
-                          statistics?.donationStatistics?.monthlyAmountTarget,
+                      percent:
+                          ((statistics?.donationStatistics?.monthlyAmount ??
+                                      0) /
+                                  statistics
+                                      ?.donationStatistics?.monthlyAmountTarget)
+                              .clamp(0.0, 1.0),
                     ),
                   ),
                   Expanded(
                     child: _GoalWidget(
                       title: 'Jahresziel',
-                      percent: (statistics?.donationStatistics?.yearlyAmount ?? 0) /
-                          statistics?.donationStatistics?.yearlyAmountTarget,
+                      percent:
+                          ((statistics?.donationStatistics?.yearlyAmount ?? 0) /
+                                  statistics
+                                      ?.donationStatistics?.yearlyAmountTarget)
+                              .clamp(0.0, 1.0),
                     ),
                   ),
                 ],
@@ -321,7 +330,7 @@ class _PercentCirclePainter extends CustomPainter {
     final double strokeWidth = 5;
 
     final Paint backgroundPaint = Paint()
-      ..color = ColorTheme.white.withOpacity(0.04)
+      ..color = ColorTheme.white.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

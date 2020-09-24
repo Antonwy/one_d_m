@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 
 import 'CampaignHeader.dart';
@@ -52,6 +53,7 @@ class _CampaignListState extends State<CampaignList> {
 
     for (Campaign c in campaigns) {
       list.add(CampaignHeader(c));
+      list.add(ExploreNativeAd());
     }
 
     list.add(SizedBox(

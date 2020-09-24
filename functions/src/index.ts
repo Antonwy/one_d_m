@@ -11,3 +11,4 @@ exports.user = require('./user-functions');
 exports.storage = require('./storage-functions');
 exports.httpFunctions = require('./http-functions');
 exports.friends = require('./friends-functions');
+exports.ads = require('./ad-functions');

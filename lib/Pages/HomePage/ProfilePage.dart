@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -14,6 +15,7 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/CreateCampaignPage.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
+import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
@@ -138,6 +140,22 @@ class _ProfilePageState extends State<ProfilePage>
                                         onTap: () {
                                           open();
                                         },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    CustomOpenContainer(
+                                      openBuilder:
+                                          (context, close, controller) =>
+                                              RewardVideoPage(),
+                                      closedShape: CircleBorder(),
+                                      closedElevation: 0,
+                                      closedColor: ColorTheme.orange,
+                                      closedBuilder: (context, open) =>
+                                          RoundButtonHomePage(
+                                        icon: Icons.play_arrow,
+                                        onTap: open,
                                       ),
                                     ),
                                     SizedBox(

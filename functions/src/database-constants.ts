@@ -18,7 +18,10 @@ export class DatabaseConstants {
   static readonly user: string = 'user';
   static readonly users: string = 'users';
   static readonly private_data: string = 'private_data';
+  static readonly advertising_data: string = 'ad_data';
   static readonly data: string = 'data';
+  static readonly ad_impressions: string = 'impressions';
+  static readonly ad_balance: string = 'balance';
   static readonly cards: string = 'cards';
   static readonly organisations: string = 'organisations';
   static readonly charges_users: string = 'charges_users';
@@ -36,6 +39,13 @@ export class DonationFields {
 
 export class PrivateUserFields {
   static readonly phone_number: string = 'phone_number';
+}
+
+export class UserAdFields {
+  static readonly native_ad_impressions: string = 'native_ad_impressions';
+  static readonly interstitial_impressions: string = 'interstitial_impressions';
+  static readonly activity_score: string = 'activity_score';
+  static readonly dc_balance: string = 'dc_balance';
 }
 
 export class ImageResolutions {

@@ -11,13 +11,15 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		832081D02504DADE00220052 /* AdLayoutFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832081CB2504DADE00220052 /* AdLayoutFactory.swift */; };
-		832081D12504DADE00220052 /* AdLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832081CC2504DADE00220052 /* AdLayout.swift */; };
-		832081D22504DADE00220052 /* NativeAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832081CD2504DADE00220052 /* NativeAds.swift */; };
-		832081DA2504E75900220052 /* NewsAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 832081D92504E75900220052 /* NewsAd.xib */; };
 		832081DD2504E76200220052 /* SFUIText-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 832081DB2504E76200220052 /* SFUIText-Regular.ttf */; };
 		832081DE2504E76200220052 /* SFUIText-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 832081DC2504E76200220052 /* SFUIText-Medium.ttf */; };
-		832081E02504ED9200220052 /* ExploreAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 832081DF2504ED9200220052 /* ExploreAd.xib */; };
+		83F89B4D251CA8AE003AE202 /* AdLayoutFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */; };
+		83F89B4E251CA8AE003AE202 /* AdLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B47251CA8AE003AE202 /* AdLayout.swift */; };
+		83F89B4F251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */; };
+		83F89B50251CA8AE003AE202 /* UnifiedAdLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */; };
+		83F89B51251CA8AE003AE202 /* NativeAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B4A251CA8AE003AE202 /* NativeAds.swift */; };
+		83F89B52251CA8AE003AE202 /* NewsAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83F89B4B251CA8AE003AE202 /* NewsAd.xib */; };
+		83F89B53251CA8AE003AE202 /* ExploreAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83F89B4C251CA8AE003AE202 /* ExploreAd.xib */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
@@ -49,13 +51,15 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
-		832081CB2504DADE00220052 /* AdLayoutFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayoutFactory.swift; sourceTree = "<group>"; };
-		832081CC2504DADE00220052 /* AdLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayout.swift; sourceTree = "<group>"; };
-		832081CD2504DADE00220052 /* NativeAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeAds.swift; sourceTree = "<group>"; };
-		832081D92504E75900220052 /* NewsAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = NewsAd.xib; path = ../../../../native_ads_flutter/ios/Runner/ads/NewsAd.xib; sourceTree = "<group>"; };
 		832081DB2504E76200220052 /* SFUIText-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFUIText-Regular.ttf"; sourceTree = "<group>"; };
 		832081DC2504E76200220052 /* SFUIText-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFUIText-Medium.ttf"; sourceTree = "<group>"; };
-		832081DF2504ED9200220052 /* ExploreAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ExploreAd.xib; path = ../../../../native_ads_flutter/ios/Runner/ads/ExploreAd.xib; sourceTree = "<group>"; };
+		83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayoutFactory.swift; sourceTree = "<group>"; };
+		83F89B47251CA8AE003AE202 /* AdLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayout.swift; sourceTree = "<group>"; };
+		83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnifiedAdLayoutFactory.swift; sourceTree = "<group>"; };
+		83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnifiedAdLayout.swift; sourceTree = "<group>"; };
+		83F89B4A251CA8AE003AE202 /* NativeAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeAds.swift; sourceTree = "<group>"; };
+		83F89B4B251CA8AE003AE202 /* NewsAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NewsAd.xib; sourceTree = "<group>"; };
+		83F89B4C251CA8AE003AE202 /* ExploreAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ExploreAd.xib; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,14 +109,16 @@
 			path = fonts;
 			sourceTree = "<group>";
 		};
-		832081C92504DADE00220052 /* ads */ = {
+		83F89B45251CA8AE003AE202 /* ads */ = {
 			isa = PBXGroup;
 			children = (
-				832081CB2504DADE00220052 /* AdLayoutFactory.swift */,
-				832081CC2504DADE00220052 /* AdLayout.swift */,
-				832081D92504E75900220052 /* NewsAd.xib */,
-				832081DF2504ED9200220052 /* ExploreAd.xib */,
-				832081CD2504DADE00220052 /* NativeAds.swift */,
+				83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */,
+				83F89B47251CA8AE003AE202 /* AdLayout.swift */,
+				83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */,
+				83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */,
+				83F89B4A251CA8AE003AE202 /* NativeAds.swift */,
+				83F89B4B251CA8AE003AE202 /* NewsAd.xib */,
+				83F89B4C251CA8AE003AE202 /* ExploreAd.xib */,
 			);
 			path = ads;
 			sourceTree = "<group>";
@@ -150,7 +156,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
-				832081C92504DADE00220052 /* ads */,
+				83F89B45251CA8AE003AE202 /* ads */,
 				832081B62502495500220052 /* fonts */,
 				1020BB1E24ED53AF00C5B622 /* Runner.entitlements */,
 				1020BB1C24ED533400C5B622 /* GoogleService-Info.plist */,
@@ -232,11 +238,11 @@
 			files = (
 				832081DD2504E76200220052 /* SFUIText-Regular.ttf in Resources */,
 				1020BB1D24ED533400C5B622 /* GoogleService-Info.plist in Resources */,
+				83F89B53251CA8AE003AE202 /* ExploreAd.xib in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
-				832081E02504ED9200220052 /* ExploreAd.xib in Resources */,
-				832081DA2504E75900220052 /* NewsAd.xib in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
+				83F89B52251CA8AE003AE202 /* NewsAd.xib in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				832081DE2504E76200220052 /* SFUIText-Medium.ttf in Resources */,
 			);
@@ -336,11 +342,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				832081D22504DADE00220052 /* NativeAds.swift in Sources */,
-				832081D02504DADE00220052 /* AdLayoutFactory.swift in Sources */,
+				83F89B4F251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift in Sources */,
+				83F89B4E251CA8AE003AE202 /* AdLayout.swift in Sources */,
+				83F89B4D251CA8AE003AE202 /* AdLayoutFactory.swift in Sources */,
+				83F89B50251CA8AE003AE202 /* UnifiedAdLayout.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				83F89B51251CA8AE003AE202 /* NativeAds.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
-				832081D12504DADE00220052 /* AdLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -23,9 +23,15 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
     return;
   }
 
-  const splittedName: string[] = obj.name.split('_');
+  console.log('Name: ' + obj.name);
+
+  const splittedPaths: string[] = obj.name.split('/');
+  const splittedName: string[] = splittedPaths[splittedPaths.length - 1].split(
+    '_'
+  );
+  console.log('SplittedName: ' + splittedName);
   const imageType: ImageType = splittedName[0] as ImageType;
-  const resulution: ImageRes = splittedName[2].replace(
+  const resulution: ImageRes = splittedName[splittedName.length - 1].replace(
     ImageSuffix.dottJpg,
     ''
   ) as ImageRes;
@@ -88,7 +94,10 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
 });
 
 function generateUrl(obj: functions.storage.ObjectMetadata): string {
-  return `${StorageConstants.storageUrlStart}${
-    obj.name
-  }${StorageConstants.storageUrlEnd}${obj.metadata?.firebaseStorageDownloadTokens ?? ''}`;
+  return `${StorageConstants.storageUrlStart}${obj.name?.repl(
+    new RegExp('/', 'g'),
+    '%2F'
+  )}${StorageConstants.storageUrlEnd}${
+    obj.metadata?.firebaseStorageDownloadTokens ?? ''
+  }`;
 }

@@ -182,7 +182,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                 height: 4,
                                               ),
                                               Text(
-                                                "Wähle einen Betrag",
+                                                "Wähle einen Betrag:",
                                                 style: _theme
                                                     .textTheme.bodyText1
                                                     .copyWith(

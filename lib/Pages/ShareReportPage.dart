@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:provider/provider.dart';
 
 class ShareReportPage extends StatelessWidget {
@@ -17,6 +18,7 @@ class ShareReportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: ThemeManager.of(context).theme.light,
       body: CustomScrollView(controller: _scrollController, slivers: [
         SliverAppBar(
           backgroundColor: Colors.transparent,

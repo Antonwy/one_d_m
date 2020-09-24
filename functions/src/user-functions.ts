@@ -5,8 +5,6 @@ import Stripe from 'stripe';
 import {
   DatabaseConstants,
   ImagePrefix,
-  ImageSuffix,
-  ImageResolutions,
   DonationFields,
 } from './database-constants';
 

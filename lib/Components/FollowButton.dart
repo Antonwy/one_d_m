@@ -30,7 +30,7 @@ class _FollowButtonState extends State<FollowButton> {
           return Material(
             shape: CircleBorder(),
             clipBehavior: Clip.antiAlias,
-            elevation: 4,
+            elevation: 2,
             child: InkWell(
               onTap: activated
                   ? (_loading

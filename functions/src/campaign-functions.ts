@@ -5,7 +5,7 @@ import { DatabaseConstants, CampaignFields } from './database-constants';
 
 const firestore = admin.firestore();
 
-exports.onUpdateCampaign = functions.firestore
+exports.onCreateCampaign = functions.firestore
   .document(`${DatabaseConstants.campaigns}/{campaignId}`)
   .onCreate(async (snapshot, context) => {
     return firestore
@@ -24,7 +24,7 @@ exports.onDeleteCampaign = functions.firestore
 
     const bucket = admin.storage().bucket();
 
-    await bucket.deleteFiles({prefix: `campaigns/campaign_${campaignId}/`});
+    await bucket.deleteFiles({ prefix: `campaigns/campaign_${campaignId}/` });
 
     // delete all news
     const newsQuery = firestore

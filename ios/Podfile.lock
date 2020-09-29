@@ -645,10 +645,6 @@ SPEC CHECKSUMS:
   stripe_payment: ad86f099179edb7b9fe12b9b62ac3746d5e56802
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
-<<<<<<< HEAD
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
-=======
-PODFILE CHECKSUM: 1f1de7b3517194c85e88af55bce459f4b776b61b
->>>>>>> advertising
+PODFILE CHECKSUM: 5c6d12be3b9e286ee07b9c8459a032fcef7f655b
 
 COCOAPODS: 1.9.1

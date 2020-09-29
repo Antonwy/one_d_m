@@ -187,6 +187,7 @@ class _DCInformation extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 35.0,
                                     fontWeight: FontWeight.bold,
+                                    color: ThemeManager.of(context).theme.contrast
                                   ),
                                 ),
                                 Padding(
@@ -282,9 +283,7 @@ class _GoalWidget extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 14.0),
-          _PercentLine(
-            percent: percent,
-          ),
+          _PercentLine(percent: percent),
         ],
       ),
     );
@@ -307,7 +306,8 @@ class _PercentCircle extends StatelessWidget {
       height: 2 * radius,
       width: 2 * radius,
       child: CustomPaint(
-        painter: _PercentCirclePainter(percent),
+        painter: _PercentCirclePainter(percent,
+            color: ThemeManager.of(context).theme.contrast),
         child: Center(
           child: Text(
             '${((percent * 100) % 100).round().toString()}%',
@@ -324,9 +324,10 @@ class _PercentCircle extends StatelessWidget {
 }
 
 class _PercentCirclePainter extends CustomPainter {
-  _PercentCirclePainter(this.percent);
+  _PercentCirclePainter(this.percent, {this.color = ColorTheme.orange});
 
   final double percent;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -339,7 +340,7 @@ class _PercentCirclePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final Paint percentPaint = Paint()
-      ..color = ColorTheme.orange
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -376,11 +377,8 @@ class _PercentCirclePainter extends CustomPainter {
 }
 
 class _PercentLine extends StatelessWidget {
-  const _PercentLine({
-    Key key,
-    @required this.percent,
-    this.height = 6.0,
-  }) : super(key: key);
+  const _PercentLine({Key key, @required this.percent, this.height = 6.0})
+      : super(key: key);
 
   final double percent;
   final double height;
@@ -390,20 +388,22 @@ class _PercentLine extends StatelessWidget {
     return SizedBox(
       height: height,
       child: CustomPaint(
-        painter: _PercentLinePainter(percent: percent, height: height),
+        painter: _PercentLinePainter(
+            percent: percent,
+            height: height,
+            color: ThemeManager.of(context).theme.contrast),
       ),
     );
   }
 }
 
 class _PercentLinePainter extends CustomPainter {
-  _PercentLinePainter({
-    @required this.percent,
-    @required this.height,
-  });
+  _PercentLinePainter(
+      {@required this.percent, @required this.height, this.color});
 
   final double height;
   final double percent;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -414,7 +414,7 @@ class _PercentLinePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final Paint percentPaint = Paint()
-      ..color = ColorTheme.orange
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = height
       ..strokeCap = StrokeCap.round;

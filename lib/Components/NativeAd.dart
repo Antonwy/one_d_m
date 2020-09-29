@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
-
-final String _adUnitId = "ca-app-pub-3940256099942544/3986624511";
 
 class NewsNativeAd extends StatelessWidget {
   @override
@@ -21,7 +20,7 @@ class NewsNativeAd extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: NativeAdView(
-              adUnitId: _adUnitId,
+              adUnitId: Constants.ADMOB_NEWS_ID,
               layoutName: "NewsAd",
               onAdImpression: () {
                 DatabaseService.addNativeAdImpression(
@@ -58,7 +57,7 @@ class ExploreNativeAd extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               child: NativeAdView(
-                adUnitId: _adUnitId,
+                adUnitId: Constants.ADMOB_EXPLORE_ID,
                 layoutName: "NewsAd",
                 onAdImpression: () {
                   DatabaseService.addNativeAdImpression(

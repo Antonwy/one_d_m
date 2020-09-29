@@ -17,14 +17,14 @@ void main() => runApp(MultiProvider(providers: [
       Provider(
         create: (context) => PushNotificationService(context),
       )
-    ], child: MyApp()));
+    ], child: ODMApp()));
 
-class MyApp extends StatefulWidget {
+class ODMApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _ODMAppState createState() => _ODMAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ODMAppState extends State<ODMApp> {
   @override
   void initState() {
     StripePayment.setOptions(
@@ -33,9 +33,7 @@ class _MyAppState extends State<MyApp> {
       ThemeManager.of(context, listen: false).theme = ThemeHolder.themes[value];
     });
     NativeAds.initialize();
-    FirebaseAdMob.instance.initialize(appId: "ca-app-pub-3940256099942544~1458002511");
-    StripePayment.setOptions(StripeOptions(
-        publishableKey: "pk_test_mMYl6nvlrQmibKbJWw3CsdoK00lcfXjNKW"));
+    FirebaseAdMob.instance.initialize(appId: Constants.ADMOB_APP_ID);
     super.initState();
   }
 

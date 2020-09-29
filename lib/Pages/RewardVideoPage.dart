@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +22,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       _loadingAd = show;
     });
     return RewardedVideoAd.instance.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      adUnitId: Constants.ADMOB_REWARD_ID,
     );
   }
 
@@ -59,6 +61,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
 
   @override
   Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).theme;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -74,41 +77,52 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(height: 50.0),
-            Text(
-              'Spiele hier Videos ab und booste deinen Aktivitätsscore!',
-              style: TextStyle(fontSize: 15.0),
-              textAlign: TextAlign.center,
-            ),
-            Container(height: 100.0),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: Material(
-                child: InkWell(
-                  onTap: _loadingAd == false
-                      ? () async {
-                          _loadAd(show: true);
-                          _showIfAlreadyAvailable();
-                        }
-                      : null,
-                  child: Container(
-                    color: ColorTheme.orange,
-                    width: 100,
-                    height: 100,
-                    child: Center(
-                      child: _loadingAd == false
-                          ? Icon(
-                              Icons.play_arrow,
-                              size: 65,
-                              color: Colors.white,
-                            )
-                          : CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
+            SizedBox(height: 100.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  "assets/images/ad_video.svg",
+                  height: 200,
+                ),
+                Material(
+                  shape: CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: _loadingAd == false
+                        ? () async {
+                            _loadAd(show: true);
+                            _showIfAlreadyAvailable();
+                          }
+                        : null,
+                    child: Container(
+                      color: _bTheme.contrast,
+                      width: 75,
+                      height: 75,
+                      child: Center(
+                        child: _loadingAd == false
+                            ? Icon(
+                                Icons.play_arrow,
+                                size: 50,
+                                color: _bTheme.textOnContrast,
+                              )
+                            : CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation(
+                                    _bTheme.textOnContrast),
+                              ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
+            ),
+            SizedBox(
+              height: 40,
+            ),
+            Text(
+              'Spiele hier Videos ab und booste deinen Aktivitätsscore!',
+              style: Theme.of(context).textTheme.bodyText1,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

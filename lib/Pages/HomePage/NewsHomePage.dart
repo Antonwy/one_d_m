@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -42,7 +40,7 @@ class _NewsHomePageState extends State<NewsHomePage>
               ),
               Text(
                 "Updates deiner abonnierten Projekte",
-                style: _textTheme.bodyText1,
+                style: _textTheme.caption,
               ),
               SizedBox(
                 height: 10,

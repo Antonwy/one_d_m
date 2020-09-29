@@ -151,7 +151,7 @@ class _ProfilePageState extends State<ProfilePage>
                                               RewardVideoPage(),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
-                                      closedColor: ColorTheme.orange,
+                                      closedColor: _bTheme.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
                                         icon: Icons.play_arrow,

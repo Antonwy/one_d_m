@@ -94,10 +94,9 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
 });
 
 function generateUrl(obj: functions.storage.ObjectMetadata): string {
-  return `${StorageConstants.storageUrlStart}${obj.name?.repl(
-    new RegExp('/', 'g'),
-    '%2F'
-  )}${StorageConstants.storageUrlEnd}${
+  return `${StorageConstants.storageUrlStart}${obj.name
+    ?.split('/')
+    .join('%2F')}${StorageConstants.storageUrlEnd}${
     obj.metadata?.firebaseStorageDownloadTokens ?? ''
   }`;
 }

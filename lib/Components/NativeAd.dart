@@ -134,7 +134,7 @@ class _NativeAdViewState extends State<NativeAdView>
             child: Opacity(
               opacity: 1.0,
               child: Container(
-                height: 600,
+                height: height,
                 width: double.infinity,
                 child: UiKitView(
                   viewType: 'native_ads/ad_layout',

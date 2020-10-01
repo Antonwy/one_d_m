@@ -58,7 +58,7 @@ class ExploreNativeAd extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               child: NativeAdView(
                 adUnitId: Constants.ADMOB_EXPLORE_ID,
-                layoutName: "NewsAd",
+                layoutName: "ExploreAd",
                 onAdImpression: () {
                   DatabaseService.addNativeAdImpression(
                     Provider.of<UserManager>(

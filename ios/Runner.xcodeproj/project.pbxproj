@@ -15,8 +15,6 @@
 		832081DE2504E76200220052 /* SFUIText-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 832081DC2504E76200220052 /* SFUIText-Medium.ttf */; };
 		83F89B4D251CA8AE003AE202 /* AdLayoutFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */; };
 		83F89B4E251CA8AE003AE202 /* AdLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B47251CA8AE003AE202 /* AdLayout.swift */; };
-		83F89B4F251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */; };
-		83F89B50251CA8AE003AE202 /* UnifiedAdLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */; };
 		83F89B51251CA8AE003AE202 /* NativeAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F89B4A251CA8AE003AE202 /* NativeAds.swift */; };
 		83F89B52251CA8AE003AE202 /* NewsAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83F89B4B251CA8AE003AE202 /* NewsAd.xib */; };
 		83F89B53251CA8AE003AE202 /* ExploreAd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83F89B4C251CA8AE003AE202 /* ExploreAd.xib */; };
@@ -55,8 +53,6 @@
 		832081DC2504E76200220052 /* SFUIText-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFUIText-Medium.ttf"; sourceTree = "<group>"; };
 		83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayoutFactory.swift; sourceTree = "<group>"; };
 		83F89B47251CA8AE003AE202 /* AdLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdLayout.swift; sourceTree = "<group>"; };
-		83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnifiedAdLayoutFactory.swift; sourceTree = "<group>"; };
-		83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnifiedAdLayout.swift; sourceTree = "<group>"; };
 		83F89B4A251CA8AE003AE202 /* NativeAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeAds.swift; sourceTree = "<group>"; };
 		83F89B4B251CA8AE003AE202 /* NewsAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NewsAd.xib; sourceTree = "<group>"; };
 		83F89B4C251CA8AE003AE202 /* ExploreAd.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ExploreAd.xib; sourceTree = "<group>"; };
@@ -114,8 +110,6 @@
 			children = (
 				83F89B46251CA8AE003AE202 /* AdLayoutFactory.swift */,
 				83F89B47251CA8AE003AE202 /* AdLayout.swift */,
-				83F89B48251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift */,
-				83F89B49251CA8AE003AE202 /* UnifiedAdLayout.swift */,
 				83F89B4A251CA8AE003AE202 /* NativeAds.swift */,
 				83F89B4B251CA8AE003AE202 /* NewsAd.xib */,
 				83F89B4C251CA8AE003AE202 /* ExploreAd.xib */,
@@ -342,10 +336,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83F89B4F251CA8AE003AE202 /* UnifiedAdLayoutFactory.swift in Sources */,
 				83F89B4E251CA8AE003AE202 /* AdLayout.swift in Sources */,
 				83F89B4D251CA8AE003AE202 /* AdLayoutFactory.swift in Sources */,
-				83F89B50251CA8AE003AE202 /* UnifiedAdLayout.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				83F89B51251CA8AE003AE202 /* NativeAds.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

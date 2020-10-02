@@ -35,8 +35,10 @@ class AdLayout : NSObject, FlutterPlatformView {
         self.adUnitId = self.args["ad_unit_id"] as! String
         self.layoutName = self.args["layout_name"] as! String
 
+        let mediaOptions = GADNativeAdMediaAdLoaderOptions();
+        mediaOptions.mediaAspectRatio = GADMediaAspectRatio.landscape
         self.adLoader = GADAdLoader(adUnitID: adUnitId, rootViewController: nil,
-                    adTypes: [ .unifiedNative ], options: nil)
+                            adTypes: [ .unifiedNative ], options: [mediaOptions])
         channel = FlutterMethodChannel(name: "native_ads/ad_layout_\(viewId)", binaryMessenger: messeneger)
         
         guard let nibObjects = Bundle.main.loadNibNamed(layoutName, owner: nil, options: nil),

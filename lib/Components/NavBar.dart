@@ -72,7 +72,9 @@ class _NavBarState extends State<NavBar> {
                     return Center(
                       child: Container(
                         width: _mq.size.width * .75,
+                        height: _mq.size.height,
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: _generateIcons(),
                         ),
                       ),
@@ -87,16 +89,25 @@ class _NavBarState extends State<NavBar> {
 
   List<Widget> _generateIcons() {
     List<Widget> icons = [];
+    List<Alignment> alignments = [
+      Alignment.centerLeft,
+      Alignment.center,
+      Alignment.centerRight
+    ];
 
     for (int i = 0; i < _iconList.length; i++) {
       icons.add(Expanded(
-        flex: i == 1 ? 1 : 0,
-        child: Container(
-          margin: EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 2 ? 8 : 0),
-          child: GestureDetector(
-              onTap: () {
-                widget.changePage(i);
-              },
+        child: GestureDetector(
+          onTap: () {
+            widget.changePage(i);
+          },
+          child: Container(
+            alignment: alignments[i],
+            height: double.infinity,
+            color: Colors.transparent,
+            margin:
+                EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 2 ? 8 : 0),
+            child: Container(
               child: Opacity(
                 opacity: Tween<double>(begin: 1.0, end: .5)
                     .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
@@ -107,7 +118,9 @@ class _NavBarState extends State<NavBar> {
                           end: ColorTheme.navBarDisabled)
                       .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
                 ),
-              )),
+              ),
+            ),
+          ),
         ),
       ));
     }

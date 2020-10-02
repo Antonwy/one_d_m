@@ -391,12 +391,19 @@ class DatabaseService {
         .map((ss) => ss.exists);
   }
 
-  static Stream<List<String>> getFollowingUsersStream(String uid) {
-    return followingCollection
-        .document(uid)
-        .collection(USERS)
-        .snapshots()
-        .map((qs) => qs.documents.map((ds) => ds.documentID).toList());
+  static Stream<List<String>> getFollowingUsersStream(String uid, {int limit}) {
+    return limit != null
+        ? followingCollection
+            .document(uid)
+            .collection(USERS)
+            .limit(limit)
+            .snapshots()
+            .map((qs) => qs.documents.map((ds) => ds.documentID).toList())
+        : followingCollection
+            .document(uid)
+            .collection(USERS)
+            .snapshots()
+            .map((qs) => qs.documents.map((ds) => ds.documentID).toList());
   }
 
   static Stream<List<String>> getFollowedUsersStream(String uid) {

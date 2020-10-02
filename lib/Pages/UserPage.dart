@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/FollowButton.dart';
+import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -48,6 +49,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   static final double _staticHeaderTop = 76;
 
   Stream _donationStream;
+  Stream<List<String>> _followingStream;
 
   double _headerHeight, _headerTop = _staticHeaderTop, _scrollOffset = 0.0;
 
@@ -76,6 +78,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       });
 
     _donationStream = DatabaseService.getDonationsFromUserLimit(widget.user.id);
+    _followingStream =
+        DatabaseService.getFollowingUsersStream(widget.user.id, limit: 3);
   }
 
   @override
@@ -97,6 +101,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     _headerTop = _staticHeaderTop + mq.padding.top;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Consumer<UserManager>(
         builder: (context, um, child) => StreamBuilder<User>(
             initialData: user,
@@ -111,6 +116,37 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                     pinned: true,
                     delegate: UserHeader(user),
                   ),
+                  StreamBuilder<List<String>>(
+                      stream: _followingStream,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return SliverToBoxAdapter();
+                        if (snapshot.data.isEmpty) return SliverToBoxAdapter();
+                        return SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Text(
+                              "Personen denen dieser nutzer folgt:",
+                              style: _theme.textTheme.headline6,
+                            ),
+                          ),
+                        );
+                      }),
+                  StreamBuilder<List<String>>(
+                      stream: _followingStream,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return SliverToBoxAdapter();
+                        if (snapshot.data.isEmpty) return SliverToBoxAdapter();
+                        return SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
+                          sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                  (context, index) => UserButton(
+                                        snapshot.data[index],
+                                        elevation: 0,
+                                      ),
+                                  childCount: snapshot.data.length)),
+                        );
+                      }),
                   StreamBuilder<List<Donation>>(
                       stream: _donationStream,
                       builder: (context, snapshot) {

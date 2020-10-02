@@ -13,7 +13,6 @@ import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/MyCampaignsPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
-import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +29,7 @@ class SettingsDialog extends StatelessWidget {
       color: ColorTheme.navBar,
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 18),
         child: DefaultTextStyle(
           style: TextStyle(color: ColorTheme.blue),
           child: Column(

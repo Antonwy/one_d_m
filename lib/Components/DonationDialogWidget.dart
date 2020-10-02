@@ -36,6 +36,7 @@ class DonationDialogWidget extends StatefulWidget {
 class _DonationDialogWidgetState extends State<DonationDialogWidget>
     with SingleTickerProviderStateMixin {
   ThemeData _theme;
+  BaseTheme _bTheme;
   static final List<int> defaultDonationAmounts = [
     1,
     2,
@@ -66,6 +67,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
+    _bTheme = ThemeManager.of(context).theme;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -183,8 +185,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                               ),
                                               Text(
                                                 "Wähle einen Betrag:",
-                                                style: _theme
-                                                    .textTheme.bodyText1
+                                                style: _theme.textTheme.caption
                                                     .copyWith(
                                                         color: Colors.black54),
                                               ),
@@ -203,6 +204,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
+                                        bool selected = index !=
+                                                defaultDonationAmounts.length &&
+                                            _amount ==
+                                                defaultDonationAmounts[index];
                                         return Center(
                                           child: Container(
                                             width: 120,
@@ -216,14 +221,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                     : null,
                                             child: Card(
                                               clipBehavior: Clip.antiAlias,
-                                              elevation: index !=
-                                                          defaultDonationAmounts
-                                                              .length &&
-                                                      _amount ==
-                                                          defaultDonationAmounts[
-                                                              index]
-                                                  ? 2
-                                                  : 0,
+                                              elevation: selected ? 2 : 0,
+                                              color: selected
+                                                  ? _bTheme.contrast
+                                                  : Colors.white,
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -265,8 +266,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                               defaultDonationAmounts
                                                                   .length
                                                           ? Material(
-                                                              color: ColorTheme
-                                                                  .blue
+                                                              color: _bTheme
+                                                                  .dark
                                                                   .withOpacity(
                                                                       .1),
                                                               shape:
@@ -281,8 +282,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                                   style: TextStyle(
                                                                       fontSize:
                                                                           12,
-                                                                      color: ColorTheme
-                                                                          .blue),
+                                                                      color: _bTheme
+                                                                          .dark),
                                                                 ),
                                                               ),
                                                             )
@@ -293,8 +294,14 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                                     .length
                                                             ? "${defaultDonationAmounts[index]}.00"
                                                             : "Anderer Betrag",
-                                                        style: _theme.textTheme
-                                                            .headline6,
+                                                        style: _theme
+                                                            .textTheme.headline6
+                                                            .copyWith(
+                                                                color: selected
+                                                                    ? _bTheme
+                                                                        .textOnContrast
+                                                                    : _bTheme
+                                                                        .dark),
                                                       ),
                                                     ],
                                                   ),
@@ -367,10 +374,31 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: <Widget>[
-                                                  Text(
-                                                    "Alternatives Projekt: ",
-                                                    style: _theme
-                                                        .textTheme.headline6,
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        "Alternatives Projekt: ",
+                                                        style: _theme.textTheme
+                                                            .headline6,
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          _showAlternativeProjectDialog(
+                                                              context);
+                                                        },
+                                                        child: Icon(
+                                                          Icons.info,
+                                                          size: 18,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                   AutoSizeText(
                                                     "Wähle ein Projekt an das wir alternativ spenden können.",
@@ -388,6 +416,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                       Axis.horizontal,
                                                   itemBuilder:
                                                       (context, index) {
+                                                    bool selected =
+                                                        _alternativCampaign
+                                                                ?.id ==
+                                                            campaigns[index].id;
                                                     return Center(
                                                       child: Container(
                                                         height: 80,
@@ -405,13 +437,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                                 : null,
                                                         child: Card(
                                                           elevation:
-                                                              _alternativCampaign
-                                                                          ?.id ==
-                                                                      campaigns[
-                                                                              index]
-                                                                          .id
-                                                                  ? 2
-                                                                  : 0,
+                                                              selected ? 2 : 0,
+                                                          color: selected
+                                                              ? _bTheme.contrast
+                                                              : Colors.white,
                                                           clipBehavior:
                                                               Clip.antiAlias,
                                                           shape: RoundedRectangleBorder(
@@ -449,7 +478,11 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                                     "${campaigns[index].name}",
                                                                     style: _theme
                                                                         .textTheme
-                                                                        .headline6,
+                                                                        .headline6
+                                                                        .copyWith(
+                                                                            color: selected
+                                                                                ? _bTheme.textOnContrast
+                                                                                : _bTheme.dark),
                                                                   ),
                                                                 ],
                                                               ),
@@ -595,6 +628,23 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }),
       ),
     );
+  }
+
+  _showAlternativeProjectDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Alternatives Projekt"),
+              content: Text(
+                  "Wir spenden an deine alternative Auswahl, sollte es eine Problem bei der Organisation oder bei der Überweisung geben.\nWir geben unser bestes in Allen Fällen deine erste Wahl zu erfüllen!"),
+              actions: [
+                FlatButton(
+                  onPressed: () {},
+                  child: Text("Schließen"),
+                  textColor: _bTheme.dark,
+                )
+              ],
+            ));
   }
 
   Future<List<Campaign>> _getPossibleCampaigns() async {

@@ -112,6 +112,7 @@ class NativeAdView extends StatefulWidget {
 class _NativeAdViewState extends State<NativeAdView>
     with AutomaticKeepAliveClientMixin {
   double height = 600;
+  bool failed = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -119,6 +120,8 @@ class _NativeAdViewState extends State<NativeAdView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    if (failed == true) return Container();
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       return Stack(
@@ -159,6 +162,11 @@ class _NativeAdViewState extends State<NativeAdView>
     widget.onAdLoaded(height);
   }
 
+  void _onAdFailed(Map<String, dynamic> error) {
+    setState(() => failed = true);
+    widget.onAdFailedToLoad(error);
+  }
+
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onAdImpression':
@@ -171,7 +179,7 @@ class _NativeAdViewState extends State<NativeAdView>
         widget.onAdClicked();
         break;
       case 'onAdFailedToLoad':
-        widget.onAdFailedToLoad(Map<String, dynamic>.from(call.arguments));
+        _onAdFailed(Map<String, dynamic>.from(call.arguments));
         break;
       case 'onAdLoaded':
         _onAdLoaded(call.arguments as double);

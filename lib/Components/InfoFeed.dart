@@ -183,7 +183,7 @@ class _DCInformation extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  '${snapshot?.data?.dcBalance ?? '-'}',
+                                  '${snapshot?.data?.dcBalance ?? 0}',
                                   style: TextStyle(
                                     fontSize: 35.0,
                                     fontWeight: FontWeight.bold,

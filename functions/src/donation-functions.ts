@@ -156,8 +156,24 @@ exports.onCreateDonation = functions
         { merge: true }
       );
 
+    let availableDCs: number = 0;
+
+    if (donation.useDCs) {
+      let balanceRes = await firestore
+        .collection(DatabaseConstants.user)
+        .doc(donation.user_id)
+        .collection(DatabaseConstants.advertising_data)
+        .doc(DatabaseConstants.ad_balance)
+        .get();
+      let balanceData = balanceRes.data();
+
+      if (balanceData !== undefined) availableDCs = balanceData.dc_balance;
+    }
+
+    let maxDCsToUse: number = Math.min(donation.amount, availableDCs);
+
     const userCharge: ChargesType = {
-      amount: increment(donation.amount),
+      amount: increment(donation.amount - maxDCsToUse),
       user_id: donation.user_id,
       error: false,
     };
@@ -172,10 +188,22 @@ exports.onCreateDonation = functions
       .doc(donation.campaign_id)
       .set(campaignCharge, { merge: true });
 
-    await firestore
-      .collection(DatabaseConstants.charges_users)
-      .doc(donation.user_id)
-      .set(userCharge, { merge: true });
+    if (availableDCs < donation.amount) {
+      await firestore
+        .collection(DatabaseConstants.charges_users)
+        .doc(donation.user_id)
+        .set(userCharge, { merge: true });
+    }
+
+    if (donation.useDCs) {
+      await firestore
+        .collection(DatabaseConstants.user)
+        .doc(donation.user_id)
+        .collection(DatabaseConstants.advertising_data)
+        .doc(DatabaseConstants.ad_balance)
+        .set({ dc_balance: increment(-maxDCsToUse) }, { merge: true });
+      await snapshot.ref.set({ ad_dc_amount: maxDCsToUse }, { merge: true });
+    }
   });
 
 function getDate(nowDate: Date): string {
@@ -190,6 +218,14 @@ exports.onUpdateDonation = functions.firestore
     const donationId: string = context.params.donationId;
     const donation: DonationType = snapshot.after.data() as DonationType;
     console.log(`Updating ${donation}`);
+
+    if (
+      (snapshot.before.data()?.ad_dc_amount === null ||
+        snapshot.before.data()?.ad_dc_amount === undefined) &&
+      (snapshot.after.data()?.ad_dc_amount !== undefined ||
+        snapshot.after.data()?.ad_dc_amount !== null)
+    )
+      return;
 
     // get followed Users of the donation author
     const followedUser = await firestore

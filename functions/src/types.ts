@@ -7,6 +7,7 @@ export interface DonationType {
   created_at: FirebaseFirestore.Timestamp;
   user_id: string;
   anonym: boolean;
+  useDCs?: boolean;
 }
 
 export interface UserType {

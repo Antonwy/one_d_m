@@ -26,6 +26,7 @@ export class DatabaseConstants {
   static readonly organisations: string = 'organisations';
   static readonly charges_users: string = 'charges_users';
   static readonly charges_campaigns: string = 'charges_campaigns';
+  static readonly cpm_rates: string = 'cpm_rates';
 }
 
 export class CampaignFields {

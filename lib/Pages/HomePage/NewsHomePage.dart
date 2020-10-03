@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -91,13 +92,7 @@ class _NewsHomePageState extends State<NewsHomePage>
                   return SliverPadding(
                     padding: EdgeInsets.only(top: 10),
                     sliver: SliverList(
-                      delegate: SliverChildListDelegate(snapshot.data
-                          .map<Widget>((News news) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                child: NewsPost(news),
-                              ))
-                          .expand((element) => [element, NewsNativeAd()]).toList()),
+                      delegate: SliverChildListDelegate(_getNewsWidget(news)),
                     ),
                   );
                 });
@@ -106,6 +101,28 @@ class _NewsHomePageState extends State<NewsHomePage>
         SliverPadding(padding: EdgeInsets.only(bottom: 150))
       ],
     );
+  }
+
+  List<Widget> _getNewsWidget(List<News> news) {
+    List<Widget> widgets = [];
+    int adRate = Constants.AD_NEWS_RATE;
+    int rateCount = 0;
+
+    for (News n in news) {
+      rateCount++;
+
+      widgets.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: NewsPost(n),
+      ));
+
+      if (rateCount >= adRate) {
+        widgets.add(NewsNativeAd());
+        rateCount = 0;
+      }
+    }
+
+    return widgets;
   }
 
   @override

@@ -21,14 +21,13 @@ exports.monthly = functions.pubsub
   .schedule('0 0 1 * *')
   .onRun(async (context) => {
     await resetStatistics({ monthly_amount: 0 });
+    await chargeCustomers();
   });
 
 exports.yearly = functions.pubsub
   .schedule('0 0 * 1 *')
   .onRun(async (context) => {
     await resetStatistics({ yearly_amount: 0 });
-
-    await chargeCustomers();
   });
 
 async function resetStatistics(obj: StatisticType) {
@@ -47,7 +46,7 @@ async function chargeCustomers() {
   console.log('Charging Customers');
   const chargedUsers = await firestore
     .collection(DatabaseConstants.charges_users)
-    .where(ChargesFields.amount, '>', 0)
+    .where(ChargesFields.amount, '>', 4)
     .get();
 
   chargedUsers.forEach(async (chargeDoc) => {
@@ -108,12 +107,12 @@ async function chargeCustomers() {
     }
   });
 
-  await firestore.collection('mail').add({
-    to: 'anton.wyrowski@gmail.com',
-    message: {
-      subject: 'Hello from Firebase!',
-      text: 'This is the plaintext section of the email body.',
-      html: 'This is the <code>HTML</code> section of the email body.',
-    },
-  });
+  // await firestore.collection('mail').add({
+  //   to: 'anton.wyrowski@gmail.com',
+  //   message: {
+  //     subject: 'Hello from Firebase!',
+  //     text: 'This is the plaintext section of the email body.',
+  //     html: 'This is the <code>HTML</code> section of the email body.',
+  //   },
+  // });
 }

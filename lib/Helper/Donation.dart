@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Donation {
   final int amount;
-  final bool anonym;
+  final bool anonym, useDCs;
   final String campaignId,
       alternativeCampaignId,
       userId,
@@ -17,26 +17,33 @@ class Donation {
       CAMPAIGNNAME = "campaign_name",
       USERID = "user_id",
       ISANONYM = "anonym",
+      USEDCS = "useDCs",
       CREATEDAT = "created_at";
 
-  Donation(this.amount,
-      {this.campaignId,
-      this.alternativeCampaignId,
-      this.userId,
-      this.campaignName,
-      this.campaignImgUrl,
-      this.createdAt,
-      this.anonym});
+  Donation(
+    this.amount, {
+    this.campaignId,
+    this.alternativeCampaignId,
+    this.userId,
+    this.campaignName,
+    this.campaignImgUrl,
+    this.createdAt,
+    this.anonym,
+    this.useDCs,
+  });
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
-    return Donation(doc[AMOUNT],
-        campaignId: doc[CAMPAIGNID],
-        alternativeCampaignId: doc[ALTERNATIVECAMPAIGNID],
-        userId: doc[USERID],
-        campaignImgUrl: doc[CAMPAIGNIMGURL],
-        campaignName: doc[CAMPAIGNNAME],
-        anonym: doc[ISANONYM] ?? false,
-        createdAt: (doc[CREATEDAT] as Timestamp).toDate());
+    return Donation(
+      doc[AMOUNT],
+      campaignId: doc[CAMPAIGNID],
+      alternativeCampaignId: doc[ALTERNATIVECAMPAIGNID],
+      userId: doc[USERID],
+      campaignImgUrl: doc[CAMPAIGNIMGURL],
+      campaignName: doc[CAMPAIGNNAME],
+      anonym: doc[ISANONYM] ?? false,
+      createdAt: (doc[CREATEDAT] as Timestamp).toDate(),
+      useDCs: doc[USEDCS] ?? false,
+    );
   }
 
   static List<Donation> listFromSnapshots(List<DocumentSnapshot> list) {
@@ -52,7 +59,8 @@ class Donation {
       CAMPAIGNIMGURL: campaignImgUrl,
       USERID: userId,
       CREATEDAT: Timestamp.now(),
-      ISANONYM: anonym
+      ISANONYM: anonym,
+      USEDCS: useDCs,
     };
   }
 

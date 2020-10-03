@@ -28,7 +28,7 @@ class _ODMAppState extends State<ODMApp> {
   @override
   void initState() {
     StripePayment.setOptions(
-        StripeOptions(publishableKey: Constants.STRIPE_TEST_KEY));
+        StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
     getThemeIndex().then((value) {
       ThemeManager.of(context, listen: false).theme = ThemeHolder.themes[value];
     });

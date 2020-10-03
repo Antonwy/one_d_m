@@ -11,7 +11,7 @@ class ThemeManager extends ChangeNotifier {
   }
 
   ThemeManager() {
-    _currentTheme = ThemeHolder.themes[0];
+    _currentTheme = ThemeHolder.themes[1];
   }
 
   factory ThemeManager.of(BuildContext context, {bool listen = true}) {

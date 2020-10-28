@@ -21,17 +21,19 @@ class UserButton extends StatelessWidget {
   double elevation;
   bool withAddButton;
 
-  UserButton(this.id,
-      {this.user,
-      this.color = Colors.white,
-      this.avatarColor = ColorTheme.blue,
-      this.textStyle = const TextStyle(color: Colors.black),
-      this.elevation = 1,
-      this.withAddButton = false});
+  UserButton(
+    this.id, {
+    this.user,
+    this.color = Colors.white,
+    this.avatarColor = ColorTheme.blue,
+    this.textStyle = const TextStyle(color: Colors.black),
+    this.elevation = 1,
+    this.withAddButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return AnimatedFutureBuilder<User>(
         future: user == null ? DatabaseService.getUser(id) : Future.value(user),
         builder: (context, snapshot) {
@@ -90,55 +92,17 @@ class UserButton extends StatelessWidget {
                                               DatabaseService.getFollowStream(
                                                   um.uid, id),
                                           builder: (context, snapshot) {
-                                            return IconButton(
-                                                icon: TweenAnimationBuilder(
-                                                  duration: Duration(
-                                                      milliseconds: 250),
-                                                  tween: Tween<double>(
-                                                      begin: 0,
-                                                      end: snapshot.data
-                                                          ? 1
-                                                          : 0),
-                                                  builder:
-                                                      (context, tween, child) =>
-                                                          Transform.rotate(
-                                                    angle: tween *
-                                                        Helper.degreesToRads(
-                                                            45),
-                                                    child: Material(
-                                                      shape: CircleBorder(),
-                                                      color: ColorTween(
-                                                              begin: _bTheme
-                                                                  .contrast
-                                                                  .withOpacity(
-                                                                      .3),
-                                                              end: _bTheme
-                                                                  .contrast)
-                                                          .transform(tween),
-                                                      child: Center(
-                                                        child: Icon(
-                                                          Icons.add,
-                                                          color: ColorTween(
-                                                                  begin: _bTheme
-                                                                      .dark,
-                                                                  end: _bTheme
-                                                                      .textOnContrast)
-                                                              .transform(tween),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  if (snapshot.data)
-                                                    DatabaseService
-                                                        .deleteFollow(
-                                                            um.uid, id);
-                                                  else
-                                                    DatabaseService
-                                                        .createFollow(
-                                                            um.uid, id);
-                                                });
+                                            return TurningAddButton(
+                                              selected: snapshot.data,
+                                              onPressed: () {
+                                                if (snapshot.data)
+                                                  DatabaseService.deleteFollow(
+                                                      um.uid, id);
+                                                else
+                                                  DatabaseService.createFollow(
+                                                      um.uid, id);
+                                              },
+                                            );
                                           }),
                                 )
                               : Container()
@@ -193,5 +157,43 @@ class UserButton extends StatelessWidget {
             ),
           );
         });
+  }
+}
+
+class TurningAddButton extends StatelessWidget {
+  final bool selected;
+  final Function onPressed;
+
+  const TurningAddButton({Key key, this.selected, this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return IconButton(
+        icon: TweenAnimationBuilder(
+          duration: Duration(milliseconds: 250),
+          tween: Tween<double>(begin: 0, end: selected ? 1 : 0),
+          builder: (context, tween, child) => Transform.rotate(
+            angle: tween * Helper.degreesToRads(45),
+            child: Material(
+              shape: CircleBorder(),
+              color: ColorTween(
+                      begin: _theme.colors.contrast.withOpacity(.3),
+                      end: _theme.colors.contrast)
+                  .transform(tween),
+              child: Center(
+                child: Icon(
+                  Icons.add,
+                  color: ColorTween(
+                          begin: _theme.colors.dark,
+                          end: _theme.colors.textOnContrast)
+                      .transform(tween),
+                ),
+              ),
+            ),
+          ),
+        ),
+        onPressed: onPressed);
   }
 }

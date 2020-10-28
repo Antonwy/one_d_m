@@ -13,7 +13,7 @@ class CreditCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return AspectRatio(
       aspectRatio: 8 / 5,
       child: Material(

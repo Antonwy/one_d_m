@@ -8,13 +8,16 @@ export interface DonationType {
   user_id: string;
   anonym: boolean;
   useDCs?: boolean;
+  session_id?: string | null;
 }
 
 export interface UserType {
+  id?: string;
   admin: boolean;
   donated_amount: number;
   name: string | null;
   image_url: string | null;
+  thumbnail_url: string | null;
   subscribed_campaigns: string[];
 }
 
@@ -26,6 +29,7 @@ export interface PrivateUserDataType {
 }
 
 export interface CampaignType {
+  id?: string;
   authorId: string;
   city: string;
   created_at: any;
@@ -62,4 +66,50 @@ export interface ChargesType {
   amount: FirebaseFirestore.FieldValue;
   error?: boolean;
   charged?: boolean;
+}
+
+export interface UploadedSessionType {
+  campaign: CampaignType;
+  members: Array<UserType>;
+  session_name: string;
+  session_description: string;
+  amount_per_user: number;
+}
+
+export interface SessionType {
+  campaign_name: string;
+  campaign_id: string;
+  campaign_img_url: string;
+  campaign_short_description: string;
+  session_name: string;
+  session_description: string;
+  amount_per_user: number;
+  current_amount: number;
+  created_at: FirebaseFirestore.Timestamp;
+  end_date: FirebaseFirestore.Timestamp;
+  creator_id: string;
+}
+
+export interface UserSessionType {
+  id: string;
+  session_name: string;
+  session_description: string;
+  amount_per_user: number;
+  created_at: FirebaseFirestore.Timestamp;
+  end_date: FirebaseFirestore.Timestamp;
+  creator_id: string;
+  campaign_id: string;
+}
+
+export interface SessionMemberType {
+  id: string;
+  donation_amount: number;
+}
+
+export interface SessionInviteType {
+  id: string;
+  session_name: string;
+  session_creator: string;
+  session_description: string;
+  amount_per_user: number;
 }

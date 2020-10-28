@@ -57,7 +57,9 @@ class DonationWidget extends StatelessWidget {
                   ),
             title: AutoSizeText(
               snapshot.hasData
-                  ? donation.anonym ? "Anonym" : "${user.name}"
+                  ? donation.anonym
+                      ? "Anonym"
+                      : "${user.name}"
                   : "Laden...",
               maxLines: 1,
               style: TextStyle(
@@ -145,7 +147,9 @@ class DonationWidget extends StatelessWidget {
                 ),
           title: AutoSizeText(
             snapshot.hasData
-                ? donation.anonym ? "Anonym" : "${user.name}"
+                ? donation.anonym
+                    ? "Anonym"
+                    : "${user.name}"
                 : "Laden...",
             maxLines: 1,
             style: TextStyle(
@@ -222,23 +226,34 @@ class DonationWidget extends StatelessWidget {
 }
 
 class RoundedAvatar extends StatelessWidget {
-  String imgUrl;
-  bool loading, backgroundLight;
+  final String imgUrl;
+  final bool loading, backgroundLight;
+  final double height;
+  final double defaultHeight = 20;
+  final Color iconColor, color;
 
   RoundedAvatar(this.imgUrl,
-      {this.loading = false, this.backgroundLight = true});
+      {this.loading = false,
+      this.backgroundLight = true,
+      this.height,
+      this.iconColor,
+      this.color});
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return ConstrainedBox(
       constraints: BoxConstraints(
-          minHeight: 20, minWidth: 20, maxHeight: 45, maxWidth: 45),
+          minHeight: (height ?? defaultHeight),
+          minWidth: (height ?? defaultHeight),
+          maxHeight: (height ?? defaultHeight) + 25,
+          maxWidth: (height ?? defaultHeight) + 25),
       child: LayoutBuilder(builder: (context, constraints) {
         return AspectRatio(
           aspectRatio: 1,
           child: Material(
-            color: backgroundLight ? _bTheme.dark : _bTheme.darkerLight,
+            color:
+                color ?? (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
             borderRadius: BorderRadius.circular(constraints.maxHeight * .3),
             clipBehavior: Clip.antiAlias,
             child: imgUrl == null
@@ -253,14 +268,14 @@ class RoundedAvatar extends StatelessWidget {
                             )))
                     : Icon(
                         Icons.person,
-                        color: _bTheme.contrast,
+                        color: iconColor ?? _bTheme.contrast,
                       )
                 : CachedNetworkImage(
                     imageUrl: imgUrl,
                     fit: BoxFit.cover,
                     errorWidget: (context, error, obj) => Icon(
                       Icons.error,
-                      color: _bTheme.contrast,
+                      color: iconColor ?? _bTheme.contrast,
                     ),
                   ),
           ),

@@ -22,7 +22,7 @@ class DonationsGroupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
 
     List<Widget> widgetList = [
       AnimatedFutureBuilder<User>(

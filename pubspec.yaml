@@ -56,6 +56,7 @@ dependencies:
   url_launcher: ^5.5.0
   shared_preferences: ^0.5.10
   firebase_admob: ^0.9.3+4
+  numberpicker: ^1.2.1
 
 dev_dependencies:
 

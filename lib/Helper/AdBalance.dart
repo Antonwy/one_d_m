@@ -7,8 +7,9 @@ class AdBalance {
   AdBalance({this.activityScore, this.dcBalance});
 
   factory AdBalance.fromSnapshot(DocumentSnapshot snapshot) {
+    if (snapshot.data == null) return AdBalance(activityScore: 0, dcBalance: 0);
     return AdBalance(
-      activityScore: (snapshot[ACTIVITY_SCORE] as num)?.toDouble(),
+      activityScore: (snapshot[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
       dcBalance: (snapshot[DC_BALANCE] as num)?.toInt(),
     );
   }

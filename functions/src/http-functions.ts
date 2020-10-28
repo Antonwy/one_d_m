@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { DatabaseConstants, PrivateUserFields } from './database-constants';
+import { recursiveDelete } from './helper-functions';
 
 const firestore = admin.firestore();
 
@@ -65,4 +66,57 @@ exports.findFriends = functions.https.onCall(async (req, res) => {
       .doc(id)
       .set({ id });
   });
+});
+
+exports.cleanDatabase = functions.https.onRequest(async (req, res) => {
+  console.log('Starting cleaning...');
+  const userRef = firestore.collection(DatabaseConstants.user);
+
+  // clean subscribed Campaigns
+  const subCampUserCollectionsRef = firestore.collection(
+    DatabaseConstants.subscribed_campaigns
+  );
+
+  const subCampUserCollections = await subCampUserCollectionsRef.get();
+  console.log(
+    `subCampUserCollections length: ${subCampUserCollections.docs.length}.`
+  );
+
+  subCampUserCollections.forEach(async (doc) => {
+    let userDoc = await userRef.doc(doc.id).get();
+
+    if (!userDoc.exists) {
+      console.log(`Found deleted User: ${userDoc.id}`);
+      await doc.ref.delete();
+      await recursiveDelete(
+        subCampUserCollectionsRef
+          .doc(doc.id)
+          .collection(DatabaseConstants.campaigns)
+      );
+    }
+    console.log(`User ${userDoc.id} exists!`);
+  });
+
+  // clean following/followed collections
+  const followingCollectionRef = firestore.collection(
+    DatabaseConstants.following
+  );
+
+  const followingCollection = await followingCollectionRef.get();
+  console.log(
+    `followingCollection length: ${followingCollection.docs.length}.`
+  );
+
+  // console.log(`followingCollection:\n${followingCollection}`);
+  followingCollection.forEach(async (doc) => {
+    let userDoc = await userRef.doc(doc.id).get();
+
+    if (!userDoc.exists) {
+      console.log(`Found deleted User: ${userDoc.id}`);
+      await recursiveDelete(doc.ref.collection(DatabaseConstants.users));
+    }
+    console.log(`User ${userDoc.id} exists!`);
+  });
+
+  res.end();
 });

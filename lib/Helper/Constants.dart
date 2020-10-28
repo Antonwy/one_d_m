@@ -9,6 +9,7 @@ class Constants {
   static const String STRIPE_TEST_KEY = "pk_test_mMYl6nvlrQmibKbJWw3CsdoK00lcfXjNKW";
   static const String STRIPE_LIVE_KEY = "pk_live_b82q59Wk8dCYMa2ruGWHPP27003iVVmsoY";
   static const String THEME_KEY = "theme_key";
+  static const int DEFAULT_THEME_INDEX = 1;
   static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~1231771836";
   static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/2483531295";
   static const String ADMOB_REWARD_ID = "ca-app-pub-6737404453820737/7341106307";

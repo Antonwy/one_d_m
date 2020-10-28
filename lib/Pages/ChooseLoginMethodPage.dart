@@ -71,18 +71,18 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
                 ],
               ),
             ),
-            SignInWithAppleButton(
-              onPressed: _appleSignIn,
-              text: "Mit Apple anmelden",
-              height: 52,
-              style: SignInWithAppleButtonStyle.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SignInButton(Buttons.Google,
-                text: "Mit Google einloggen", onPressed: _googleSignIn),
+            // SignInWithAppleButton(
+            //   onPressed: _appleSignIn,
+            //   text: "Mit Apple anmelden",
+            //   height: 52,
+            //   style: SignInWithAppleButtonStyle.black,
+            //   borderRadius: BorderRadius.circular(12),
+            // ),
+            // SizedBox(
+            //   height: 10,
+            // ),
+            // SignInButton(Buttons.Google,
+            //     text: "Mit Google einloggen", onPressed: _googleSignIn),
             _loading
                 ? SizedBox(
                     height: 20,

@@ -18,7 +18,7 @@ class ShareReportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: ThemeManager.of(context).theme.light,
+      backgroundColor: ThemeManager.of(context).colors.light,
       body: CustomScrollView(controller: _scrollController, slivers: [
         SliverAppBar(
           backgroundColor: Colors.transparent,

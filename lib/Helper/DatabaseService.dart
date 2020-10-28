@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
@@ -13,6 +14,7 @@ import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/Ranking.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -44,9 +46,17 @@ class DatabaseService {
       ADVERTISING_DATA = 'ad_data',
       ADVERTISING_BALANCE = 'balance',
       ADVERTISING_IMPRESSIONS = 'impressions',
-      DATA = "data";
+      DATA = "data",
+      SESSION_INVITES = "session_invites",
+      SESSIONS = "sessions",
+      SESSION_MEMBERS = "session_members",
+      FINDFRIENDS = "httpFunctions-findFriends",
+      CREATESESSION = "session-createSession",
+      ACCEPTINVITE = "session-acceptInvite",
+      DECLINEINVITE = "session-declineInvite";
 
   static final Firestore firestore = Firestore.instance;
+  static final CloudFunctions cloudFunctions = CloudFunctions.instance;
   static final CollectionReference userCollection = firestore.collection(USER);
   static final CollectionReference campaignsCollection =
       firestore.collection(CAMPAIGNS);
@@ -72,6 +82,8 @@ class DatabaseService {
       firestore.collection(CHARGESUSERS);
   static final CollectionReference organisationsCollection =
       firestore.collection(ORGANISATIONS);
+  static final CollectionReference sessionsCollection =
+      firestore.collection(SESSIONS);
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.document(uid).get();
@@ -312,10 +324,10 @@ class DatabaseService {
         .map((qs) => Campaign.listFromSnapshot(qs.documents));
   }
 
-  static Future<List<Campaign>> getTopCampaigns() async {
+  static Future<List<Campaign>> getTopCampaigns([int limit = 5]) async {
     return (await campaignsCollection
             .orderBy(Campaign.AMOUNT, descending: true)
-            .limit(5)
+            .limit(limit)
             .getDocuments())
         .documents
         .map(Campaign.fromSnapshot)
@@ -687,5 +699,94 @@ class DatabaseService {
         .where(Campaign.AUTHORID, isEqualTo: oid)
         .snapshots()
         .map((qs) => Campaign.listFromSnapshot(qs.documents));
+  }
+
+  static Future<HttpsCallableResult> createSession(UploadableSession session) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: CREATESESSION)
+        .call(session.toMap());
+  }
+
+  static Stream<List<BaseSession>> getSessionsFromUser(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(SESSIONS)
+        .where(BaseSession.END_DATE, isGreaterThanOrEqualTo: DateTime.now())
+        .orderBy(BaseSession.END_DATE, descending: true)
+        .snapshots()
+        .map((BaseSession.fromQuerySnapshot));
+  }
+
+  static Stream<Session> getSession(String sid) {
+    return sessionsCollection
+        .document(sid)
+        .snapshots()
+        .map((doc) => Session.fromDoc(doc));
+  }
+
+  static Future<Session> getSessionFuture(String sid) async {
+    return Session.fromDoc((await sessionsCollection.document(sid).get()));
+  }
+
+  static Stream<List<SessionMember>> getSessionMembers(String sid) {
+    return sessionsCollection
+        .document(sid)
+        .collection(SESSION_MEMBERS)
+        .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
+        .snapshots()
+        .map(SessionMember.fromQuerySnapshot);
+  }
+
+  static Stream<List<SessionMember>> getInvitedSessionMembers(String sid) {
+    return sessionsCollection
+        .document(sid)
+        .collection(SESSION_INVITES)
+        .snapshots()
+        .map(SessionMember.fromQuerySnapshot);
+  }
+
+  static Stream<int> getDonatedAmountToSession({String sid, String uid}) {
+    return sessionsCollection
+        .document(sid)
+        .collection(SESSION_MEMBERS)
+        .document(uid)
+        .snapshots()
+        .map((doc) => doc[SessionMember.DONATION_AMOUNT]);
+  }
+
+  static Stream<List<Donation>> getDonationsFromSession(String sid,
+      [int limit = 5]) {
+    return donationsCollection
+        .where(Donation.SESSION_ID, isEqualTo: sid)
+        .limit(5)
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.documents));
+  }
+
+  static Future<HttpsCallableResult> callFindFriends(List<String> numbers) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: FINDFRIENDS)
+        .call(numbers);
+  }
+
+  static Stream<List<SessionInvite>> getSessionInvites(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(SESSION_INVITES)
+        .snapshots()
+        .map((SessionInvite.fromQuerySnapshot));
+  }
+
+  static Future<HttpsCallableResult> acceptSessionInvite(SessionInvite invite) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: ACCEPTINVITE)
+        .call(invite.toMap());
+  }
+
+  static Future<HttpsCallableResult> declineSessionInvite(
+      SessionInvite invite) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: DECLINEINVITE)
+        .call(invite.toMap());
   }
 }

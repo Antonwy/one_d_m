@@ -61,7 +61,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Scaffold(
       appBar: AppBar(
         title: Text(

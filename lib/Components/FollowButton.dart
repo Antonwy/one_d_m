@@ -22,7 +22,7 @@ class _FollowButtonState extends State<FollowButton> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return OfflineBuilder(
         child: Container(),
         connectivityBuilder: (context, connection, child) {

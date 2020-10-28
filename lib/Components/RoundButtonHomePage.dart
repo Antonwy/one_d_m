@@ -22,7 +22,7 @@ class RoundButtonHomePage extends StatelessWidget {
       height: 50,
       child: Material(
         clipBehavior: Clip.antiAlias,
-        color: ThemeManager.of(context).theme.contrast,
+        color: ThemeManager.of(context).colors.contrast,
         shape: CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -40,7 +40,7 @@ class RoundButtonHomePage extends StatelessWidget {
           },
           child: Icon(
             icon,
-            color: ThemeManager.of(context).theme.textOnContrast,
+            color: ThemeManager.of(context).colors.textOnContrast,
           ),
         ),
       ),

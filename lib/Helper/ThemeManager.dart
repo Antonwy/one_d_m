@@ -1,22 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'Constants.dart';
+
 class ThemeManager extends ChangeNotifier {
   BaseTheme _currentTheme;
+  ThemeData materialTheme;
+  MyTextTheme textTheme;
 
-  BaseTheme get theme => _currentTheme;
-  set theme(BaseTheme theme) {
+  BaseTheme get colors => _currentTheme;
+  set colors(BaseTheme theme) {
     _currentTheme = theme;
+    textTheme.updateTheme(theme);
     notifyListeners();
   }
 
-  ThemeManager() {
-    _currentTheme = ThemeHolder.themes[1];
+  ThemeManager(BuildContext context) {
+    _currentTheme = ThemeHolder.themes[Constants.DEFAULT_THEME_INDEX];
+    materialTheme = Theme.of(context);
+    textTheme = MyTextTheme(materialTheme.textTheme, _currentTheme);
   }
 
   factory ThemeManager.of(BuildContext context, {bool listen = true}) {
     return Provider.of<ThemeManager>(context, listen: listen);
   }
+}
+
+class MyTextTheme {
+  BaseTheme _theme;
+  TextTheme _textTheme;
+  BaseTextTheme dark, contrast, light, darkerLight, textOnContrast, textOnDark;
+
+  MyTextTheme(this._textTheme, this._theme) {
+    dark = BaseTextTheme(_textTheme, _theme.dark);
+    contrast = BaseTextTheme(_textTheme, _theme.contrast);
+    light = BaseTextTheme(_textTheme, _theme.light);
+    darkerLight = BaseTextTheme(_textTheme, _theme.darkerLight);
+    textOnContrast = BaseTextTheme(_textTheme, _theme.textOnContrast);
+    textOnDark = BaseTextTheme(_textTheme, _theme.textOnDark);
+  }
+
+  void updateTheme(BaseTheme theme) {
+    _theme = theme;
+    dark = BaseTextTheme(_textTheme, _theme.dark);
+    contrast = BaseTextTheme(_textTheme, _theme.contrast);
+    light = BaseTextTheme(_textTheme, _theme.light);
+    darkerLight = BaseTextTheme(_textTheme, _theme.darkerLight);
+    textOnContrast = BaseTextTheme(_textTheme, _theme.textOnContrast);
+    textOnDark = BaseTextTheme(_textTheme, _theme.textOnDark);
+  }
+}
+
+class BaseTextTheme {
+  final TextTheme _textTheme;
+  final Color color;
+
+  const BaseTextTheme(this._textTheme, this.color);
+
+  TextStyle get bodyText1 => _textTheme.bodyText1.copyWith(color: color);
+  TextStyle get bodyText2 => _textTheme.bodyText2.copyWith(color: color);
+  TextStyle get headline5 => _textTheme.headline5.copyWith(color: color);
+  TextStyle get headline6 => _textTheme.headline6.copyWith(color: color);
+  TextStyle get caption =>
+      _textTheme.caption.copyWith(color: color.withOpacity(.6));
 }
 
 class BaseTheme {
@@ -37,7 +83,7 @@ class ThemeHolder {
     contrast: Color.fromARGB(255, 252, 163, 16),
     light: Colors.white,
     darkerLight: Color.fromARGB(255, 246, 245, 250),
-    textOnDark: Color.fromARGB(255, 19, 33, 60),
+    textOnDark: Colors.white,
     textOnContrast: Colors.white,
   );
   static BaseTheme turqoiseBlue = BaseTheme(

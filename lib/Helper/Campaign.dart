@@ -75,16 +75,12 @@ class Campaign {
 
   Map<String, dynamic> toMap() {
     return {
+      ID: id,
       NAME: name,
       DESCRIPTION: description,
       SHORTDESCRIPTION: shortDescription,
-      SUBSCRIBEDCOUNT: 0,
-      CITY: city,
-      CREATEDAT: Timestamp.now(),
       AUTHORID: authorId,
-      AMOUNT: amount,
       IMAGEURL: imgUrl,
-      CATEGORYID: 0
     };
   }
 
@@ -99,5 +95,11 @@ class Campaign {
   @override
   String toString() {
     return 'Campaign{name: $name, description: $description, city: $city, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, id: $id, authorId: $authorId}';
+  }
+
+  @override
+  bool operator ==(other) {
+    if (other is Campaign) return other.id == this.id;
+    return false;
   }
 }

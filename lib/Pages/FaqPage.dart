@@ -29,7 +29,9 @@ class FaqPage extends StatelessWidget {
                       height: 100,
                     ),
                   ),
-                  SizedBox(height: 40,),
+                  SizedBox(
+                    height: 40,
+                  ),
                   Text(
                     "One Dollar Movement",
                     style:
@@ -84,9 +86,7 @@ class Faq {
 
   static List<Faq> faqs = [
     Faq("Was ist One Dollar Movement?",
-        "One Dollar Movement ist eine Spenden App, die es ermöglicht schnell und einfach kleine Geldbeträge an wohltätige Zwecke zu spenden. Dabei fokussieren wir uns besonders auf die junge Generation, um aktuelle und bevorstehende Probleme zu lösen und finanziell zu unterstützen."),
-    Faq("Was passiert mit meinen Spenden?",
-        "Deine Spenden werden auf Deinem Account gesammelt und dann in einer Überweisung am Ende des Monats auf das One Dollar Movement Bankkonto übertragen. Ein Donation Credit entspricht dabei 10 Cent. Nachdem wir den Eingang des Geldes registrieren, werden die entsprechenden Beträge an die jeweiligen Organisationen überwiesen."),
+        "ODM macht spenden einfach, schnell und für jeden zugänglich. Dabei haben wir uns für ein werbebasiertes Geschäftsmodell entschieden. Durch jede Ad-Impression erhalten wir Geld von unseren Werbenetzwerken. Das eingenommene Geld wird prozentual, je nach Aktivität, auf die Nutzer verteilt und am Ende des Monats an die von den Nutzern ausgewählten Projekte/ Organisationen überwiesen. Dabei befindet sich das Geld zu keinem Zeitpunkt auf dem Konto der Nutzer. Dadurch werden unnötigen Transaktionen zwischen den Nutzern und One Dollar Movement vermieden."),
     Faq("Sind die Projekte zertifiziert?",
         "Jede Organisation an die auf unserer Plattform gespendet werden kann, ist von uns sorgfältig ausgewählt und zertifiziert worden."),
   ];

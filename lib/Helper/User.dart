@@ -52,6 +52,15 @@ class User {
     return snapshots.map((ss) => fromSnapshot(ss)).toList();
   }
 
+  Map<String, dynamic> userInfoToMap() {
+    return {
+      "id": id,
+      NAME: name,
+      IMAGEURL: imgUrl,
+      THUMBNAILURL: thumbnailUrl
+    };
+  }
+
   Map<String, dynamic> publicDataToMap() {
     return {
       NAME: name,

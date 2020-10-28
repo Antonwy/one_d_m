@@ -43,6 +43,15 @@ exports.onCreateDonation = functions
         all_donations: increment(donation.amount),
       });
 
+    // update the donatedAmount in Session Members
+    if (donation.session_id != null)
+      await firestore
+        .collection(DatabaseConstants.sessions)
+        .doc(donation.session_id)
+        .collection(DatabaseConstants.session_members)
+        .doc(donation.user_id)
+        .update({ donation_amount: increment(donation.amount) });
+
     // get followed Users of the donation author
     const followedUsers = await firestore
       .collection(DatabaseConstants.followed)
@@ -159,18 +168,18 @@ exports.onCreateDonation = functions
     let availableDCs: number = 0;
 
     if (donation.useDCs) {
-      let balanceRes = await firestore
+      const balanceRes = await firestore
         .collection(DatabaseConstants.user)
         .doc(donation.user_id)
         .collection(DatabaseConstants.advertising_data)
         .doc(DatabaseConstants.ad_balance)
         .get();
-      let balanceData = balanceRes.data();
+      const balanceData = balanceRes.data();
 
       if (balanceData !== undefined) availableDCs = balanceData.dc_balance;
     }
 
-    let maxDCsToUse: number = Math.min(donation.amount, availableDCs);
+    const maxDCsToUse: number = Math.min(donation.amount, availableDCs);
 
     const userCharge: ChargesType = {
       amount: increment(donation.amount - maxDCsToUse),

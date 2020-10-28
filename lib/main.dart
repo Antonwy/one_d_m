@@ -13,7 +13,7 @@ import 'Pages/PageManagerWidget.dart';
 
 void main() => runApp(MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => UserManager.instance()),
-      ChangeNotifierProvider(create: (context) => ThemeManager()),
+      ChangeNotifierProvider(create: (context) => ThemeManager(context)),
       Provider(
         create: (context) => PushNotificationService(context),
       )
@@ -30,7 +30,8 @@ class _ODMAppState extends State<ODMApp> {
     StripePayment.setOptions(
         StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
     getThemeIndex().then((value) {
-      ThemeManager.of(context, listen: false).theme = ThemeHolder.themes[value];
+      ThemeManager.of(context, listen: false).colors =
+          ThemeHolder.themes[value];
     });
     NativeAds.initialize();
     FirebaseAdMob.instance.initialize(appId: Constants.ADMOB_APP_ID);
@@ -39,7 +40,7 @@ class _ODMAppState extends State<ODMApp> {
 
   Future<int> getThemeIndex() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(Constants.THEME_KEY) ?? 0;
+    return prefs.getInt(Constants.THEME_KEY) ?? Constants.DEFAULT_THEME_INDEX;
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -20,10 +21,12 @@ class NewsHomePage extends StatefulWidget {
 class _NewsHomePageState extends State<NewsHomePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme _textTheme;
+  ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
+    _theme = ThemeManager.of(context);
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -81,9 +84,21 @@ class _NewsHomePageState extends State<NewsHomePage>
                               height: 10,
                             ),
                             Text(
-                              "Du hast noch keine Neuigkeiten!",
+                              "Du hast noch keine Neuigkeiten!\nAbonniere Projekte um Neuigkeiten zu erhalten.",
+                              textAlign: TextAlign.center,
                               style: TextStyle(fontWeight: FontWeight.w500),
-                            )
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            RaisedButton(
+                              onPressed: widget.changePage,
+                              color: _theme.colors.contrast,
+                              textColor: _theme.colors.textOnContrast,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6)),
+                              child: Text("Zu den Projekten"),
+                            ),
                           ],
                         ),
                       ),

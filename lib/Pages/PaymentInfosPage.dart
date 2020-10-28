@@ -19,7 +19,7 @@ class PaymentInfosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
-    _bTheme = ThemeManager.of(context).theme;
+    _bTheme = ThemeManager.of(context).colors;
 
     return Scaffold(
       appBar: AppBar(

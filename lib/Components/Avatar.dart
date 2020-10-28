@@ -4,18 +4,20 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class Avatar extends StatefulWidget {
-  String imageUrl;
-  IconData icon;
-  Function onTap;
-  double elevation;
-  Color color, iconColor;
+  final String imageUrl;
+  final IconData icon;
+  final Function onTap;
+  final double elevation;
+  final Color color, iconColor;
+  final double radius;
 
   Avatar(this.imageUrl,
       {this.icon,
       this.onTap,
       this.elevation = 0.0,
       this.color,
-      this.iconColor});
+      this.iconColor,
+      this.radius});
 
   @override
   _AvatarState createState() => _AvatarState();
@@ -26,10 +28,11 @@ class _AvatarState extends State<Avatar> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return GestureDetector(
       onTap: widget.onTap,
       child: CircleAvatar(
+        radius: widget.radius,
         backgroundImage: widget.imageUrl != null
             ? CachedNetworkImageProvider(widget.imageUrl)
             : null,

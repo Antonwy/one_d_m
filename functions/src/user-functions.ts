@@ -94,6 +94,7 @@ exports.onDeleteUser = functions.firestore
     (await userRef.collection(DatabaseConstants.cards).get()).forEach(
       async (c) => await c.ref.delete()
     );
+    
     await userRef
       .collection(DatabaseConstants.private_data)
       .doc(DatabaseConstants.data)

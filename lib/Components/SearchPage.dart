@@ -20,50 +20,63 @@ class _SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.white,
         body: CustomScrollView(
           slivers: <Widget>[
-            SliverAppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.white,
-              iconTheme: IconThemeData(color: Colors.black),
-              expandedHeight: 80,
-              flexibleSpace: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 60,
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(5),
-                      elevation: 2,
-                      color: Colors.white,
-                      child: Center(
-                          child: Padding(
-                        padding: const EdgeInsets.only(right: 18.0),
-                        child: Row(
-                          children: <Widget>[
-                            BackButton(),
-                            Expanded(
-                              child: TextField(
-                                onChanged: (text) {
-                                  setState(() {
-                                    _query = text;
-                                  });
-                                },
-                                decoration: InputDecoration.collapsed(
-                                    hintText: "Suchen"),
-                              ),
-                            ),
-                            Icon(Icons.search),
-                          ],
-                        ),
-                      )),
-                    ),
-                  ),
-                ),
-              ),
+            SliverSearchBar(
+              onChanged: (text) {
+                setState(() {
+                  _query = text;
+                });
+              },
             ),
             SearchResultsList(_query)
           ],
         ));
+  }
+}
+
+class SliverSearchBar extends StatelessWidget {
+  final Function(String) onChanged;
+
+  const SliverSearchBar({Key key, this.onChanged}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.white,
+      iconTheme: IconThemeData(color: Colors.black),
+      expandedHeight: 80,
+      flexibleSpace: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          height: 60,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+            child: Material(
+              borderRadius: BorderRadius.circular(5),
+              elevation: 2,
+              color: Colors.white,
+              child: Center(
+                  child: Padding(
+                padding: const EdgeInsets.only(right: 18.0),
+                child: Row(
+                  children: <Widget>[
+                    BackButton(),
+                    Expanded(
+                      child: TextField(
+                        onChanged: onChanged,
+                        decoration:
+                            InputDecoration.collapsed(hintText: "Suchen"),
+                      ),
+                    ),
+                    Icon(Icons.search),
+                  ],
+                ),
+              )),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

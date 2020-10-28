@@ -52,7 +52,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   }
 
   Future<void> _saveDeviceToken() async {
-    print("SAVING DEVICE TOKEN");
     await DatabaseService.saveDeviceToken(
         _um.uid, await _firebaseMessaging.getToken());
   }

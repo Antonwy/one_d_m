@@ -7,7 +7,8 @@ class Donation {
       alternativeCampaignId,
       userId,
       campaignName,
-      campaignImgUrl;
+      campaignImgUrl,
+      sessionId;
   final DateTime createdAt;
 
   static final String AMOUNT = "amount",
@@ -18,32 +19,31 @@ class Donation {
       USERID = "user_id",
       ISANONYM = "anonym",
       USEDCS = "useDCs",
+      SESSION_ID = "session_id",
       CREATEDAT = "created_at";
 
-  Donation(
-    this.amount, {
-    this.campaignId,
-    this.alternativeCampaignId,
-    this.userId,
-    this.campaignName,
-    this.campaignImgUrl,
-    this.createdAt,
-    this.anonym,
-    this.useDCs,
-  });
+  Donation(this.amount,
+      {this.campaignId,
+      this.alternativeCampaignId,
+      this.userId,
+      this.campaignName,
+      this.campaignImgUrl,
+      this.createdAt,
+      this.anonym,
+      this.useDCs,
+      this.sessionId});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
-    return Donation(
-      doc[AMOUNT],
-      campaignId: doc[CAMPAIGNID],
-      alternativeCampaignId: doc[ALTERNATIVECAMPAIGNID],
-      userId: doc[USERID],
-      campaignImgUrl: doc[CAMPAIGNIMGURL],
-      campaignName: doc[CAMPAIGNNAME],
-      anonym: doc[ISANONYM] ?? false,
-      createdAt: (doc[CREATEDAT] as Timestamp).toDate(),
-      useDCs: doc[USEDCS] ?? false,
-    );
+    return Donation(doc[AMOUNT],
+        campaignId: doc[CAMPAIGNID],
+        alternativeCampaignId: doc[ALTERNATIVECAMPAIGNID],
+        userId: doc[USERID],
+        campaignImgUrl: doc[CAMPAIGNIMGURL],
+        campaignName: doc[CAMPAIGNNAME],
+        anonym: doc[ISANONYM] ?? false,
+        createdAt: (doc[CREATEDAT] as Timestamp).toDate(),
+        useDCs: doc[USEDCS] ?? false,
+        sessionId: doc[SESSION_ID]);
   }
 
   static List<Donation> listFromSnapshots(List<DocumentSnapshot> list) {
@@ -61,6 +61,7 @@ class Donation {
       CREATEDAT: Timestamp.now(),
       ISANONYM: anonym,
       USEDCS: useDCs,
+      SESSION_ID: sessionId
     };
   }
 

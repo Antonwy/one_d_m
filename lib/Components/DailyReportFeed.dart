@@ -69,7 +69,7 @@ class _NoData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ThemeManager.of(context).theme.darkerLight,
+      color: ThemeManager.of(context).colors.darkerLight,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(14.0),
@@ -106,7 +106,7 @@ class _ChooseDateState extends State<ChooseDate>
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
         borderRadius: BorderRadius.circular(12),
         color: _bTheme.darkerLight,
@@ -242,11 +242,11 @@ class ShareDailyReport extends StatelessWidget {
         ),
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        closedColor: ThemeManager.of(context).theme.darkerLight,
+        closedColor: ThemeManager.of(context).colors.darkerLight,
         closedElevation: 0,
         closedBuilder: (context, open) => Material(
             borderRadius: BorderRadius.circular(12),
-            color: ThemeManager.of(context).theme.darkerLight,
+            color: ThemeManager.of(context).colors.darkerLight,
             clipBehavior: Clip.antiAlias,
             child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -273,7 +273,7 @@ class DailyDonatedAmountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
         borderRadius: BorderRadius.circular(12),
         color: _bTheme.darkerLight,
@@ -320,7 +320,7 @@ class SummaryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
         borderRadius: BorderRadius.circular(12),
         color: _bTheme.darkerLight,
@@ -363,7 +363,7 @@ class CampaignsRankingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
       borderRadius: BorderRadius.circular(12),
       color: _bTheme.darkerLight,
@@ -441,7 +441,7 @@ class FriendsRankingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
       borderRadius: BorderRadius.circular(12),
       color: _bTheme.darkerLight,
@@ -528,7 +528,7 @@ class RankingButton extends StatelessWidget {
 
             User user = snapshot.data;
             return CustomOpenContainer(
-              closedColor: ThemeManager.of(context).theme.darkerLight,
+              closedColor: ThemeManager.of(context).colors.darkerLight,
               closedElevation: 0,
               openBuilder: (context, close, controller) => UserPage(
                 user,
@@ -549,7 +549,7 @@ class RankingButton extends StatelessWidget {
           Campaign campaign = snapshot.data;
 
           return CustomOpenContainer(
-            closedColor: ThemeManager.of(context).theme.darkerLight,
+            closedColor: ThemeManager.of(context).colors.darkerLight,
             closedElevation: 0,
             openBuilder: (context, close, controller) => NewCampaignPage(
               campaign,

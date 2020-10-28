@@ -84,7 +84,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _mq = MediaQuery.of(context);
-    _bTheme = ThemeManager.of(context).theme;
+    _bTheme = ThemeManager.of(context).colors;
     return Scaffold(
         floatingActionButton: OfflineBuilder(
             child: Container(),
@@ -122,7 +122,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     activated ? _bTheme.dark : Colors.grey,
                                 label: _isAuthorOfCampaign
                                     ? Text("Post erstellen")
-                                    : Text("Spenden"),
+                                    : Text("Unterstützen"),
                                 onPressed: activated
                                     ? _isAuthorOfCampaign
                                         ? () {
@@ -574,7 +574,7 @@ class _StatCollumn extends StatelessWidget {
   Widget build(BuildContext context) {
     Interval _interval = Interval(interval.begin, interval.end,
         curve: Curves.fastLinearToSlowEaseIn);
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Expanded(
       child: SlideTransition(
         position: Tween<Offset>(begin: Offset(0.0, .2), end: Offset.zero)

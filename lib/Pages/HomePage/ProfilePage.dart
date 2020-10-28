@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/ActivityDonationFeed.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
@@ -6,37 +7,42 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
+import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/SessionInvitesFeed.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/CreateCampaignPage.dart';
-import 'package:one_d_m/Pages/PaymentInfosPage.dart';
+import 'package:one_d_m/Pages/CreateSessionPage.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
+import 'package:one_d_m/Pages/SessionInvitesPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
-  Function goToExplore;
-
-  ProfilePage(this.goToExplore);
-
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin {
-  ThemeData _theme;
-  BaseTheme _bTheme;
+  ThemeManager _theme;
+  Stream<List<BaseSession>> _sessionStream;
+
+  @override
+  void initState() {
+    _sessionStream = DatabaseService.getSessionsFromUser(
+        Provider.of<UserManager>(context, listen: false).uid);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _theme = Theme.of(context);
-    _bTheme = ThemeManager.of(context).theme;
+    _theme = ThemeManager.of(context);
     return CustomScrollView(
       slivers: <Widget>[
         Consumer<UserManager>(
@@ -67,18 +73,20 @@ class _ProfilePageState extends State<ProfilePage>
                                   children: <Widget>[
                                     Text(
                                       "Willkommen,",
-                                      style: _theme.textTheme.headline5
+                                      style: _theme
+                                          .materialTheme.textTheme.headline5
                                           .copyWith(
                                               fontSize: 32,
-                                              color: _bTheme.dark),
+                                              color: _theme.colors.dark),
                                     ),
                                     Text(
                                       "${user?.name}",
-                                      style: _theme.textTheme.headline5
+                                      style: _theme
+                                          .materialTheme.textTheme.headline5
                                           .copyWith(
                                               fontSize: 30,
                                               fontWeight: FontWeight.bold,
-                                              color: _bTheme.dark),
+                                              color: _theme.colors.dark),
                                     ),
                                   ],
                                 ),
@@ -111,47 +119,48 @@ class _ProfilePageState extends State<ProfilePage>
                                     Text(
                                       "Gespendet: ",
                                       style: TextStyle(
-                                          fontSize: 15, color: _bTheme.dark),
+                                          fontSize: 15,
+                                          color: _theme.colors.dark),
                                     ),
                                     Text(
                                       "${Numeral(user?.donatedAmount ?? 0).value()} DC",
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
-                                          color: _bTheme.dark),
+                                          color: _theme.colors.dark),
                                     ),
                                   ],
                                 ),
                                 Row(
                                   children: <Widget>[
-                                    CustomOpenContainer(
-                                      openBuilder:
-                                          (context, close, controller) =>
-                                              PaymentInfosPage(
-                                                  scrollController: controller),
-                                      closedShape: CircleBorder(),
-                                      closedElevation: 0,
-                                      closedColor: _bTheme.contrast,
-                                      closedBuilder: (context, open) =>
-                                          RoundButtonHomePage(
-                                        icon: Icons
-                                            .credit_card, // toPage: BuyCoinsPage(),
-                                        // toPage: BuyCoinsPage(),
-                                        onTap: () {
-                                          open();
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
+                                    // CustomOpenContainer(
+                                    //   openBuilder:
+                                    //       (context, close, controller) =>
+                                    //           PaymentInfosPage(
+                                    //               scrollController: controller),
+                                    //   closedShape: CircleBorder(),
+                                    //   closedElevation: 0,
+                                    //   closedColor: _bTheme.contrast,
+                                    //   closedBuilder: (context, open) =>
+                                    //       RoundButtonHomePage(
+                                    //     icon: Icons
+                                    //         .credit_card, // toPage: BuyCoinsPage(),
+                                    //     // toPage: BuyCoinsPage(),
+                                    //     onTap: () {
+                                    //       open();
+                                    //     },
+                                    //   ),
+                                    // ),
+                                    // SizedBox(
+                                    //   width: 10,
+                                    // ),
                                     CustomOpenContainer(
                                       openBuilder:
                                           (context, close, controller) =>
                                               RewardVideoPage(),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
-                                      closedColor: _bTheme.contrast,
+                                      closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
                                         icon: Icons.play_arrow,
@@ -168,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                   scrollController: controller),
                                       closedShape: CircleBorder(),
                                       closedElevation: 0,
-                                      closedColor: _bTheme.contrast,
+                                      closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
                                         icon: Icons.person,
@@ -178,26 +187,26 @@ class _ProfilePageState extends State<ProfilePage>
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    Row(
-                                      children: <Widget>[
-                                        user?.admin ?? false
-                                            ? RoundButtonHomePage(
-                                                icon: Icons.add,
-                                                toPage: CreateCampaignPage(),
-                                                toColor: Colors.indigo,
-                                              )
-                                            : Container(
-                                                width: 0,
-                                              ),
-                                        user?.admin ?? false
-                                            ? SizedBox(
-                                                width: 10,
-                                              )
-                                            : Container(
-                                                width: 0,
-                                              ),
-                                      ],
-                                    ),
+                                    // Row(
+                                    //   children: <Widget>[
+                                    //     user?.admin ?? false
+                                    //         ? RoundButtonHomePage(
+                                    //             icon: Icons.add,
+                                    //             toPage: CreateCampaignPage(),
+                                    //             toColor: Colors.indigo,
+                                    //           )
+                                    //         : Container(
+                                    //             width: 0,
+                                    //           ),
+                                    //     user?.admin ?? false
+                                    //         ? SizedBox(
+                                    //             width: 10,
+                                    //           )
+                                    //         : Container(
+                                    //             width: 0,
+                                    //           ),
+                                    //   ],
+                                    // ),
                                     RoundButtonHomePage(
                                       icon: Icons.settings,
                                       onTap: () {
@@ -218,14 +227,158 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-        ChangeNotifierProvider.value(
-            value: DailyReportManager(), child: DailyReportFeed()),
-        ChangeNotifierProvider.value(
-            value: DailyReportManager(), child: ActivityDonationFeed()),
+        // ChangeNotifierProvider.value(
+        //     value: DailyReportManager(), child: DailyReportFeed()),
+        // ChangeNotifierProvider.value(
+        //     value: DailyReportManager(), child: ActivityDonationFeed()),
+        StreamBuilder<List<BaseSession>>(
+            stream: _sessionStream,
+            builder: (context, snapshot) {
+              List<BaseSession> sessions = snapshot.data ?? [];
+
+              if (sessions.isEmpty)
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            _SessionInvitesButton(),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            _CreateSessionButton()
+                          ],
+                        ),
+                        SvgPicture.asset(
+                          "assets/images/no-donations.svg",
+                          height: 200,
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen.",
+                          style: _theme.textTheme.dark.bodyText1,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Deine Sessions",
+                        style: _theme.textTheme.dark.headline6,
+                      ),
+                      Expanded(child: Container()),
+                      _SessionInvitesButton(),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      _CreateSessionButton()
+                    ],
+                  ),
+                ),
+              );
+            }),
+        SessionsFeed()
       ],
     );
   }
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _CreateSessionButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    return CustomOpenContainer(
+      openBuilder: (context, close, scrollController) =>
+          CreateSessionPage(scrollController),
+      closedBuilder: (context, open) => InkWell(
+        onTap: open,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            Icons.add,
+            color: _bTheme.textOnContrast,
+            size: 24,
+          ),
+        ),
+      ),
+      closedShape: CircleBorder(),
+      closedElevation: 0,
+      closedColor: _bTheme.contrast,
+    );
+  }
+}
+
+class _SessionInvitesButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    return Consumer<UserManager>(
+      builder: (context, um, child) => StreamBuilder<List<SessionInvite>>(
+          stream: DatabaseService.getSessionInvites(um.uid),
+          builder: (context, snapshot) {
+            List<SessionInvite> invites = snapshot.data ?? [];
+
+            if (invites.isEmpty) return Container();
+
+            return Stack(
+              overflow: Overflow.visible,
+              alignment: Alignment.topRight,
+              children: [
+                CustomOpenContainer(
+                  openBuilder: (context, close, scrollController) =>
+                      SessionInvitesPage(
+                    scrollController: scrollController,
+                    invites: invites,
+                  ),
+                  closedBuilder: (context, open) => InkWell(
+                    onTap: open,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.announcement,
+                        color: _bTheme.textOnContrast,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  closedShape: CircleBorder(),
+                  closedElevation: 0,
+                  closedColor: _bTheme.contrast,
+                ),
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: Material(
+                    color: Colors.red,
+                    shape: CircleBorder(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Center(
+                          child: Text(
+                        invites.length.toString(),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      )),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+    );
+  }
 }

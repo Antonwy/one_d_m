@@ -14,6 +14,7 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
@@ -270,7 +271,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 class UserHeader extends SliverPersistentHeaderDelegate {
   final int index = 0;
   final User user;
-  ThemeData _theme;
+  ThemeManager _theme;
   double _minExtend = 80.0;
 
   UserHeader(this.user);
@@ -278,7 +279,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    _theme = Theme.of(context);
+    _theme = ThemeManager.of(context);
     return LayoutBuilder(builder: (context, constraints) {
       _minExtend = MediaQuery.of(context).padding.top + 56.0;
       final double percentage =
@@ -287,7 +288,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
       return Container(
         height: constraints.maxHeight,
         child: Material(
-          color: ColorTheme.whiteBlue,
+          color: _theme.colors.dark,
           elevation: 1,
           child: SafeArea(
             bottom: false,
@@ -299,10 +300,10 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                 AppBar(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  iconTheme: IconThemeData(color: ColorTheme.blue),
+                  iconTheme: IconThemeData(color: _theme.colors.textOnDark),
                   title: Text(
                     "${user?.name ?? "Gelöschter Account"}",
-                    style: TextStyle(color: ColorTheme.blue),
+                    style: TextStyle(color: _theme.colors.textOnDark),
                   ),
                 ),
                 Row(
@@ -485,13 +486,12 @@ class UserHeader extends SliverPersistentHeaderDelegate {
             AutoSizeText(
               number.toString(),
               maxLines: 1,
-              style: _theme.accentTextTheme.headline6
-                  .copyWith(color: ColorTheme.blue),
+              style: _theme.textTheme.textOnDark.headline6,
             ),
             Text(
               text,
-              style: _theme.accentTextTheme.bodyText1
-                  .copyWith(color: ColorTheme.blue.withOpacity(.5)),
+              style: _theme.materialTheme.accentTextTheme.bodyText1
+                  .copyWith(color: _theme.colors.textOnDark.withOpacity(.5)),
             )
           ],
         ),

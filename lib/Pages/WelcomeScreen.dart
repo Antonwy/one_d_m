@@ -63,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     maxLines: 2,
                   ),
                   description:
-                      "One Dollar Movement ist eine Plattform, auf der kleine Geldbeträge gespendet werden können. Durch uns wird spenden einfach, schnell und unterhaltsam.",
+                      "Wir wollen Spenden einfach, schnell und kostenlos machen. Vernetze dich mit deinen Freunden, verteile Donation Credits an Projekte und mache die Welt zu einem besseren Ort!",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
@@ -71,22 +71,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "donation-credits",
                     title: "Donation Credits",
                     description:
-                        "Ein Donation Credit entspricht 10 Cent. Wir nutzen das als App interne „Währung“ um ein schnelles und reibungsloses Spenden zu ermöglichen.",
+                        "Ein Donation Credit entspricht 10 Cent. Wir verteilen Donation Credits je nach Aktivität an Dich und deine Freunde!",
                     darkText: true,
                     animatedValue: _getAnimatedValue(1, _page),
                     onPressed: () => _animateToPage(2)),
                 _WelcomePage(
                     svgName: "landing-page",
-                    title: "Startseite",
+                    title: "Sessions",
                     description:
-                        "Auf der Startseite werden die Spenden deiner Freunde und die jeweiligen Tagesziele angezeigt. So hast Du immer im Blick, wer an was gespendet hat und wie viele Donation Credits noch bis zum Ende des Tages gesammelt werden sollten, um das Tagesziel zu erreichen.",
+                        "Du kannst öffentlichen Sessions beitreten oder Deine eigene Session erstellen! Zusammen mit deinen Freunden und weiteren Nutzern könnt ihr Donation Credits an Organisationen/Projekte verteilen!",
                     animatedValue: _getAnimatedValue(2, _page),
                     onPressed: () => _animateToPage(3)),
                 _WelcomePage(
                     svgName: "projects",
                     title: "Projekte",
                     description:
-                        "Die Projekte, an die gespendet werden kann, sind primär Wohltätigkeitsorganisationen, die ohne finanzielle Unterstützung ihrer Arbeit nicht mehr nachgehen könnten.",
+                        "Die Projekte die auf unserer Plattform vertreten sind, wurden sorgfältig ausgewählt. Neben der Sicherheit zielt unser Auswahlprozess auch darauf ab, ein möglichst vielfältiges Projektangebot anbieten zu können.",
                     darkText: true,
                     animatedValue: _getAnimatedValue(3, _page),
                     onPressed: () => _animateToPage(4)),
@@ -94,14 +94,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "explore",
                     title: "Entdecken",
                     description:
-                        "Um neue Projekte entdecken zu können haben wir eine „Entdecken“ Seite eingebaut. Dort werden die neusten Projekte und Nutzer präsentiert.",
+                        "Um neue Projekte entdecken zu können haben wir eine „Entdecken“ Seite eingebaut. Dort werden die neusten Projekte und Nutzer angezeigt.",
                     animatedValue: _getAnimatedValue(4, _page),
                     onPressed: () => _animateToPage(5)),
                 _WelcomePage(
                   svgName: "donation",
                   title: "Spendenablauf",
                   description:
-                      "Alle Donation Credits, die du spendest, werden bis zum Ende des Monats auf deinem Account gesammelt und in einer Sammelüberweisung auf unser Konto überwiesen. Von dort aus wird das Geld an die Projekte verteilt.",
+                      "Durch jede Ad-Impression erhalten wir Geld von unseren Werbenetzwerken. Das eingenommene Geld wird prozentual, je nach Aktivität, auf die Nutzer verteilt und am Ende des Monats an die von den Nutzern ausgewählten Projekte/Organisationen überwiesen. Dabei befindet sich das Geld zu keinem Zeitpunkt auf dem Konto der Nutzer. Dadurch werden unnötigen Transaktionen zwischen den Nutzern und One Dollar Movement vermieden.",
                   animatedValue: _getAnimatedValue(5, _page),
                   onPressed: () => _animateToPage(6),
                 ),

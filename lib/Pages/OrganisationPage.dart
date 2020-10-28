@@ -28,7 +28,7 @@ class OrganisationPage extends StatelessWidget {
             iconTheme: IconThemeData(color: ColorTheme.blue),
             title: Text(
               organisation.name,
-              style: TextStyle(color: ThemeManager.of(context).theme.dark),
+              style: TextStyle(color: ThemeManager.of(context).colors.dark),
             ),
           ),
           SliverToBoxAdapter(

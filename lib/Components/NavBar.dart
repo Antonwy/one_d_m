@@ -24,7 +24,7 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     _mq = MediaQuery.of(context);
 
     _openHeight = _mq.padding.bottom == 0 ? 75 : 55 + _mq.padding.bottom;

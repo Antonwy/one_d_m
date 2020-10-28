@@ -309,9 +309,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
         }
       }
 
-      CloudFunctions.instance
-          .getHttpsCallable(functionName: "httpFunctions-findFriends")
-          .call(numbers.toList());
+      DatabaseService.callFindFriends(numbers.toList());
     }
   }
 

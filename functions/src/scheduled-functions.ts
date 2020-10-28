@@ -1,6 +1,10 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { DatabaseConstants, ChargesFields } from './database-constants';
+import {
+  DatabaseConstants,
+  ChargesFields,
+  SessionFields,
+} from './database-constants';
 import { StatisticType, PrivateUserDataType } from './types';
 import { _namespaceWithOptions } from 'firebase-functions/lib/providers/firestore';
 import Stripe from 'stripe';
@@ -15,7 +19,18 @@ exports.daily = functions.pubsub
   .schedule('0 0 * * *')
   .onRun(async (context) => {
     await resetStatistics({ daily_amount: 0 });
+    await deleteOutdatedSessions();
   });
+
+async function deleteOutdatedSessions() {
+  const nowDate = admin.firestore.Timestamp.now();
+  const outdatedSessions = await firestore
+    .collection(DatabaseConstants.sessions)
+    .where(SessionFields.end_date, '<', nowDate)
+    .get();
+
+  outdatedSessions.forEach(async (session) => await session.ref.delete());
+}
 
 exports.monthly = functions.pubsub
   .schedule('0 0 1 * *')
@@ -71,7 +86,7 @@ async function chargeCustomers() {
       ).docs[0];
 
       try {
-        let payIntent: Stripe.PaymentIntent = await stripe.paymentIntents.create(
+        const payIntent: Stripe.PaymentIntent = await stripe.paymentIntents.create(
           {
             amount: amount * 10,
             currency: 'eur',
@@ -84,7 +99,7 @@ async function chargeCustomers() {
           }
         );
 
-        if (payIntent.status != 'succeeded') {
+        if (payIntent.status !== 'succeeded') {
           await firestore
             .collection(DatabaseConstants.charges_users)
             .doc(chargeDoc.id)

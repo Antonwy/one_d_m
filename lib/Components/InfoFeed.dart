@@ -33,7 +33,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
       color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
@@ -127,7 +127,7 @@ class _ColumnStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -185,10 +185,11 @@ class _DCInformation extends StatelessWidget {
                                 Text(
                                   '${snapshot?.data?.dcBalance ?? 0}',
                                   style: TextStyle(
-                                    fontSize: 35.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: ThemeManager.of(context).theme.contrast
-                                  ),
+                                      fontSize: 35.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: ThemeManager.of(context)
+                                          .colors
+                                          .contrast),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -307,7 +308,7 @@ class _PercentCircle extends StatelessWidget {
       width: 2 * radius,
       child: CustomPaint(
         painter: _PercentCirclePainter(percent,
-            color: ThemeManager.of(context).theme.contrast),
+            color: ThemeManager.of(context).colors.contrast),
         child: Center(
           child: Text(
             '${((percent * 100) % 100).round().toString()}%',
@@ -391,7 +392,7 @@ class _PercentLine extends StatelessWidget {
         painter: _PercentLinePainter(
             percent: percent,
             height: height,
-            color: ThemeManager.of(context).theme.contrast),
+            color: ThemeManager.of(context).colors.contrast),
       ),
     );
   }

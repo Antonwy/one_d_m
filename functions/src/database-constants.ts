@@ -27,6 +27,10 @@ export class DatabaseConstants {
   static readonly charges_users: string = 'charges_users';
   static readonly charges_campaigns: string = 'charges_campaigns';
   static readonly cpm_rates: string = 'cpm_rates';
+  static readonly sessions: string = 'sessions';
+  static readonly session_members: string = 'session_members';
+  static readonly session_invites: string = 'session_invites';
+  static readonly id: string = 'id';
 }
 
 export class CampaignFields {
@@ -73,4 +77,19 @@ export class ImageSuffix {
 export class ChargesFields {
   static readonly amount: string = 'amount';
   static readonly user_id: string = 'user_id';
+}
+
+export class SessionFields {
+  static readonly campaign_name: string = 'campaign_name';
+  static readonly campaign_id: string = 'campaign_id';
+  static readonly campaign_img_url: string = 'campaign_img_url';
+  static readonly campaign_short_description: string =
+    'campaign_short_description';
+  static readonly session_name: string = 'session_name';
+  static readonly session_description: string = 'session_description';
+  static readonly amount_per_user: string = 'amount_per_user';
+  static readonly current_amount: string = 'current_amount';
+  static readonly created_at: string = 'created_at';
+  static readonly end_date: string = 'end_date';
+  static readonly creator_id: string = 'creator_id';
 }

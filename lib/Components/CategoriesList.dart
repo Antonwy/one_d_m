@@ -80,7 +80,7 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).theme;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Padding(
       padding: EdgeInsets.only(
           right: index - 1 == Category.categories.length - 1 ? 10 : 0),

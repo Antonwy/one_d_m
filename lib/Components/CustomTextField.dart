@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class CustomTextField extends StatelessWidget {
-  String hint, label;
-  Color activeColor, focusedColor, textColor;
-  Icon preficIcon;
-  TextInputType textInputType;
-  bool obscureText, autoCorrect;
-  Function(String) onChanged;
-  String Function(String) validator;
+  final String hint, label;
+  final Color activeColor, focusedColor, textColor;
+  final Icon preficIcon;
+  final TextInputType textInputType;
+  final bool obscureText, autoCorrect;
+  final Function(String) onChanged;
+  final String Function(String) validator;
+  final TextEditingController controller;
+  final int maxLines, maxLength;
 
   CustomTextField(
-      {this.hint,
+      {this.controller,
+      this.hint,
       this.label,
+      this.maxLines = 1,
+      this.maxLength,
       this.preficIcon,
       this.obscureText = false,
       this.textInputType = TextInputType.text,
@@ -32,6 +37,9 @@ class CustomTextField extends StatelessWidget {
         errorColor: Colors.red,
       ),
       child: TextFormField(
+        maxLines: maxLines,
+        maxLength: maxLength,
+        controller: controller,
         autocorrect: autoCorrect,
         cursorColor: focusedColor,
         onChanged: onChanged,

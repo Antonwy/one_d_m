@@ -21,14 +21,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ThemeManager.of(context).theme.light,
+        backgroundColor: ThemeManager.of(context).colors.light,
         body: Stack(
           children: <Widget>[
             PageView(
               controller: _pageController,
               children: <Widget>[
                 NewsHomePage(() => _changePage(2)),
-                ProfilePage(() => _changePage(2)),
+                ProfilePage(),
                 ExplorePage(),
               ],
             ),

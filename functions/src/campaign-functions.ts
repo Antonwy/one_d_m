@@ -4,6 +4,7 @@ import { CampaignType, NewsType } from './types';
 import { DatabaseConstants, CampaignFields } from './database-constants';
 
 const firestore = admin.firestore();
+const increment = admin.firestore.FieldValue.increment;
 
 exports.onCreateCampaign = functions.firestore
   .document(`${DatabaseConstants.campaigns}/{campaignId}`)
@@ -11,7 +12,7 @@ exports.onCreateCampaign = functions.firestore
     return firestore
       .collection(DatabaseConstants.statistics)
       .doc(DatabaseConstants.campaigns_info)
-      .update({ campaign_count: admin.firestore.FieldValue.increment(1) });
+      .update({ campaign_count: increment(1) });
   });
 
 exports.onDeleteCampaign = functions.firestore

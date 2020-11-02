@@ -6,6 +6,7 @@ import {
   DatabaseConstants,
   ImagePrefix,
   DonationFields,
+  CampaignFields,
 } from './database-constants';
 
 const stripe = new Stripe(functions.config().stripe.token, {
@@ -13,6 +14,7 @@ const stripe = new Stripe(functions.config().stripe.token, {
 });
 
 const firestore = admin.firestore();
+const increment = admin.firestore.FieldValue.increment;
 
 exports.onCreateUser = functions.firestore
   .document(`${DatabaseConstants.user}/{userId}`)
@@ -39,7 +41,7 @@ exports.onCreateUser = functions.firestore
     return firestore
       .collection(DatabaseConstants.statistics)
       .doc(DatabaseConstants.users_info)
-      .update({ user_count: admin.firestore.FieldValue.increment(1) });
+      .update({ user_count: increment(1) });
   });
 
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
@@ -51,10 +53,18 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
   ).exists;
 
   if (isOrganisation) {
-    return firestore
+    await firestore
       .collection(DatabaseConstants.organisations)
       .doc(user.uid)
       .delete();
+
+    const campaignsToDelete = await firestore
+      .collection(DatabaseConstants.campaigns)
+      .where(CampaignFields.author_id, '==', user.uid)
+      .get();
+
+    campaignsToDelete.forEach(async (campaign) => await campaign.ref.delete());
+    return;
   }
 
   return firestore.collection(DatabaseConstants.user).doc(user.uid).delete();
@@ -84,21 +94,36 @@ exports.onDeleteUser = functions.firestore
     const user: UserType = snapshot.data() as UserType;
 
     const userRef = firestore.collection(DatabaseConstants.user).doc(userId);
+    const privateRef = userRef
+      .collection(DatabaseConstants.private_data)
+      .doc(DatabaseConstants.data);
+    const cardRef = userRef.collection(DatabaseConstants.cards);
+    const adRef = userRef.collection(DatabaseConstants.advertising_data);
+    const sessionsRef = userRef.collection(DatabaseConstants.sessions);
+    const sessionsInvitesRef = userRef.collection(
+      DatabaseConstants.session_invites
+    );
 
     const privateUserData: PrivateUserDataType = (
-      await userRef
-        .collection(DatabaseConstants.private_data)
-        .doc(DatabaseConstants.data)
-        .get()
+      await privateRef.get()
     ).data() as PrivateUserDataType;
-    (await userRef.collection(DatabaseConstants.cards).get()).forEach(
-      async (c) => await c.ref.delete()
+
+    // delete Cards
+    (await cardRef.get()).forEach(async (c) => await c.ref.delete());
+
+    //delete ads
+    (await adRef.get()).forEach(async (doc) => await doc.ref.delete());
+
+    // delete sessions
+    (await sessionsRef.get()).forEach(async (doc) => await doc.ref.delete());
+
+    // delete sessions invites
+    (await sessionsInvitesRef.get()).forEach(
+      async (doc) => await doc.ref.delete()
     );
-    
-    await userRef
-      .collection(DatabaseConstants.private_data)
-      .doc(DatabaseConstants.data)
-      .delete();
+
+    // delete privateData
+    await privateRef.delete();
 
     if (!(await userRef.get()).exists) return;
 
@@ -121,26 +146,7 @@ exports.onDeleteUser = functions.firestore
       .get();
 
     // delete follow and FriendRanking
-    followingUserColl.forEach(async (doc) => {
-      const dailyDonationsRanking = await firestore
-        .collection(DatabaseConstants.donation_feed)
-        .doc(doc.id)
-        .collection(DatabaseConstants.daily_rankings)
-        .get();
-      dailyDonationsRanking.forEach(async (dailyDoc) => {
-        const foundDailyDoc = await firestore
-          .collection(DatabaseConstants.donation_feed)
-          .doc(doc.id)
-          .collection(DatabaseConstants.daily_rankings)
-          .doc(dailyDoc.id)
-          .collection(DatabaseConstants.users)
-          .doc(userId)
-          .get();
-
-        if (dailyDoc.exists) await foundDailyDoc.ref.delete();
-      });
-      await doc.ref.delete();
-    });
+    followingUserColl.forEach(async (doc) => await doc.ref.delete());
 
     // delete donations
     const qs = await firestore
@@ -156,14 +162,24 @@ exports.onDeleteUser = functions.firestore
           .collection(DatabaseConstants.campaigns)
           .doc(id)
           .update({
-            subscribed_count: admin.firestore.FieldValue.increment(-1),
+            subscribed_count: increment(-1),
           })
     );
 
+    // decrement user count
     await firestore
       .collection(DatabaseConstants.statistics)
       .doc(DatabaseConstants.users_info)
-      .update({ user_count: admin.firestore.FieldValue.increment(-1) });
+      .update({ user_count: increment(-1) });
+
+    // delete subscribed_campaigns
+    (
+      await firestore
+        .collection(DatabaseConstants.subscribed_campaigns)
+        .doc(userId)
+        .collection(DatabaseConstants.campaigns)
+        .get()
+    ).forEach(async (doc) => await doc.ref.delete());
 
     if (user.image_url === null || !user.image_url.startsWith('user_')) return;
 

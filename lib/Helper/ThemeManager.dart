@@ -59,6 +59,7 @@ class BaseTextTheme {
 
   TextStyle get bodyText1 => _textTheme.bodyText1.copyWith(color: color);
   TextStyle get bodyText2 => _textTheme.bodyText2.copyWith(color: color);
+  TextStyle get headline3 => _textTheme.headline3.copyWith(color: color);
   TextStyle get headline5 => _textTheme.headline5.copyWith(color: color);
   TextStyle get headline6 => _textTheme.headline6.copyWith(color: color);
   TextStyle get caption =>

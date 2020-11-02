@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { UserType } from './types';
-import { DatabaseConstants, DonationFields } from './database-constants';
+import { DatabaseConstants } from './database-constants';
 
 const firestore = admin.firestore();
 
@@ -23,28 +23,6 @@ exports.createFollower = functions.firestore
       .collection(DatabaseConstants.users)
       .doc(followedId)
       .set({ id: followedId });
-
-    const donations = await firestore
-      .collection(DatabaseConstants.donations)
-      .where(DonationFields.user_id, '==', followingId)
-      .get();
-
-    console.log('Copying data to ' + followedId);
-    donations.docs.forEach(async (ds) => {
-      const donation = ds.data();
-      await firestore
-        .collection(DatabaseConstants.donation_feed)
-        .doc(followedId)
-        .collection(DatabaseConstants.donations)
-        .add({
-          amount: donation.amount,
-          user_id: donation.user_id,
-          campaign_name: donation.campaign_name,
-          campaign_id: donation.campaign_id,
-          campaign_img_url: donation.campaign_img_url,
-          created_at: donation.created_at,
-        });
-    });
 
     const privateData = await firestore
       .collection(DatabaseConstants.user)
@@ -104,13 +82,4 @@ exports.deleteFollower = functions.firestore
       .collection(DatabaseConstants.users)
       .doc(followedId)
       .delete();
-
-    const toDelete = await firestore
-      .collection(DatabaseConstants.donation_feed)
-      .doc(followedId)
-      .collection(DatabaseConstants.donations)
-      .where(DonationFields.user_id, '==', followingId)
-      .get();
-
-    toDelete.docs.forEach(async (ds) => await ds.ref.delete());
   });

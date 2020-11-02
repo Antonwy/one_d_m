@@ -17,13 +17,15 @@ import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class DonationWidget extends StatelessWidget {
-  Donation donation;
-  bool campaignPage, withUsername, backgroundLight;
+  final Donation donation;
+  final bool campaignPage, withUsername, backgroundLight;
+  Color textColor;
 
   DonationWidget(this.donation,
       {this.campaignPage = false,
       this.withUsername = true,
-      this.backgroundLight = true});
+      this.backgroundLight = true,
+      this.textColor});
   TextTheme _textTheme;
 
   Future _future;
@@ -64,23 +66,28 @@ class DonationWidget extends StatelessWidget {
               maxLines: 1,
               style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color:
-                      backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
+                  color: textColor ??
+                      (backgroundLight
+                          ? ColorTheme.blue
+                          : ColorTheme.whiteBlue)),
             ),
             subtitle: AutoSizeText(
               "${donation.campaignName} (${timeago.format(donation.createdAt)})",
               maxLines: 1,
               style: TextStyle(
-                  color: backgroundLight
-                      ? ColorTheme.blue.withOpacity(.7)
-                      : ColorTheme.whiteBlue.withOpacity(.7)),
+                  color: textColor ??
+                      (backgroundLight
+                          ? ColorTheme.blue.withOpacity(.7)
+                          : ColorTheme.whiteBlue.withOpacity(.7))),
             ),
             trailing: Text(
               "${Numeral(donation.amount).value()} DC",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color:
-                      backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
+                  color: textColor ??
+                      (backgroundLight
+                          ? ColorTheme.blue
+                          : ColorTheme.whiteBlue)),
             ),
             onTap: () {
               if (donation.anonym) return;
@@ -113,23 +120,25 @@ class DonationWidget extends StatelessWidget {
           subtitle: Text(
             timeago.format(donation.createdAt),
             style: TextStyle(
-                color: backgroundLight
-                    ? ColorTheme.blue.withOpacity(.5)
-                    : ColorTheme.whiteBlue.withOpacity(.5)),
+                color: textColor ??
+                    (backgroundLight
+                        ? ColorTheme.blue.withOpacity(.5)
+                        : ColorTheme.whiteBlue.withOpacity(.5))),
           ),
           title: AutoSizeText(donation.campaignName,
               maxLines: 1,
               style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: backgroundLight
-                      ? ColorTheme.blue
-                      : ColorTheme.whiteBlue)),
+                  color: textColor ??
+                      (backgroundLight
+                          ? ColorTheme.blue
+                          : ColorTheme.whiteBlue))),
           trailing: Text(
             "${Numeral(donation.amount).value()} DC",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color:
-                    backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
+                color: textColor ??
+                    (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
           ),
         ),
       );
@@ -154,23 +163,24 @@ class DonationWidget extends StatelessWidget {
             maxLines: 1,
             style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color:
-                    backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
+                color: textColor ??
+                    (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
           ),
           subtitle: AutoSizeText(
             "${donation.campaignName} (${timeago.format(donation.createdAt)})",
             maxLines: 1,
             style: TextStyle(
-                color: backgroundLight
-                    ? ColorTheme.blue.withOpacity(.7)
-                    : ColorTheme.whiteBlue.withOpacity(.7)),
+                color: textColor ??
+                    (backgroundLight
+                        ? ColorTheme.blue.withOpacity(.7)
+                        : ColorTheme.whiteBlue.withOpacity(.7))),
           ),
           trailing: Text(
             "${Numeral(donation.amount).value()} DC",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color:
-                    backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue),
+                color: textColor ??
+                    (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
           ),
           onTap: () {
             if (!withUsername) {

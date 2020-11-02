@@ -75,7 +75,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                                 _ColumnStats(
                                   value: statistics
                                       .donationStatistics.donationsCount,
-                                  desc: "Spenden",
+                                  desc: "Unterstützungen",
                                 ),
                               ],
                             ),

@@ -16,7 +16,7 @@ class UsersDonationsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Spenden",
+          "Unterstützt",
           style: TextStyle(color: ColorTheme.blue),
         ),
         iconTheme: IconThemeData(color: ColorTheme.blue),

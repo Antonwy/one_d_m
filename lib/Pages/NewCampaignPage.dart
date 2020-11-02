@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -273,8 +274,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                 }),
                                           ),
                                           SizedBox(height: 5),
-                                          Text(
+                                          AutoSizeText(
                                             campaign.name,
+                                            maxLines: 1,
                                             style: _textTheme.headline5
                                                 .copyWith(
                                                     fontSize: 30,
@@ -289,7 +291,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       ),
                                     ),
                                     SizedBox(
-                                      width: 10,
+                                      width: 20,
                                     ),
                                     Consumer<UserManager>(
                                         builder: (context, um, child) {

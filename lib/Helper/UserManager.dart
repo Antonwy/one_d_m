@@ -166,13 +166,13 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> createSocialUserDocument(
       String username, String phonenumber) async {
-    if (!await DatabaseService.checkUsernameAvailable(username)) {
+    if (!await DatabaseService.checkUsernameAvailable(username.trim())) {
       return ApiError("Nutzername nicht verfügbar!");
     }
 
     User user = User(
         phoneNumber: phonenumber,
-        name: username,
+        name: username.trim(),
         email: fireUser.email,
         imgUrl: fireUser.photoUrl,
         id: fireUser.uid);
@@ -189,7 +189,7 @@ class UserManager extends ChangeNotifier {
     try {
       status = Status.Authenticating;
 
-      if (!await DatabaseService.checkUsernameAvailable(user.name)) {
+      if (!await DatabaseService.checkUsernameAvailable(user.name.trim())) {
         status = Status.Unauthenticated;
         return ApiError(
             "Nutzername gibt es bereits, bitte wähle einen anderen!");
@@ -207,7 +207,7 @@ class UserManager extends ChangeNotifier {
       }
 
       UserUpdateInfo uui = UserUpdateInfo();
-      uui.displayName = user.name;
+      uui.displayName = user.name.trim();
 
       await res.user.updateProfile(uui);
 
@@ -223,11 +223,11 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<ApiResult> updateUser(User updatedUser) async {
-    if (updatedUser.name != user.name &&
-        !await DatabaseService.checkUsernameAvailable(updatedUser.name)) {
+    if (updatedUser.name.trim() != user.name.trim() &&
+        !await DatabaseService.checkUsernameAvailable(updatedUser.name.trim())) {
       return ApiError("Nutzername gibt es bereits, bitte wähle einen anderen!");
     }
-    user.name = updatedUser.name;
+    user.name = updatedUser.name.trim();
     user.imgUrl = updatedUser.imgUrl;
     user.thumbnailUrl = updatedUser.thumbnailUrl;
     user.phoneNumber = updatedUser.phoneNumber;

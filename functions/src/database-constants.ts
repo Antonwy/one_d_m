@@ -35,6 +35,7 @@ export class DatabaseConstants {
 
 export class CampaignFields {
   static readonly campaign_id: string = 'campaign_id';
+  static readonly author_id: string = 'authorId';
 }
 
 export class DonationFields {

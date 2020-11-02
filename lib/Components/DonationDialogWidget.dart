@@ -303,7 +303,7 @@ class DonationButton extends StatelessWidget {
           context: context,
           builder: (context) => AlertDialog(
                 title: Text("Bist du dir sicher?"),
-                content: Text("Willst du wirklich ${ddm.amount} DC Spenden?"),
+                content: Text("Willst du wirklich ${ddm.amount} DC zum unterstützen ausgeben?"),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 actions: <Widget>[
@@ -397,7 +397,7 @@ class AnonymDCCheckboxWidget extends StatelessWidget {
             onChanged: (val) => ddm.anonym = val,
             title: Text("Anonym?"),
             subtitle: Text(
-                "Wenn aktiviert, wird diese Spende nicht in deinem Profil angezeigt."),
+                "Wenn aktiviert, wird diese Unterstützung nicht in deinem Profil angezeigt."),
           ),
         );
       },
@@ -536,7 +536,7 @@ class AlternativeCampaignWidget extends StatelessWidget {
                               style: _theme.textTheme.headline6,
                             ),
                             AutoSizeText(
-                              "Wähle ein Projekt an das wir alternativ spenden können.",
+                              "Wähle ein Projekt an das wir alternativ unterstützen können.",
                               maxLines: 1,
                               style: _theme.textTheme.caption,
                             ),
@@ -622,7 +622,7 @@ class AlternativeCampaignWidget extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               content: Text(
-                  "Wir spenden an deine alternative Auswahl, sollte es eine Problem bei der Organisation oder bei der Überweisung geben.\nWir geben unser bestes in Allen Fällen deine erste Wahl zu erfüllen!"),
+                  "Wir unterstützen deine alternative Auswahl, sollte es eine Problem bei der Organisation oder bei der Überweisung geben.\nWir geben unser bestes in Allen Fällen deine erste Wahl zu erfüllen!"),
               actions: [
                 FlatButton(
                   onPressed: () {
@@ -832,7 +832,7 @@ class AddPaymentMethodDialog extends StatelessWidget {
                     height: 10,
                   ),
                   Text(
-                    "Bevor du etwas spenden kannst, brauchen wir deine Zahlungsdaten oder gesammelte DCs!",
+                    "Bevor du etwas unterstützen kannst, brauchen wir deine Zahlungsdaten oder gesammelte DCs!",
                     style: _theme.textTheme.bodyText2,
                   ),
                   SizedBox(

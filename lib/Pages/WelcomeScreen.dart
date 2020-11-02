@@ -63,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     maxLines: 2,
                   ),
                   description:
-                      "Wir wollen Spenden einfach, schnell und kostenlos machen. Vernetze dich mit deinen Freunden, verteile Donation Credits an Projekte und mache die Welt zu einem besseren Ort!",
+                      "Wir wollen das Unterstützen von wohltätigen Organisationen einfach, schnell und kostenlos machen. Vernetze dich mit deinen Freunden, verteile Donation Credits an Projekte und mache die Welt zu einem besseren Ort!",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
@@ -99,7 +99,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     onPressed: () => _animateToPage(5)),
                 _WelcomePage(
                   svgName: "donation",
-                  title: "Spendenablauf",
+                  title: "Ablauf",
                   description:
                       "Durch jede Ad-Impression erhalten wir Geld von unseren Werbenetzwerken. Das eingenommene Geld wird prozentual, je nach Aktivität, auf die Nutzer verteilt und am Ende des Monats an die von den Nutzern ausgewählten Projekte/Organisationen überwiesen. Dabei befindet sich das Geld zu keinem Zeitpunkt auf dem Konto der Nutzer. Dadurch werden unnötigen Transaktionen zwischen den Nutzern und One Dollar Movement vermieden.",
                   animatedValue: _getAnimatedValue(5, _page),

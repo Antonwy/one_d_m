@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
@@ -25,10 +27,12 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   StreamSubscription _fmStream;
   bool _saveToken = false;
+  HomePage _homePage;
 
   @override
   void initState() {
     super.initState();
+    _homePage = HomePage();
     _fmStream = _firebaseMessaging.onIosSettingsRegistered.listen((data) {
       print(data);
       _saveToken = true;
@@ -65,7 +69,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   @override
   Widget build(BuildContext context) {
     _um = Provider.of<UserManager>(context);
-    final HomePage _homePage = HomePage();
 
     if (_um.status == Status.NEEDSMOREINFORMATIONS) {
       return NewRegisterPage(
@@ -89,7 +92,7 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     }
 
     return FutureBuilder(
-        future: Future.delayed(Duration(milliseconds: 1500)),
+        future: Future.delayed(Duration(milliseconds: 2000)),
         builder: (context, snapshot) {
           if (_saveToken && _um?.uid != null) {
             _saveDeviceToken();
@@ -102,21 +105,40 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
                       child: CircularProgressIndicator(),
                     )
                   : _homePage,
-              Positioned.fill(
-                  child: IgnorePointer(
-                      ignoring:
-                          snapshot.connectionState != ConnectionState.waiting,
-                      child: AnimatedOpacity(
-                        duration: Duration(milliseconds: 500),
-                        opacity:
-                            snapshot.connectionState == ConnectionState.waiting
-                                ? 1
-                                : 0,
-                        child: Splash(),
-                      )))
+              _HideSplash(snapshot.connectionState == ConnectionState.done)
             ],
           );
         });
+  }
+}
+
+class _HideSplash extends StatefulWidget {
+  final bool _hide;
+
+  _HideSplash(this._hide);
+
+  @override
+  __HideSplashState createState() => __HideSplashState();
+}
+
+class __HideSplashState extends State<_HideSplash> {
+  bool _hideSplash = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+        child: IgnorePointer(
+            ignoring: widget._hide,
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 500),
+              onEnd: () {
+                setState(() {
+                  _hideSplash = true;
+                });
+              },
+              opacity: widget._hide ? 0 : 1,
+              child: _hideSplash ? Container() : Splash(),
+            )));
   }
 }
 
@@ -128,15 +150,8 @@ class Splash extends StatefulWidget {
 class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
   AnimationController _controller;
 
-  SvgPicture picture;
-
   @override
   void initState() {
-    picture = SvgPicture.asset(
-      'assets/images/odm-logo.svg',
-      height: 130,
-      width: 130,
-    );
     _controller =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
     _controller.forward();
@@ -151,47 +166,66 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
     return Material(
-      color: ColorTheme.whiteBlue,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          FadeTransition(
-            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_controller),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                  CurvedAnimation(parent: _controller, curve: Curves.easeOut)),
-              child: SlideTransition(
-                position: Tween<Offset>(begin: Offset(0, .4), end: Offset.zero)
-                    .animate(CurvedAnimation(
-                        parent: _controller, curve: Curves.easeOut)),
-                child: picture,
+      color: Colors.white,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Container(
+                      width: Tween<double>(begin: 0.0, end: 40.0)
+                          .animate(_controller)
+                          .value,
+                      height: 2,
+                      color: _theme.colors.dark,
+                    );
+                  }),
+              SizedBox(
+                height: 4,
               ),
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          FadeTransition(
-            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                CurvedAnimation(
-                    parent: _controller,
-                    curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-            child: SlideTransition(
-              position: Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
-                  .animate(CurvedAnimation(
-                      parent: _controller,
-                      curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-              child: Text(
-                "One Dollar Movement",
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: ColorTheme.blue),
+              FadeTransition(
+                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                        parent: _controller,
+                        curve: Interval(.3, 1.0, curve: Curves.easeOut))),
+                child: SlideTransition(
+                  position:
+                      Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
+                          .animate(CurvedAnimation(
+                              parent: _controller,
+                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
+                  child: Text("Willkommen bei",
+                      style: _theme.textTheme.dark.headline6
+                          .copyWith(fontWeight: FontWeight.w200)),
+                ),
               ),
-            ),
-          )
-        ],
+              FadeTransition(
+                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                        parent: _controller,
+                        curve: Interval(.3, 1.0, curve: Curves.easeOut))),
+                child: SlideTransition(
+                  position:
+                      Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
+                          .animate(CurvedAnimation(
+                              parent: _controller,
+                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
+                  child: AutoSizeText("One Dollar Movement",
+                      maxLines: 1,
+                      style: _theme.textTheme.dark.headline3
+                          .copyWith(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -45,95 +45,90 @@ class SessionsFeed extends StatelessWidget {
 
 class SessionView extends StatelessWidget {
   final BaseSession baseSession;
-  ThemeManager _theme;
 
   SessionView(this.baseSession);
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
     return Provider<SessionManager>(
-      create: (context) => SessionManager(baseSession),
-      builder: (c, child) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: CustomOpenContainer(
-          openBuilder: (context, close, scrollController) => SessionPage(
-            scrollController: scrollController,
-            sessionManager: Provider.of<SessionManager>(c, listen: false),
-          ),
-          closedColor: Colors.white,
-          closedElevation: 1,
-          closedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          closedBuilder: (context, open) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  Positioned.fill(
-                    child: Consumer<SessionManager>(
-                      builder: (context, sm, child) => StreamBuilder<Session>(
-                          stream: sm.sessionStream,
-                          builder: (context, snapshot) {
-                            return Container(
-                              decoration: snapshot.data == null
-                                  ? null
-                                  : BoxDecoration(
-                                      image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: CachedNetworkImageProvider(
-                                              snapshot.data.campaignImgUrl))),
-                            );
-                          }),
-                    ),
-                  ),
-                  Positioned.fill(
-                      child: Material(
-                    color: _theme.colors.dark,
-                  )),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Consumer<SessionManager>(
-                            builder: (context, sm, child) => Text(
-                              sm.baseSession.name,
-                              style: _theme.textTheme.light.headline5,
-                            ),
-                          )),
-                      _SessionDescription(),
-                      _SessionMemberList(),
-                      Divider(
-                        height: 1,
-                        color: Colors.white24,
-                      ),
-                      _DonateButton(),
-                    ],
-                  ),
-                ],
-              ),
-              _CampaignArea(),
-            ],
-          ),
-        ),
-      ),
-    );
+        create: (context) => SessionManager(baseSession),
+        builder: (c, child) => _ProvidedSessionView());
   }
 }
 
-class _SessionInfo extends StatelessWidget {
+class _ProvidedSessionView extends StatelessWidget {
   ThemeManager _theme;
-
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
-    return Row(
-      children: [
-        Expanded(child: _CampaignInfo()),
-        Expanded(child: _TimeRemaining()),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Builder(builder: (context) {
+        return Consumer<SessionManager>(
+          builder: (context, sm, child) => CustomOpenContainer(
+            openBuilder: (c, close, scrollController) => SessionPage(
+              scrollController: scrollController,
+              baseSession: sm.baseSession,
+            ),
+            closedColor: Colors.white,
+            closedElevation: 1,
+            closedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            closedBuilder: (context, open) => Provider<SessionManager>(
+              create: (context) => sm,
+              builder: (context, child) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    children: [
+                      Positioned.fill(
+                        child: StreamBuilder<Session>(
+                            stream: sm.sessionStream,
+                            builder: (context, snapshot) {
+                              return Container(
+                                decoration: snapshot.data == null
+                                    ? null
+                                    : BoxDecoration(
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: CachedNetworkImageProvider(
+                                                snapshot.data.campaignImgUrl))),
+                              );
+                            }),
+                      ),
+                      Positioned.fill(
+                          child: Material(
+                        color: _theme.colors.dark,
+                      )),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                sm.baseSession.name,
+                                style: _theme.textTheme.light.headline5,
+                              )),
+                          _SessionDescription(),
+                          SessionMemberList(),
+                          SizedBox(height: 12,),
+                          Divider(
+                            height: 1,
+                            color: Colors.white24,
+                          ),
+                          _DonateButton(),
+                        ],
+                      ),
+                    ],
+                  ),
+                  _CampaignArea(),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }
@@ -179,84 +174,6 @@ class _SessionDescription extends StatelessWidget {
   }
 }
 
-class _CampaignInfo extends StatelessWidget {
-  ThemeManager _theme;
-
-  @override
-  Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-    return Consumer<SessionManager>(
-      builder: (context, sm, child) => StreamBuilder<Session>(
-          stream: sm.sessionStream,
-          builder: (context, snapshot) {
-            return CustomOpenContainer(
-              closedColor: _theme.colors.dark,
-              closedElevation: 0,
-              closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0)),
-              tappable: snapshot.hasData,
-              openBuilder: (context, close, scrollController) =>
-                  NewCampaignPage(
-                Campaign(
-                    id: sm.baseSession.campaignId,
-                    imgUrl: snapshot.data?.campaignImgUrl ?? "",
-                    name: snapshot.data?.campaignName ?? ""),
-                scrollController: scrollController,
-              ),
-              closedBuilder: (context, open) => Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Center(
-                  child: Text(
-                    snapshot.data?.campaignName ?? "",
-                    style: _theme.textTheme.textOnDark.bodyText1
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
-  }
-}
-
-class _TimeRemaining extends StatelessWidget {
-  ThemeManager _theme;
-
-  @override
-  Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-
-    return Material(
-      color: _theme.colors.light,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Center(
-          child: Consumer<SessionManager>(
-            builder: (context, sm, child) {
-              Duration diff = sm.baseSession.endDate.difference(DateTime.now());
-              return RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "${diff.inHours} ",
-                      style: _theme.textTheme.dark.bodyText1
-                          .copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: "Stunden",
-                    ),
-                  ],
-                  style: _theme.textTheme.dark.bodyText2,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _DonateButton extends StatelessWidget {
   ThemeManager _theme;
 
@@ -295,7 +212,7 @@ class _DonateButton extends StatelessWidget {
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(
-                                        text: "gespendet",
+                                        text: "unterstützt",
                                         style:
                                             _theme.textTheme.textOnDark.caption,
                                       ),
@@ -426,70 +343,25 @@ class _CampaignArea extends StatelessWidget {
   }
 }
 
-class _DonationArea extends StatelessWidget {
+class SessionMemberList extends StatelessWidget {
   ThemeManager _theme;
 
-  @override
-  Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-    return Consumer<SessionManager>(
-      builder: (context, sm, child) => StreamBuilder<List<Donation>>(
-          stream: DatabaseService.getDonationsFromSession(sm.baseSession.id),
-          builder: (context, snapshot) {
-            List<Donation> donations = snapshot.data ?? [];
-            return Material(
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        12, 12, 12, donations.isEmpty ? 12 : 6),
-                    child: Text(
-                      "Letzte Spenden (${donations.length})",
-                      style: _theme.textTheme.dark.bodyText1,
-                    ),
-                  ),
-                  ...donations
-                      .map((don) => Material(
-                            color: ThemeManager.of(context).colors.light,
-                            child: DonationWidget(
-                              don,
-                            ),
-                          ))
-                      .toList()
-                ],
-              ),
-            );
-          }),
-    );
-  }
-}
-
-class _SessionMemberList extends StatelessWidget {
-  ThemeManager _theme;
+  SessionMemberList({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      padding: const EdgeInsets.only(bottom: 0),
       child: Consumer<SessionManager>(
-        builder: (context, sm, child) => Container(
+        builder: (context, sm, child) => SizedBox(
             height: 150,
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
               slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.only(right: 12),
-                  sliver: SliverToBoxAdapter(
-                    child: Center(
-                        child: RotatedBox(
-                            quarterTurns: 3,
-                            child: Text(
-                              "Mitglieder",
-                              style: _theme.textTheme.textOnDark.bodyText1,
-                            ))),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 150,
                   ),
                 ),
                 StreamBuilder<List<SessionMember>>(
@@ -521,8 +393,8 @@ class _SessionMemberList extends StatelessWidget {
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                                right: index < members.length - 1 ? 12.0 : 0.0),
-                            child: _MemberView(member: members[index]),
+                                left: index <= members.length - 1 ? 12.0 : 0.0),
+                            child: SessionMemberView(member: members[index]),
                           );
                         }, childCount: members.length),
                       );
@@ -541,7 +413,12 @@ class _SessionMemberList extends StatelessWidget {
                     stream: sm.invitedMembersStream,
                     builder: (context, snapshot) {
                       List<SessionMember> members = snapshot.data ?? [];
-                      if (members.isEmpty) return SliverToBoxAdapter();
+                      if (members.isEmpty)
+                        return SliverToBoxAdapter(
+                          child: SizedBox(
+                            width: 12,
+                          ),
+                        );
                       return SliverPadding(
                         padding: const EdgeInsets.only(right: 12),
                         sliver: SliverToBoxAdapter(
@@ -564,8 +441,9 @@ class _SessionMemberList extends StatelessWidget {
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                                right: index < members.length - 1 ? 12.0 : 0.0),
-                            child: _MemberView(
+                                right:
+                                    index <= members.length - 1 ? 12.0 : 0.0),
+                            child: SessionMemberView(
                               member: members[index],
                               invited: true,
                             ),
@@ -580,12 +458,13 @@ class _SessionMemberList extends StatelessWidget {
   }
 }
 
-class _MemberView extends StatelessWidget {
+class SessionMemberView extends StatelessWidget {
   final SessionMember member;
   final bool invited;
   ThemeManager _theme;
 
-  _MemberView({Key key, this.member, this.invited = false}) : super(key: key);
+  SessionMemberView({Key key, this.member, this.invited = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

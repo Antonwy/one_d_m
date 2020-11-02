@@ -33,6 +33,7 @@ exports.createSession = functions.https.onCall(async (req, res) => {
     campaign_short_description: result.campaign.short_description,
     session_name: result.session_name,
     session_description: result.session_description,
+    current_amount: 0,
     amount_per_user: result.amount_per_user,
     created_at: admin.firestore.Timestamp.fromDate(createdAt),
     end_date: admin.firestore.Timestamp.fromDate(endDate),

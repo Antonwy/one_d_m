@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
-import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -94,7 +93,7 @@ class SessionPage extends StatelessWidget {
                 ),
               ),
             ),
-            CampaignInfo(),
+            CampaignInfo<SessionManager>(),
             LastSessionDonations(),
             SliverToBoxAdapter(
               child: SizedBox(
@@ -177,14 +176,14 @@ class _SessionInfoItem extends StatelessWidget {
   }
 }
 
-class CampaignInfo extends StatelessWidget {
+class CampaignInfo<T extends BaseSessionManager> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: Consumer<SessionManager>(
+        child: Consumer<T>(
           builder: (context, sm, child) => StreamBuilder<Session>(
               stream: sm.sessionStream,
               builder: (context, snapshot) {

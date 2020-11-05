@@ -9,6 +9,7 @@ import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
+import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -32,11 +33,14 @@ class _ProfilePageState extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin {
   ThemeManager _theme;
   Stream<List<BaseSession>> _sessionStream;
+  Stream<List<BaseSession>> _certifiedSessionsStream;
 
   @override
   void initState() {
-    _sessionStream = DatabaseService.getSessionsFromUser(
-        Provider.of<UserManager>(context, listen: false).uid);
+    String uid = Provider.of<UserManager>(context, listen: false).uid;
+    _sessionStream = DatabaseService.getSessionsFromUser(uid);
+    _certifiedSessionsStream =
+        DatabaseService.getCertifiedSessionsFromUser(uid);
     super.initState();
   }
 
@@ -227,10 +231,6 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-        // ChangeNotifierProvider.value(
-        //     value: DailyReportManager(), child: DailyReportFeed()),
-        // ChangeNotifierProvider.value(
-        //     value: DailyReportManager(), child: ActivityDonationFeed()),
         StreamBuilder<List<BaseSession>>(
             stream: _sessionStream,
             builder: (context, snapshot) {
@@ -260,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage>
                           height: 20,
                         ),
                         Text(
-                          "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen.",
+                          "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
                           style: _theme.textTheme.dark.bodyText1,
                           textAlign: TextAlign.center,
                         ),
@@ -289,6 +289,12 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
               );
             }),
+        Consumer<UserManager>(
+            builder: (context, um, child) => SliverPadding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  sliver: CertifiedSessionsList(
+                      DatabaseService.getCertifiedSessionsFromUser(um.uid)),
+                )),
         SessionsFeed()
       ],
     );

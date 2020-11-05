@@ -88,6 +88,7 @@ export interface SessionType {
   created_at: FirebaseFirestore.Timestamp;
   end_date: FirebaseFirestore.Timestamp;
   creator_id: string;
+  img_url?: string;
 }
 
 export interface UserSessionType {
@@ -99,6 +100,7 @@ export interface UserSessionType {
   end_date: FirebaseFirestore.Timestamp;
   creator_id: string;
   campaign_id: string;
+  img_url?: string;
 }
 
 export interface SessionMemberType {

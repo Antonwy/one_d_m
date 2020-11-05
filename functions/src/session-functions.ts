@@ -221,3 +221,68 @@ exports.onDeleteSession = functions.firestore
 
     sessionMembers.forEach(async (doc) => await doc.ref.delete());
   });
+
+exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
+  if (!res.auth) return;
+
+  const userId = res.auth.uid;
+  const sessionId = req.session_id;
+
+  const sessionRef = firestore
+    .collection(DatabaseConstants.sessions)
+    .doc(sessionId);
+
+  // add user as member in session
+  await sessionRef
+    .collection(DatabaseConstants.session_members)
+    .doc(userId)
+    .set({
+      donation_amount: 0,
+      id: userId,
+    } as SessionMemberType);
+
+  const session = (await sessionRef.get()).data() as SessionType;
+
+  // add session to User
+  await firestore
+    .collection(DatabaseConstants.user)
+    .doc(userId)
+    .collection(DatabaseConstants.sessions)
+    .doc(sessionId)
+    .set({
+      id: sessionId,
+      session_name: session.session_name,
+      session_description: session.session_description,
+      amount_per_user: session.amount_per_user,
+      created_at: session.created_at,
+      end_date: session.end_date,
+      creator_id: session.creator_id,
+      campaign_id: session.campaign_id,
+      img_url: session.img_url,
+    } as UserSessionType);
+});
+
+exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
+  if (!res.auth) return;
+
+  const userId = res.auth.uid;
+  const sessionId = req.session_id;
+
+  const sessionRef = firestore
+    .collection(DatabaseConstants.sessions)
+    .doc(sessionId);
+
+  // remove user as member in session
+  await sessionRef
+    .collection(DatabaseConstants.session_members)
+    .doc(userId)
+    .delete();
+
+  // add session to User
+  await firestore
+    .collection(DatabaseConstants.user)
+    .doc(userId)
+    .collection(DatabaseConstants.sessions)
+    .doc(sessionId)
+    .delete();
+});

@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
-import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -112,7 +110,9 @@ class _ProvidedSessionView extends StatelessWidget {
                               )),
                           _SessionDescription(),
                           SessionMemberList(),
-                          SizedBox(height: 12,),
+                          SizedBox(
+                            height: 12,
+                          ),
                           Divider(
                             height: 1,
                             color: Colors.white24,
@@ -394,7 +394,8 @@ class SessionMemberList extends StatelessWidget {
                           return Padding(
                             padding: EdgeInsets.only(
                                 left: index <= members.length - 1 ? 12.0 : 0.0),
-                            child: SessionMemberView(member: members[index]),
+                            child: SessionMemberView<SessionManager>(
+                                member: members[index]),
                           );
                         }, childCount: members.length),
                       );
@@ -443,7 +444,7 @@ class SessionMemberList extends StatelessWidget {
                             padding: EdgeInsets.only(
                                 right:
                                     index <= members.length - 1 ? 12.0 : 0.0),
-                            child: SessionMemberView(
+                            child: SessionMemberView<SessionManager>(
                               member: members[index],
                               invited: true,
                             ),
@@ -458,7 +459,7 @@ class SessionMemberList extends StatelessWidget {
   }
 }
 
-class SessionMemberView extends StatelessWidget {
+class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
   final SessionMember member;
   final bool invited;
   ThemeManager _theme;
@@ -469,7 +470,7 @@ class SessionMemberView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
-    return Consumer<SessionManager>(
+    return Consumer<T>(
       builder: (context, sm, child) => Opacity(
         opacity: invited ? .3 : 1.0,
         child: FutureBuilder<User>(

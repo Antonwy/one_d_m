@@ -10,16 +10,24 @@ import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'Helper.dart';
 
 class CertifiedSessionsList extends StatelessWidget {
+  final Stream<List<Session>> stream;
+
+  CertifiedSessionsList([this.stream]);
+
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Container(
-        height: 120,
-        child: StreamBuilder<List<Session>>(
-            stream: DatabaseService.getCertifiedSessions(),
-            builder: (context, snapshot) {
-              List<BaseSession> sessions = snapshot.data ?? [];
-              return ListView.separated(
+      child: StreamBuilder<List<Session>>(
+          stream: stream ?? DatabaseService.getCertifiedSessions(),
+          builder: (context, snapshot) {
+            List<BaseSession> sessions = snapshot.data ?? [];
+
+            if (snapshot.connectionState == ConnectionState.active &&
+                sessions.isEmpty) return Container();
+
+            return Container(
+              height: 120,
+              child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   separatorBuilder: (context, index) => SizedBox(
                         width: 8,
@@ -30,9 +38,9 @@ class CertifiedSessionsList extends StatelessWidget {
                             right: index == sessions.length - 1 ? 12.0 : 0.0),
                         child: _CertifiedSessionView(sessions[index]),
                       ),
-                  itemCount: sessions.length);
-            }),
-      ),
+                  itemCount: sessions.length),
+            );
+          }),
     );
   }
 }
@@ -51,23 +59,28 @@ class _CertifiedSessionView extends StatelessWidget {
         closedColor: Colors.grey[200],
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        closedElevation: 0,
         openBuilder: (context, close, scrollController) => CertifiedSessionPage(
           session: session,
           scrollController: scrollController,
         ),
         closedBuilder: (context, open) => Stack(
           children: [
-            Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: session.imgUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned.fill(
-              child: Material(
-                color: Colors.black38,
-              ),
-            ),
+            session?.imgUrl == null
+                ? Container()
+                : Positioned.fill(
+                    child: CachedNetworkImage(
+                      imageUrl: session?.imgUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+            session?.imgUrl == null
+                ? Container()
+                : Positioned.fill(
+                    child: Material(
+                      color: Colors.black38,
+                    ),
+                  ),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Align(
@@ -78,7 +91,9 @@ class _CertifiedSessionView extends StatelessWidget {
                       Expanded(
                           child: AutoSizeText(
                         session.name,
-                        style: _theme.textTheme.light.bodyText1,
+                        style: session?.imgUrl == null
+                            ? _theme.textTheme.dark.bodyText1
+                            : _theme.textTheme.light.bodyText1,
                         maxLines: 1,
                       )),
                       SizedBox(

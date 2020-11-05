@@ -9,6 +9,7 @@ abstract class BaseSessionManager {
   void initStreams();
 
   BaseSessionManager(this.baseSession) {
+    sessionStream = DatabaseService.getSession(baseSession.id);
     initStreams();
   }
 }
@@ -20,7 +21,6 @@ class SessionManager extends BaseSessionManager {
 
   @override
   void initStreams() {
-    sessionStream = DatabaseService.getSession(baseSession.id);
     membersStream = DatabaseService.getSessionMembers(baseSession.id);
     invitedMembersStream =
         DatabaseService.getInvitedSessionMembers(baseSession.id);

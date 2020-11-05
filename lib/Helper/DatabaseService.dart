@@ -53,7 +53,9 @@ class DatabaseService {
       FINDFRIENDS = "httpFunctions-findFriends",
       CREATESESSION = "session-createSession",
       ACCEPTINVITE = "session-acceptInvite",
-      DECLINEINVITE = "session-declineInvite";
+      DECLINEINVITE = "session-declineInvite",
+      JOIN_CERTIFIED_SESSION = "session-joinCertifiedSession",
+      LEAVE_CERTIFIED_SESSION = "session-leaveCertifiedSession";
 
   static final Firestore firestore = Firestore.instance;
   static final CloudFunctions cloudFunctions = CloudFunctions.instance;
@@ -717,6 +719,15 @@ class DatabaseService {
         .map((BaseSession.fromQuerySnapshot));
   }
 
+  static Stream<List<Session>> getCertifiedSessionsFromUser(String uid) {
+    return userCollection
+        .document(uid)
+        .collection(SESSIONS)
+        .where(BaseSession.END_DATE, isNull: true)
+        .snapshots()
+        .map((Session.fromQuerySnapshot));
+  }
+
   static Stream<List<Session>> getCertifiedSessions() {
     return sessionsCollection
         .where(BaseSession.END_DATE, isNull: true)
@@ -806,5 +817,17 @@ class DatabaseService {
     return cloudFunctions
         .getHttpsCallable(functionName: DECLINEINVITE)
         .call(invite.toMap());
+  }
+
+  static Future<HttpsCallableResult> joinCertifiedSession(String sid) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: JOIN_CERTIFIED_SESSION)
+        .call({"session_id": sid});
+  }
+
+  static Future<HttpsCallableResult> leaveCertifiedSession(String sid) {
+    return cloudFunctions
+        .getHttpsCallable(functionName: LEAVE_CERTIFIED_SESSION)
+        .call({"session_id": sid});
   }
 }

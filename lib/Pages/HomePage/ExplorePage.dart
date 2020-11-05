@@ -4,9 +4,9 @@ import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/User.dart';
 
 class ExplorePage extends StatefulWidget {
   @override
@@ -47,23 +47,23 @@ class _ExplorePageState extends State<ExplorePage>
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SearchBar(),
+                    child: SearchBar(
+                      categoryIndex: _categoryId,
+                      onCategoryChange: (index) {
+                        setState(() {
+                          _categoryId = index;
+                        });
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Container(
-              height: 95,
-              margin: EdgeInsets.symmetric(vertical: 10),
-              child: CategoriesList((catId) {
-                setState(() {
-                  _categoryId = catId;
-                });
-              })),
-        ),
+        SliverPadding(
+            padding: const EdgeInsets.only(bottom: 6),
+            sliver: CertifiedSessionsList()),
         StreamBuilder<List<Campaign>>(
             stream: _categoryId == 100
                 ? DatabaseService.getTopCampaignsStream()

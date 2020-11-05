@@ -152,12 +152,6 @@ exports.acceptInvite = functions.https.onCall(async (req, res) => {
     .doc(invite.id)
     .delete();
 
-  // delete invite in session
-  await sessionDoc
-    .collection(DatabaseConstants.session_invites)
-    .doc(userId)
-    .delete();
-
   // create member access in session
   await sessionDoc
     .collection(DatabaseConstants.session_members)
@@ -200,14 +194,6 @@ exports.declineInvite = functions.https.onCall(async (req, res) => {
     .collection(DatabaseConstants.session_invites)
     .doc(invite.id)
     .delete();
-
-  // delete invite in session
-  await firestore
-    .collection(DatabaseConstants.sessions)
-    .doc(invite.id)
-    .collection(DatabaseConstants.session_invites)
-    .doc(userId)
-    .delete();
 });
 
 exports.onDeleteSession = functions.firestore
@@ -226,4 +212,12 @@ exports.onDeleteSession = functions.firestore
       .get();
 
     sessionInviteDocs.forEach(async (doc) => await doc.ref.delete());
+
+    const sessionMembers = await firestore
+      .collection(DatabaseConstants.sessions)
+      .doc(context.params.sessionId)
+      .collection(DatabaseConstants.session_members)
+      .get();
+
+    sessionMembers.forEach(async (doc) => await doc.ref.delete());
   });

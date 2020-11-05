@@ -51,8 +51,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
   bool _isAuthorOfCampaign = false;
 
-  AnimationController _transitionController;
-
   @override
   void initState() {
     _scrollController = widget.scrollController ?? ScrollController();
@@ -63,22 +61,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
       _scrollOffset.value = _scrollController.offset;
     });
 
-    _transitionController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 1500));
-
-    _transitionController.forward();
-
     _campaignStream = DatabaseService.getCampaignStream(widget.campaign.id);
     _donationStream =
         DatabaseService.getDonationFromCampaignStream(widget.campaign.id);
 
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _transitionController.dispose();
-    super.dispose();
   }
 
   @override
@@ -100,56 +87,33 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                         _isAuthorOfCampaign = snapshot.data.authorId == um.uid;
                       }
 
-                      return ScaleTransition(
-                        scale: Tween<double>(begin: .8, end: 1.0).animate(
-                            CurvedAnimation(
-                                parent: _transitionController,
-                                curve: Interval(.2, .8,
-                                    curve: Curves.fastLinearToSlowEaseIn))),
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                                  begin: Offset(0, 1.0), end: Offset.zero)
-                              .animate(CurvedAnimation(
-                                  parent: _transitionController,
-                                  curve: Interval(.2, .8,
-                                      curve: Curves.fastLinearToSlowEaseIn))),
-                          child: FadeTransition(
-                            opacity: CurvedAnimation(
-                                parent: _transitionController,
-                                curve: Interval(.2, .8,
-                                    curve: Curves.fastLinearToSlowEaseIn)),
-                            child: FloatingActionButton.extended(
-                                backgroundColor:
-                                    activated ? _bTheme.dark : Colors.grey,
-                                label: _isAuthorOfCampaign
-                                    ? Text("Post erstellen")
-                                    : Text("Unterstützen"),
-                                onPressed: activated
-                                    ? _isAuthorOfCampaign
-                                        ? () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (c) =>
-                                                        CreateNewsPage(
-                                                            campaign)));
-                                          }
-                                        : () {
-                                            BottomDialog bd =
-                                                BottomDialog(context);
-                                            bd.show(DonationDialogWidget(
-                                              campaign: snapshot.data,
-                                              user: um.user,
-                                              context: context,
-                                              close: bd.close,
-                                            ));
-                                          }
-                                    : () {
-                                        Helper.showConnectionSnackBar(context);
-                                      }),
-                          ),
-                        ),
-                      );
+                      return FloatingActionButton.extended(
+                          backgroundColor:
+                              activated ? _bTheme.dark : Colors.grey,
+                          label: _isAuthorOfCampaign
+                              ? Text("Post erstellen")
+                              : Text("Unterstützen"),
+                          onPressed: activated
+                              ? _isAuthorOfCampaign
+                                  ? () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (c) =>
+                                                  CreateNewsPage(campaign)));
+                                    }
+                                  : () {
+                                      BottomDialog bd = BottomDialog(context);
+                                      bd.show(DonationDialogWidget(
+                                        campaign: snapshot.data,
+                                        user: um.user,
+                                        context: context,
+                                        close: bd.close,
+                                      ));
+                                    }
+                              : () {
+                                  Helper.showConnectionSnackBar(context);
+                                });
                     });
               });
             }),
@@ -321,13 +285,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         MainAxisAlignment.spaceEvenly,
                                     children: <Widget>[
                                       _StatCollumn(
-                                          controller: _transitionController,
-                                          interval: Interval(.1, .6),
                                           value: campaign.amount,
                                           description: "Donation Credits"),
                                       _StatCollumn(
-                                          controller: _transitionController,
-                                          interval: Interval(.2, .7),
                                           value: campaign.subscribedCount,
                                           description: "Abonnenten",
                                           isDark: true),
@@ -343,22 +303,16 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         1,
                                         user: um.user,
                                         campaign: campaign,
-                                        controller: _transitionController,
-                                        interval: Interval(0.2, .7),
                                       ),
                                       _AmountWidget(
                                         2,
                                         user: um.user,
                                         campaign: campaign,
-                                        controller: _transitionController,
-                                        interval: Interval(0.3, .8),
                                       ),
                                       _AmountWidget(
                                         5,
                                         user: um.user,
                                         campaign: campaign,
-                                        controller: _transitionController,
-                                        interval: Interval(0.4, .8),
                                       ),
                                     ],
                                   ),
@@ -366,47 +320,13 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                 SizedBox(
                                   height: 20,
                                 ),
-                                SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset(0.0, 4.0),
-                                          end: Offset.zero)
-                                      .animate(CurvedAnimation(
-                                          parent: _transitionController,
-                                          curve: Interval(.1, .7,
-                                              curve: Curves
-                                                  .fastLinearToSlowEaseIn))),
-                                  child: FadeTransition(
-                                    opacity: CurvedAnimation(
-                                        parent: _transitionController,
-                                        curve: Interval(.1, .7,
-                                            curve:
-                                                Curves.fastLinearToSlowEaseIn)),
-                                    child: Text("Beschreibung",
-                                        style: _textTheme.headline6),
-                                  ),
-                                ),
+                                Text("Beschreibung",
+                                    style: _textTheme.headline6),
                                 SizedBox(
                                   height: 5,
                                 ),
-                                SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset(0.0, .1),
-                                          end: Offset.zero)
-                                      .animate(CurvedAnimation(
-                                          parent: _transitionController,
-                                          curve: Interval(.2, .8,
-                                              curve: Curves
-                                                  .fastLinearToSlowEaseIn))),
-                                  child: FadeTransition(
-                                    opacity: CurvedAnimation(
-                                        parent: _transitionController,
-                                        curve: Interval(.2, .8,
-                                            curve:
-                                                Curves.fastLinearToSlowEaseIn)),
-                                    child: Text(campaign.description ?? "",
-                                        style: _textTheme.bodyText2),
-                                  ),
-                                ),
+                                Text(campaign.description ?? "",
+                                    style: _textTheme.bodyText2),
                                 StreamBuilder<List<Donation>>(
                                     stream: _donationStream,
                                     builder: (context, snapshot) {
@@ -480,23 +400,17 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                   Positioned(
                     child: Padding(
                       padding: const EdgeInsets.only(left: 12.0),
-                      child: ScaleTransition(
-                        scale: CurvedAnimation(
-                            parent: _transitionController,
-                            curve: Interval(.1, .6,
-                                curve: Curves.fastLinearToSlowEaseIn)),
-                        child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          shape: CircleBorder(),
-                          elevation: 10,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: IconButton(
-                                icon: Icon(Icons.arrow_downward),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                }),
-                          ),
+                      child: Material(
+                        clipBehavior: Clip.antiAlias,
+                        shape: CircleBorder(),
+                        elevation: 10,
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: IconButton(
+                              icon: Icon(Icons.arrow_downward),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              }),
                         ),
                       ),
                     ),
@@ -562,60 +476,43 @@ class _StatCollumn extends StatelessWidget {
   final int value;
   final String description;
   final bool isDark;
-  final Interval interval;
-  final AnimationController controller;
 
-  _StatCollumn(
-      {this.value,
-      this.description,
-      this.isDark = false,
-      this.interval,
-      this.controller});
+  _StatCollumn({
+    this.value,
+    this.description,
+    this.isDark = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Interval _interval = Interval(interval.begin, interval.end,
-        curve: Curves.fastLinearToSlowEaseIn);
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Expanded(
-      child: SlideTransition(
-        position: Tween<Offset>(begin: Offset(0.0, .2), end: Offset.zero)
-            .animate(CurvedAnimation(parent: controller, curve: _interval)),
-        child: ScaleTransition(
-          scale: Tween<double>(begin: .9, end: 1.0)
-              .animate(CurvedAnimation(parent: controller, curve: _interval)),
-          child: FadeTransition(
-            opacity: CurvedAnimation(parent: controller, curve: _interval),
-            child: Card(
-              elevation: 0,
-              color: isDark ? _bTheme.dark : _bTheme.contrast,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    "${Numeral(value ?? 0).value()}",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        color: isDark ? _bTheme.contrast : _bTheme.dark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30),
-                  ),
-                  SizedBox(
-                    height: 6,
-                  ),
-                  Text(
-                    description,
-                    style: TextStyle(
-                        color: isDark ? _bTheme.contrast : _bTheme.dark,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+      child: Card(
+        elevation: 0,
+        color: isDark ? _bTheme.dark : _bTheme.contrast,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "${Numeral(value ?? 0).value()}",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                  color: isDark ? _bTheme.contrast : _bTheme.dark,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30),
             ),
-          ),
+            SizedBox(
+              height: 6,
+            ),
+            Text(
+              description,
+              style: TextStyle(
+                  color: isDark ? _bTheme.contrast : _bTheme.dark,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
@@ -627,91 +524,67 @@ class _AmountWidget extends StatelessWidget {
   final User user;
   final Campaign campaign;
 
-  final Interval interval;
-  final AnimationController controller;
-
-  _AmountWidget(this.amount,
-      {this.user, this.campaign, this.interval, this.controller});
+  _AmountWidget(this.amount, {this.user, this.campaign});
 
   TextTheme _textTheme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    Interval _interval = Interval(interval.begin, interval.end,
-        curve: Curves.fastLinearToSlowEaseIn);
     return Expanded(
       child: OfflineBuilder(
           child: Container(),
           connectivityBuilder: (context, connection, child) {
             bool activated = connection != ConnectivityResult.none;
-            return AnimatedOpacity(
-              duration: Duration(milliseconds: 250),
-              opacity: activated ? 1 : .4,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                        begin: Offset(0.0, .2), end: Offset.zero)
-                    .animate(
-                        CurvedAnimation(parent: controller, curve: _interval)),
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: .9, end: 1.0).animate(
-                      CurvedAnimation(parent: controller, curve: _interval)),
-                  child: FadeTransition(
-                    opacity:
-                        CurvedAnimation(parent: controller, curve: _interval),
-                    child: Container(
-                      height: 100,
-                      child: Card(
-                        clipBehavior: Clip.antiAlias,
-                        color: ColorTheme.whiteBlue,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        child: InkWell(
-                          onTap: () {
-                            if (!activated) {
-                              Helper.showConnectionSnackBar(context);
-                              return;
-                            }
+            return Container(
+              height: 100,
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                color: ColorTheme.whiteBlue,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: InkWell(
+                  onTap: () {
+                    if (!activated) {
+                      Helper.showConnectionSnackBar(context);
+                      return;
+                    }
 
-                            BottomDialog bd = BottomDialog(context);
-                            bd.show(DonationDialogWidget(
-                              campaign: campaign,
-                              defaultSelectedAmount: amount,
-                              user: user,
-                              context: context,
-                              close: bd.close,
-                            ));
-                          },
+                    BottomDialog bd = BottomDialog(context);
+                    bd.show(DonationDialogWidget(
+                      campaign: campaign,
+                      defaultSelectedAmount: amount,
+                      user: user,
+                      context: context,
+                      close: bd.close,
+                    ));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Material(
+                          color: ColorTheme.blue.withOpacity(.2),
+                          shape: CircleBorder(),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15.0, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Material(
-                                  color: ColorTheme.blue.withOpacity(.2),
-                                  shape: CircleBorder(),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "DC",
-                                      style: TextStyle(
-                                          fontSize: 12, color: ColorTheme.blue),
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  "${amount}.00",
-                                  style: _textTheme.headline6
-                                      .copyWith(color: ColorTheme.blue),
-                                ),
-                              ],
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "DC",
+                              style: TextStyle(
+                                  fontSize: 12, color: ColorTheme.blue),
                             ),
                           ),
                         ),
-                      ),
+                        Text(
+                          "${amount}.00",
+                          style: _textTheme.headline6
+                              .copyWith(color: ColorTheme.blue),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -26,7 +26,8 @@ class BaseSession {
       name: doc[SESSION_NAME],
       amountPerUser: doc[AMOUNT_PER_USER],
       createdAt: (doc[CREATED_AT] as Timestamp).toDate(),
-      endDate: (doc[END_DATE] as Timestamp).toDate(),
+      endDate:
+          doc[END_DATE] == null ? null : (doc[END_DATE] as Timestamp).toDate(),
       sessionDescription: doc[SESSION_DESCRIPTION] ?? "",
     );
   }
@@ -46,7 +47,7 @@ class BaseSession {
 }
 
 class Session extends BaseSession {
-  final String campaignImgUrl, campaignName, campaignShortDescription;
+  final String campaignImgUrl, campaignName, campaignShortDescription, imgUrl;
   final int currentAmount;
 
   Session(
@@ -58,6 +59,7 @@ class Session extends BaseSession {
       DateTime endDate,
       String campaignId,
       String sessionDescription,
+      this.imgUrl,
       this.currentAmount,
       this.campaignImgUrl,
       this.campaignName,
@@ -79,19 +81,27 @@ class Session extends BaseSession {
         name: doc[BaseSession.SESSION_NAME],
         amountPerUser: doc[BaseSession.AMOUNT_PER_USER],
         createdAt: (doc[BaseSession.CREATED_AT] as Timestamp).toDate(),
-        endDate: (doc[BaseSession.END_DATE] as Timestamp).toDate(),
+        endDate: doc[BaseSession.END_DATE] == null
+            ? null
+            : (doc[BaseSession.END_DATE] as Timestamp).toDate(),
         campaignId: doc[BaseSession.CAMPAIGN_ID],
         campaignName: doc[CAMPAIGN_NAME],
         campaignImgUrl: doc[CAMPAIGN_IMG_URL],
         currentAmount: doc[CURRENT_AMOUNT],
         campaignShortDescription: doc[CAMPAIGN_SHORT_DESCRIPTION],
-        sessionDescription: doc[BaseSession.SESSION_DESCRIPTION] ?? "");
+        sessionDescription: doc[BaseSession.SESSION_DESCRIPTION] ?? "",
+        imgUrl: doc[IMG_URL]);
+  }
+
+  static List<Session> fromQuerySnapshot(QuerySnapshot qs) {
+    return qs.documents.map((doc) => Session.fromDoc(doc)).toList();
   }
 
   static const CAMPAIGN_IMG_URL = "campaign_img_url",
       CAMPAIGN_NAME = "campaign_name",
       CURRENT_AMOUNT = "current_amount",
-      CAMPAIGN_SHORT_DESCRIPTION = "campaign_short_description";
+      CAMPAIGN_SHORT_DESCRIPTION = "campaign_short_description",
+      IMG_URL = "img_url";
 }
 
 class UploadableSession {

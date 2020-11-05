@@ -89,23 +89,19 @@ exports.cleanDatabase = functions.https.onRequest(async (req, res) => {
     }
   });
 
-  // clean following/followed collections
-  const followingCollectionRef = firestore.collection(
-    DatabaseConstants.following
-  );
+  const usersRef = firestore.collection(DatabaseConstants.user);
+  const usersCollection = await usersRef.get();
 
-  const followingCollection = await followingCollectionRef.get();
-
-  // console.log(`followingCollection:\n${followingCollection}`);
-  followingCollection.forEach(async (doc) => {
-    const userDoc = await userRef.doc(doc.id).get();
-
-    if (!userDoc.exists) {
-      (await doc.ref.collection(DatabaseConstants.users).get()).forEach(
-        async (d) => await d.ref.delete()
-      );
-      await doc.ref.delete();
-    }
+  usersCollection.forEach(async (doc) => {
+    const followingUsers = await firestore
+      .collection(DatabaseConstants.following)
+      .doc(doc.id)
+      .collection(DatabaseConstants.users)
+      .get();
+    followingUsers.forEach(async (u) => {
+      const checkUser = await userRef.doc(u.id).get();
+      if (!checkUser.exists) await u.ref.delete();
+    });
   });
 
   res.end();

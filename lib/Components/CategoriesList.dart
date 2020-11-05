@@ -5,9 +5,10 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
 class CategoriesList extends StatefulWidget {
-  Function(int) onCategoryChanged;
+  final Function(int) onCategoryChanged;
+  final int initialIndex;
 
-  CategoriesList(this.onCategoryChanged);
+  CategoriesList(this.onCategoryChanged, {this.initialIndex = 100});
 
   @override
   _CategoriesListState createState() => _CategoriesListState();
@@ -15,6 +16,12 @@ class CategoriesList extends StatefulWidget {
 
 class _CategoriesListState extends State<CategoriesList> {
   int _selectedCategoryId = 100;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategoryId = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

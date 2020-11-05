@@ -717,6 +717,13 @@ class DatabaseService {
         .map((BaseSession.fromQuerySnapshot));
   }
 
+  static Stream<List<Session>> getCertifiedSessions() {
+    return sessionsCollection
+        .where(BaseSession.END_DATE, isNull: true)
+        .snapshots()
+        .map((Session.fromQuerySnapshot));
+  }
+
   static Stream<Session> getSession(String sid) {
     return sessionsCollection
         .document(sid)
@@ -724,14 +731,25 @@ class DatabaseService {
         .map((doc) => Session.fromDoc(doc));
   }
 
+  static Stream<bool> userIsInSession(String uid, String sid) {
+    return sessionsCollection
+        .document(sid)
+        .collection(SESSION_MEMBERS)
+        .document(uid)
+        .snapshots()
+        .map((doc) => doc.exists);
+  }
+
   static Future<Session> getSessionFuture(String sid) async {
     return Session.fromDoc((await sessionsCollection.document(sid).get()));
   }
 
-  static Stream<List<SessionMember>> getSessionMembers(String sid) {
+  static Stream<List<SessionMember>> getSessionMembers(String sid,
+      [int limit = 50]) {
     return sessionsCollection
         .document(sid)
         .collection(SESSION_MEMBERS)
+        .limit(limit)
         .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
         .snapshots()
         .map(SessionMember.fromQuerySnapshot);

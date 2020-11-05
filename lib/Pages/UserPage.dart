@@ -349,11 +349,16 @@ class _RecommendationUser extends StatelessWidget {
           width: 108,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Material(
-              elevation: 1,
-              borderRadius: BorderRadius.circular(6),
-              color: Colors.white,
-              child: Padding(
+            child: CustomOpenContainer(
+              openBuilder: (context, close, scrollController) => UserPage(
+                user,
+                scrollController: scrollController,
+              ),
+              closedElevation: 1,
+              closedColor: Colors.white,
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6)),
+              closedBuilder: (context, open) => Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
@@ -436,7 +441,11 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                     Container(
                         width: 75,
                         height: 75,
-                        child: RoundedAvatar(user.imgUrl)),
+                        child: RoundedAvatar(
+                          user.imgUrl,
+                          color: _theme.colors.contrast,
+                          iconColor: _theme.colors.textOnContrast,
+                        )),
                     SizedBox(
                       width: 20,
                     ),

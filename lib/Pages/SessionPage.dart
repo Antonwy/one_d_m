@@ -72,11 +72,12 @@ class SessionPage extends StatelessWidget {
               title: Text(baseSession.name),
               backgroundColor: _theme.colors.dark,
             ),
-            SliverToBoxAdapter(child: Padding(
+            SliverToBoxAdapter(
+                child: Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: SessionMemberList(),
             )),
-            _SessionInfo(),
+            SessionInfo(),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -93,8 +94,8 @@ class SessionPage extends StatelessWidget {
                 ),
               ),
             ),
-            _CampaignInfo(),
-            _LastSessionDonations(),
+            CampaignInfo(),
+            LastSessionDonations(),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 100,
@@ -107,7 +108,7 @@ class SessionPage extends StatelessWidget {
   }
 }
 
-class _SessionInfo extends StatelessWidget {
+class SessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
@@ -176,7 +177,7 @@ class _SessionInfoItem extends StatelessWidget {
   }
 }
 
-class _CampaignInfo extends StatelessWidget {
+class CampaignInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
@@ -260,7 +261,7 @@ class _CampaignInfo extends StatelessWidget {
   }
 }
 
-class _LastSessionDonations extends StatelessWidget {
+class LastSessionDonations extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
@@ -285,7 +286,7 @@ class _LastSessionDonations extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
                         child: Text(
-                          "Letzte Unterstützungen (${donations.length}):",
+                          "Letzte Unterstützungen:",
                           style: _theme.textTheme.textOnContrast.headline6,
                         ),
                       ),

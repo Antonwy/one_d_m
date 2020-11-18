@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -55,14 +56,13 @@ class _CertifiedSessionView extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     return Container(
       width: 220,
-      child: CustomOpenContainer(
+      child: OpenContainer(
         closedColor: Colors.grey[200],
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         closedElevation: 0,
-        openBuilder: (context, close, scrollController) => CertifiedSessionPage(
+        openBuilder: (context, close) => CertifiedSessionPage(
           session: session,
-          scrollController: scrollController,
         ),
         closedBuilder: (context, open) => Stack(
           children: [

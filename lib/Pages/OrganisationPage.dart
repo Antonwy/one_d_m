@@ -45,7 +45,7 @@ class OrganisationPage extends StatelessWidget {
                     height: 20,
                   ),
                   Text(
-                    organisation.description,
+                    organisation.description ?? "",
                     style: _theme.textTheme.bodyText2,
                     textAlign: TextAlign.center,
                   ),

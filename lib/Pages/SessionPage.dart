@@ -31,36 +31,7 @@ class SessionPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _theme.colors.dark,
-      floatingActionButton: OfflineBuilder(
-          child: Container(),
-          connectivityBuilder: (context, connection, child) {
-            bool _connected = connection != ConnectivityResult.none;
-            return Consumer<UserManager>(
-              builder: (context, um, child) => FloatingActionButton.extended(
-                  onPressed: _connected
-                      ? () async {
-                          BottomDialog bd = BottomDialog(context);
-                          bd.show(DonationDialogWidget(
-                            campaign: await DatabaseService.getCampaign(
-                                baseSession.campaignId),
-                            user: um.user,
-                            context: context,
-                            close: bd.close,
-                            sessionId: baseSession.id,
-                          ));
-                        }
-                      : null,
-                  label: Text(
-                    "Unterstützen",
-                    style: TextStyle(
-                        color: _connected
-                            ? _theme.colors.textOnDark
-                            : Colors.white60),
-                  ),
-                  backgroundColor:
-                      _connected ? _theme.colors.dark : Colors.grey),
-            );
-          }),
+      floatingActionButton: FloatingDonationButton(baseSession),
       body: Provider<SessionManager>(
         create: (context) => SessionManager(baseSession),
         builder: (context, child) => CustomScrollView(
@@ -107,6 +78,46 @@ class SessionPage extends StatelessWidget {
   }
 }
 
+class FloatingDonationButton extends StatelessWidget {
+  BaseSession session;
+
+  FloatingDonationButton(this.session);
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return OfflineBuilder(
+        child: Container(),
+        connectivityBuilder: (context, connection, child) {
+          bool _connected = connection != ConnectivityResult.none;
+          return Consumer<UserManager>(
+            builder: (context, um, child) => FloatingActionButton.extended(
+                onPressed: _connected
+                    ? () async {
+                        BottomDialog bd = BottomDialog(context);
+                        bd.show(DonationDialogWidget(
+                          campaign: await DatabaseService.getCampaign(
+                              session.campaignId),
+                          user: um.user,
+                          context: context,
+                          close: bd.close,
+                          sessionId: session.id,
+                        ));
+                      }
+                    : null,
+                label: Text(
+                  "Unterstützen",
+                  style: TextStyle(
+                      color: _connected
+                          ? _theme.colors.textOnDark
+                          : Colors.white60),
+                ),
+                backgroundColor: _connected ? _theme.colors.dark : Colors.grey),
+          );
+        });
+  }
+}
+
 class SessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -131,7 +142,7 @@ class SessionInfo extends StatelessWidget {
                       stream: sm.sessionStream,
                       builder: (context, snapshot) {
                         return _SessionInfoItem(
-                          head: "${(snapshot.data?.currentAmount ?? 0)} DC",
+                          head: "${(snapshot.data?.currentAmount ?? 0)} DV",
                           sub: "Unterstützt",
                         );
                       }),

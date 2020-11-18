@@ -79,7 +79,7 @@ class _PercentIndicatorState extends State<PercentIndicator>
                             child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            "${widget.currentValue}/${widget.targetValue} DC",
+                            "${widget.currentValue}/${widget.targetValue} DV",
                             textAlign: TextAlign.center,
                             style: TextStyle(color: Colors.white),
                           ),

@@ -241,6 +241,12 @@ exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
       id: userId,
     } as SessionMemberType);
 
+  // increment member count
+  await sessionRef.set(
+    { member_count: admin.firestore.FieldValue.increment(1) },
+    { merge: true }
+  );
+
   const session = (await sessionRef.get()).data() as SessionType;
 
   // add session to User
@@ -277,6 +283,12 @@ exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
     .collection(DatabaseConstants.session_members)
     .doc(userId)
     .delete();
+
+  // decrement member count
+  await sessionRef.set(
+    { member_count: admin.firestore.FieldValue.increment(-1) },
+    { merge: true }
+  );
 
   // add session to User
   await firestore

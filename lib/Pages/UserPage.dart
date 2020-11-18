@@ -345,7 +345,7 @@ class _RecommendationUser extends StatelessWidget {
         bool deleted = snapshot.hasData && snapshot.data?.name == null;
 
         return Container(
-          height: 125,
+          height: 100,
           width: 108,
           child: Padding(
             padding: const EdgeInsets.all(4),
@@ -381,7 +381,7 @@ class _RecommendationUser extends StatelessWidget {
                                 ? "Gelöschter Nutzer"
                                 : user?.name ?? "Laden...",
                             textAlign: TextAlign.center,
-                            maxLines: 2,
+                            maxLines: 1,
                             style: _theme.textTheme.dark.headline6),
                       ),
                     ),
@@ -481,7 +481,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                           child: _textNumberColumn(
                               text: "Unterstützt",
                               number:
-                                  "${Numeral(user?.donatedAmount).value()} DC"),
+                                  "${Numeral(user?.donatedAmount).value()} DV"),
                         ),
                       ),
                       _followersCollumn(

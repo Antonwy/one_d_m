@@ -96,7 +96,7 @@ class DonationsGroupWidget extends StatelessWidget {
               ),
               subtitle: Text("${timeago.format(dci.createdAt)}"),
               trailing: Text(
-                "${Numeral(dci.amount).value()} DC",
+                "${Numeral(dci.amount).value()} DV",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

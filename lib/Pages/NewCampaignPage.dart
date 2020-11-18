@@ -286,7 +286,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     children: <Widget>[
                                       _StatCollumn(
                                           value: campaign.amount,
-                                          description: "Donation Credits"),
+                                          description: "Donation Votes"),
                                       _StatCollumn(
                                           value: campaign.subscribedCount,
                                           description: "Abonnenten",
@@ -573,7 +573,7 @@ class _AmountWidget extends StatelessWidget {
                           child: Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Text(
-                              "DC",
+                              "DV",
                               style: TextStyle(
                                   fontSize: 12, color: ColorTheme.blue),
                             ),

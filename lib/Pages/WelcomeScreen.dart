@@ -63,15 +63,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     maxLines: 2,
                   ),
                   description:
-                      "Wir wollen das Unterstützen von wohltätigen Organisationen einfach, schnell und kostenlos machen. Vernetze dich mit deinen Freunden, verteile Donation Credits an Projekte und mache die Welt zu einem besseren Ort!",
+                      "Wir wollen das Unterstützen von wohltätigen Organisationen einfach, schnell und kostenlos machen. Vernetze dich mit deinen Freunden, verteile Donation Votes an Projekte und mache die Welt zu einem besseren Ort!",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
                 _WelcomePage(
                     svgName: "donation-credits",
-                    title: "Donation Credits",
+                    title: "Donation Votes",
                     description:
-                        "Ein Donation Credit entspricht 10 Cent. Wir verteilen Donation Credits je nach Aktivität an Dich und deine Freunde!",
+                        "Ein Donation Credit entspricht 10 Cent. Wir verteilen Donation Votes je nach Aktivität an Dich und deine Freunde!",
                     darkText: true,
                     animatedValue: _getAnimatedValue(1, _page),
                     onPressed: () => _animateToPage(2)),
@@ -79,7 +79,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "landing-page",
                     title: "Sessions",
                     description:
-                        "Du kannst öffentlichen Sessions beitreten oder Deine eigene Session erstellen! Zusammen mit deinen Freunden und weiteren Nutzern könnt ihr Donation Credits an Organisationen/Projekte verteilen!",
+                        "Du kannst öffentlichen Sessions beitreten oder Deine eigene Session erstellen! Zusammen mit deinen Freunden und weiteren Nutzern könnt ihr Donation Votes an Organisationen/Projekte verteilen!",
                     animatedValue: _getAnimatedValue(2, _page),
                     onPressed: () => _animateToPage(3)),
                 _WelcomePage(

@@ -303,7 +303,7 @@ class DailyDonatedAmountWidget extends StatelessWidget {
                         date: dm.date),
                     builder: (context, snapshot) {
                       return Text(
-                        "${Numeral(snapshot.data).value()} DC",
+                        "${Numeral(snapshot.data).value()} DV",
                         style: _textTheme.headline5.copyWith(
                             color: _bTheme.dark, fontWeight: FontWeight.bold),
                       );
@@ -604,7 +604,7 @@ class RankingButton extends StatelessWidget {
                       height: 3,
                     ),
                     AutoSizeText(
-                      "${Numeral(info.amount).value()} DC",
+                      "${Numeral(info.amount).value()} DV",
                       maxLines: 1,
                       maxFontSize: 12,
                       style: TextStyle(

@@ -15,6 +15,7 @@ import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/Ranking.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -55,7 +56,8 @@ class DatabaseService {
       ACCEPTINVITE = "session-acceptInvite",
       DECLINEINVITE = "session-declineInvite",
       JOIN_CERTIFIED_SESSION = "session-joinCertifiedSession",
-      LEAVE_CERTIFIED_SESSION = "session-leaveCertifiedSession";
+      LEAVE_CERTIFIED_SESSION = "session-leaveCertifiedSession",
+      MESSAGES = "messages";
 
   static final Firestore firestore = Firestore.instance;
   static final CloudFunctions cloudFunctions = CloudFunctions.instance;
@@ -696,6 +698,13 @@ class DatabaseService {
         await organisationsCollection.document(oid).get());
   }
 
+  static Future<Organisation> getOrganisationOfCampaign(String cid) async {
+    Campaign campaign =
+        Campaign.fromSnapshot(await campaignsCollection.document(cid).get());
+    return Organisation.fromMap(
+        await organisationsCollection.document(campaign.authorId).get());
+  }
+
   static Stream<List<Campaign>> getCampaignsOfOrganisation(String oid) {
     return campaignsCollection
         .where(Campaign.AUTHORID, isEqualTo: oid)
@@ -790,6 +799,22 @@ class DatabaseService {
         .limit(5)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.documents));
+  }
+
+  static Future<void> sendMessageToSession(SessionMessage msg) {
+    return sessionsCollection
+        .document(msg.toSid)
+        .collection(MESSAGES)
+        .add(msg.toMap());
+  }
+
+  static Stream<List<SessionMessage>> getSessionMessages(String sid) {
+    return sessionsCollection
+        .document(sid)
+        .collection(MESSAGES)
+        .orderBy(SessionMessage.CREATED_AT, descending: true)
+        .snapshots()
+        .map(SessionMessage.fromQuerySnapshot);
   }
 
   static Future<HttpsCallableResult> callFindFriends(List<String> numbers) {

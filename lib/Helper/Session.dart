@@ -48,7 +48,7 @@ class BaseSession {
 
 class Session extends BaseSession {
   final String campaignImgUrl, campaignName, campaignShortDescription, imgUrl;
-  final int currentAmount;
+  final int currentAmount, memberCount;
 
   Session(
       {String id,
@@ -61,6 +61,7 @@ class Session extends BaseSession {
       String sessionDescription,
       this.imgUrl,
       this.currentAmount,
+      this.memberCount,
       this.campaignImgUrl,
       this.campaignName,
       this.campaignShortDescription})
@@ -88,6 +89,7 @@ class Session extends BaseSession {
         campaignName: doc[CAMPAIGN_NAME],
         campaignImgUrl: doc[CAMPAIGN_IMG_URL],
         currentAmount: doc[CURRENT_AMOUNT],
+        memberCount: doc[MEMBER_COUNT] ?? 0,
         campaignShortDescription: doc[CAMPAIGN_SHORT_DESCRIPTION],
         sessionDescription: doc[BaseSession.SESSION_DESCRIPTION] ?? "",
         imgUrl: doc[IMG_URL]);
@@ -100,6 +102,7 @@ class Session extends BaseSession {
   static const CAMPAIGN_IMG_URL = "campaign_img_url",
       CAMPAIGN_NAME = "campaign_name",
       CURRENT_AMOUNT = "current_amount",
+      MEMBER_COUNT = "member_count",
       CAMPAIGN_SHORT_DESCRIPTION = "campaign_short_description",
       IMG_URL = "img_url";
 }

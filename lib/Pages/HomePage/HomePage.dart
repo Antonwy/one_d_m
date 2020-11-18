@@ -15,8 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  PageController _pageController =
-      PageController(initialPage: 1, viewportFraction: .99);
+  PageController _pageController = PageController(initialPage: 1);
 
   @override
   Widget build(BuildContext context) {

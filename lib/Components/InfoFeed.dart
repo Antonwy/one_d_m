@@ -90,7 +90,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                                 _ColumnStats(
                                   value: statistics
                                       .donationStatistics.allDonations,
-                                  desc: "Donation Credits",
+                                  desc: "Donation Votes",
                                 ),
                               ],
                             ),
@@ -193,13 +193,13 @@ class _DCInformation extends StatelessWidget {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text('Donation Credits'),
+                                  child: Text('Donation Votes'),
                                 ),
                               ],
                             ),
                             SizedBox(height: 5.0),
                             Text(
-                              '${100 - ((snapshot?.data?.activityScore ?? 0) * 100).round()}% bis zum nächsten DC',
+                              '${100 - ((snapshot?.data?.activityScore ?? 0) * 100).round()}% bis zum nächsten DV',
                               style: TextStyle(
                                 fontWeight: FontWeight.w200,
                               ),

@@ -166,7 +166,7 @@ class __DonationTargetState extends State<_DonationTarget> {
               style: _theme.textTheme.dark.headline6,
             ),
             Text(
-              "Überlege dir wieviel DC jeder Nutzer spenden soll.",
+              "Überlege dir wieviel DV jeder Nutzer spenden soll.",
               style: _theme.textTheme.dark.caption,
             ),
             SizedBox(
@@ -204,7 +204,7 @@ class __DonationTargetState extends State<_DonationTarget> {
                   width: 12,
                 ),
                 Text(
-                  "DC ",
+                  "DV ",
                   style: _theme.textTheme.dark.headline6,
                 ),
                 Text(

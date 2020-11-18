@@ -208,7 +208,7 @@ class _DonateButton extends StatelessWidget {
                                     children: [
                                       TextSpan(
                                           text:
-                                              "${snapshot.data}/${sm.baseSession.amountPerUser} DC ",
+                                              "${snapshot.data}/${sm.baseSession.amountPerUser} DV ",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(
@@ -461,10 +461,14 @@ class SessionMemberList extends StatelessWidget {
 
 class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
   final SessionMember member;
-  final bool invited;
+  final bool invited, showTargetAmount;
   ThemeManager _theme;
 
-  SessionMemberView({Key key, this.member, this.invited = false})
+  SessionMemberView(
+      {Key key,
+      this.member,
+      this.invited = false,
+      this.showTargetAmount = true})
       : super(key: key);
 
   @override
@@ -487,6 +491,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                 closedColor: _theme.colors.contrast,
                 closedElevation: 1,
                 closedBuilder: (context, open) => Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     user?.imgUrl == null
@@ -508,31 +513,32 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                             fit: BoxFit.cover,
                           ),
                     Container(
-                      height: 75,
+                      height: showTargetAmount ? 75 : 50,
+                      width: 84,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: 84,
-                              child: Center(
-                                child: AutoSizeText(
-                                  user?.name ?? "Laden...",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: _theme
-                                      .textTheme.textOnContrast.bodyText1
-                                      .copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                ),
+                            Center(
+                              child: AutoSizeText(
+                                user?.name ?? "Laden...",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _theme
+                                    .textTheme.textOnContrast.bodyText1
+                                    .copyWith(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
                               ),
                             ),
-                            Text(
-                              "${member.donationAmount}/${sm.baseSession.amountPerUser} DC",
-                              style: _theme.textTheme.textOnContrast.bodyText1,
-                            ),
+                            showTargetAmount
+                                ? Text(
+                                    "${member.donationAmount}/${sm.baseSession.amountPerUser} DV",
+                                    style: _theme
+                                        .textTheme.textOnContrast.bodyText1,
+                                  )
+                                : Container(),
                           ],
                         ),
                       ),

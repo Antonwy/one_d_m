@@ -1,280 +1,556 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
   Session session;
-  ScrollController scrollController;
 
-  CertifiedSessionPage({Key key, this.session, this.scrollController})
-      : super(key: key);
+  CertifiedSessionPage({Key key, this.session}) : super(key: key);
 
   @override
   _CertifiedSessionPageState createState() => _CertifiedSessionPageState();
 }
 
 class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
-  MediaQueryData _mq;
-
   ThemeManager _theme;
-
-  ValueNotifier _scrollOffset;
 
   Session session;
 
+  PageController _pageController = PageController();
+  ValueNotifier<double> _pagePosition = ValueNotifier(0);
+
   @override
   void initState() {
-    _scrollOffset = ValueNotifier(0);
     session = widget.session;
-
-    widget.scrollController.addListener(() {
-      _scrollOffset.value = widget.scrollController.offset;
+    _pageController.addListener(() {
+      _pagePosition.value = _pageController.page;
     });
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _mq = MediaQuery.of(context);
     _theme = ThemeManager.of(context);
     UserManager _um = Provider.of<UserManager>(context, listen: false);
     return Provider<CertifiedSessionManager>(
-      create: (context) =>
-          CertifiedSessionManager(baseSession: session, uid: _um.uid),
+      create: (context) => CertifiedSessionManager(
+        session: session,
+        uid: _um.uid,
+      ),
       builder: (context, child) {
         return Scaffold(
-          body: Stack(
-            children: <Widget>[
-              Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  height: _mq.size.height * .3 + 30,
-                  decoration: BoxDecoration(
-                      image: widget.session?.imgUrl == null
-                          ? null
-                          : DecorationImage(
-                              fit: BoxFit.cover,
-                              image: CachedNetworkImageProvider(
-                                  widget.session?.imgUrl))),
+          floatingActionButton: ValueListenableBuilder(
+            valueListenable: _pagePosition,
+            builder: (context, val, child) => Opacity(
+              opacity: 1 - val,
+              child: Transform.scale(
+                scale: 1 - val,
+                child: FloatingDonationButton(
+                  session,
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ValueListenableBuilder(
-                    valueListenable: _scrollOffset,
-                    builder: (context, value, child) {
-                      return Container(
-                          height: (_mq.size.height * .7 + value)
-                              .clamp(0, _mq.size.height),
-                          width: double.infinity,
-                          child: Material(
-                            color: ColorTheme.white,
-                            elevation: 20,
-                            clipBehavior: Clip.antiAlias,
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(30)),
-                          ));
-                    }),
-              ),
-              MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: CustomScrollView(
-                    controller: widget.scrollController,
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: _mq.size.height * .3,
-                          child: Container(
-                            color: Colors.transparent,
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
-                          padding: EdgeInsets.fromLTRB(14, 18, 14, 6),
-                          sliver: SliverToBoxAdapter(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: AutoSizeText(
-                                    session.name,
-                                    maxLines: 1,
-                                    style: _theme.textTheme.dark.headline6,
-                                  ),
-                                ),
-                                _SessionJoinButton()
-                              ],
-                            ),
-                          )),
-                      SliverToBoxAdapter(
-                        child: Divider(),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
-                        sliver: SliverToBoxAdapter(
-                          child: Row(
-                            children: [
-                              Consumer<CertifiedSessionManager>(
-                                builder: (context, csm, child) =>
-                                    StreamBuilder<Session>(
-                                        stream: csm.sessionStream,
-                                        builder: (context, snapshot) {
-                                          return _InfoView(
-                                            description: "DC",
-                                            value:
-                                                snapshot.data?.currentAmount ??
-                                                    session.currentAmount,
-                                          );
-                                        }),
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Consumer<CertifiedSessionManager>(
-                                builder: (context, csm, child) =>
-                                    StreamBuilder<Session>(
-                                        stream: csm.sessionStream,
-                                        builder: (context, snapshot) {
-                                          return _InfoView(
-                                            description: "Mitglieder",
-                                            value: 20,
-                                          );
-                                        }),
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Expanded(
-                                  child: Material(
-                                borderRadius: BorderRadius.circular(12),
-                                color: _theme.colors.contrast,
-                                clipBehavior: Clip.antiAlias,
-                                child: Builder(builder: (context) {
-                                  return InkWell(
-                                    onTap: () {
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text(
-                                              "Dieses Feature kommt im nächsten Update!")));
-                                    },
-                                    child: Container(
-                                        height: 70,
-                                        child: Center(
-                                            child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              "Zum Chat",
-                                              style: _theme.textTheme
-                                                  .textOnContrast.bodyText1
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                            ),
-                                            SizedBox(
-                                              width: 6,
-                                            ),
-                                            Icon(
-                                              Icons.arrow_forward_ios,
-                                              size: 15,
-                                              color:
-                                                  _theme.colors.textOnContrast,
-                                            )
-                                          ],
-                                        ))),
-                                  );
-                                }),
-                              )),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Divider(),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        sliver: _CertifiedSessionMembers(),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Divider(),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        sliver: CampaignInfo<CertifiedSessionManager>(),
-                      ),
-                    ]),
-              ),
-              Positioned(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Material(
-                    clipBehavior: Clip.antiAlias,
-                    shape: CircleBorder(),
-                    elevation: 10,
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: IconButton(
-                          icon: Icon(Icons.arrow_downward),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          }),
-                    ),
-                  ),
-                ),
-                top: MediaQuery.of(context).padding.top,
-                left: 0,
-              ),
-            ],
+            ),
           ),
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            iconTheme: IconThemeData(color: _theme.colors.dark),
+            actions: [_CertifiedSessionPageIndicator(_pageController)],
+          ),
+          body: PageView(
+              controller: _pageController,
+              children: [_CertifiedSessionInfoPage(), _CertifiedSessionChat()]),
         );
       },
     );
   }
 }
 
-class _InfoView extends StatelessWidget {
-  final String description;
-  final int value;
+class _CertifiedSessionPageIndicator extends StatefulWidget {
+  PageController _pageController;
+  _CertifiedSessionPageIndicator(this._pageController);
 
-  const _InfoView({Key key, this.description, this.value}) : super(key: key);
+  @override
+  __CertifiedSessionPageIndicatorState createState() =>
+      __CertifiedSessionPageIndicatorState();
+}
+
+class __CertifiedSessionPageIndicatorState
+    extends State<_CertifiedSessionPageIndicator> {
+  double _pageValue = 0;
+
+  @override
+  void initState() {
+    widget._pageController.addListener(() {
+      setState(() {
+        _pageValue = widget._pageController.page;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return Container(
-      height: 70,
-      child: Center(
-        child: Material(
-          color: _theme.colors.dark,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: Container(
+          width: 90,
+          height: 45,
+          child: Material(
+            color: _theme.colors.contrast,
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
               children: [
-                Text(
-                  Numeral(value).value(),
-                  style: _theme.textTheme.textOnDark.headline6,
+                Align(
+                  alignment: AlignmentTween(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight)
+                      .transform(_pageValue),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 9.5),
+                    child: Container(
+                      width: 35,
+                      height: 30,
+                      child: Material(
+                        color: _theme.colors.dark,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-                Text(
-                  description,
-                  style: _theme.textTheme.textOnDark.bodyText2,
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 18),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _changePage(0);
+                          },
+                          child: Icon(
+                            Icons.info,
+                            size: 18,
+                            color: ColorTween(
+                                    begin: _theme.colors.contrast,
+                                    end: _theme.colors.dark)
+                                .transform(_pageValue),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            _changePage(1);
+                          },
+                          child: Icon(
+                            Icons.message,
+                            size: 18,
+                            color: ColorTween(
+                                    begin: _theme.colors.dark,
+                                    end: _theme.colors.contrast)
+                                .transform(_pageValue),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _changePage(int page) {
+    widget._pageController.animateToPage(page,
+        duration: Duration(milliseconds: 250),
+        curve: Curves.fastLinearToSlowEaseIn);
+  }
+}
+
+class _CertifiedSessionChat extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Consumer<CertifiedSessionManager>(
+      builder: (context, csm, child) => Stack(
+        children: [
+          Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Divider(
+                height: 1,
+              )),
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: StreamBuilder<List<SessionMessage>>(
+                  stream: DatabaseService.getSessionMessages(csm.session.id),
+                  builder: (context, snapshot) {
+                    List<SessionMessage> messages = snapshot.data ?? [];
+                    return messages.isEmpty
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 150,
+                              ),
+                              SvgPicture.asset("assets/images/no-news.svg",
+                                  height: 150),
+                              SizedBox(
+                                height: 12,
+                              ),
+                              Text(
+                                "Hier gibt es noch keine Nachrichten.",
+                                style: _theme.textTheme.dark.bodyText1,
+                              ),
+                            ],
+                          )
+                        : ListView.separated(
+                            itemCount: messages.length,
+                            reverse: true,
+                            separatorBuilder: (context, index) => SizedBox(
+                                  height: 6,
+                                ),
+                            itemBuilder: (context, index) {
+                              SessionMessage msg = messages[index];
+                              return Padding(
+                                padding: index == 0
+                                    ? EdgeInsets.only(
+                                        bottom: 92 +
+                                            MediaQuery.of(context)
+                                                .padding
+                                                .bottom)
+                                    : EdgeInsets.zero,
+                                child: _SessionMessageView(msg),
+                              );
+                            });
+                  }),
+            ),
+          ),
+          _ChatTextField()
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionMessageView extends StatelessWidget {
+  final SessionMessage msg;
+
+  const _SessionMessageView(this.msg);
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Consumer<UserManager>(
+      builder: (context, um, child) {
+        bool isOwnMessage = um.uid == msg.fromUid;
+        return isOwnMessage
+            ? Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Material(
+                            color: _theme.colors.dark,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                                bottomLeft: Radius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(msg.message,
+                                  style: _theme.textTheme.textOnDark.bodyText1),
+                            )),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 12,
+                    ),
+                    FutureBuilder<User>(
+                        future: DatabaseService.getUser(msg.fromUid),
+                        builder: (context, snapshot) {
+                          return Avatar(snapshot.data?.imgUrl, radius: 16);
+                        }),
+                  ],
+                ),
+              )
+            : Align(
+                alignment: Alignment.bottomLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    FutureBuilder<User>(
+                        future: DatabaseService.getUser(msg.fromUid),
+                        builder: (context, snapshot) {
+                          return Avatar(snapshot.data?.imgUrl, radius: 16);
+                        }),
+                    SizedBox(
+                      width: 12,
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Material(
+                            color: _theme.colors.contrast,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                                bottomRight: Radius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(msg.message,
+                                  style: _theme
+                                      .textTheme.textOnContrast.bodyText1),
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+      },
+    );
+  }
+}
+
+class _ChatTextField extends StatelessWidget {
+  TextEditingController _textController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 80 + MediaQuery.of(context).padding.bottom,
+        width: double.infinity,
+        child: Material(
+          color: _theme.colors.contrast,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24.0, 12, 12, 0),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (text) => _sendMessage(context),
+                      decoration: InputDecoration.collapsed(
+                          hintText: "Schreibe etwas..."),
+                    ),
+                  ),
+                  Consumer2<CertifiedSessionManager, UserManager>(
+                    builder: (context, csm, um, child) => IconButton(
+                        icon: Icon(
+                          Icons.send,
+                          color: _theme.colors.textOnContrast,
+                        ),
+                        onPressed: () => _sendMessage(context)),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendMessage(BuildContext context) async {
+    UserManager um = Provider.of<UserManager>(context, listen: false);
+    CertifiedSessionManager csm =
+        Provider.of<CertifiedSessionManager>(context, listen: false);
+    if (_textController.text.isEmpty) return;
+    SessionMessage msg = SessionMessage(
+        fromUid: um.uid, message: _textController.text, toSid: csm.session.id);
+    await DatabaseService.sendMessageToSession(msg);
+    _textController.clear();
+  }
+}
+
+class _CertifiedSessionInfoPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Consumer<CertifiedSessionManager>(
+      builder: (context, csm, child) => CustomScrollView(slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(12),
+          sliver: SliverToBoxAdapter(
+            child: Container(
+              height: 250,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Material(
+                      elevation: 10,
+                      borderRadius: BorderRadius.circular(6),
+                      clipBehavior: Clip.antiAlias,
+                      child: CachedNetworkImage(
+                        imageUrl: csm.session.imgUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    child: _SessionJoinButton(),
+                    bottom: 6,
+                    right: 12,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          sliver: SliverToBoxAdapter(
+            child: Row(
+              children: [
+                StreamBuilder<Session>(
+                    stream: csm.sessionStream,
+                    builder: (context, snapshot) {
+                      return Container(
+                        width: 90,
+                        child: _InfoView(
+                          description: "DV",
+                          value: snapshot.data?.currentAmount ??
+                              csm.session.currentAmount ??
+                              0,
+                        ),
+                      );
+                    }),
+                SizedBox(
+                  width: 12,
+                ),
+                StreamBuilder<Session>(
+                    stream: csm.sessionStream,
+                    builder: (context, snapshot) {
+                      return Expanded(
+                        child: _InfoView(
+                            imageUrl: snapshot.data?.campaignImgUrl ??
+                                csm.session.campaignImgUrl,
+                            description: snapshot.data?.campaignName ??
+                                csm.session.campaignName),
+                      );
+                    }),
+                SizedBox(
+                  width: 12,
+                ),
+                StreamBuilder<Session>(
+                    stream: csm.sessionStream,
+                    builder: (context, snapshot) {
+                      return Container(
+                        width: 90,
+                        child: _InfoView(
+                          description: "Mitglieder",
+                          value: snapshot.data?.memberCount ??
+                              csm.session.memberCount,
+                        ),
+                      );
+                    }),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Divider(),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          sliver: _CertifiedSessionMembers(),
+        ),
+        SliverToBoxAdapter(
+          child: Divider(),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 100,
+          ),
+        )
+      ]),
+    );
+  }
+}
+
+class _InfoView extends StatelessWidget {
+  final String description;
+  final String imageUrl;
+  final num value;
+
+  const _InfoView({Key key, this.description, this.value, this.imageUrl})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Material(
+      color: imageUrl != null ? _theme.colors.contrast : _theme.colors.dark,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            imageUrl != null
+                ? Container(
+                    height: 50,
+                    width: 50,
+                    child: Material(
+                        clipBehavior: Clip.antiAlias,
+                        shape: CircleBorder(),
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                        )),
+                  )
+                : AutoSizeText(
+                    Numeral(value).value(),
+                    maxLines: 1,
+                    style: _theme.textTheme.textOnDark.headline5
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+            SizedBox(
+              height: imageUrl != null ? 6 : 0,
+            ),
+            AutoSizeText(
+              description,
+              maxLines: 1,
+              style: imageUrl != null
+                  ? _theme.textTheme.textOnContrast.bodyText2
+                  : _theme.textTheme.textOnDark.bodyText2,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -288,38 +564,15 @@ class _CertifiedSessionMembers extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
         builder: (context, sm, child) => SizedBox(
-            height: 150,
+            height: 130,
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
               slivers: [
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 150,
+                    height: 130,
                   ),
                 ),
-                StreamBuilder<List<SessionMember>>(
-                    stream: sm.membersStream,
-                    builder: (context, snapshot) {
-                      List<SessionMember> members = snapshot.data ?? [];
-                      if (members.isEmpty)
-                        return SliverToBoxAdapter(
-                          child: SizedBox(
-                            width: 12,
-                          ),
-                        );
-                      return SliverPadding(
-                        padding: const EdgeInsets.only(left: 12),
-                        sliver: SliverToBoxAdapter(
-                          child: Center(
-                              child: RotatedBox(
-                                  quarterTurns: 3,
-                                  child: Text(
-                                    "Mitglieder",
-                                    style: _theme.textTheme.dark.bodyText1,
-                                  ))),
-                        ),
-                      );
-                    }),
                 StreamBuilder<List<SessionMember>>(
                     stream: sm.membersStream,
                     builder: (context, snapshot) {
@@ -351,7 +604,8 @@ class _CertifiedSessionMembers extends StatelessWidget {
                             padding: EdgeInsets.only(
                                 left: index <= members.length - 1 ? 12.0 : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
-                                member: members[index]),
+                                member: members[index],
+                                showTargetAmount: false),
                           );
                         }, childCount: members.length),
                       );

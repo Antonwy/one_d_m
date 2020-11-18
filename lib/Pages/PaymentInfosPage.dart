@@ -140,7 +140,7 @@ class PaymentInfosPage extends StatelessWidget {
                               style: _theme.textTheme.headline6,
                             ),
                             Text(
-                              "Deine spenden werden monatlich gesammelt und ab 5 DC abgebucht.",
+                              "Deine spenden werden monatlich gesammelt und ab 5 DV abgebucht.",
                               style: _theme.textTheme.caption,
                             ),
                             SizedBox(
@@ -181,7 +181,7 @@ class PaymentInfosPage extends StatelessWidget {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            "Beim Abbuchen von ${charge.amount} DC gab es ein Fehler.\nWir werden es nächsten Monat erneut versuchen. Bitte sorgen sie für eine ausreichende Deckung ihres Kontos.",
+                                            "Beim Abbuchen von ${charge.amount} DV gab es ein Fehler.\nWir werden es nächsten Monat erneut versuchen. Bitte sorgen sie für eine ausreichende Deckung ihres Kontos.",
                                             style: _theme.textTheme.bodyText1
                                                 .copyWith(color: Colors.red),
                                           ),
@@ -212,8 +212,8 @@ class PaymentInfosPage extends StatelessWidget {
   String _chargeText(UserCharge charge) {
     if (charge.amount > 0) {
       if (charge.amount < 5)
-        return "${charge.amount} DC noch ${5 - charge.amount} DC spenden bis wir abbuchen.";
-      return "${charge.amount} DC werden am Ende des Monats abgebucht.";
+        return "${charge.amount} DV noch ${5 - charge.amount} DV spenden bis wir abbuchen.";
+      return "${charge.amount} DV werden am Ende des Monats abgebucht.";
     }
 
     return "Keine ausstehenden Zahlungen.";

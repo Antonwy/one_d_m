@@ -30,9 +30,9 @@ class SessionManager extends BaseSessionManager {
 class CertifiedSessionManager extends BaseSessionManager {
   final String uid;
   Stream<bool> isInSession;
+  Session session;
 
-  CertifiedSessionManager({BaseSession baseSession, this.uid})
-      : super(baseSession);
+  CertifiedSessionManager({this.session, this.uid}) : super(session);
 
   @override
   void initStreams() {

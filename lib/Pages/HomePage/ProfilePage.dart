@@ -127,7 +127,7 @@ class _ProfilePageState extends State<ProfilePage>
                                           color: _theme.colors.dark),
                                     ),
                                     Text(
-                                      "${Numeral(user?.donatedAmount ?? 0).value()} DC",
+                                      "${Numeral(user?.donatedAmount ?? 0).value()} DV",
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
@@ -231,69 +231,72 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-        StreamBuilder<List<BaseSession>>(
-            stream: _sessionStream,
-            builder: (context, snapshot) {
-              List<BaseSession> sessions = snapshot.data ?? [];
+        StreamBuilder<List<Session>>(
+          stream: _certifiedSessionsStream,
+          builder: (context, snapshot1) => StreamBuilder<List<BaseSession>>(
+              stream: _sessionStream,
+              builder: (context, snapshot2) {
+                List<BaseSession> sessions = snapshot2.data ?? [];
+                List<BaseSession> certifiedSessions = snapshot1.data ?? [];
 
-              if (sessions.isEmpty)
+                if (sessions.isEmpty && certifiedSessions.isEmpty)
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _SessionInvitesButton(),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              _CreateSessionButton()
+                            ],
+                          ),
+                          SvgPicture.asset(
+                            "assets/images/no-donations.svg",
+                            height: 200,
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
+                            style: _theme.textTheme.dark.bodyText1,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+
                 return SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            _SessionInvitesButton(),
-                            SizedBox(
-                              width: 8,
-                            ),
-                            _CreateSessionButton()
-                          ],
-                        ),
-                        SvgPicture.asset(
-                          "assets/images/no-donations.svg",
-                          height: 200,
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
                         Text(
-                          "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
-                          style: _theme.textTheme.dark.bodyText1,
-                          textAlign: TextAlign.center,
+                          "Deine Sessions",
+                          style: _theme.textTheme.dark.headline6,
                         ),
+                        Expanded(child: Container()),
+                        _SessionInvitesButton(),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        _CreateSessionButton()
                       ],
                     ),
                   ),
                 );
-
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Deine Sessions",
-                        style: _theme.textTheme.dark.headline6,
-                      ),
-                      Expanded(child: Container()),
-                      _SessionInvitesButton(),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      _CreateSessionButton()
-                    ],
-                  ),
-                ),
-              );
-            }),
+              }),
+        ),
         Consumer<UserManager>(
             builder: (context, um, child) => SliverPadding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  sliver: CertifiedSessionsList(
-                      DatabaseService.getCertifiedSessionsFromUser(um.uid)),
+                  sliver: CertifiedSessionsList(_certifiedSessionsStream),
                 )),
         SessionsFeed()
       ],

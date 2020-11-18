@@ -111,7 +111,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                   CrossAxisAlignment.start,
                                               children: <Widget>[
                                                 AutoSizeText(
-                                                  "Wieviele Donation Credits?",
+                                                  "Wieviele Donation Votes?",
                                                   maxLines: 1,
                                                   style: _theme
                                                       .textTheme.headline6,
@@ -128,7 +128,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                             text: "Du hast "),
                                                         TextSpan(
                                                             text:
-                                                                "${ddm.adBalance.dcBalance} DC",
+                                                                "${ddm.adBalance.dcBalance} DV",
                                                             style: _theme
                                                                 .textTheme
                                                                 .bodyText1
@@ -271,9 +271,9 @@ class DonationButton extends StatelessWidget {
       return showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Zu wenig DCs"),
+          title: Text("Zu wenig DVs"),
           content: Text(
-              "Du hast zu wenig DCs um diese Spende durchzuführen! Füge eine Zahlungsmethode hinzu."),
+              "Du hast zu wenig DVs um diese Spende durchzuführen! Füge eine Zahlungsmethode hinzu."),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           actions: <Widget>[
@@ -303,7 +303,7 @@ class DonationButton extends StatelessWidget {
           context: context,
           builder: (context) => AlertDialog(
                 title: Text("Bist du dir sicher?"),
-                content: Text("Willst du wirklich ${ddm.amount} DC zum unterstützen ausgeben?"),
+                content: Text("Willst du wirklich ${ddm.amount} DV zum unterstützen ausgeben?"),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 actions: <Widget>[
@@ -680,12 +680,12 @@ class CustomAmountWidget extends StatelessWidget {
                     validator: (text) {
                       int amount = int.parse(text);
                       if (amount > ddm.adBalance.dcBalance)
-                        return "Du hast nur ${ddm.adBalance.dcBalance} DC's! Wähle einen kleineren Betrag.";
+                        return "Du hast nur ${ddm.adBalance.dcBalance} DV's! Wähle einen kleineren Betrag.";
                       return null;
                     },
                     decoration: InputDecoration(
-                      hintText: "Anzahl an DC's",
-                      labelText: "DC's",
+                      hintText: "Anzahl an DV's",
+                      labelText: "DV's",
                     ),
                   ),
                 )
@@ -763,7 +763,7 @@ class DCSlider extends StatelessWidget {
                                   child: Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      "DC",
+                                      "DV",
                                       style: TextStyle(
                                           fontSize: 12, color: _bTheme.dark),
                                     ),
@@ -825,14 +825,14 @@ class AddPaymentMethodDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(
-                    "Bitte füge eine Bezalmethode hinzu oder sammle neue DCs!",
+                    "Bitte füge eine Bezalmethode hinzu oder sammle neue DVs!",
                     style: _theme.textTheme.headline6,
                   ),
                   SizedBox(
                     height: 10,
                   ),
                   Text(
-                    "Bevor du etwas unterstützen kannst, brauchen wir deine Zahlungsdaten oder gesammelte DCs!",
+                    "Bevor du etwas unterstützen kannst, brauchen wir deine Zahlungsdaten oder gesammelte DVs!",
                     style: _theme.textTheme.bodyText2,
                   ),
                   SizedBox(

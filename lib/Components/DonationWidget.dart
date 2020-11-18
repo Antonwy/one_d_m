@@ -81,7 +81,7 @@ class DonationWidget extends StatelessWidget {
                           : ColorTheme.whiteBlue.withOpacity(.7))),
             ),
             trailing: Text(
-              "${Numeral(donation.amount).value()} DC",
+              "${Numeral(donation.amount).value()} DV",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: textColor ??
@@ -134,7 +134,7 @@ class DonationWidget extends StatelessWidget {
                           ? ColorTheme.blue
                           : ColorTheme.whiteBlue))),
           trailing: Text(
-            "${Numeral(donation.amount).value()} DC",
+            "${Numeral(donation.amount).value()} DV",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: textColor ??
@@ -176,7 +176,7 @@ class DonationWidget extends StatelessWidget {
                         : ColorTheme.whiteBlue.withOpacity(.7))),
           ),
           trailing: Text(
-            "${Numeral(donation.amount).value()} DC",
+            "${Numeral(donation.amount).value()} DV",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: textColor ??

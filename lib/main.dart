@@ -1,4 +1,5 @@
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/NativeAds.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
@@ -11,13 +12,18 @@ import 'package:stripe_payment/stripe_payment.dart';
 import 'Helper/Constants.dart';
 import 'Pages/PageManagerWidget.dart';
 
-void main() => runApp(MultiProvider(providers: [
-      ChangeNotifierProvider(create: (context) => UserManager.instance()),
-      ChangeNotifierProvider(create: (context) => ThemeManager(context)),
-      Provider(
-        create: (context) => PushNotificationService(context),
-      )
-    ], child: ODMApp()));
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => UserManager.instance()),
+    ChangeNotifierProvider(create: (context) => ThemeManager(context)),
+    Provider(
+      create: (context) => PushNotificationService(context),
+    )
+  ], child: ODMApp()));
+
+}
 
 class ODMApp extends StatefulWidget {
   @override

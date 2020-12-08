@@ -61,8 +61,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       _loading = true;
                     });
                     await _um.fireUser.reload();
-                    _um.fireUser = await _um.auth.currentUser();
-                    if (_um.fireUser.isEmailVerified) {
+                    _um.fireUser =  _um.auth.currentUser;
+                    if (_um.fireUser.emailVerified) {
                       _openWidget = FindFriendsPage(afterRegister: true);
                       open();
                     } else

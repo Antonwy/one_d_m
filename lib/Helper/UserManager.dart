@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -22,12 +22,13 @@ enum Status {
 
 class UserManager extends ChangeNotifier {
   User _user;
-  FirebaseAuth _auth;
-  FirebaseUser _fireUser;
+  firebaseAuth.FirebaseAuth _auth;
+  firebaseAuth.User _fireUser;
   Status _status = Status.Uninitialized;
   GoogleSignIn _googleSignIn;
 
   Status get status => _status;
+
   set status(Status status) {
     _status = status;
     notifyListeners();
@@ -36,32 +37,34 @@ class UserManager extends ChangeNotifier {
   User get user => _user;
 
   String get uid => _fireUser?.uid;
-  FirebaseUser get fireUser => _fireUser;
-  set fireUser(FirebaseUser fUser) {
+
+  firebaseAuth.User get fireUser => _fireUser;
+
+  set fireUser(firebaseAuth.User fUser) {
     _fireUser = fUser;
   }
 
-  FirebaseAuth get auth => _auth;
+  firebaseAuth.FirebaseAuth get auth => _auth;
 
   UserManager.instance() {
     _googleSignIn = GoogleSignIn(scopes: [
       'profile',
       'email',
     ]);
-    _auth = FirebaseAuth.instance;
+    _auth = firebaseAuth.FirebaseAuth.instance;
     _auth.onAuthStateChanged.listen(_onAuthStateChanged);
   }
 
   Future<User> getUser() async {
     if (user != null) return _user;
-    return DatabaseService.getUser((await _auth.currentUser()).uid);
+    return DatabaseService.getUser((_auth.currentUser).uid);
   }
 
   Future<void> delete() {
     return fireUser.delete();
   }
 
-  Future<ApiResult<FirebaseUser>> signInWithApple() async {
+  Future<ApiResult<firebaseAuth.User>> signInWithApple() async {
     try {
       final AuthorizationCredentialAppleID appleResult =
           await SignInWithApple.getAppleIDCredential(
@@ -71,13 +74,14 @@ class UserManager extends ChangeNotifier {
         ],
       );
 
-      final AuthCredential credential =
-          OAuthProvider(providerId: 'apple.com').getCredential(
+      final firebaseAuth.AuthCredential credential =
+          firebaseAuth.OAuthProvider('apple.com').getCredential(
         accessToken: appleResult.authorizationCode,
         idToken: appleResult.identityToken,
       );
 
-      AuthResult firebaseResult = await _auth.signInWithCredential(credential);
+      firebaseAuth.UserCredential firebaseResult =
+          await _auth.signInWithCredential(credential);
       _fireUser = firebaseResult.user;
 
       return ApiSuccess(data: _fireUser);
@@ -87,12 +91,12 @@ class UserManager extends ChangeNotifier {
     }
   }
 
-  Future<ApiResult<FirebaseUser>> signInWithGoogle() async {
+  Future<ApiResult<firebaseAuth.User>> signInWithGoogle() async {
 //    await _googleSignIn.signOut();
     bool isSignedIn = await _googleSignIn.isSignedIn();
 
     if (isSignedIn) {
-      _fireUser = await _auth.currentUser();
+      _fireUser = _auth.currentUser;
       return ApiSuccess(data: _fireUser, message: "Bereits eingeloggt");
     }
 
@@ -110,18 +114,20 @@ class UserManager extends ChangeNotifier {
 
     if (googleAuthentication == null)
       return ApiError("Etwas ist schief gelaufen!");
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-        idToken: googleAuthentication.idToken,
-        accessToken: googleAuthentication.accessToken);
+    final firebaseAuth.GoogleAuthCredential credential =
+        firebaseAuth.GoogleAuthProvider.credential(
+            idToken: googleAuthentication.idToken,
+            accessToken: googleAuthentication.accessToken);
 
     _fireUser = (await _auth.signInWithCredential(credential)).user;
     return ApiSuccess(data: _fireUser);
   }
 
-  Future<ApiResult<FirebaseUser>> signIn(String email, String password) async {
+  Future<ApiResult<firebaseAuth.User>> signIn(
+      String email, String password) async {
     try {
       status = Status.Authenticating;
-      AuthResult res = await _auth.signInWithEmailAndPassword(
+      firebaseAuth.UserCredential res = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       status = Status.Authenticated;
       return ApiSuccess(data: res.user);
@@ -185,7 +191,7 @@ class UserManager extends ChangeNotifier {
     }
   }
 
-  Future<ApiResult<FirebaseUser>> signUp(User user, File image) async {
+  Future<ApiResult<firebaseAuth.User>> signUp(User user, File image) async {
     try {
       status = Status.Authenticating;
 
@@ -197,8 +203,9 @@ class UserManager extends ChangeNotifier {
 
       print(user);
 
-      AuthResult res = await _auth.createUserWithEmailAndPassword(
-          email: user.email, password: user.password);
+      firebaseAuth.UserCredential res =
+          await _auth.createUserWithEmailAndPassword(
+              email: user.email, password: user.password);
 
       if (image != null) {
         StorageService service = StorageService(file: image);
@@ -206,10 +213,8 @@ class UserManager extends ChangeNotifier {
             .uploadImage(StorageService.userImageName(res.user.uid));
       }
 
-      UserUpdateInfo uui = UserUpdateInfo();
-      uui.displayName = user.name.trim();
 
-      await res.user.updateProfile(uui);
+      await res.user.updateProfile(displayName: user.name.trim());
 
       user.id = res.user.uid;
       await DatabaseService.addUser(user);
@@ -224,7 +229,8 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> updateUser(User updatedUser) async {
     if (updatedUser.name.trim() != user.name.trim() &&
-        !await DatabaseService.checkUsernameAvailable(updatedUser.name.trim())) {
+        !await DatabaseService.checkUsernameAvailable(
+            updatedUser.name.trim())) {
       return ApiError("Nutzername gibt es bereits, bitte wähle einen anderen!");
     }
     user.name = updatedUser.name.trim();
@@ -242,13 +248,13 @@ class UserManager extends ChangeNotifier {
     status = Status.Unauthenticated;
   }
 
-  Future<void> _onAuthStateChanged(FirebaseUser firebaseUser) async {
+  Future<void> _onAuthStateChanged(firebaseAuth.User firebaseUser) async {
     print(firebaseUser);
     if (firebaseUser == null) {
       status = Status.Unauthenticated;
     } else {
       _fireUser = firebaseUser;
-      if (!firebaseUser.isEmailVerified) {
+      if (!firebaseUser.emailVerified) {
         status = Status.Unverified;
       } else {
         _user = await DatabaseService.getUser(firebaseUser.uid);

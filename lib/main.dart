@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +14,7 @@ import 'package:stripe_payment/stripe_payment.dart';
 import 'Helper/Constants.dart';
 import 'Pages/PageManagerWidget.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MultiProvider(providers: [
@@ -22,7 +24,6 @@ void main() async{
       create: (context) => PushNotificationService(context),
     )
   ], child: ODMApp()));
-
 }
 
 class ODMApp extends StatefulWidget {
@@ -39,7 +40,7 @@ class _ODMAppState extends State<ODMApp> {
       ThemeManager.of(context, listen: false).colors =
           ThemeHolder.themes[value];
     });
-    NativeAds.initialize();
+    Platform.isAndroid ? NativeAds.initialize() : null;
     FirebaseAdMob.instance.initialize(appId: Constants.ADMOB_APP_ID);
     super.initState();
   }

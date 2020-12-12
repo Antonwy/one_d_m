@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
-import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
@@ -69,7 +68,12 @@ class _ExplorePageState extends State<ExplorePage>
                 ? DatabaseService.getTopCampaignsStream()
                 : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
             builder: (context, snapshot) {
-              if (!snapshot.hasData)
+              print('-------$snapshot');
+              if (snapshot.hasData) {
+                return CampaignList(
+                  campaigns: snapshot.data,
+                );
+              } else {
                 return SliverToBoxAdapter(
                   child: Center(
                       child: Column(
@@ -87,9 +91,7 @@ class _ExplorePageState extends State<ExplorePage>
                     ],
                   )),
                 );
-              return CampaignList(
-                campaigns: snapshot.data,
-              );
+              }
             })
       ],
     );

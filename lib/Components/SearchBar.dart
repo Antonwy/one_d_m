@@ -4,6 +4,7 @@ import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Helper/CategoryDialog.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
+import 'package:one_d_m/Helper/navigator_util.dart';
 
 class SearchBar extends StatelessWidget {
   final int categoryIndex;
@@ -34,10 +35,7 @@ class SearchBar extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.person_add),
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FindFriendsPage()));
+                        context.navigate(FindFriendsPage());
                       },
                       color: _theme.colors.dark,
                     ),

@@ -95,9 +95,7 @@ class DatabaseService {
   }
 
   static Future<bool> checkUsernameAvailable(String username) async {
-    return (await userCollection
-            .where(User.NAME, isEqualTo: username)
-            .get())
+    return (await userCollection.where(User.NAME, isEqualTo: username).get())
         .docs
         .isEmpty;
   }
@@ -190,19 +188,30 @@ class DatabaseService {
   static Future<List<User>> getUsers([int limit = 20]) async {
     return User.listFromSnapshots((await userCollection
             .where(User.GHOST, isEqualTo: false)
-            .orderBy(User.DONATEDAMOUNT, descending: true)
             .limit(limit)
             .get())
         .docs);
   }
 
+  static Stream<List<User>> streamUsers() {
+    return FirebaseFirestore.instance
+        .collection("user")
+        .snapshots()
+        .map((QuerySnapshot snapshot) {
+      return snapshot.docs.map((e) {
+        return User.fromSnapshot(e);
+      }).toList();
+    });
+  }
+
   static Stream<List<User>> getUsersStream() {
     return userCollection
         .where(User.GHOST, isEqualTo: false)
-        .orderBy(User.DONATEDAMOUNT, descending: true)
         .limit(20)
         .snapshots()
-        .map((qs) => User.listFromSnapshots(qs.docs));
+        .map((qs) {
+      return User.listFromSnapshots(qs.docs);
+    });
   }
 
   static Stream<List<Campaign>> getCampaignFromQueryStream(String query) {
@@ -248,9 +257,7 @@ class DatabaseService {
         .limit(5)
         .get();
 
-    return nameSnapshot.docs
-        .map((doc) => Organisation.fromMap(doc))
-        .toList();
+    return nameSnapshot.docs.map((doc) => Organisation.fromMap(doc)).toList();
   }
 
   static Future<void> createSubscription(Campaign campaign, String uid) async {
@@ -308,10 +315,7 @@ class DatabaseService {
   }
 
   static Stream<Campaign> getCampaignStream(String id) {
-    return campaignsCollection
-        .doc(id)
-        .snapshots()
-        .map(Campaign.fromSnapshot);
+    return campaignsCollection.doc(id).snapshots().map(Campaign.fromSnapshot);
   }
 
   static Stream<List<Campaign>> getCampaignsFromCategoryStream(int category) {
@@ -323,14 +327,18 @@ class DatabaseService {
 
   static Stream<List<Campaign>> getTopCampaignsStream() {
     return campaignsCollection
-        .orderBy(Campaign.AMOUNT, descending: true)
+        // .orderBy(Campaign.AMOUNT, descending: true)
         .snapshots()
-        .map((qs) => Campaign.listFromSnapshot(qs.docs));
+        .map((qs){
+          return qs.docs.map((e){
+            return Campaign.fromSnapshot(e);
+          }).toList();
+    });
   }
 
   static Future<List<Campaign>> getTopCampaigns([int limit = 5]) async {
     return (await campaignsCollection
-            .orderBy(Campaign.AMOUNT, descending: true)
+            // .orderBy(Campaign.AMOUNT, descending: true)
             .limit(limit)
             .get())
         .docs
@@ -366,7 +374,7 @@ class DatabaseService {
     return newsFeedCollection
         .doc(uid)
         .collection(NEWS)
-        .orderBy(News.CREATEDAT, descending: true)
+        // .orderBy(News.CREATEDAT, descending: true)
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
@@ -382,20 +390,12 @@ class DatabaseService {
 
   static Future<void> createFollow(String meId, String toId) async {
     if (meId == toId) return;
-    followingCollection
-        .doc(meId)
-        .collection(USERS)
-        .doc(toId)
-        .set({"id": toId});
+    followingCollection.doc(meId).collection(USERS).doc(toId).set({"id": toId});
   }
 
   static Future<void> deleteFollow(String meId, String toId) async {
     if (meId == toId) return;
-    followingCollection
-        .doc(meId)
-        .collection(USERS)
-        .doc(toId)
-        .delete();
+    followingCollection.doc(meId).collection(USERS).doc(toId).delete();
   }
 
   static Stream<bool> getFollowStream(String meId, String toId) {
@@ -434,8 +434,8 @@ class DatabaseService {
     List<Campaign> campaigns = [];
 
     for (String id in ids) {
-      campaigns.add(
-          Campaign.fromSnapshot(await campaignsCollection.doc(id).get()));
+      campaigns
+          .add(Campaign.fromSnapshot(await campaignsCollection.doc(id).get()));
     }
 
     return campaigns;
@@ -458,7 +458,7 @@ class DatabaseService {
       String campaignId) {
     return donationsCollection
         .where(Donation.CAMPAIGNID, isEqualTo: campaignId)
-        .orderBy(Donation.CREATEDAT, descending: true)
+        // .orderBy(Donation.CREATEDAT, descending: true)
         .limit(6)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
@@ -468,7 +468,7 @@ class DatabaseService {
     return donationFeedCollection
         .doc(uid)
         .collection(DONATIONS)
-        .orderBy(Donation.CREATEDAT, descending: true)
+        // .orderBy(Donation.CREATEDAT, descending: true)
         .limit(20)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
@@ -503,7 +503,7 @@ class DatabaseService {
     return donationsCollection
         .where(Donation.USERID, isEqualTo: uid)
         .where(Donation.ISANONYM, isEqualTo: false)
-        .orderBy(Donation.CREATEDAT, descending: true)
+        // .orderBy(Donation.CREATEDAT, descending: true)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
@@ -512,7 +512,7 @@ class DatabaseService {
     return donationsCollection
         .where(Donation.USERID, isEqualTo: uid)
         .where(Donation.ISANONYM, isEqualTo: false)
-        .orderBy(Donation.CREATEDAT, descending: true)
+        // .orderBy(Donation.CREATEDAT, descending: true)
         .limit(4)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
@@ -558,8 +558,8 @@ class DatabaseService {
           .get();
       if (qs.docs.isNotEmpty) {
         for (DocumentSnapshot doc in qs.docs) {
-          userList.add(
-              User.fromSnapshot(await doc.reference.parent.doc().get()));
+          userList
+              .add(User.fromSnapshot(await doc.reference.parent.doc().get()));
         }
       }
     }
@@ -576,18 +576,12 @@ class DatabaseService {
   }
 
   static Future<void> deleteCard({PaymentMethod card, String uid}) {
-    return userCollection
-        .doc(uid)
-        .collection(CARDS)
-        .doc(card.id)
-        .delete();
+    return userCollection.doc(uid).collection(CARDS).doc(card.id).delete();
   }
 
   static Stream<List<PaymentMethod>> getCards(String uid) {
-    return userCollection.doc(uid).collection(CARDS).snapshots().map(
-        (qs) => qs.docs
-            .map((doc) => PaymentMethod.fromJson(doc.data()))
-            .toList());
+    return userCollection.doc(uid).collection(CARDS).snapshots().map((qs) =>
+        qs.docs.map((doc) => PaymentMethod.fromJson(doc.data())).toList());
   }
 
   static Stream<bool> hasPaymentMethod(String uid) {
@@ -599,10 +593,7 @@ class DatabaseService {
   }
 
   static Future<List<String>> getFriends(String uid) async {
-    return (await friendsCollection
-            .doc(uid)
-            .collection(USERS)
-            .get())
+    return (await friendsCollection.doc(uid).collection(USERS).get())
         .docs
         .map((doc) => doc.id)
         .toList();
@@ -647,7 +638,7 @@ class DatabaseService {
         .collection(Ranking.DAILYRANKINGS)
         .doc(Ranking.getFormatedDate(date))
         .collection(Ranking.USERS)
-        .orderBy(Ranking.AMOUNT, descending: true)
+        // .orderBy(Ranking.AMOUNT, descending: true)
         .limit(5)
         .snapshots()
         .map(FriendsRanking.fromQuery);
@@ -660,7 +651,7 @@ class DatabaseService {
         .collection(Ranking.DAILYRANKINGS)
         .doc(Ranking.getFormatedDate(date))
         .collection(Ranking.CAMPAIGNS)
-        .orderBy(Ranking.AMOUNT, descending: true)
+        // .orderBy(Ranking.AMOUNT, descending: true)
         .limit(5)
         .snapshots()
         .map(CampaignsRanking.fromQuery);
@@ -694,8 +685,7 @@ class DatabaseService {
   }
 
   static Future<Organisation> getOrganisation(String oid) async {
-    return Organisation.fromMap(
-        await organisationsCollection.doc(oid).get());
+    return Organisation.fromMap(await organisationsCollection.doc(oid).get());
   }
 
   static Future<Organisation> getOrganisationOfCampaign(String cid) async {
@@ -713,9 +703,7 @@ class DatabaseService {
   }
 
   static Future<HttpsCallableResult> createSession(UploadableSession session) {
-    return cloudFunctions
-        .httpsCallable(CREATESESSION)
-        .call(session.toMap());
+    return cloudFunctions.httpsCallable(CREATESESSION).call(session.toMap());
   }
 
   static Stream<List<BaseSession>> getSessionsFromUser(String uid) {
@@ -723,7 +711,7 @@ class DatabaseService {
         .doc(uid)
         .collection(SESSIONS)
         .where(BaseSession.END_DATE, isGreaterThanOrEqualTo: DateTime.now())
-        .orderBy(BaseSession.END_DATE, descending: true)
+        // .orderBy(BaseSession.END_DATE, descending: true)
         .snapshots()
         .map((BaseSession.fromQuerySnapshot));
   }
@@ -770,7 +758,7 @@ class DatabaseService {
         .doc(sid)
         .collection(SESSION_MEMBERS)
         .limit(limit)
-        .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
+        // .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
         .snapshots()
         .map(SessionMember.fromQuerySnapshot);
   }
@@ -812,15 +800,13 @@ class DatabaseService {
     return sessionsCollection
         .doc(sid)
         .collection(MESSAGES)
-        .orderBy(SessionMessage.CREATED_AT, descending: true)
+        // .orderBy(SessionMessage.CREATED_AT, descending: true)
         .snapshots()
         .map(SessionMessage.fromQuerySnapshot);
   }
 
   static Future<HttpsCallableResult> callFindFriends(List<String> numbers) {
-    return cloudFunctions
-        .httpsCallable(FINDFRIENDS)
-        .call(numbers);
+    return cloudFunctions.httpsCallable(FINDFRIENDS).call(numbers);
   }
 
   static Stream<List<SessionInvite>> getSessionInvites(String uid) {
@@ -832,16 +818,12 @@ class DatabaseService {
   }
 
   static Future<HttpsCallableResult> acceptSessionInvite(SessionInvite invite) {
-    return cloudFunctions
-        .httpsCallable(ACCEPTINVITE)
-        .call(invite.toMap());
+    return cloudFunctions.httpsCallable(ACCEPTINVITE).call(invite.toMap());
   }
 
   static Future<HttpsCallableResult> declineSessionInvite(
       SessionInvite invite) {
-    return cloudFunctions
-        .httpsCallable(DECLINEINVITE)
-        .call(invite.toMap());
+    return cloudFunctions.httpsCallable(DECLINEINVITE).call(invite.toMap());
   }
 
   static Future<HttpsCallableResult> joinCertifiedSession(String sid) {
@@ -852,7 +834,7 @@ class DatabaseService {
 
   static Future<HttpsCallableResult> leaveCertifiedSession(String sid) {
     return cloudFunctions
-        .httpsCallable( LEAVE_CERTIFIED_SESSION)
+        .httpsCallable(LEAVE_CERTIFIED_SESSION)
         .call({"session_id": sid});
   }
 }

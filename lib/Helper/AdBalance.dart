@@ -9,8 +9,8 @@ class AdBalance {
   factory AdBalance.fromSnapshot(DocumentSnapshot snapshot) {
     if (snapshot.data == null) return AdBalance(activityScore: 0, dcBalance: 0);
     return AdBalance(
-      activityScore: (snapshot[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
-      dcBalance: (snapshot[DC_BALANCE] as num)?.toInt(),
+      activityScore: (snapshot.data()[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
+      dcBalance: (snapshot.data()[DC_BALANCE] as num)?.toInt(),
     );
   }
 

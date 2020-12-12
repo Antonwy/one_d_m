@@ -24,10 +24,13 @@ class SearchResultsList extends StatelessWidget {
                 return FutureBuilder<List<Organisation>>(
                   future: DatabaseService.getOrganisationsFromQuery(query),
                   builder: (context, oSnapshot) {
-                    if (uSnapshot.hasData && cSnapshot.hasData) {
-                      List<Campaign> resCampaigns = cSnapshot.data;
-                      List<User> resUsers = uSnapshot.data;
-                      List<Organisation> resOrganisations = oSnapshot.data;
+                    if (uSnapshot.hasData && cSnapshot.hasData && oSnapshot.hasData) {
+                      List<Campaign> resCampaigns=List();
+                      resCampaigns.addAll(cSnapshot.data);
+                      List<User> resUsers = List();
+                      resUsers.addAll(uSnapshot.data);
+                      List<Organisation> resOrganisations = List();
+                      resOrganisations.addAll(oSnapshot.data);
 
                       return SliverList(
                           delegate: SliverChildListDelegate(

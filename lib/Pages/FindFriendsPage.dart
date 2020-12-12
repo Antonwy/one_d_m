@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,60 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
               return StreamBuilder<List<String>>(
                   stream: _contactsStream,
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData)
+                    if (snapshot.hasData) {
+                      if (snapshot.data.isNotEmpty) {
+                        return SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18.0),
+                                child: Text(
+                                  "Nutzer aus deinen Kontakten",
+                                  style: _textTheme.headline5
+                                      .copyWith(color: ColorTheme.blue),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18.0),
+                                child: Text(
+                                  "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
+                                  style: _textTheme.caption.copyWith(
+                                      color: ColorTheme.blue.withOpacity(.5)),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                (context, index) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18.0, vertical: 5),
+                                  child: UserButton(
+                                    snapshot.data[index],
+                                    withAddButton: true,
+                                    color: ColorTheme.whiteBlue,
+                                    textStyle:
+                                        TextStyle(color: ColorTheme.blue),
+                                    elevation: 1,
+                                    avatarColor: ColorTheme.blue,
+                                  ),
+                                ),
+                                childCount: snapshot.data.length,
+                              ))
+                            ],
+                          ),
+                        );
+                      } else {
+                        return SliverToBoxAdapter();
+                      }
+                    } else {
                       return SliverPadding(
                         padding: const EdgeInsets.all(18.0),
                         sliver: SliverToBoxAdapter(
@@ -112,69 +166,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                           ),
                         ),
                       );
-
-                    if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-
-                    return SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 18.0),
-                            child: Text(
-                              "Nutzer aus deinen Kontakten",
-                              style: _textTheme.headline5
-                                  .copyWith(color: ColorTheme.blue),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 18.0),
-                            child: Text(
-                              "Diese Freunde nutzen ebenfalls die App! Abonniere sie doch direkt, um updates von ihnen zu bekommen!",
-                              style: _textTheme.caption.copyWith(
-                                  color: ColorTheme.blue.withOpacity(.5)),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          )
-                        ],
-                      ),
-                    );
-                  });
-            },
-          ),
-          Consumer<UserManager>(
-            builder: (context, um, child) {
-              if (_contactsStream == null) {
-                _contactsStream = DatabaseService.getFriendsStream(um.uid);
-              }
-              return StreamBuilder<List<String>>(
-                  stream: _contactsStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return SliverToBoxAdapter();
-
-                    return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                      (context, index) => Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 18.0, vertical: 5),
-                        child: UserButton(
-                          snapshot.data[index],
-                          withAddButton: true,
-                          color: ColorTheme.whiteBlue,
-                          textStyle: TextStyle(color: ColorTheme.blue),
-                          elevation: 1,
-                          avatarColor: ColorTheme.blue,
-                        ),
-                      ),
-                      childCount: snapshot.data.length,
-                    ));
+                    }
                   });
             },
           ),
@@ -244,6 +236,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                   if (!snapshot.hasData) return SliverToBoxAdapter();
 
                   List<User> users = snapshot.data;
+                  users.sort(
+                      (a, b) => a.donatedAmount.compareTo(b.donatedAmount));
                   users.removeWhere((user) => user.id == um.uid);
 
                   return SliverPadding(

@@ -52,16 +52,16 @@ class News {
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
     return News(
-      id: snapshot.documentID,
-      campaignId: snapshot[CAMPAIGNID],
-      userId: snapshot[USERID],
-      title: snapshot[TITLE],
-      text: snapshot[TEXT],
-      shortText: snapshot[SHORTTEXT],
-      campaignName: snapshot[CAMPAIGNNAME],
-      campaignImgUrl: snapshot[CAMPAIGNIMGURL],
-      imageUrl: snapshot[IMAGEURL],
-      createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
+      id: snapshot.id,
+      campaignId: snapshot.data()[CAMPAIGNID],
+      userId: snapshot.data()[USERID],
+      title: snapshot.data()[TITLE],
+      text: snapshot.data()[TEXT],
+      shortText: snapshot.data()[SHORTTEXT],
+      campaignName: snapshot.data()[CAMPAIGNNAME],
+      campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
+      imageUrl: snapshot.data()[IMAGEURL],
+      createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
     );
   }
 

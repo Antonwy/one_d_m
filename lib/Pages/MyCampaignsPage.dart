@@ -87,7 +87,7 @@ class _MyCampaignsPageState extends State<MyCampaignsPage> {
     List<Widget> list = [];
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(c));
+      list.add(CampaignHeader(campaign: c,));
     }
 
     return list;

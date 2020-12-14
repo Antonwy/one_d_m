@@ -21,4 +21,7 @@ class Constants {
       "ca-app-pub-3940256099942544/2247696110";
   static const int AD_NEWS_RATE = 3;
   static const int AD_CAMPAIGNS_RATE = 3;
+
+  //SkSl WarmUp file
+  ///Users/niroshana/Documents/FIVERR/one-d-m/flutter_01.sksl.json.
 }

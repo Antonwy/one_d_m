@@ -104,7 +104,7 @@ class OrganisationPage extends StatelessWidget {
                 return SliverList(
                     delegate: SliverChildBuilderDelegate(
                         (context, index) =>
-                            CampaignHeader(snapshot.data[index]),
+                            CampaignHeader(campaign: snapshot.data[index],),
                         childCount: snapshot.data.length));
               })
         ],

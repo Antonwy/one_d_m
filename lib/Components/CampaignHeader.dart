@@ -6,30 +6,23 @@ import 'package:one_d_m/Pages/NewCampaignPage.dart';
 
 import 'CustomOpenContainer.dart';
 
-class CampaignHeader extends StatefulWidget {
-  Campaign campaign;
+class CampaignHeader extends StatelessWidget {
+  final Campaign campaign;
 
-  CampaignHeader(this.campaign);
-
-  @override
-  _CampaignHeaderState createState() => _CampaignHeaderState();
-}
-
-class _CampaignHeaderState extends State<CampaignHeader> {
-  TextTheme textTheme;
+  const CampaignHeader({Key key, this.campaign}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    textTheme = Theme.of(context).textTheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
         child: CustomOpenContainer(
           closedShape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           closedElevation: 1,
           openBuilder: (context, close, scrollController) => NewCampaignPage(
-              widget.campaign,
+              campaign,
               scrollController: scrollController),
           closedColor: ColorTheme.white,
           closedBuilder: (context, open) => InkWell(
@@ -37,17 +30,19 @@ class _CampaignHeaderState extends State<CampaignHeader> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                CachedNetworkImage(
-                  imageUrl: widget.campaign.imgUrl,
-                  height: 230,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Center(
-                      child: Icon(
-                    Icons.error,
-                    color: ColorTheme.orange,
-                  )),
-                  alignment: Alignment.center,
+                RepaintBoundary(
+                  child: CachedNetworkImage(
+                    imageUrl: campaign.imgUrl,
+                    height: 230,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Center(
+                        child: Icon(
+                          Icons.error,
+                          color: ColorTheme.orange,
+                        )),
+                    alignment: Alignment.center,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(18),
@@ -55,12 +50,12 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        widget.campaign.name,
+                        campaign.name,
                         style: textTheme.headline6,
                       ),
-                      widget.campaign.shortDescription == null
+                      campaign.shortDescription == null
                           ? Container()
-                          : Text(widget.campaign.shortDescription),
+                          : Text(campaign.shortDescription),
                     ],
                   ),
                 )
@@ -70,3 +65,4 @@ class _CampaignHeaderState extends State<CampaignHeader> {
         ));
   }
 }
+

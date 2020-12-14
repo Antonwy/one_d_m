@@ -68,11 +68,8 @@ class _ExplorePageState extends State<ExplorePage>
                 ? DatabaseService.getTopCampaignsStream()
                 : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
             builder: (context, snapshot) {
-              print('-------$snapshot');
               if (snapshot.hasData) {
-                return CampaignList(
-                  campaigns: snapshot.data,
-                );
+                return CampaignList(campaigns: snapshot.data,);
               } else {
                 return SliverToBoxAdapter(
                   child: Center(
@@ -99,4 +96,9 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

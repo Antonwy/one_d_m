@@ -20,6 +20,7 @@ import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/image_placeholder.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -66,6 +67,12 @@ class _NewCampaignPageState extends State<NewCampaignPage>
         DatabaseService.getDonationFromCampaignStream(widget.campaign.id);
 
     super.initState();
+  }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollOffset.dispose();
+    super.dispose();
   }
 
   @override
@@ -129,11 +136,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     alignment: Alignment.topCenter,
                     child: Container(
                       height: _mq.size.height * .3 + 30,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: CachedNetworkImageProvider(
-                                  widget.campaign.imgUrl))),
+                      width: _mq.size.width,
+                      child: ImageWidgetPlaceholder(
+                        image: CachedNetworkImageProvider(widget.campaign.imgUrl),
+                        placeholder: SizedBox.shrink(),
+                      ),
                     ),
                   ),
                   Align(
@@ -593,4 +600,5 @@ class _AmountWidget extends StatelessWidget {
           }),
     );
   }
+
 }

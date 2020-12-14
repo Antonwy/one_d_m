@@ -247,7 +247,9 @@ class DatabaseService {
         .limit(5)
         .get();
 
-    return nameSnapshot.docs.map(User.fromSnapshot).toList();
+    List<User> users = nameSnapshot.docs.map(User.fromSnapshot).toList();
+    users.removeWhere((User c) => !c.name.contains(query));
+    return users;
   }
 
   static Future<List<Organisation>> getOrganisationsFromQuery(
@@ -257,7 +259,11 @@ class DatabaseService {
         .limit(5)
         .get();
 
-    return nameSnapshot.docs.map((doc) => Organisation.fromMap(doc)).toList();
+    List<Organisation> org =
+        nameSnapshot.docs.map((doc) => Organisation.fromMap(doc)).toList();
+
+    org.removeWhere((Organisation c) => !c.name.contains(query));
+    return org;
   }
 
   static Future<void> createSubscription(Campaign campaign, String uid) async {
@@ -329,10 +335,10 @@ class DatabaseService {
     return campaignsCollection
         // .orderBy(Campaign.AMOUNT, descending: true)
         .snapshots()
-        .map((qs){
-          return qs.docs.map((e){
-            return Campaign.fromSnapshot(e);
-          }).toList();
+        .map((qs) {
+      return qs.docs.map((e) {
+        return Campaign.fromSnapshot(e);
+      }).toList();
     });
   }
 

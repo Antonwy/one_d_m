@@ -24,66 +24,68 @@ class SearchResultsList extends StatelessWidget {
                 return FutureBuilder<List<Organisation>>(
                   future: DatabaseService.getOrganisationsFromQuery(query),
                   builder: (context, oSnapshot) {
-                    if (uSnapshot.hasData && cSnapshot.hasData && oSnapshot.hasData) {
-                      List<Campaign> resCampaigns=List();
-                      resCampaigns.addAll(cSnapshot.data);
-                      List<User> resUsers = List();
+                    List<Campaign> resCampaigns = List();
+                    List<User> resUsers = List();
+                    List<Organisation> resOrganisations = List();
+                    if (uSnapshot.hasData) {
                       resUsers.addAll(uSnapshot.data);
-                      List<Organisation> resOrganisations = List();
-                      resOrganisations.addAll(oSnapshot.data);
-
-                      return SliverList(
-                          delegate: SliverChildListDelegate(
-                        [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          resUsers.isEmpty
-                              ? Container()
-                              : Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 20, bottom: 10, top: 10),
-                                  child: Text(
-                                    "Nutzer",
-                                    style:
-                                        Theme.of(context).textTheme.headline6,
-                                  ),
-                                ),
-                          ..._buildUsers(resUsers),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          resOrganisations.isEmpty
-                              ? Container()
-                              : Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 20, bottom: 10),
-                                  child: Text(
-                                    "Organisationen",
-                                    style:
-                                        Theme.of(context).textTheme.headline6,
-                                  ),
-                                ),
-                          ..._buildOrganisations(resOrganisations),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          resCampaigns.isEmpty
-                              ? Container()
-                              : Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 20, bottom: 10),
-                                  child: Text(
-                                    "Projekte",
-                                    style:
-                                        Theme.of(context).textTheme.headline6,
-                                  ),
-                                ),
-                          ..._buildCampaigns(resCampaigns),
-                          SizedBox(height: 50)
-                        ],
-                      ));
                     }
+                    if (cSnapshot.hasData) {
+                      resCampaigns.addAll(cSnapshot.data);
+                    }
+
+                    if (oSnapshot.hasData) {
+                      resOrganisations.addAll(oSnapshot.data);
+                    }
+
+                    return SliverList(
+                        delegate: SliverChildListDelegate(
+                      [
+                        SizedBox(
+                          height: 10,
+                        ),
+                        resUsers.isEmpty
+                            ? Container()
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 20, bottom: 10, top: 10),
+                                child: Text(
+                                  "Nutzer",
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                              ),
+                        ..._buildUsers(resUsers),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        resOrganisations.isEmpty
+                            ? Container()
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, bottom: 10),
+                                child: Text(
+                                  "Organisationen",
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                              ),
+                        ..._buildOrganisations(resOrganisations),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        resCampaigns.isEmpty
+                            ? Container()
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, bottom: 10),
+                                child: Text(
+                                  "Projekte",
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                              ),
+                        ..._buildCampaigns(resCampaigns),
+                        SizedBox(height: 50)
+                      ],
+                    ));
 
                     return SliverFillRemaining(
                       child: Center(

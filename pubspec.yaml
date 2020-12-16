@@ -57,6 +57,7 @@ dependencies:
   shared_preferences: ^0.5.10
   firebase_admob: ^0.10.3
   numberpicker: ^1.2.1
+  flutter_xlider: ^3.4.0
 
 dev_dependencies:
 

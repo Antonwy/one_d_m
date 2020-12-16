@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -21,7 +22,7 @@ class DonationDialogWidget extends StatefulWidget {
   final Campaign campaign;
   final User user;
   final BuildContext context;
-  final int defaultSelectedAmount;
+  int defaultSelectedAmount;
   final String sessionId;
 
   DonationDialogWidget(
@@ -30,7 +31,7 @@ class DonationDialogWidget extends StatefulWidget {
       this.user,
       this.context,
       this.sessionId,
-      this.defaultSelectedAmount = 5});
+      this.defaultSelectedAmount = 0});
 
   @override
   _DonationDialogWidgetState createState() => _DonationDialogWidgetState();
@@ -41,6 +42,18 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   ThemeData _theme;
   BaseTheme _bTheme;
   FocusScopeNode _keyboardFocus = FocusScopeNode();
+  double _selectedValue = 0;
+
+  @override
+  void initState() {
+    _selectedValue = widget.defaultSelectedAmount.toDouble();
+    DatabaseService.getAdBalance(widget.user.id).listen((event) {
+      if (event.dcBalance < _selectedValue) {
+        _selectedValue = 0;
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +76,6 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 child: Consumer2<DonationDialogManager, UserManager>(
                     builder: (context, ddm, um, child) {
                   if (um.user.ghost) ddm.setAnonymWithoutRebuild(true);
-
-                  // if (!ddm.hasPaymentMethod &&
-                  //     (ddm.adBalance.dcBalance ?? 0) == 0) {
-                  //   return AddPaymentMethodDialog(widget.close);
-                  // }
-
-                  // if (!ddm.hasPaymentMethod) ddm.setUseDCsWithoutRebuild(true);
-
                   return Stack(
                     children: <Widget>[
                       Positioned.fill(
@@ -89,78 +94,118 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                               alignment: Alignment.bottomCenter,
                               child: Material(
                                 borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(10)),
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20)),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     SizedBox(
-                                      height: 20,
+                                      height: 10,
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 12.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                AutoSizeText(
-                                                  "Wieviele Donation Votes?",
-                                                  maxLines: 1,
-                                                  style: _theme
-                                                      .textTheme.headline6,
-                                                ),
-                                                SizedBox(
-                                                  height: 4,
-                                                ),
-                                                RichText(
-                                                  text: TextSpan(
-                                                      style: _theme
-                                                          .textTheme.caption,
-                                                      children: [
-                                                        TextSpan(
-                                                            text: "Du hast "),
-                                                        TextSpan(
-                                                            text:
-                                                                "${ddm.adBalance.dcBalance} DV",
-                                                            style: _theme
-                                                                .textTheme
-                                                                .bodyText1
-                                                                .copyWith(
-                                                                    color: _bTheme
-                                                                        .contrast)),
-                                                        TextSpan(
-                                                            text:
-                                                                " zum ausgeben."),
-                                                      ]),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          _closeButton()
-                                        ],
-                                      ),
-                                    ),
-                                    DCSlider(),
-                                    CustomAmountWidget(_keyboardFocus),
-                                    AlternativeCampaignWidget(widget.campaign),
-                                    AnonymDCCheckboxWidget(),
+                                    Align(
+                                        alignment: Alignment.center,
+                                        child: AutoSizeText(
+                                          "Donate",
+                                          style: _theme.textTheme.headline4
+                                              .copyWith(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold),
+                                        )),
                                     SizedBox(
                                       height: 10,
                                     ),
-                                    DonationButton(
-                                      keyboardFocus: _keyboardFocus,
-                                      campaign: widget.campaign,
-                                      user: widget.user,
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        InfoCardWidget(
+                                          isDark: true,
+                                          childWidget: _buildWWFContent(),
+                                        ),
+                                        InfoCardWidget(
+                                          isDark: true,
+                                          childWidget: _buildDVBalanceCard(ddm
+                                              .adBalance.dcBalance
+                                              .toString()),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          _selectedValue.toInt().toString(),
+                                          style: _theme.textTheme.headline4
+                                              .copyWith(
+                                                  fontWeight: FontWeight.bold),
+                                        )),
+                                    Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          'DV selected',
+                                          style: _theme.textTheme.headline4
+                                              .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16),
+                                        )),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    //dv slider
+                                    Flexible(
+                                      child: FlutterSlider(
+                                        min: 0,
+                                        max: ddm.adBalance.dcBalance.toDouble(),
+                                        values: [_selectedValue],
+                                        onDragging: (handlerIndex, lowerValue,
+                                            upperValue) {
+                                          _selectedValue = lowerValue;
+                                          setState(() {
+                                            ddm.amount = _selectedValue.toInt();
+                                          });
+                                        },
+                                        tooltip: FlutterSliderTooltip(
+                                          disabled: true
+                                        ),
+                                        handler: FlutterSliderHandler(
+                                          decoration: BoxDecoration(),
+                                          child: Material(
+                                            type: MaterialType.circle,
+                                            color: _bTheme.dark,
+                                            elevation: 3,
+                                            child: Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Icon(Icons.adjust_sharp, size: 25,color: _bTheme.contrast,)),
+                                          ),
+                                        ),
+                                        trackBar: FlutterSliderTrackBar(
+                                          activeTrackBarHeight: 16,
+                                          inactiveTrackBarHeight: 16,
+                                          inactiveTrackBar: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            color: _bTheme.contrast,
+                                          ),
+                                          activeTrackBar: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: _bTheme.dark),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    Align(
+                                      alignment: Alignment.center,
+                                      child: DonationButton(
+                                        keyboardFocus: _keyboardFocus,
+                                        campaign: widget.campaign,
+                                        user: widget.user,
+                                      ),
                                     ),
                                     SizedBox(
                                       height: 10 +
@@ -186,6 +231,47 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 }))));
   }
 
+  Widget _buildWWFContent() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.white,
+            child: Image.asset(
+              "assets/icons/ic_wwf.png",
+              width: 37,
+              height: 38,
+            ),
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          Text(
+            "WWF",
+            style: _theme.textTheme.headline5
+                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          )
+        ],
+      );
+
+  Widget _buildDVBalanceCard(String dv) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "DV balance",
+            style: _theme.textTheme.bodyText1
+                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "$dv DV",
+            style: _theme.textTheme.headline6
+                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          )
+        ],
+      );
+
   Widget _closeButton() {
     return Container(
       height: 35,
@@ -203,6 +289,33 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
               size: 20,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class InfoCardWidget extends StatelessWidget {
+  final Widget childWidget;
+  final bool isDark;
+
+  const InfoCardWidget({Key key, this.childWidget, this.isDark})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    return Container(
+      height: 70,
+      width: 158,
+      margin: const EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 0,
+        color: isDark ? _bTheme.dark : _bTheme.contrast,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: childWidget,
         ),
       ),
     );
@@ -235,12 +348,12 @@ class DonationButton extends StatelessWidget {
           connectivityBuilder: (c, connection, child) {
             bool connected = connection != ConnectivityResult.none;
             return MaterialButton(
-              minWidth: double.infinity,
+              minWidth: 170,
               height: 50,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(20)),
               elevation: 0,
-              color: ThemeManager.of(context).colors.dark,
+              color: const Color(0xFF8CB369),
               disabledColor: Colors.grey,
               onPressed: ddm.amount != null &&
                       ddm.amount != 0 &&
@@ -252,14 +365,32 @@ class DonationButton extends StatelessWidget {
                         }
                   : null,
               child: ddm.loading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      ],
                     )
-                  : Text(
-                      "UNTERSTÜTZEN",
-                      style: _theme.accentTextTheme.button,
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Support!",
+                          style: _theme.accentTextTheme.button.copyWith(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Image.asset(
+                          "assets/icons/ic_support.png",
+                          width: 27,
+                          height: 27,
+                        )
+                      ],
                     ),
             );
           }),
@@ -303,7 +434,8 @@ class DonationButton extends StatelessWidget {
           context: context,
           builder: (context) => AlertDialog(
                 title: Text("Bist du dir sicher?"),
-                content: Text("Willst du wirklich ${ddm.amount} DV zum unterstützen ausgeben?"),
+                content: Text(
+                    "Willst du wirklich ${ddm.amount} DV zum unterstützen ausgeben?"),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 actions: <Widget>[

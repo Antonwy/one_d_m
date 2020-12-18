@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
+import 'package:lottie/lottie.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -16,6 +20,7 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
 import 'package:provider/provider.dart';
+import 'package:vibration/vibration.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -168,8 +173,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           });
                                         },
                                         tooltip: FlutterSliderTooltip(
-                                          disabled: true
-                                        ),
+                                            disabled: true),
                                         handler: FlutterSliderHandler(
                                           decoration: BoxDecoration(),
                                           child: Material(
@@ -178,7 +182,11 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                             elevation: 3,
                                             child: Container(
                                                 padding: EdgeInsets.all(5),
-                                                child: Icon(Icons.adjust_sharp, size: 25,color: _bTheme.contrast,)),
+                                                child: Icon(
+                                                  Icons.adjust_sharp,
+                                                  size: 25,
+                                                  color: _bTheme.contrast,
+                                                )),
                                           ),
                                         ),
                                         trackBar: FlutterSliderTrackBar(
@@ -208,14 +216,16 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                       ),
                                     ),
                                     SizedBox(
-                                      height: 10 +
+                                      height: 30 +
                                           MediaQuery.of(context).padding.bottom,
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            ThankYouWidget(),
+                            ddm.showAnimation
+                                ? DonationAnimationWidget()
+                                : SizedBox.shrink(),
                             Positioned(
                                 top: 20,
                                 right: 20,
@@ -461,16 +471,17 @@ class DonationButton extends StatelessWidget {
     await DatabaseService.donate(donation);
 
     ddm.setLoadingWithoutRebuild(false);
-    ddm.showThankYou = true;
+    ddm.showAnimation = true;
 
     if (keyboardFocus.hasPrimaryFocus) keyboardFocus.unfocus();
   }
 }
 
-class ThankYouWidget extends StatelessWidget {
+class ThankYouWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData _theme = Theme.of(context);
+
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
       return Positioned(
           left: 0,
@@ -483,32 +494,100 @@ class ThankYouWidget extends StatelessWidget {
               opacity: ddm.showThankYou ? 1 : 0,
               duration: Duration(milliseconds: 250),
               child: Material(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SvgPicture.asset(
-                      "assets/images/thank-you.svg",
-                      width: 300,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Wir werden \"${ddm.campaign.name}\" unterstützen!",
-                      style: _theme.textTheme.headline6,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).padding.bottom,
-                    )
-                  ],
-                ),
-              ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  child: _buildThankYou(context, ddm.campaign.name)),
             ),
           ));
     });
+  }
+
+  Widget _buildThankYou(BuildContext context, String name) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          SvgPicture.asset(
+            "assets/images/thank-you.svg",
+            width: 300,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "Wir werden \"$name\" unterstützen!",
+            style: Theme.of(context).textTheme.headline6,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom,
+          )
+        ],
+      );
+}
+
+class DonationAnimationWidget extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final animationController = useAnimationController();
+    return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
+      return Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          child: IgnorePointer(
+            ignoring: !ddm.showAnimation,
+            child: AnimatedOpacity(
+              opacity: ddm.showAnimation ? 1 : 0,
+              duration: Duration(milliseconds: 250),
+              child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedSwitcher(
+                    duration: Duration(seconds: 1),
+                    child: !ddm.showThankYou
+                        ? Lottie.asset('assets/anim/anim_start.json',
+                            onLoaded: (composition) {
+                              Timer(Duration(seconds: 1), () {
+                                ddm.showThankYou = true;
+                              });
+                            _vibrate();
+                          })
+                        : _buildThankYou(context, ddm.campaign.name),
+                  )),
+            ),
+          ));
+    });
+  }
+
+  Widget _buildThankYou(BuildContext context, String name) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          SvgPicture.asset(
+            "assets/images/thank-you.svg",
+            width: 300,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "Wir werden \"$name\" unterstützen!",
+            style: Theme.of(context).textTheme.headline6,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom,
+          )
+        ],
+      );
+
+  _vibrate() async {
+    if (await Vibration.hasCustomVibrationsSupport()) {
+      Vibration.vibrate(duration: 1000);
+    } else {
+      Vibration.vibrate();
+      await Future.delayed(Duration(milliseconds: 500));
+      Vibration.vibrate();
+    }
   }
 }
 

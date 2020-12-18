@@ -60,7 +60,7 @@ dependencies:
   flutter_xlider: ^3.4.0
   lottie: ^0.7.0+1
   flutter_hooks: ^0.15.0
-  vibration: ^1.7.3
+
 
 dev_dependencies:
 

@@ -20,7 +20,6 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
 import 'package:provider/provider.dart';
-import 'package:vibration/vibration.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -171,6 +170,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           setState(() {
                                             ddm.amount = _selectedValue.toInt();
                                           });
+                                         HapticFeedback.vibrate();
+
                                         },
                                         tooltip: FlutterSliderTooltip(
                                             disabled: true),
@@ -547,10 +548,10 @@ class DonationAnimationWidget extends HookWidget {
                     child: !ddm.showThankYou
                         ? Lottie.asset('assets/anim/anim_start.json',
                             onLoaded: (composition) {
+                              HapticFeedback.heavyImpact();
                               Timer(Duration(seconds: 1), () {
                                 ddm.showThankYou = true;
                               });
-                            _vibrate();
                           })
                         : _buildThankYou(context, ddm.campaign.name),
                   )),
@@ -580,15 +581,7 @@ class DonationAnimationWidget extends HookWidget {
         ],
       );
 
-  _vibrate() async {
-    if (await Vibration.hasCustomVibrationsSupport()) {
-      Vibration.vibrate(duration: 1000);
-    } else {
-      Vibration.vibrate();
-      await Future.delayed(Duration(milliseconds: 500));
-      Vibration.vibrate();
-    }
-  }
+
 }
 
 class AnonymDCCheckboxWidget extends StatelessWidget {

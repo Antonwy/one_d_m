@@ -333,7 +333,6 @@ class DatabaseService {
 
   static Stream<List<Campaign>> getTopCampaignsStream() {
     return campaignsCollection
-        // .orderBy(Campaign.AMOUNT, descending: true)
         .snapshots()
         .map((qs) {
       return qs.docs.map((e) {
@@ -344,7 +343,6 @@ class DatabaseService {
 
   static Future<List<Campaign>> getTopCampaigns([int limit = 5]) async {
     return (await campaignsCollection
-            // .orderBy(Campaign.AMOUNT, descending: true)
             .limit(limit)
             .get())
         .docs

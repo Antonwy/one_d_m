@@ -5,21 +5,23 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 class ProfileWidget extends StatelessWidget {
   final imgUrl;
   final Color color;
+  final double radius;
+  final double size;
 
-  const ProfileWidget({Key key, this.imgUrl, this.color,})
+  const ProfileWidget({Key key, this.imgUrl, this.color, this.radius, this.size,})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return CircleAvatar(
-      radius: 20,
+      radius: radius,
       backgroundColor: color ?? _bTheme.dark,
       child: CachedNetworkImage(
         imageUrl: imgUrl??'',
         imageBuilder: (context, imageProvider) => Container(
-          height: 40,
-          width: 40,
+          height: size,
+          width: size,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(30)),
             image: DecorationImage(

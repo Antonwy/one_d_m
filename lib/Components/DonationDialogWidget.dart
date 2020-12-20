@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,7 +10,9 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:lottie/lottie.dart';
+import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/profile_widget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -20,6 +24,7 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/PaymentInfosPage.dart';
 import 'package:provider/provider.dart';
+import 'package:one_d_m/Helper/margin.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -98,129 +103,133 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                               alignment: Alignment.bottomCenter,
                               child: Material(
                                 borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    topRight: Radius.circular(20)),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Align(
-                                        alignment: Alignment.center,
-                                        child: AutoSizeText(
-                                          "Donate",
-                                          style: _theme.textTheme.headline4
-                                              .copyWith(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold),
-                                        )),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        InfoCardWidget(
-                                          isDark: true,
-                                          childWidget: _buildWWFContent(),
-                                        ),
-                                        InfoCardWidget(
-                                          isDark: true,
-                                          childWidget: _buildDVBalanceCard(ddm
-                                              .adBalance.dcBalance
-                                              .toString()),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          _selectedValue.toInt().toString(),
-                                          style: _theme.textTheme.headline4
-                                              .copyWith(
-                                                  fontWeight: FontWeight.bold),
-                                        )),
-                                    Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'DV selected',
-                                          style: _theme.textTheme.headline4
-                                              .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16),
-                                        )),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    //dv slider
-                                    Flexible(
-                                      child: FlutterSlider(
-                                        min: 0,
-                                        max: ddm.adBalance.dcBalance.toDouble(),
-                                        values: [_selectedValue],
-                                        onDragging: (handlerIndex, lowerValue,
-                                            upperValue) {
-                                          _selectedValue = lowerValue;
-                                          setState(() {
-                                            ddm.amount = _selectedValue.toInt();
-                                          });
-                                         HapticFeedback.vibrate();
-
-                                        },
-                                        tooltip: FlutterSliderTooltip(
-                                            disabled: true),
-                                        handler: FlutterSliderHandler(
-                                          decoration: BoxDecoration(),
-                                          child: Material(
-                                            type: MaterialType.circle,
-                                            color: _bTheme.dark,
-                                            elevation: 3,
-                                            child: Container(
-                                                padding: EdgeInsets.all(5),
-                                                child: Icon(
-                                                  Icons.adjust_sharp,
-                                                  size: 25,
-                                                  color: _bTheme.contrast,
-                                                )),
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      _buildheading(widget.campaign.imgUrl,
+                                          widget.campaign.name),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Gesammelte DV: ',
+                                            style: _theme.textTheme.subtitle1
+                                                .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black,
+                                                    fontSize: 18),
                                           ),
-                                        ),
-                                        trackBar: FlutterSliderTrackBar(
-                                          activeTrackBarHeight: 16,
-                                          inactiveTrackBarHeight: 16,
-                                          inactiveTrackBar: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            color: _bTheme.contrast,
+                                          Text(
+                                            ddm.adBalance.dcBalance.toString(),
+                                            style: _theme.textTheme.subtitle1
+                                                .copyWith(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 24,
+                                                    color: Colors.black),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Ausgewählt: ',
+                                            style: _theme.textTheme.subtitle1
+                                                .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black,
+                                                    fontSize: 18),
                                           ),
-                                          activeTrackBar: BoxDecoration(
+                                          Text(
+                                            _selectedValue.toInt().toString(),
+                                            style: _theme.textTheme.subtitle1
+                                                .copyWith(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 24,
+                                                    color: Colors.black),
+                                          )
+                                        ],
+                                      ),
+                                      //dv slider
+                                      Flexible(
+                                        child: FlutterSlider(
+                                          min: 0,
+                                          max: ddm.adBalance.dcBalance
+                                              .toDouble(),
+                                          values: [_selectedValue],
+                                          onDragging: (handlerIndex, lowerValue,
+                                              upperValue) {
+                                            _selectedValue = lowerValue;
+                                            setState(() {
+                                              ddm.amount =
+                                                  _selectedValue.toInt();
+                                            });
+                                          },
+                                          tooltip: FlutterSliderTooltip(
+                                              disabled: true),
+                                          handler: FlutterSliderHandler(
+                                            decoration: BoxDecoration(),
+                                            child: Material(
+                                              type: MaterialType.circle,
+                                              color: _bTheme.dark,
+                                              elevation: 3,
+                                              child: Container(
+                                                  padding: EdgeInsets.all(5),
+                                                  child: Icon(
+                                                    Icons.adjust_sharp,
+                                                    size: 25,
+                                                    color: _bTheme.contrast,
+                                                  )),
+                                            ),
+                                          ),
+                                          trackBar: FlutterSliderTrackBar(
+                                            activeTrackBarHeight: 16,
+                                            inactiveTrackBarHeight: 16,
+                                            inactiveTrackBar: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(20),
-                                              color: _bTheme.dark),
+                                              color: _bTheme.contrast,
+                                            ),
+                                            activeTrackBar: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: _bTheme.dark),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Align(
-                                      alignment: Alignment.center,
-                                      child: DonationButton(
-                                        keyboardFocus: _keyboardFocus,
-                                        campaign: widget.campaign,
-                                        user: widget.user,
+                                      SizedBox(
+                                        height: 5,
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 30 +
-                                          MediaQuery.of(context).padding.bottom,
-                                    ),
-                                  ],
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: DonationButton(
+                                          keyboardFocus: _keyboardFocus,
+                                          campaign: widget.campaign,
+                                          user: widget.user,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 30 +
+                                            MediaQuery.of(context)
+                                                .padding
+                                                .bottom,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -242,46 +251,57 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 }))));
   }
 
-  Widget _buildWWFContent() => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.white,
-            child: Image.asset(
-              "assets/icons/ic_wwf.png",
-              width: 37,
-              height: 38,
+  Widget _buildheading(String url, String title) => Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    mainAxisSize: MainAxisSize.max,
+    children: [
+      CircleAvatar(
+        radius: 40,
+        backgroundColor: Colors.transparent,
+        child: CachedNetworkImage(
+          imageUrl: url,
+          imageBuilder: (context, imageProvider) => Container(
+            height: 58.0,
+            width: 76.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(25)),
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          SizedBox(
-            width: 5,
-          ),
-          Text(
-            "WWF",
-            style: _theme.textTheme.headline5
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-          )
-        ],
-      );
-
-  Widget _buildDVBalanceCard(String dv) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "DV balance",
-            style: _theme.textTheme.bodyText1
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "$dv DV",
-            style: _theme.textTheme.headline6
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-          )
-        ],
-      );
+        ),
+      ),
+      SizedBox(
+        width: 5,
+      ),
+      Flexible(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              maxLines: 1,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.headline5.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+            Text(
+              'by WWF',
+              style: Theme.of(context).textTheme.subtitle1.copyWith(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500),
+            )
+          ],
+        ),
+      )
+    ],
+  );
 
   Widget _closeButton() {
     return Container(
@@ -364,7 +384,7 @@ class DonationButton extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
               elevation: 0,
-              color: const Color(0xFF8CB369),
+              color: _bTheme.dark,
               disabledColor: Colors.grey,
               onPressed: ddm.amount != null &&
                       ddm.amount != 0 &&
@@ -385,23 +405,10 @@ class DonationButton extends StatelessWidget {
                         ),
                       ],
                     )
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Support!",
-                          style: _theme.accentTextTheme.button.copyWith(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Image.asset(
-                          "assets/icons/ic_support.png",
-                          width: 27,
-                          height: 27,
-                        )
-                      ],
+                  : Text(
+                      "Support!",
+                      style: _theme.accentTextTheme.button
+                          .copyWith(fontSize: 21, fontWeight: FontWeight.bold),
                     ),
             );
           }),
@@ -528,7 +535,6 @@ class ThankYouWidget extends HookWidget {
 class DonationAnimationWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final animationController = useAnimationController();
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
       return Positioned(
           left: 0,
@@ -542,46 +548,56 @@ class DonationAnimationWidget extends HookWidget {
               duration: Duration(milliseconds: 250),
               child: Material(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(30),
                   child: AnimatedSwitcher(
                     duration: Duration(seconds: 1),
                     child: !ddm.showThankYou
                         ? Lottie.asset('assets/anim/anim_start.json',
                             onLoaded: (composition) {
-                              HapticFeedback.heavyImpact();
-                              Timer(Duration(seconds: 1), () {
-                                ddm.showThankYou = true;
-                              });
+                            HapticFeedback.heavyImpact();
+                            Timer(Duration(seconds: 1), () {
+                              ddm.showThankYou = true;
+                            });
                           })
-                        : _buildThankYou(context, ddm.campaign.name),
+                        : _buildThankYou(
+                            context, ddm.campaign.name, ddm.amount.toString()),
                   )),
             ),
           ));
     });
   }
 
-  Widget _buildThankYou(BuildContext context, String name) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildThankYou(BuildContext context, String name, String amount) =>
+      Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           SvgPicture.asset(
             "assets/images/thank-you.svg",
             width: 300,
-          ),
-          SizedBox(
-            height: 20,
+            height: 150,
           ),
           Text(
             "Wir werden \"$name\" unterstützen!",
             style: Theme.of(context).textTheme.headline6,
             textAlign: TextAlign.center,
           ),
-          SizedBox(
-            height: MediaQuery.of(context).padding.bottom,
-          )
+          Align(
+            alignment: Alignment.center,
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: ThemeManager.of(context).colors.dark,
+              child: NumberSlideAnimation(
+                number: amount,
+                duration: const Duration(seconds: 3),
+                curve: Curves.bounceIn,
+                textStyle: Theme.of(context).textTheme.headline5.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: ThemeManager.of(context).colors.light),
+              ),
+            ),
+          ),
         ],
       );
-
-
 }
 
 class AnonymDCCheckboxWidget extends StatelessWidget {

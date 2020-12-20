@@ -59,6 +59,8 @@ class UserButton extends StatelessWidget {
                       children: <Widget>[
                         ProfileWidget(
                             imgUrl: user.thumbnailUrl ?? user.imgUrl,
+                            radius: 20,
+                            size: 40,
                             color: avatarColor),
                         SizedBox(width: 10),
                         Expanded(

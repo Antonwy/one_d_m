@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  PageController _pageController = PageController(initialPage: 1);
+  PageController _pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               children: <Widget>[
-                NewsHomePage(() => _changePage(2)),
+                // NewsHomePage(() => _changePage(2)),
                 ProfilePage(),
                 ExplorePage(),
               ],
@@ -42,5 +42,11 @@ class _HomePageState extends State<HomePage> {
   void _changePage(int page) {
     _pageController.animateToPage(page,
         duration: Duration(milliseconds: 250), curve: Curves.fastOutSlowIn);
+  }
+  
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

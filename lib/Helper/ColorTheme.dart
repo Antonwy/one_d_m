@@ -14,6 +14,7 @@ class ColorTheme {
   static const Color lightGrey = Color.fromARGB(255, 246, 245, 250);
 
   static const Color darkOrange = Color.fromARGB(255, 255, 100, 86);
+  static const Color wildGreen = Color(0xFF2A6654);
 
   static const Color homePage = white;
   static const Color navBar = whiteBlue;

@@ -14,7 +14,7 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-  List<IconData> _iconList = [Icons.inbox, Icons.home, Icons.public];
+  List<IconData> _iconList = [Icons.home, Icons.public];
 
   MediaQueryData _mq;
 
@@ -50,11 +50,14 @@ class _NavBarState extends State<NavBar> {
                 Positioned.fill(
                   child: Center(
                     child: Container(
-                      width: _mq.size.width * .75,
+                      width: _mq.size.width * 0.50,
                       child: Consumer<NavBarManager>(
                           builder: (context, npm, child) {
                         return Align(
-                            alignment: Alignment(npm.position - 1, 0),
+                          alignment: AlignmentTween(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight)
+                              .transform(npm.position),
                             child: Container(
                               height: 40,
                               width: 40,
@@ -71,7 +74,7 @@ class _NavBarState extends State<NavBar> {
                     _npm = npm;
                     return Center(
                       child: Container(
-                        width: _mq.size.width * .75,
+                        width: _mq.size.width * .50,
                         height: _mq.size.height,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -89,11 +92,7 @@ class _NavBarState extends State<NavBar> {
 
   List<Widget> _generateIcons() {
     List<Widget> icons = [];
-    List<Alignment> alignments = [
-      Alignment.centerLeft,
-      Alignment.center,
-      Alignment.centerRight
-    ];
+    List<Alignment> alignments = [Alignment.centerLeft, Alignment.centerRight];
 
     for (int i = 0; i < _iconList.length; i++) {
       icons.add(Expanded(
@@ -106,7 +105,7 @@ class _NavBarState extends State<NavBar> {
             height: double.infinity,
             color: Colors.transparent,
             margin:
-                EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 2 ? 8 : 0),
+                EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 1 ? 8 : 0),
             child: Container(
               child: Opacity(
                 opacity: Tween<double>(begin: 1.0, end: .5)

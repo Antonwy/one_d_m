@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
@@ -52,18 +53,19 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
       ),
       builder: (context, child) {
         return Scaffold(
-          floatingActionButton: ValueListenableBuilder(
-            valueListenable: _pagePosition,
-            builder: (context, val, child) => Opacity(
-              opacity: 1 - val,
-              child: Transform.scale(
-                scale: 1 - val,
-                child: FloatingDonationButton(
-                  session,
-                ),
-              ),
-            ),
-          ),
+          //removed FAB according to the design
+          // floatingActionButton: ValueListenableBuilder(
+          //   valueListenable: _pagePosition,
+          //   builder: (context, val, child) => Opacity(
+          //     opacity: 1 - val,
+          //     child: Transform.scale(
+          //       scale: 1 - val,
+          //       child: FloatingDonationButton(
+          //         session,
+          //       ),
+          //     ),
+          //   ),
+          // ),
           backgroundColor: Colors.white,
           appBar: AppBar(
             backgroundColor: Colors.white,
@@ -82,6 +84,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
 
 class _CertifiedSessionPageIndicator extends StatefulWidget {
   PageController _pageController;
+
   _CertifiedSessionPageIndicator(this._pageController);
 
   @override
@@ -408,7 +411,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           sliver: SliverToBoxAdapter(
             child: Container(
-              height: 250,
+              height: 220,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -422,15 +425,47 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Positioned(
-                    child: _SessionJoinButton(),
-                    bottom: 6,
-                    right: 12,
-                  )
                 ],
               ),
             ),
           ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          sliver: SliverToBoxAdapter(
+              child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      csm.session.name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline5
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    StreamBuilder(
+                      stream:
+                          DatabaseService.getUserStream(csm.session.creatorId),
+                      builder: (context, AsyncSnapshot<User> snapshot) {
+                        return Text(
+                          'by ${snapshot.data?.name}',
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: _SessionJoinButton(),
+              )
+            ],
+          )),
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
@@ -451,7 +486,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       );
                     }),
                 SizedBox(
-                  width: 12,
+                  width: 8,
                 ),
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
@@ -465,7 +500,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       );
                     }),
                 SizedBox(
-                  width: 12,
+                  width: 8,
                 ),
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
@@ -483,15 +518,21 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Divider(),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0,horizontal: 8.0),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'Donators',
+              style: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           sliver: _CertifiedSessionMembers(),
-        ),
-        SliverToBoxAdapter(
-          child: Divider(),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -515,15 +556,15 @@ class _InfoView extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return Material(
-      color: imageUrl != null ? _theme.colors.contrast : _theme.colors.dark,
-      borderRadius: BorderRadius.circular(12),
+      color: imageUrl != null ? ColorTheme.wildGreen : _theme.colors.dark,
+      borderRadius: BorderRadius.circular(15),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             imageUrl != null
                 ? Container(
-                    height: 50,
+                    height: 60,
                     width: 50,
                     child: Material(
                         clipBehavior: Clip.antiAlias,
@@ -533,11 +574,17 @@ class _InfoView extends StatelessWidget {
                           fit: BoxFit.cover,
                         )),
                   )
-                : AutoSizeText(
-                    Numeral(value).value(),
-                    maxLines: 1,
-                    style: _theme.textTheme.textOnDark.headline5
-                        .copyWith(fontWeight: FontWeight.bold),
+                : Container(
+                    height: 60,
+                    width: 50,
+                    child: Center(
+                      child: AutoSizeText(
+                        Numeral(value).value(),
+                        maxLines: 1,
+                        style: _theme.textTheme.textOnDark.headline5
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
             SizedBox(
               height: imageUrl != null ? 6 : 0,
@@ -546,7 +593,8 @@ class _InfoView extends StatelessWidget {
               description,
               maxLines: 1,
               style: imageUrl != null
-                  ? _theme.textTheme.textOnContrast.bodyText2
+                  ? _theme.textTheme.textOnDark.bodyText2
+                      .copyWith(fontWeight: FontWeight.bold)
                   : _theme.textTheme.textOnDark.bodyText2,
               textAlign: TextAlign.center,
             ),
@@ -564,7 +612,7 @@ class _CertifiedSessionMembers extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
         builder: (context, sm, child) => SizedBox(
-            height: 130,
+            height: 150,
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
               slivers: [
@@ -605,7 +653,7 @@ class _CertifiedSessionMembers extends StatelessWidget {
                                 left: index <= members.length - 1 ? 12.0 : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
                                 member: members[index],
-                                showTargetAmount: false),
+                                showTargetAmount: true),
                           );
                         }, childCount: members.length),
                       );
@@ -638,40 +686,48 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
             Color color = snapshot.data
                 ? _theme.colors.textOnDark
                 : _theme.colors.textOnContrast;
-            return RaisedButton(
+            return MaterialButton(
+              height: 50,
               onPressed: () async {
                 setState(() {
                   _loading = true;
                 });
                 if (snapshot.data)
                   await DatabaseService.leaveCertifiedSession(
-                      csm.baseSession.id);
+                          csm.baseSession.id)
+                      .then((value) {
+                    setState(() {
+                      _loading = false;
+                    });
+                  });
                 else
-                  await DatabaseService.joinCertifiedSession(
-                      csm.baseSession.id);
-                setState(() {
-                  _loading = false;
-                });
+                  await DatabaseService.joinCertifiedSession(csm.baseSession.id)
+                      .then((value) {
+                    setState(() {
+                      _loading = false;
+                    });
+                  });
               },
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
-              color:
-                  snapshot.data ? _theme.colors.dark : _theme.colors.contrast,
+                  borderRadius: BorderRadius.circular(15)),
+              color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
               textColor: color,
-              child: Row(
-                children: [
-                  _loading
-                      ? Container(
-                          width: 20,
-                          height: 20,
-                          margin: const EdgeInsets.only(right: 12),
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(color),
-                          ))
-                      : Container(),
-                  snapshot.data ? Text("VERLASSEN") : Text("BEITRETEN"),
-                ],
-              ),
+              child: _loading
+                  ? Container(
+                      width: 20,
+                      height: 20,
+                      margin: const EdgeInsets.only(right: 12),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(_theme.colors.light),
+                      ))
+                  : Text(
+                      snapshot.data ? "VERLASSEN" : 'BEITRETEN',
+                      style: Theme.of(context)
+                          .accentTextTheme
+                          .button
+                          .copyWith(
+                              fontSize: 21, fontWeight: FontWeight.bold),
+                    ),
             );
           }),
     );

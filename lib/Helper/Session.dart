@@ -78,7 +78,7 @@ class Session extends BaseSession {
   factory Session.fromDoc(DocumentSnapshot doc) {
     return Session(
         creatorId: doc[BaseSession.CREATOR_ID],
-        id: doc.documentID,
+        id: doc.id,
         name: doc[BaseSession.SESSION_NAME],
         amountPerUser: doc[BaseSession.AMOUNT_PER_USER],
         createdAt: (doc[BaseSession.CREATED_AT] as Timestamp).toDate(),

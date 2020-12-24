@@ -518,7 +518,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0,horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
           sliver: SliverToBoxAdapter(
             child: Text(
               'Donators',
@@ -645,14 +645,15 @@ class _CertifiedSessionMembers extends StatelessWidget {
                         );
 
                       List<SessionMember> members = snapshot.data ?? [];
+                      members.sort((a, b) =>
+                          b.donationAmount.compareTo(a.donationAmount));
                       return SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
                                 left: index <= members.length - 1 ? 12.0 : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
-                                member: members[index],
-                                showTargetAmount: true),
+                                member: members[index], showTargetAmount: true),
                           );
                         }, childCount: members.length),
                       );
@@ -724,8 +725,7 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                       style: Theme.of(context)
                           .accentTextTheme
                           .button
-                          .copyWith(
-                              fontSize: 12, fontWeight: FontWeight.bold),
+                          .copyWith(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
             );
           }),

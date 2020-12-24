@@ -474,8 +474,8 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
-                      return Container(
-                        width: 90,
+                      return Expanded(
+                        flex: 1,
                         child: _InfoView(
                           description: "DV",
                           value: snapshot.data?.currentAmount ??
@@ -491,6 +491,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
+                        flex: 2,
                         child: _InfoView(
                             imageUrl: snapshot.data?.campaignImgUrl ??
                                 csm.session.campaignImgUrl,
@@ -504,8 +505,8 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
-                      return Container(
-                        width: 90,
+                      return Expanded(
+                        flex: 1,
                         child: _InfoView(
                           description: "Mitglieder",
                           value: snapshot.data?.memberCount ??
@@ -554,27 +555,36 @@ class _InfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return Material(
-      color: imageUrl != null ? ColorTheme.wildGreen : _theme.colors.dark,
-      borderRadius: BorderRadius.circular(15),
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: imageUrl != null ? ColorTheme.wildGreen : _theme.colors.dark,
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(imageUrl != null ? 2.0 : 8.0),
         child: Column(
           children: [
             imageUrl != null
                 ? Container(
-                    height: 60,
+                    height: 65,
                     width: 50,
-                    child: Material(
-                        clipBehavior: Clip.antiAlias,
-                        shape: CircleBorder(),
-                        child: CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          fit: BoxFit.cover,
-                        )),
-                  )
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      imageBuilder: (_, imgProvider) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              width: 1, color: _theme.colors.textOnDark),
+                          image: DecorationImage(
+                            image: imgProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ))
                 : Container(
-                    height: 60,
+                    height: 65,
                     width: 50,
                     child: Center(
                       child: AutoSizeText(
@@ -590,10 +600,12 @@ class _InfoView extends StatelessWidget {
             ),
             AutoSizeText(
               description,
-              maxLines: 1,
+              maxLines: imageUrl != null ? 2 : 1,
+              softWrap: true,
               style: imageUrl != null
-                  ? _theme.textTheme.textOnDark.bodyText2
-                      .copyWith(fontWeight: FontWeight.bold)
+                  ? _theme.textTheme.textOnDark.bodyText2.copyWith(
+                      fontWeight: FontWeight.bold,
+                    )
                   : _theme.textTheme.textOnDark.bodyText2,
               textAlign: TextAlign.center,
             ),

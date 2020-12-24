@@ -53,19 +53,18 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
       ),
       builder: (context, child) {
         return Scaffold(
-          //removed FAB according to the design
-          // floatingActionButton: ValueListenableBuilder(
-          //   valueListenable: _pagePosition,
-          //   builder: (context, val, child) => Opacity(
-          //     opacity: 1 - val,
-          //     child: Transform.scale(
-          //       scale: 1 - val,
-          //       child: FloatingDonationButton(
-          //         session,
-          //       ),
-          //     ),
-          //   ),
-          // ),
+          floatingActionButton: ValueListenableBuilder(
+            valueListenable: _pagePosition,
+            builder: (context, val, child) => Opacity(
+              opacity: 1 - val,
+              child: Transform.scale(
+                scale: 1 - val,
+                child: FloatingDonationButton(
+                  session,
+                ),
+              ),
+            ),
+          ),
           backgroundColor: Colors.white,
           appBar: AppBar(
             backgroundColor: Colors.white,
@@ -436,7 +435,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               child: Row(
             children: [
               Expanded(
-                flex: 3,
+                flex: 5,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,7 +444,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       csm.session.name,
                       style: Theme.of(context)
                           .textTheme
-                          .headline5
+                          .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
                     StreamBuilder(
@@ -525,7 +524,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               'Donators',
               style: Theme.of(context)
                   .textTheme
-                  .headline5
+                  .headline6
                   .copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -726,7 +725,7 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                           .accentTextTheme
                           .button
                           .copyWith(
-                              fontSize: 21, fontWeight: FontWeight.bold),
+                              fontSize: 12, fontWeight: FontWeight.bold),
                     ),
             );
           }),

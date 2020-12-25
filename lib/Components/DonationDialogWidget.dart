@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_offline/flutter_offline.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
-import 'package:one_d_m/Components/Avatar.dart';
-import 'package:one_d_m/Components/profile_widget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -22,9 +20,7 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/PaymentInfosPage.dart';
 import 'package:provider/provider.dart';
-import 'package:one_d_m/Helper/margin.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -85,223 +81,225 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 child: Consumer2<DonationDialogManager, UserManager>(
                     builder: (context, ddm, um, child) {
                   if (um.user.ghost) ddm.setAnonymWithoutRebuild(true);
-                  return Stack(
-                    children: <Widget>[
-                      Positioned.fill(
-                          child: GestureDetector(
-                        onTap: widget.close,
-                      )),
-                      AnimatedPositioned(
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.easeOut,
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                        left: 0,
-                        right: 0,
-                        child: Stack(
-                          children: <Widget>[
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Material(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30),
-                                    topRight: Radius.circular(30)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      _buildheading(widget.campaign.imgUrl,
-                                          widget.campaign.name),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Gesammelte DV: ',
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.black,
-                                                    fontSize: 18),
-                                          ),
-                                          Text(
-                                            ddm.adBalance.dcBalance.toString(),
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 24,
-                                                    color: Colors.black),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Ausgewählt: ',
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.black,
-                                                    fontSize: 18),
-                                          ),
-                                          Text(
-                                            _selectedValue.toInt().toString(),
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 24,
-                                                    color: Colors.black),
-                                          )
-                                        ],
-                                      ),
-                                      //dv slider
-                                      Flexible(
-                                        child: FlutterSlider(
-                                          min: 0,
-                                          max: ddm.adBalance.dcBalance
-                                              .toDouble(),
-                                          values: [_selectedValue],
-                                          onDragging: (handlerIndex, lowerValue,
-                                              upperValue) {
-                                            _selectedValue = lowerValue;
-                                            setState(() {
-                                              ddm.amount =
-                                                  _selectedValue.toInt();
-                                            });
-                                          },
-                                          tooltip: FlutterSliderTooltip(
-                                              disabled: true),
-                                          handler: FlutterSliderHandler(
-                                            decoration: BoxDecoration(),
-                                            child: Material(
-                                              type: MaterialType.circle,
-                                              color: _bTheme.dark,
-                                              elevation: 3,
-                                              child: Container(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Icon(
-                                                    Icons.adjust_sharp,
-                                                    size: 25,
-                                                    color: _bTheme.contrast,
-                                                  )),
+                  return Container(
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned.fill(
+                            child: GestureDetector(
+                          onTap: widget.close,
+                        )),
+                        AnimatedPositioned(
+                          duration: Duration(milliseconds: 250),
+                          curve: Curves.easeOut,
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                          left: 0,
+                          right: 0,
+                          child: Stack(
+                            children: <Widget>[
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Material(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(30),
+                                      topRight: Radius.circular(30)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        _buildheading(widget.campaign.imgUrl,
+                                            widget.campaign.name),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Gesammelte DV: ',
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.black,
+                                                      fontSize: 18),
                                             ),
-                                          ),
-                                          trackBar: FlutterSliderTrackBar(
-                                            activeTrackBarHeight: 16,
-                                            inactiveTrackBarHeight: 16,
-                                            inactiveTrackBar: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              color: _bTheme.contrast,
+                                            Text(
+                                              ddm.adBalance.dcBalance.toString(),
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w900,
+                                                      fontSize: 24,
+                                                      color: Colors.black),
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Ausgewählt: ',
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.black,
+                                                      fontSize: 18),
                                             ),
-                                            activeTrackBar: BoxDecoration(
+                                            Text(
+                                              _selectedValue.toInt().toString(),
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w900,
+                                                      fontSize: 24,
+                                                      color: Colors.black),
+                                            )
+                                          ],
+                                        ),
+                                        //dv slider
+                                        Flexible(
+                                          child: FlutterSlider(
+                                            min: 0,
+                                            max: ddm.adBalance.dcBalance
+                                                .toDouble(),
+                                            values: [_selectedValue],
+                                            onDragging: (handlerIndex, lowerValue,
+                                                upperValue) {
+                                              _selectedValue = lowerValue;
+                                              setState(() {
+                                                ddm.amount =
+                                                    _selectedValue.toInt();
+                                              });
+                                            },
+                                            tooltip: FlutterSliderTooltip(
+                                                disabled: true),
+                                            handler: FlutterSliderHandler(
+                                              decoration: BoxDecoration(),
+                                              child: Material(
+                                                type: MaterialType.circle,
+                                                color: _bTheme.dark,
+                                                elevation: 3,
+                                                child: Container(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Icon(
+                                                      Icons.adjust_sharp,
+                                                      size: 25,
+                                                      color: _bTheme.contrast,
+                                                    )),
+                                              ),
+                                            ),
+                                            trackBar: FlutterSliderTrackBar(
+                                              activeTrackBarHeight: 16,
+                                              inactiveTrackBarHeight: 16,
+                                              inactiveTrackBar: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(20),
-                                                color: _bTheme.dark),
+                                                color: _bTheme.contrast,
+                                              ),
+                                              activeTrackBar: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  color: _bTheme.dark),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: DonationButton(
-                                          keyboardFocus: _keyboardFocus,
-                                          campaign: widget.campaign,
-                                          user: widget.user,
+                                        SizedBox(
+                                          height: 5,
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 30 +
-                                            MediaQuery.of(context)
-                                                .padding
-                                                .bottom,
-                                      ),
-                                    ],
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: DonationButton(
+                                            keyboardFocus: _keyboardFocus,
+                                            campaign: widget.campaign,
+                                            user: widget.user,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 30 +
+                                              MediaQuery.of(context)
+                                                  .padding
+                                                  .bottom,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            ddm.showAnimation
-                                ? DonationAnimationWidget()
-                                : SizedBox.shrink(),
-                            Positioned(
-                                top: 20,
-                                right: 20,
-                                child: AnimatedOpacity(
-                                    duration: Duration(milliseconds: 250),
-                                    opacity: ddm.showThankYou ? 1 : 0,
-                                    child: _closeButton()))
-                          ],
+                              ddm.showAnimation
+                                  ? DonationAnimationWidget(widget.close)
+                                  : SizedBox.shrink(),
+                              // Positioned(
+                              //     top: 20,
+                              //     right: 20,
+                              //     child: AnimatedOpacity(
+                              //         duration: Duration(milliseconds: 250),
+                              //         opacity: ddm.showThankYou ? 1 : 0,
+                              //         child: _closeButton()))
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 }))));
   }
 
   Widget _buildheading(String url, String title) => Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      CircleAvatar(
-        radius: 40,
-        backgroundColor: Colors.transparent,
-        child: CachedNetworkImage(
-          imageUrl: url,
-          imageBuilder: (context, imageProvider) => Container(
-            height: 58.0,
-            width: 76.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(25)),
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundColor: Colors.transparent,
+            child: CachedNetworkImage(
+              imageUrl: url,
+              imageBuilder: (context, imageProvider) => Container(
+                height: 58.0,
+                width: 76.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-      SizedBox(
-        width: 5,
-      ),
-      Flexible(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              maxLines: 1,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.headline5.copyWith(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+          SizedBox(
+            width: 5,
+          ),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.headline5.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+                Text(
+                  'by WWF',
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
+                )
+              ],
             ),
-            Text(
-              'by WWF',
-              style: Theme.of(context).textTheme.subtitle1.copyWith(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500),
-            )
-          ],
-        ),
-      )
-    ],
-  );
+          )
+        ],
+      );
 
   Widget _closeButton() {
     return Container(
@@ -485,56 +483,17 @@ class DonationButton extends StatelessWidget {
   }
 }
 
-class ThankYouWidget extends HookWidget {
-  @override
-  Widget build(BuildContext context) {
-    ThemeData _theme = Theme.of(context);
-
-    return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      return Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: 0,
-          child: IgnorePointer(
-            ignoring: !ddm.showThankYou,
-            child: AnimatedOpacity(
-              opacity: ddm.showThankYou ? 1 : 0,
-              duration: Duration(milliseconds: 250),
-              child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  child: _buildThankYou(context, ddm.campaign.name)),
-            ),
-          ));
-    });
-  }
-
-  Widget _buildThankYou(BuildContext context, String name) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          SvgPicture.asset(
-            "assets/images/thank-you.svg",
-            width: 300,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            "Wir werden \"$name\" unterstützen!",
-            style: Theme.of(context).textTheme.headline6,
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).padding.bottom,
-          )
-        ],
-      );
-}
-
 class DonationAnimationWidget extends HookWidget {
+  BaseTheme _bTheme;
+  ThemeData _theme;
+  final Function close;
+
+  DonationAnimationWidget(this.close);
+
   @override
   Widget build(BuildContext context) {
+    _bTheme = ThemeManager.of(context).colors;
+    _theme = Theme.of(context);
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
       return Positioned(
           left: 0,
@@ -559,156 +518,455 @@ class DonationAnimationWidget extends HookWidget {
                               ddm.showThankYou = true;
                             });
                           })
-                        : _buildThankYou(
-                            context, ddm.campaign.name, ddm.amount.toString()),
+                        : Expanded(
+                            child: _buildThankYou(context, ddm.campaign,
+                                ddm.amount.toString(), close),
+                          ),
                   )),
             ),
           ));
     });
   }
 
-  Widget _buildThankYou(BuildContext context, String name, String amount) =>
-      Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          SvgPicture.asset(
-            "assets/images/thank-you.svg",
-            width: 300,
-            height: 150,
-          ),
-          Text(
-            "Wir werden \"$name\" unterstützen!",
-            style: Theme.of(context).textTheme.headline6,
-            textAlign: TextAlign.center,
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: ThemeManager.of(context).colors.dark,
-              child: NumberSlideAnimation(
-                number: amount,
-                duration: const Duration(seconds: 3),
-                curve: Curves.bounceIn,
-                textStyle: Theme.of(context).textTheme.headline5.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: ThemeManager.of(context).colors.light),
-              ),
+  Widget _buildThankYou(BuildContext context, Campaign campaign, String amount,
+          Function close) =>
+      SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            _buildInfoContent(),
+            Container(
+              width: 2,
+              color: ThemeManager.of(context).colors.dark,
             ),
+            _buildDonatedAmountContent(amount),
+            _buildCampaignImage(campaign.imgUrl),
+            _buildReadMore(context, campaign),
+            _buildChartContent(context),
+            _buildThanksContent(context),
+            const SizedBox(
+              height: 20,
+            ),
+            _buildContinueButton(context, close),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildInfoContent() => Row(
+        children: [
+          Image(
+            image: AssetImage('assets/icons/ic_flower.png'),
+            width: 120,
+            height: 102,
           ),
+          Consumer<UserManager>(
+              builder: (context, um, child) => StreamBuilder<User>(
+                  initialData: um.user,
+                  stream: DatabaseService.getUserStream(um.uid),
+                  builder: (context, snapshot) {
+                    User user = snapshot.data;
+                    return AutoSizeText(
+                      '${user.name},you just made the \nworld a little bit better\n with your Donation Votes!!!',
+                      maxLines: null,
+                      softWrap: true,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2
+                          .copyWith(fontWeight: FontWeight.bold),
+                    );
+                  }))
         ],
       );
+
+  Widget _buildDonatedAmountContent(String amount) => Container(
+        height: 180,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Stack(
+            children: [
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                  color: _bTheme.dark,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _bTheme.dark.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 3,
+                      offset: Offset(3, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Container(
+                  margin: const EdgeInsets.only(top: 24.0, left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text('You donated ',
+                              style: _theme.textTheme.headline6.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: _bTheme.light)),
+                          NumberSlideAnimation(
+                            number: amount,
+                            duration: const Duration(seconds: 3),
+                            curve: Curves.bounceIn,
+                            textStyle: _theme.textTheme.headline6.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: _bTheme.light,
+                                decoration: TextDecoration.underline),
+                          ),
+                          Text(' DV',
+                              style: _theme.textTheme.headline6.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: _bTheme.light)),
+                        ],
+                      ),
+                      Text('Equal 40 Cent',
+                          style: _theme.textTheme.bodyText2
+                              .copyWith(color: _bTheme.light)),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Image(
+                  image: AssetImage('assets/icons/ic_donation.png'),
+                  width: 120,
+                  height: 102,
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildCampaignImage(String imageUrl) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          imageBuilder: (_, imgProvider) => Container(
+            height: 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              image: DecorationImage(
+                image: imgProvider,
+                fit: BoxFit.cover,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _bTheme.dark.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 3,
+                  offset: Offset(3, 2), // changes position of shadow
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildReadMore(BuildContext context, Campaign campaign) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            height: 170,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(17.0)),
+              color: Colors.white,
+              border:
+                  Border.all(width: 0.5, color: _bTheme.dark.withOpacity(0.4)),
+              boxShadow: [
+                BoxShadow(
+                  color: _bTheme.dark.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 3,
+                  offset: Offset(3, 2), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                AutoSizeText(
+                  campaign.name,
+                  style: _theme.textTheme.headline6
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: AutoSizeText(
+                    campaign.shortDescription,
+                    style: _theme.textTheme.bodyText2
+                        .copyWith(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                RaisedButton(
+                    color: _bTheme.dark,
+                    textColor: _bTheme.light,
+                    child: Text('Read more'),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    onPressed: () {})
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildChartContent(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          height: 170,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15.0)),
+            color: _bTheme.dark,
+            boxShadow: [
+              BoxShadow(
+                color: _bTheme.dark.withOpacity(0.3),
+                spreadRadius: 2,
+                blurRadius: 3,
+                offset: Offset(3, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                AutoSizeText(
+                  'What we do with your donation:',
+                  style: _theme.textTheme.bodyText2.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _bTheme.light),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: _PercentCircle(
+                          percent: 94,
+                        )),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          FieldWidget(
+                            amount: '94',
+                            title: 'to the project',
+                            color: ColorTheme.donationGreen,
+                          ),
+                          FieldWidget(
+                            amount: '4',
+                            title: 'to ODM',
+                            color: ColorTheme.donationOrange,
+                          ),
+                          FieldWidget(
+                            amount: '2',
+                            title: 'Transaction fees',
+                            color: ColorTheme.donationBlack,
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildThanksContent(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          height: 155,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(17.0)),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: _bTheme.dark.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 3,
+                offset: Offset(3, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: AutoSizeText(
+                    'Keep pushing!',
+                    style: _theme.textTheme.headline6
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Image(
+                    image: AssetImage('assets/icons/ic_baloons.png'),
+                    width: 120,
+                    height: 100,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: AutoSizeText(
+                      'Collect DV, donate \nthem and solve globale\nProblems with the\nODM community!',
+                      maxLines: null,
+                      softWrap: true,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildContinueButton(BuildContext context, Function function) =>
+      RaisedButton(
+          color: _bTheme.dark,
+          textColor: _bTheme.light,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Continue',
+                style: Theme.of(context).textTheme.button.copyWith(
+                    color: ThemeManager.of(context).colors.light, fontSize: 18),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: ThemeManager.of(context).colors.light,
+              )
+            ],
+          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          onPressed: function);
 }
 
-class AnonymDCCheckboxWidget extends StatelessWidget {
-  ThemeManager _theme;
+class FieldWidget extends StatelessWidget {
+  final String amount;
+  final String title;
+  final Color color;
+
+  const FieldWidget({Key key, this.amount, this.title, this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-    return Consumer2<UserManager, DonationDialogManager>(
-      builder: (context, um, ddm, child) {
-        if (um.user.ghost) return Container();
-        return Theme(
-          data: ThemeData(accentColor: _theme.colors.contrast),
-          child: CheckboxListTile(
-            checkColor: _theme.colors.textOnContrast,
-            value: ddm.anonym,
-            onChanged: (val) => ddm.anonym = val,
-            title: Text("Anonym?"),
-            subtitle: Text(
-                "Wenn aktiviert, wird diese Unterstützung nicht in deinem Profil angezeigt."),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(
+              height: 12,
+              width: 12,
+              decoration: BoxDecoration(
+                  color: color,
+                  border: Border.all(
+                      width: 1, color: ThemeManager.of(context).colors.light),
+                  shape: BoxShape.circle),
+            ),
           ),
-        );
-      },
+          Expanded(
+            flex: 3,
+            child: Row(
+              children: [
+                AutoSizeText(
+                  '$amount% ',
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: ThemeManager.of(context).colors.light),
+                ),
+                AutoSizeText(
+                  title,
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w200,
+                      color: ThemeManager.of(context).colors.light),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
-    // return Consumer2<UserManager, DonationDialogManager>(
-    //     builder: (context, um, ddm, child) {
-    //   return Container(
-    //     height: 130,
-    //     child: Row(
-    //       crossAxisAlignment: CrossAxisAlignment.stretch,
-    //       children: [
-    //         !um.user.ghost
-    //             ? Expanded(
-    //                 child: _checkBox(
-    //                     selected: ddm.anonym,
-    //                     onChange: (value) {
-    //                       ddm.anonym = value;
-    //                     },
-    //                     title: Text(
-    //                       "Anonym spenden?",
-    //                       style:
-    //                           _theme.textTheme.bodyText1.copyWith(fontSize: 16),
-    //                     ),
-    //                     subtitle:
-    //                         "Wenn aktiviert, wird diese Spende nicht in deinem Profil angezeigt",
-    //                     margin: EdgeInsets.only(left: 20)),
-    //               )
-    //             : Container(),
-    //         ddm.adBalance.dcBalance == 0
-    //             ? SizedBox(
-    //                 width: 20,
-    //               )
-    //             : Expanded(
-    //                 child: _checkBox(
-    //                     selected: ddm.useDCs,
-    //                     onChange: (value) {
-    //                       ddm.useDCs = value;
-    //                     },
-    //                     title: RichText(
-    //                         text: TextSpan(
-    //                             style: _theme.textTheme.bodyText2
-    //                                 .copyWith(fontSize: 16),
-    //                             children: [
-    //                           TextSpan(
-    //                               text:
-    //                                   "${min(ddm.adBalance.dcBalance, ddm.amount)} DC ",
-    //                               style: _theme.textTheme.headline6),
-    //                           TextSpan(
-    //                               text:
-    //                                   ddm.hasPaymentMethod ? "verwenden?" : ""),
-    //                         ])),
-    //                     subtitle: ddm.hasPaymentMethod
-    //                         ? "Sollen wir ${min(ddm.adBalance.dcBalance, ddm.amount)} DC von den von ihnen angesammelten ${ddm.adBalance.dcBalance} DC für diese Spende nutzen?"
-    //                         : "Du zahlst mit deinen gesammelten DCs.",
-    //                     margin: EdgeInsets.only(
-    //                         right: 20, left: um.user.ghost ? 20 : 10)),
-    //               )
-    //       ],
-    //     ),
-    //   );
-    // });
   }
+}
 
-  Widget _checkBox(
-      {Widget title,
-      String subtitle,
-      EdgeInsetsGeometry margin,
-      bool selected,
-      Function(bool) onChange}) {
-    return Card(
-      color: selected ? _theme.colors.contrast : Colors.white,
-      elevation: selected ? 2 : 0,
-      margin: margin,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: InkWell(
-        onTap: () {
-          onChange(!selected);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              title,
-              SizedBox(
-                height: 12,
-              ),
-              Expanded(child: AutoSizeText(subtitle))
-            ],
+class _PercentCircle extends StatelessWidget {
+  const _PercentCircle({
+    Key key,
+    @required this.percent,
+    this.radius = 50,
+  }) : super(key: key);
+
+  final double radius;
+  final double percent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 2 * radius,
+      width: 2 * radius,
+      child: CustomPaint(
+        painter: _PercentCirclePainter(percent,
+            color: ThemeManager.of(context).colors.contrast),
+        child: Center(
+          child: Text(
+            '${((percent * 100) % 100).round().toString()}%',
+            style: TextStyle(
+              color: ColorTheme.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 15.0,
+            ),
           ),
         ),
       ),
@@ -716,367 +974,55 @@ class AnonymDCCheckboxWidget extends StatelessWidget {
   }
 }
 
-class AlternativeCampaignWidget extends StatelessWidget {
-  ThemeData _theme;
-  BaseTheme _bTheme;
-  Campaign campaign;
+class _PercentCirclePainter extends CustomPainter {
+  _PercentCirclePainter(this.percent, {this.color = ColorTheme.orange});
 
-  AlternativeCampaignWidget(this.campaign);
-
-  @override
-  Widget build(BuildContext context) {
-    _theme = Theme.of(context);
-    _bTheme = ThemeManager.of(context).colors;
-
-    return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      return FutureBuilder<List<Campaign>>(
-          future: _getPossibleCampaigns(context),
-          builder: (context, snapshot) {
-            List<Campaign> campaigns = [];
-            if (snapshot.hasData) {
-              campaigns = snapshot.data;
-              campaigns.removeWhere((c) => c.id == campaign.id);
-              if (ddm.alternativCampaign == null)
-                ddm.setAlternativCampaignWithoutRebuild(campaigns[0]);
-            }
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              "Alternatives Projekt: ",
-                              style: _theme.textTheme.headline6,
-                            ),
-                            AutoSizeText(
-                              "Wähle ein Projekt an das wir alternativ unterstützen können.",
-                              maxLines: 1,
-                              style: _theme.textTheme.caption,
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _showAlternativeProjectDialog(context);
-                        },
-                        child: Icon(
-                          Icons.info,
-                          size: 18,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        bool selected =
-                            ddm.alternativCampaign?.id == campaigns[index].id;
-                        return Center(
-                          child: Container(
-                            height: 80,
-                            margin: index == 0
-                                ? EdgeInsets.only(left: 12)
-                                : index == campaigns.length - 1
-                                    ? EdgeInsets.only(right: 12)
-                                    : null,
-                            child: Card(
-                              margin: EdgeInsets.fromLTRB(0, 2, 12, 2),
-                              elevation: selected ? 2 : 0,
-                              color: selected ? _bTheme.contrast : Colors.white,
-                              clipBehavior: Clip.antiAlias,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: InkWell(
-                                onTap: () {
-                                  ddm.alternativCampaign = campaigns[index];
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15.0, vertical: 8),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Avatar(campaigns[index].thumbnailUrl ??
-                                          campaigns[index].imgUrl),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "${campaigns[index].name}",
-                                        style: _theme.textTheme.headline6
-                                            .copyWith(
-                                                color: selected
-                                                    ? _bTheme.textOnContrast
-                                                    : _bTheme.dark),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      itemCount: campaigns.length,
-                    )),
-              ],
-            );
-          });
-    });
-  }
-
-  _showAlternativeProjectDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("Alternatives Projekt"),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              content: Text(
-                  "Wir unterstützen deine alternative Auswahl, sollte es eine Problem bei der Organisation oder bei der Überweisung geben.\nWir geben unser bestes in Allen Fällen deine erste Wahl zu erfüllen!"),
-              actions: [
-                FlatButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text("Schließen"),
-                  textColor: _bTheme.dark,
-                )
-              ],
-            ));
-  }
-
-  Future<List<Campaign>> _getPossibleCampaigns(BuildContext context) async {
-    UserManager um = Provider.of<UserManager>(context, listen: false);
-    List<Campaign> possibleCampaigns =
-        await DatabaseService.getSubscribedCampaigns(um.uid);
-    possibleCampaigns.removeWhere((c) => c.id == campaign.id);
-    if (possibleCampaigns.isEmpty)
-      possibleCampaigns = await DatabaseService.getTopCampaigns();
-
-    return possibleCampaigns;
-  }
-}
-
-class CustomAmountWidget extends StatelessWidget {
-  FocusScopeNode keyboardFocus = FocusScopeNode();
-
-  CustomAmountWidget(this.keyboardFocus);
+  final double percent;
+  final Color color;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      return AnimatedContainer(
-        duration: Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        height: ddm.customAmount ? 92 : 0.0,
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          child: ddm.customAmount
-              ? Theme(
-                  data: ThemeData(primaryColor: ColorTheme.blue),
-                  child: TextFormField(
-                    focusNode: keyboardFocus,
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(500000),
-                    ],
-                    onChanged: (text) {
-                      ddm.amount = int.parse(text);
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (text) {
-                      int amount = int.parse(text);
-                      if (amount > ddm.adBalance.dcBalance)
-                        return "Du hast nur ${ddm.adBalance.dcBalance} DV's! Wähle einen kleineren Betrag.";
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: "Anzahl an DV's",
-                      labelText: "DV's",
-                    ),
-                  ),
-                )
-              : Container(),
-        ),
-      );
-    });
-  }
-}
+  void paint(Canvas canvas, Size size) {
+    final double strokeWidth = 5;
 
-class DCSlider extends StatelessWidget {
-  final List<int> defaultDonationAmounts = [
-    1,
-    2,
-    5,
-    10,
-    15,
-    20,
-    30,
-    40,
-    50,
-    100
-  ];
+    final Paint backgroundPaint = Paint()
+      ..color = ColorTheme.white.withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
 
-  @override
-  Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      defaultDonationAmounts
-          .removeWhere((element) => element > ddm.adBalance.dcBalance);
-      return SizedBox(
-        height: 120,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) {
-            bool selected = index != defaultDonationAmounts.length &&
-                ddm.amount == defaultDonationAmounts[index];
-            return Center(
-              child: Container(
-                width: 120,
-                height: 100,
-                margin: index == 0
-                    ? EdgeInsets.only(left: 12)
-                    : index == defaultDonationAmounts.length
-                        ? EdgeInsets.only(right: 12)
-                        : null,
-                child: Card(
-                  margin: EdgeInsets.fromLTRB(0, 2, 12, 2),
-                  clipBehavior: Clip.antiAlias,
-                  elevation: selected ? 2 : 0,
-                  color: selected ? _bTheme.contrast : Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: InkWell(
-                    onTap: () {
-                      if (ddm.customAmount) {
-                        ddm.customAmount = false;
-                      }
-                      if (index != defaultDonationAmounts.length)
-                        ddm.amount = defaultDonationAmounts[index];
-                      else
-                        ddm.customAmount = true;
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          index != defaultDonationAmounts.length
-                              ? Material(
-                                  color: _bTheme.dark.withOpacity(.1),
-                                  shape: CircleBorder(),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "DV",
-                                      style: TextStyle(
-                                          fontSize: 12, color: _bTheme.dark),
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          Text(
-                            index != defaultDonationAmounts.length
-                                ? "${defaultDonationAmounts[index]}.00"
-                                : "Anderer Betrag",
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline6
-                                .copyWith(
-                                    color: selected
-                                        ? _bTheme.textOnContrast
-                                        : _bTheme.dark),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-          itemCount: defaultDonationAmounts.length + 1,
-        ),
-      );
-    });
-  }
-}
+    final Paint percentPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
 
-class AddPaymentMethodDialog extends StatelessWidget {
-  ThemeData _theme;
+    canvas.drawArc(
+      Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth,
+      ),
+      -pi / 2,
+      2 * pi,
+      false,
+      backgroundPaint,
+    );
 
-  final Function close;
-
-  AddPaymentMethodDialog(this.close);
-
-  @override
-  Widget build(BuildContext context) {
-    _theme = Theme.of(context);
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-            child: GestureDetector(
-          onTap: close,
-        )),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Material(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    "Bitte füge eine Bezalmethode hinzu oder sammle neue DVs!",
-                    style: _theme.textTheme.headline6,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Bevor du etwas unterstützen kannst, brauchen wir deine Zahlungsdaten oder gesammelte DVs!",
-                    style: _theme.textTheme.bodyText2,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  OutlineButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (c) => PaymentInfosPage()));
-                    },
-                    label: Text("Hinzufügen"),
-                    icon: Icon(Icons.add),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).padding.bottom,
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    canvas.drawArc(
+      Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth,
+      ),
+      -pi / 2,
+      (2 * pi) * percent,
+      false,
+      percentPaint,
     );
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

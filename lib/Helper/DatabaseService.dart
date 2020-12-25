@@ -375,10 +375,7 @@ class DatabaseService {
   }
 
   static Stream<List<News>> getNews(String uid) {
-    return newsFeedCollection
-        .doc(uid)
-        .collection(NEWS)
-        // .orderBy(News.CREATEDAT, descending: true)
+    return newsCollection
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }

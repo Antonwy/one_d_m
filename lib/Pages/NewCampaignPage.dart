@@ -360,6 +360,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData)
                                   return SliverToBoxAdapter();
+                                snapshot.data.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
                                 return SliverPadding(
                                   padding: EdgeInsets.symmetric(horizontal: 4),
                                   sliver: SliverList(

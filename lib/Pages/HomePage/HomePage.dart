@@ -3,6 +3,7 @@ import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/chart/size_const.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';

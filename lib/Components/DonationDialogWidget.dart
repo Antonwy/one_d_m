@@ -589,6 +589,9 @@ class DonationAnimationWidget extends HookWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            const SizedBox(
+              height: 10,
+            ),
             _buildInfoContent(),
             _buildDonatedAmountContent(amount),
             _buildCampaignImage(campaign.imgUrl),
@@ -623,7 +626,7 @@ class DonationAnimationWidget extends HookWidget {
                         User user = snapshot.data;
                         return AutoSizeText(
                           '${user
-                              .name},you just made the \nworld a little bit better\n with your Donation Votes!!!',
+                              .name},du hast soeben mit\ndeinen DV die Welt\nkleines Stück besser\ngemacht!',
                           maxLines: null,
                           softWrap: true,
                           style: Theme
@@ -664,7 +667,7 @@ class DonationAnimationWidget extends HookWidget {
                     children: [
                       Row(
                         children: [
-                          Text('You donated ',
+                          Text('Du hast ',
                               style: _theme.textTheme.headline6.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: _bTheme.light)),
@@ -677,13 +680,13 @@ class DonationAnimationWidget extends HookWidget {
                                 color: _bTheme.light,
                                 decoration: TextDecoration.underline),
                           ),
-                          Text(' DV',
+                          Text(' DV gespendet',
                               style: _theme.textTheme.headline6.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: _bTheme.light)),
                         ],
                       ),
-                      Text('Equal 40 Cent',
+                      Text('Das entspricht 40 Cent',
                           style: _theme.textTheme.bodyText2
                               .copyWith(color: _bTheme.light)),
                     ],
@@ -782,7 +785,7 @@ class DonationAnimationWidget extends HookWidget {
               RaisedButton(
                   color: _bTheme.dark,
                   textColor: _bTheme.light,
-                  child: Text('Read more'),
+                  child: Text('Mehr lesen'),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),
                   onPressed: function)
@@ -821,7 +824,7 @@ class DonationAnimationWidget extends HookWidget {
                   height: 10,
                 ),
                 AutoSizeText(
-                  'What we do with your donation:',
+                  'Was mit deiner Spende passiert:',
                   style: _theme.textTheme.bodyText2.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -843,17 +846,17 @@ class DonationAnimationWidget extends HookWidget {
                         children: [
                           FieldWidget(
                             amount: '94',
-                            title: 'to the project',
+                            title: 'erhält das Projekt',
                             color: ColorTheme.donationGreen,
                           ),
                           FieldWidget(
                             amount: '4',
-                            title: 'to ODM',
+                            title: 'erhält ODM',
                             color: ColorTheme.donationOrange,
                           ),
                           FieldWidget(
                             amount: '2',
-                            title: 'Transaction fees',
+                            title: 'Transaktionskosten',
                             color: ColorTheme.donationBlack,
                           )
                         ],
@@ -895,7 +898,7 @@ class DonationAnimationWidget extends HookWidget {
                 Align(
                   alignment: Alignment.topCenter,
                   child: AutoSizeText(
-                    'Keep pushing!',
+                    'Weiter so!',
                     style: _theme.textTheme.headline6
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
@@ -913,7 +916,7 @@ class DonationAnimationWidget extends HookWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: AutoSizeText(
-                      'Collect DV, donate \nthem and solve globale\nProblems with the\nODM community!',
+                      'Sammle DV, spende\nsie und löse mit\nunserer Community\nglobale Probleme!',
                       maxLines: null,
                       softWrap: true,
                       style: Theme
@@ -939,7 +942,7 @@ class DonationAnimationWidget extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Continue',
+                'Weiter',
                 style: Theme
                     .of(context)
                     .textTheme
@@ -1018,7 +1021,7 @@ class FieldWidget extends StatelessWidget {
                       .textTheme
                       .subtitle1
                       .copyWith(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.w200,
                       color: ThemeManager
                           .of(context)

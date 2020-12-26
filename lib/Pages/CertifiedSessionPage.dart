@@ -435,13 +435,14 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               child: Row(
             children: [
               Expanded(
-                flex: 5,
+                flex: 6,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AutoSizeText(
                       csm.session.name,
+                      maxLines: 1,
                       style: Theme.of(context)
                           .textTheme
                           .headline6
@@ -726,19 +727,20 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
               textColor: color,
               child: _loading
                   ? Container(
-                      width: 20,
-                      height: 20,
-                      margin: const EdgeInsets.only(right: 12),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(_theme.colors.light),
-                      ))
-                  : Text(
-                      snapshot.data ? "VERLASSEN" : 'BEITRETEN',
-                      style: Theme.of(context)
-                          .accentTextTheme
-                          .button
-                          .copyWith(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
+                  width: 20,
+                  height: 20,
+                  margin: const EdgeInsets.only(right: 12),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(_theme.colors.light),
+                  ))
+                  : AutoSizeText(
+                snapshot.data ? "VERLASSEN" : 'BEITRETEN',
+                maxLines: 1,
+                style: Theme.of(context)
+                    .accentTextTheme
+                    .button
+                    .copyWith(fontWeight: FontWeight.bold),
+              )
             );
           }),
     );

@@ -32,12 +32,13 @@ class DonationDialogWidget extends StatefulWidget {
   int defaultSelectedAmount;
   final String sessionId;
 
-  DonationDialogWidget({this.close,
-    this.campaign,
-    this.user,
-    this.context,
-    this.sessionId,
-    this.defaultSelectedAmount = 0});
+  DonationDialogWidget(
+      {this.close,
+      this.campaign,
+      this.user,
+      this.context,
+      this.sessionId,
+      this.defaultSelectedAmount = 0});
 
   @override
   _DonationDialogWidgetState createState() => _DonationDialogWidgetState();
@@ -64,230 +65,207 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
-    _bTheme = ThemeManager
-        .of(context)
-        .colors;
+    _bTheme = ThemeManager.of(context).colors;
 
     return ChangeNotifierProvider<DonationDialogManager>(
-        create: (context) =>
-            DonationDialogManager(
-                adBalanceStream: DatabaseService.getAdBalance(widget.user.id),
-                defaultSelectedAmount: widget.defaultSelectedAmount,
-                sessionId: widget.sessionId,
-                campaign: widget.campaign),
+        create: (context) => DonationDialogManager(
+            adBalanceStream: DatabaseService.getAdBalance(widget.user.id),
+            defaultSelectedAmount: widget.defaultSelectedAmount,
+            sessionId: widget.sessionId,
+            campaign: widget.campaign),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,
             body: Container(
                 color: Colors.transparent,
-                height: MediaQuery
-                    .of(context)
-                    .size
-                    .height,
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width,
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
                 child: Consumer2<DonationDialogManager, UserManager>(
                     builder: (context, ddm, um, child) {
-                      if (um.user.ghost) ddm.setAnonymWithoutRebuild(true);
-                      return Container(
-                        child: Stack(
-                          children: <Widget>[
-                            Positioned.fill(
-                                child: GestureDetector(
-                                  onTap: widget.close,
-                                )),
-                            AnimatedPositioned(
-                              duration: Duration(milliseconds: 250),
-                              curve: Curves.easeOut,
-                              bottom: MediaQuery
-                                  .of(context)
-                                  .viewInsets
-                                  .bottom,
-                              left: 0,
-                              right: 0,
-                              child: Stack(
-                                children: <Widget>[
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Material(
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(30),
-                                          topRight: Radius.circular(30)),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
+                  if (um.user.ghost) ddm.setAnonymWithoutRebuild(true);
+                  return Container(
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned.fill(
+                            child: GestureDetector(
+                          onTap: widget.close,
+                        )),
+                        AnimatedPositioned(
+                          duration: Duration(milliseconds: 250),
+                          curve: Curves.easeOut,
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                          left: 0,
+                          right: 0,
+                          child: Stack(
+                            children: <Widget>[
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Material(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(30),
+                                      topRight: Radius.circular(30)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            _buildheading(
-                                                widget.campaign.imgUrl,
-                                                widget.campaign.name),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        _buildheading(widget.campaign.imgUrl,
+                                            widget.campaign.name),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
                                               MainAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Gesammelte DV: ',
-                                                  style: _theme.textTheme
-                                                      .subtitle1
-                                                      .copyWith(
+                                          children: [
+                                            Text(
+                                              'Gesammelte DV: ',
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
                                                       fontWeight:
-                                                      FontWeight.w600,
+                                                          FontWeight.w600,
                                                       color: Colors.black,
                                                       fontSize: 18),
-                                                ),
-                                                Text(
-                                                  ddm.adBalance.dcBalance
-                                                      .toString(),
-                                                  style: _theme.textTheme
-                                                      .subtitle1
-                                                      .copyWith(
+                                            ),
+                                            Text(
+                                              ddm.adBalance.dcBalance
+                                                  .toString(),
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
                                                       fontWeight:
-                                                      FontWeight.w900,
+                                                          FontWeight.w900,
                                                       fontSize: 24,
                                                       color: Colors.black),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Ausgewählt: ',
-                                                  style: _theme.textTheme
-                                                      .subtitle1
-                                                      .copyWith(
-                                                      fontWeight:
-                                                      FontWeight.w600,
-                                                      color: Colors.black,
-                                                      fontSize: 18),
-                                                ),
-                                                Text(
-                                                  _selectedValue.toInt()
-                                                      .toString(),
-                                                  style: _theme.textTheme
-                                                      .subtitle1
-                                                      .copyWith(
-                                                      fontWeight:
-                                                      FontWeight.w900,
-                                                      fontSize: 24,
-                                                      color: Colors.black),
-                                                )
-                                              ],
-                                            ),
-                                            //dv slider
-                                            Flexible(
-                                              child: FlutterSlider(
-                                                min: 0,
-                                                max: ddm.adBalance.dcBalance
-                                                    .toDouble(),
-                                                values: [_selectedValue],
-                                                onDragging: (handlerIndex,
-                                                    lowerValue, upperValue) {
-                                                  _selectedValue = lowerValue;
-                                                  setState(() {
-                                                    ddm.amount =
-                                                        _selectedValue.toInt();
-                                                  });
-                                                },
-                                                tooltip: FlutterSliderTooltip(
-                                                    disabled: true),
-                                                handler: FlutterSliderHandler(
-                                                  decoration: BoxDecoration(),
-                                                  child: Material(
-                                                    type: MaterialType.circle,
-                                                    color: _bTheme.dark,
-                                                    elevation: 3,
-                                                    child: Container(
-                                                        padding: EdgeInsets.all(
-                                                            5),
-                                                        child: Icon(
-                                                          Icons.adjust_sharp,
-                                                          size: 25,
-                                                          color: _bTheme
-                                                              .contrast,
-                                                        )),
-                                                  ),
-                                                ),
-                                                trackBar: FlutterSliderTrackBar(
-                                                  activeTrackBarHeight: 16,
-                                                  inactiveTrackBarHeight: 16,
-                                                  inactiveTrackBar: BoxDecoration(
-                                                    borderRadius:
-                                                    BorderRadius.circular(20),
-                                                    color: _bTheme.contrast,
-                                                  ),
-                                                  activeTrackBar: BoxDecoration(
-                                                      borderRadius:
-                                                      BorderRadius.circular(20),
-                                                      color: _bTheme.dark),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Align(
-                                              alignment: Alignment.center,
-                                              child: DonationButton(
-                                                keyboardFocus: _keyboardFocus,
-                                                campaign: widget.campaign,
-                                                user: widget.user,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 30 +
-                                                  MediaQuery
-                                                      .of(context)
-                                                      .padding
-                                                      .bottom,
-                                            ),
-                                            Visibility(
-                                              visible: ddm.showAnimation,
-                                              child: SizedBox(
-                                                height: 150 +
-                                                    MediaQuery
-                                                        .of(context)
-                                                        .padding
-                                                        .bottom,
-                                              ),
-                                            ),
+                                            )
                                           ],
                                         ),
-                                      ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Ausgewählt: ',
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.black,
+                                                      fontSize: 18),
+                                            ),
+                                            Text(
+                                              _selectedValue.toInt().toString(),
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      fontSize: 24,
+                                                      color: Colors.black),
+                                            )
+                                          ],
+                                        ),
+                                        //dv slider
+                                        Flexible(
+                                          child: FlutterSlider(
+                                            min: 0,
+                                            max: ddm.adBalance.dcBalance
+                                                .toDouble(),
+                                            values: [_selectedValue],
+                                            onDragging: (handlerIndex,
+                                                lowerValue, upperValue) {
+                                              _selectedValue = lowerValue;
+                                              setState(() {
+                                                ddm.amount =
+                                                    _selectedValue.toInt();
+                                              });
+                                            },
+                                            tooltip: FlutterSliderTooltip(
+                                                disabled: true),
+                                            handler: FlutterSliderHandler(
+                                              decoration: BoxDecoration(),
+                                              child: Material(
+                                                type: MaterialType.circle,
+                                                color: _bTheme.dark,
+                                                elevation: 3,
+                                                child: Container(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Icon(
+                                                      Icons.adjust_sharp,
+                                                      size: 25,
+                                                      color: _bTheme.contrast,
+                                                    )),
+                                              ),
+                                            ),
+                                            trackBar: FlutterSliderTrackBar(
+                                              activeTrackBarHeight: 16,
+                                              inactiveTrackBarHeight: 16,
+                                              inactiveTrackBar: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: _bTheme.contrast,
+                                              ),
+                                              activeTrackBar: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  color: _bTheme.dark),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: DonationButton(
+                                            keyboardFocus: _keyboardFocus,
+                                            campaign: widget.campaign,
+                                            user: widget.user,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 30 +
+                                              MediaQuery.of(context)
+                                                  .padding
+                                                  .bottom,
+                                        ),
+                                        Visibility(
+                                          visible: ddm.showAnimation,
+                                          child: SizedBox(
+                                            height: 150 +
+                                                MediaQuery.of(context)
+                                                    .padding
+                                                    .bottom,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  ddm.showAnimation
-                                      ? DonationAnimationWidget(widget.close)
-                                      : SizedBox.shrink(),
-                                  // Positioned(
-                                  //     top: 20,
-                                  //     right: 20,
-                                  //     child: AnimatedOpacity(
-                                  //         duration: Duration(milliseconds: 250),
-                                  //         opacity: ddm.showThankYou ? 1 : 0,
-                                  //         child: _closeButton()))
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                              ddm.showAnimation
+                                  ? DonationAnimationWidget(widget.close)
+                                  : SizedBox.shrink(),
+                              // Positioned(
+                              //     top: 20,
+                              //     right: 20,
+                              //     child: AnimatedOpacity(
+                              //         duration: Duration(milliseconds: 250),
+                              //         opacity: ddm.showThankYou ? 1 : 0,
+                              //         child: _closeButton()))
+                            ],
+                          ),
                         ),
-                      );
-                    }))));
+                      ],
+                    ),
+                  );
+                }))));
   }
 
-  Widget _buildheading(String url, String title) =>
-      Row(
+  Widget _buildheading(String url, String title) => Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -296,18 +274,17 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
             backgroundColor: Colors.transparent,
             child: CachedNetworkImage(
               imageUrl: url,
-              imageBuilder: (context, imageProvider) =>
-                  Container(
-                    height: 58.0,
-                    width: 76.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(25)),
-                      image: DecorationImage(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+              imageBuilder: (context, imageProvider) => Container(
+                height: 58.0,
+                width: 76.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
                   ),
+                ),
+              ),
             ),
           ),
           SizedBox(
@@ -322,22 +299,14 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   maxLines: 1,
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .headline5
-                      .copyWith(
+                  style: Theme.of(context).textTheme.headline5.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
                 Text(
                   'by WWF',
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
                       color: Colors.black,
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
@@ -380,9 +349,7 @@ class InfoCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager
-        .of(context)
-        .colors;
+    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Container(
       height: 70,
       width: 158,
@@ -415,9 +382,7 @@ class DonationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
-    _bTheme = ThemeManager
-        .of(context)
-        .colors;
+    _bTheme = ThemeManager.of(context).colors;
     ddm = Provider.of<DonationDialogManager>(context);
     this.context = context;
 
@@ -436,29 +401,29 @@ class DonationButton extends StatelessWidget {
               color: _bTheme.dark,
               disabledColor: Colors.grey,
               onPressed: ddm.amount != null &&
-                  ddm.amount != 0 &&
-                  ddm.amount <= ddm.adBalance.dcBalance
+                      ddm.amount != 0 &&
+                      ddm.amount <= ddm.adBalance.dcBalance
                   ? connected
-                  ? _donate
-                  : () {
-                Helper.showConnectionSnackBar(context);
-              }
+                      ? _donate
+                      : () {
+                          Helper.showConnectionSnackBar(context);
+                        }
                   : null,
               child: ddm.loading
                   ? Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                  ),
-                ],
-              )
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      ],
+                    )
                   : Text(
-                "Support!",
-                style: _theme.accentTextTheme.button
-                    .copyWith(fontSize: 21, fontWeight: FontWeight.bold),
-              ),
+                      "Support!",
+                      style: _theme.accentTextTheme.button
+                          .copyWith(fontSize: 21, fontWeight: FontWeight.bold),
+                    ),
             );
           }),
     );
@@ -468,22 +433,21 @@ class DonationButton extends StatelessWidget {
     if (!ddm.hasPaymentMethod && ddm.amount > ddm.adBalance.dcBalance) {
       return showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text("Zu wenig DVs"),
-              content: Text(
-                  "Du hast zu wenig DVs um diese Spende durchzuführen! Füge eine Zahlungsmethode hinzu."),
-              shape:
+        builder: (context) => AlertDialog(
+          title: Text("Zu wenig DVs"),
+          content: Text(
+              "Du hast zu wenig DVs um diese Spende durchzuführen! Füge eine Zahlungsmethode hinzu."),
+          shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              actions: <Widget>[
-                FlatButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    textColor: _bTheme.dark,
-                    child: Text("OK")),
-              ],
-            ),
+          actions: <Widget>[
+            FlatButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                textColor: _bTheme.dark,
+                child: Text("OK")),
+          ],
+        ),
       );
     }
 
@@ -500,12 +464,10 @@ class DonationButton extends StatelessWidget {
     if (ddm.amount >= 100) {
       bool res = await showDialog<bool>(
           context: context,
-          builder: (context) =>
-              AlertDialog(
+          builder: (context) => AlertDialog(
                 title: Text("Bist du dir sicher?"),
                 content: Text(
-                    "Willst du wirklich ${ddm
-                        .amount} DV zum unterstützen ausgeben?"),
+                    "Willst du wirklich ${ddm.amount} DV zum unterstützen ausgeben?"),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 actions: <Widget>[
@@ -546,9 +508,7 @@ class DonationAnimationWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    _bTheme = ThemeManager
-        .of(context)
-        .colors;
+    _bTheme = ThemeManager.of(context).colors;
     _theme = Theme.of(context);
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
       return Positioned(
@@ -568,12 +528,12 @@ class DonationAnimationWidget extends HookWidget {
                     duration: Duration(seconds: 1),
                     child: !ddm.showThankYou
                         ? Lottie.asset('assets/anim/anim_start.json',
-                        onLoaded: (composition) {
-                          HapticFeedback.heavyImpact();
-                          Timer(Duration(seconds: 1), () {
-                            ddm.showThankYou = true;
-                          });
-                        })
+                            onLoaded: (composition) {
+                            HapticFeedback.heavyImpact();
+                            Timer(Duration(seconds: 1), () {
+                              ddm.showThankYou = true;
+                            });
+                          })
                         : _buildThankYou(context, ddm.campaign,
                             ddm.amount.toString(), close),
                   )),
@@ -583,7 +543,7 @@ class DonationAnimationWidget extends HookWidget {
   }
 
   Widget _buildThankYou(BuildContext context, Campaign campaign, String amount,
-      Function close) =>
+          Function close) =>
       SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
@@ -609,38 +569,37 @@ class DonationAnimationWidget extends HookWidget {
         ),
       );
 
-  Widget _buildInfoContent() =>
-      Row(
+  Widget _buildInfoContent() => Row(
         children: [
           Image(
             image: AssetImage('assets/icons/ic_flower.png'),
             width: 120,
             height: 102,
           ),
+          const SizedBox(
+            width: 5,
+          ),
           Consumer<UserManager>(
-              builder: (context, um, child) =>
-                  StreamBuilder<User>(
-                      initialData: um.user,
-                      stream: DatabaseService.getUserStream(um.uid),
-                      builder: (context, snapshot) {
-                        User user = snapshot.data;
-                        return AutoSizeText(
-                          '${user
-                              .name},du hast soeben mit\ndeinen DV die Welt\nkleines Stück besser\ngemacht!',
-                          maxLines: null,
-                          softWrap: true,
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyText2
-                              .copyWith(fontWeight: FontWeight.bold),
-                        );
-                      }))
+              builder: (context, um, child) => StreamBuilder<User>(
+                  initialData: um.user,
+                  stream: DatabaseService.getUserStream(um.uid),
+                  builder: (context, snapshot) {
+                    User user = snapshot.data;
+                    return AutoSizeText(
+                      '${user.name},du hast soeben mit\ndeinen DV die Welt\nkleines Stück besser\ngemacht!',
+                      maxLines: null,
+                      textAlign: TextAlign.left,
+                      softWrap: true,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2
+                          .copyWith(fontWeight: FontWeight.bold),
+                    );
+                  }))
         ],
       );
 
-  Widget _buildDonatedAmountContent(String amount) =>
-      Container(
+  Widget _buildDonatedAmountContent(String amount) => Container(
         height: 180,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -686,7 +645,7 @@ class DonationAnimationWidget extends HookWidget {
                                   color: _bTheme.light)),
                         ],
                       ),
-                      Text('Das entspricht 40 Cent',
+                      Text('Das entspricht ${int.parse(amount) * 5} Cent',
                           style: _theme.textTheme.bodyText2
                               .copyWith(color: _bTheme.light)),
                     ],
@@ -706,48 +665,43 @@ class DonationAnimationWidget extends HookWidget {
         ),
       );
 
-  Widget _buildCampaignImage(String imageUrl) =>
-      Padding(
+  Widget _buildCampaignImage(String imageUrl) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: CachedNetworkImage(
           imageUrl: imageUrl,
-          imageBuilder: (_, imgProvider) =>
-              Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                  image: DecorationImage(
-                    image: imgProvider,
-                    fit: BoxFit.cover,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _bTheme.dark.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                      offset: Offset(3, 2), // changes position of shadow
-                    ),
-                  ],
-                ),
+          imageBuilder: (_, imgProvider) => Container(
+            height: 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              image: DecorationImage(
+                image: imgProvider,
+                fit: BoxFit.cover,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: _bTheme.dark.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 3,
+                  offset: Offset(3, 2), // changes position of shadow
+                ),
+              ],
+            ),
+          ),
         ),
       );
 
-  Widget _buildReadMore(BuildContext context, Campaign campaign,
-      Function function) =>
+  Widget _buildReadMore(
+          BuildContext context, Campaign campaign, Function function) =>
       Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           height: 170,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
+          width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(17.0)),
             color: Colors.white,
             border:
-            Border.all(width: 0.5, color: _bTheme.dark.withOpacity(0.4)),
+                Border.all(width: 0.5, color: _bTheme.dark.withOpacity(0.4)),
             boxShadow: [
               BoxShadow(
                 color: _bTheme.dark.withOpacity(0.3),
@@ -794,15 +748,11 @@ class DonationAnimationWidget extends HookWidget {
         ),
       );
 
-  Widget _buildChartContent(BuildContext context) =>
-      Padding(
+  Widget _buildChartContent(BuildContext context) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           height: 170,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
+          width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(15.0)),
             color: _bTheme.dark,
@@ -870,15 +820,11 @@ class DonationAnimationWidget extends HookWidget {
         ),
       );
 
-  Widget _buildThanksContent(BuildContext context) =>
-      Padding(
+  Widget _buildThanksContent(BuildContext context) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           height: 155,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
+          width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(17.0)),
             color: Colors.white,
@@ -919,8 +865,7 @@ class DonationAnimationWidget extends HookWidget {
                       'Sammle DV, spende\nsie und löse mit\nunserer Community\nglobale Probleme!',
                       maxLines: null,
                       softWrap: true,
-                      style: Theme
-                          .of(context)
+                      style: Theme.of(context)
                           .textTheme
                           .bodyText2
                           .copyWith(fontWeight: FontWeight.bold),
@@ -943,27 +888,17 @@ class DonationAnimationWidget extends HookWidget {
             children: [
               Text(
                 'Weiter',
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .button
-                    .copyWith(
-                    color: ThemeManager
-                        .of(context)
-                        .colors
-                        .light, fontSize: 18),
+                style: Theme.of(context).textTheme.button.copyWith(
+                    color: ThemeManager.of(context).colors.light, fontSize: 18),
               ),
               Icon(
                 Icons.chevron_right,
-                color: ThemeManager
-                    .of(context)
-                    .colors
-                    .light,
+                color: ThemeManager.of(context).colors.light,
               )
             ],
           ),
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           onPressed: function);
 }
 
@@ -989,10 +924,7 @@ class FieldWidget extends StatelessWidget {
               decoration: BoxDecoration(
                   color: color,
                   border: Border.all(
-                      width: 1, color: ThemeManager
-                      .of(context)
-                      .colors
-                      .light),
+                      width: 1, color: ThemeManager.of(context).colors.light),
                   shape: BoxShape.circle),
             ),
           ),
@@ -1002,31 +934,17 @@ class FieldWidget extends StatelessWidget {
               children: [
                 AutoSizeText(
                   '$amount% ',
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: ThemeManager
-                          .of(context)
-                          .colors
-                          .light),
+                      color: ThemeManager.of(context).colors.light),
                 ),
                 AutoSizeText(
                   title,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w200,
-                      color: ThemeManager
-                          .of(context)
-                          .colors
-                          .light),
+                      color: ThemeManager.of(context).colors.light),
                 )
               ],
             ),
@@ -1053,14 +971,8 @@ class _PercentCircle extends StatelessWidget {
         height: 2 * radius,
         width: 2 * radius,
         child: CustomPaint(
-            painter: CirclePainter(MediaQuery
-                .of(context)
-                .size
-                .width,
-                MediaQuery
-                    .of(context)
-                    .size
-                    .height,
+            painter: CirclePainter(MediaQuery.of(context).size.width,
+                MediaQuery.of(context).size.height,
                 startAngle: 0),
             child: Center(
               child: Text(
@@ -1071,9 +983,6 @@ class _PercentCircle extends StatelessWidget {
                   fontSize: 15.0,
                 ),
               ),
-            ))
-    );
+            )));
   }
 }
-
-

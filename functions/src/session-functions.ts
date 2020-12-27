@@ -159,6 +159,7 @@ exports.acceptInvite = functions.https.onCall(async (req, res) => {
     .set({
       id: userId,
       donation_amount: 0,
+      created_at: admin.firestore.Timestamp.now(),
     } as SessionMemberType);
 
   const session: SessionType = (await sessionDoc.get()).data() as SessionType;

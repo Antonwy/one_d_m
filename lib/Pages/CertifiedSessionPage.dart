@@ -69,11 +69,9 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
-            actions: [_CertifiedSessionPageIndicator(_pageController)],
+            // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
-          body: PageView(
-              controller: _pageController,
-              children: [_CertifiedSessionInfoPage(), _CertifiedSessionChat()]),
+          body: _CertifiedSessionInfoPage(),
         );
       },
     );
@@ -517,40 +515,45 @@ class _InfoView extends StatelessWidget {
     return Material(
       color: imageUrl != null ? _theme.colors.contrast : _theme.colors.dark,
       borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            imageUrl != null
-                ? Container(
-                    height: 50,
-                    width: 50,
-                    child: Material(
-                        clipBehavior: Clip.antiAlias,
-                        shape: CircleBorder(),
-                        child: CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          fit: BoxFit.cover,
-                        )),
-                  )
-                : AutoSizeText(
-                    Numeral(value).value(),
-                    maxLines: 1,
-                    style: _theme.textTheme.textOnDark.headline5
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-            SizedBox(
-              height: imageUrl != null ? 6 : 0,
-            ),
-            AutoSizeText(
-              description,
-              maxLines: 1,
-              style: imageUrl != null
-                  ? _theme.textTheme.textOnContrast.bodyText2
-                  : _theme.textTheme.textOnDark.bodyText2,
-              textAlign: TextAlign.center,
-            ),
-          ],
+      child: Container(
+        height: 90,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              imageUrl != null
+                  ? Container(
+                      height: 40,
+                      width: 40,
+                      child: Material(
+                          clipBehavior: Clip.antiAlias,
+                          shape: CircleBorder(),
+                          child: CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                          )),
+                    )
+                  : AutoSizeText(
+                      Numeral(value).value(),
+                      maxLines: 1,
+                      style: _theme.textTheme.textOnDark.headline5
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+              SizedBox(
+                height: imageUrl != null ? 6 : 0,
+              ),
+              AutoSizeText(
+                description,
+                maxLines: 1,
+                style: imageUrl != null
+                    ? _theme.textTheme.textOnContrast.bodyText2
+                        .copyWith(fontWeight: FontWeight.bold)
+                    : _theme.textTheme.textOnDark.bodyText2,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -563,55 +566,75 @@ class _CertifiedSessionMembers extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
-        builder: (context, sm, child) => SizedBox(
-            height: 130,
-            child: CustomScrollView(
-              scrollDirection: Axis.horizontal,
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 130,
-                  ),
-                ),
-                StreamBuilder<List<SessionMember>>(
-                    stream: sm.membersStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData)
-                        return SliverToBoxAdapter(
-                          child: Center(
-                              child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              children: [
-                                CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation(
-                                      _theme.colors.dark),
-                                ),
-                                SizedBox(
-                                  width: 12,
-                                ),
-                                Text("Lade Mitglieder...",
-                                    style: _theme.textTheme.dark.bodyText1)
-                              ],
-                            ),
-                          )),
+        builder: (context, sm, child) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            StreamBuilder<List<SessionMember>>(
+                stream: sm.membersStream,
+                builder: (context, snapshot) {
+                  return snapshot.data?.isEmpty ?? true
+                      ? Container()
+                      : Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          child: Text("Mitglieder: ",
+                              style: _theme.textTheme.dark.bodyText1),
                         );
+                }),
+            SizedBox(
+                height: 130,
+                child: CustomScrollView(
+                  scrollDirection: Axis.horizontal,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 130,
+                      ),
+                    ),
+                    StreamBuilder<List<SessionMember>>(
+                        stream: sm.membersStream,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData)
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                  child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  children: [
+                                    CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation(
+                                          _theme.colors.dark),
+                                    ),
+                                    SizedBox(
+                                      width: 12,
+                                    ),
+                                    Text("Lade Mitglieder...",
+                                        style: _theme.textTheme.dark.bodyText1)
+                                  ],
+                                ),
+                              )),
+                            );
 
-                      List<SessionMember> members = snapshot.data ?? [];
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                                left: index <= members.length - 1 ? 12.0 : 0.0),
-                            child: SessionMemberView<CertifiedSessionManager>(
-                                member: members[index],
-                                showTargetAmount: false),
+                          List<SessionMember> members = snapshot.data ?? [];
+                          return SliverList(
+                            delegate:
+                                SliverChildBuilderDelegate((context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                    left: index <= members.length - 1
+                                        ? 12.0
+                                        : 0.0),
+                                child:
+                                    SessionMemberView<CertifiedSessionManager>(
+                                        member: members[index],
+                                        showTargetAmount: false),
+                              );
+                            }, childCount: members.length),
                           );
-                        }, childCount: members.length),
-                      );
-                    }),
-              ],
-            )),
+                        }),
+                  ],
+                )),
+          ],
+        ),
       ),
     );
   }

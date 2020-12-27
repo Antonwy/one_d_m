@@ -4,7 +4,7 @@ import 'package:one_d_m/Helper/ImageUrl.dart';
 class News {
   static final String CAMPAIGNID = "campaign_id",
       CAMPAIGNNAME = "campaign_name",
-      USERID = "user_id",
+      ORGANISATION_ID = "organisation_id",
       TITLE = "title",
       TEXT = "text",
       SHORTTEXT = "short_text",
@@ -13,7 +13,7 @@ class News {
       IMAGEURL = "image_url";
 
   String campaignId,
-      userId,
+      organisationId,
       campaignName,
       campaignImgUrl,
       title,
@@ -26,7 +26,7 @@ class News {
   News({
     this.campaignId,
     this.id,
-    this.userId,
+    this.organisationId,
     this.title,
     this.campaignImgUrl,
     this.text,
@@ -40,7 +40,7 @@ class News {
     return {
       CAMPAIGNID: campaignId,
       CAMPAIGNNAME: campaignName,
-      USERID: userId,
+      ORGANISATION_ID: organisationId,
       TITLE: title,
       TEXT: text,
       SHORTTEXT: shortText,
@@ -54,7 +54,7 @@ class News {
     return News(
       id: snapshot.documentID,
       campaignId: snapshot[CAMPAIGNID],
-      userId: snapshot[USERID],
+      organisationId: snapshot[ORGANISATION_ID],
       title: snapshot[TITLE],
       text: snapshot[TEXT],
       shortText: snapshot[SHORTTEXT],

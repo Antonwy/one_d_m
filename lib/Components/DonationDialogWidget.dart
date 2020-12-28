@@ -20,6 +20,7 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:one_d_m/chart/circle_painter.dart';
 import 'package:one_d_m/chart/size_const.dart';
 import 'package:provider/provider.dart';
@@ -496,6 +497,7 @@ class DonationButton extends StatelessWidget {
     ddm.showAnimation = true;
 
     if (keyboardFocus.hasPrimaryFocus) keyboardFocus.unfocus();
+    await notificationPlugin.showNotification('Horaaa!', 'You save the world');
   }
 }
 

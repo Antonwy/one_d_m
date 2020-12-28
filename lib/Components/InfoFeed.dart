@@ -38,7 +38,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 228,
+        height: 150,
         child: StreamBuilder<Statistics>(
             stream: DatabaseService.getStatistics(),
             builder: (context, snapshot) {
@@ -199,7 +199,7 @@ class _DCInformation extends StatelessWidget {
                             ),
                             SizedBox(height: 5.0),
                             Text(
-                              '${100 - ((snapshot?.data?.activityScore ?? 0) * 100).round()}% bis zum nächsten DV',
+                              'Entspricht ${snapshot?.data?.dcBalance*5??0} Cent ',
                               style: TextStyle(
                                 fontWeight: FontWeight.w200,
                               ),
@@ -213,48 +213,6 @@ class _DCInformation extends StatelessWidget {
                       ],
                     );
                   }),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 19.0),
-                child: Divider(
-                  color: ColorTheme.white.withOpacity(0.1),
-                  thickness: 2.0,
-                  height: 2.0,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Tagesziel',
-                      percent: ((statistics?.donationStatistics?.dailyAmount ??
-                                  0) /
-                              statistics?.donationStatistics?.dailyAmountTarget)
-                          .clamp(0.0, 1.0),
-                    ),
-                  ),
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Monatsziel',
-                      percent:
-                          ((statistics?.donationStatistics?.monthlyAmount ??
-                                      0) /
-                                  statistics
-                                      ?.donationStatistics?.monthlyAmountTarget)
-                              .clamp(0.0, 1.0),
-                    ),
-                  ),
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Jahresziel',
-                      percent:
-                          ((statistics?.donationStatistics?.yearlyAmount ?? 0) /
-                                  statistics
-                                      ?.donationStatistics?.yearlyAmountTarget)
-                              .clamp(0.0, 1.0),
-                    ),
-                  ),
-                ],
-              )
             ],
           )),
     );

@@ -448,6 +448,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                           .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
+                    csm.session.creatorId.isNotEmpty?
                     StreamBuilder(
                       stream:
                           DatabaseService.getUserStream(csm.session.creatorId),
@@ -456,7 +457,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                           'by ${snapshot.data?.name}',
                         );
                       },
-                    ),
+                    ):SizedBox.shrink(),
                   ],
                 ),
               ),

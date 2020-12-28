@@ -374,7 +374,7 @@ class DatabaseService {
         .map((qs) => News.listFromSnapshot(qs.docs));
   }
 
-  static Stream<List<News>> getNews(String uid) {
+  static Stream<List<News>> getNews() {
     return newsCollection
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));

@@ -6,12 +6,17 @@ import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
+import 'package:one_d_m/Components/NativeAd.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Helper.dart';
+import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/SessionInvitesFeed.dart';
@@ -220,7 +225,8 @@ class _ProfilePageState extends State<ProfilePage>
                           ),
                           SvgPicture.asset(
                             "assets/images/no-donations.svg",
-                            height: 200,
+                            height: 70,
+                            width: 70,
                           ),
                           SizedBox(
                             height: 20,
@@ -261,9 +267,65 @@ class _ProfilePageState extends State<ProfilePage>
                   padding: const EdgeInsets.only(bottom: 12),
                   sliver: CertifiedSessionsList(_certifiedSessionsStream),
                 )),
-        SessionsFeed()
+        SessionsFeed(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              "News",
+              style: _theme.textTheme.dark.headline6
+                  .copyWith(fontWeight: FontWeight.bold,fontSize: 24,color: Helper.hexToColor('#575757')),
+            ),
+          ),
+        ),
+        _buildPostFeed(),
       ],
     );
+  }
+
+  Widget _buildPostFeed() => StreamBuilder<List<News>>(
+      stream: DatabaseService.getNews(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData)
+          return SliverFillRemaining(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+
+        List<News> news = snapshot.data;
+        if (news.isNotEmpty) {
+          return SliverPadding(
+            padding: EdgeInsets.only(top: 10),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(_getNewsWidget(news)),
+            ),
+          );
+        } else {
+          return SizedBox.shrink();
+        }
+      });
+
+  List<Widget> _getNewsWidget(List<News> news) {
+    List<Widget> widgets = [];
+    int adRate = Constants.AD_NEWS_RATE;
+    int rateCount = 0;
+
+    for (News n in news) {
+      rateCount++;
+
+      widgets.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: NewsPost(n),
+      ));
+
+      if (rateCount >= adRate) {
+        widgets.add(NewsNativeAd());
+        rateCount = 0;
+      }
+    }
+
+    return widgets;
   }
 
   @override

@@ -27,8 +27,8 @@ class _HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               children: <Widget>[
-                // NewsHomePage(() => _changePage(2)),
                 ProfilePage(),
+                // NewsHomePage(() => _changePage(2)),
                 ExplorePage(),
               ],
             ),

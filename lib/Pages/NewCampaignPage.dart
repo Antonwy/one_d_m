@@ -137,9 +137,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     child: Container(
                       height: _mq.size.height * .3 + 30,
                       width: _mq.size.width,
-                      child: ImageWidgetPlaceholder(
-                        image: CachedNetworkImageProvider(widget.campaign.imgUrl),
-                        placeholder: SizedBox.shrink(),
+                      child: CachedNetworkImage(
+                        imageUrl:widget.campaign.imgUrl ,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),

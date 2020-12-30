@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/ActivityDonationFeed.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
-import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
-import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
-import 'package:one_d_m/Helper/SessionInvitesFeed.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -39,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage>
   ThemeManager _theme;
   Stream<List<BaseSession>> _sessionStream;
   Stream<List<BaseSession>> _certifiedSessionsStream;
+  List<BaseSession> mySessions = [];
 
   @override
   void initState() {
@@ -46,6 +42,19 @@ class _ProfilePageState extends State<ProfilePage>
     _sessionStream = DatabaseService.getSessionsFromUser(uid);
     _certifiedSessionsStream =
         DatabaseService.getCertifiedSessionsFromUser(uid);
+
+    ///listen events for user followed sessions
+    DatabaseService.getCertifiedSessions().listen((event) {
+      mySessions.clear();
+      event.forEach((element) {
+        DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
+          if (isExist) {
+            mySessions.add(element);
+          }
+          setState(() {});
+        });
+      });
+    });
     super.initState();
   }
 
@@ -199,86 +208,25 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-        StreamBuilder<List<Session>>(
-          stream: _certifiedSessionsStream,
-          builder: (context, snapshot1) => StreamBuilder<List<BaseSession>>(
-              stream: _sessionStream,
-              builder: (context, snapshot2) {
-                List<BaseSession> sessions = snapshot2.data ?? [];
-                List<BaseSession> certifiedSessions = snapshot1.data ?? [];
 
-                if (sessions.isEmpty && certifiedSessions.isEmpty)
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              _SessionInvitesButton(),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              _CreateSessionButton()
-                            ],
-                          ),
-                          SvgPicture.asset(
-                            "assets/images/no-donations.svg",
-                            height: 70,
-                            width: 70,
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
-                            style: _theme.textTheme.dark.bodyText1,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Deine Sessions",
-                          style: _theme.textTheme.dark.headline6,
-                        ),
-                        Expanded(child: Container()),
-                        _SessionInvitesButton(),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        _CreateSessionButton()
-                      ],
-                    ),
-                  ),
-                );
-              }),
-        ),
-        Consumer<UserManager>(
-            builder: (context, um, child) => SliverPadding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  sliver: CertifiedSessionsList(_certifiedSessionsStream),
-                )),
-        SessionsFeed(),
+        ///build the sessions that follow by user
+        mySessions.isNotEmpty
+            ? _buildMySessions(mySessions)
+            : _buildEmptySession(),
+        // SessionsFeed(),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
               "News",
-              style: _theme.textTheme.dark.headline6
-                  .copyWith(fontWeight: FontWeight.bold,fontSize: 24,color: Helper.hexToColor('#575757')),
+              style: _theme.textTheme.dark.headline6.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Helper.hexToColor('#575757')),
             ),
           ),
         ),
-        _buildPostFeed(),
+        // _buildPostFeed(),
       ],
     );
   }
@@ -327,6 +275,72 @@ class _ProfilePageState extends State<ProfilePage>
 
     return widgets;
   }
+
+  Widget _buildEmptySession() => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: [
+              //     _SessionInvitesButton(),
+              //     SizedBox(
+              //       width: 8,
+              //     ),
+              //     _CreateSessionButton()
+              //   ],
+              // ),
+              SvgPicture.asset(
+                "assets/images/no-donations.svg",
+                height: 70,
+                width: 70,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text(
+                "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
+                style: _theme.textTheme.dark.bodyText1,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildMySessions(List<BaseSession> sessions) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Deine Sessions",
+                style: _theme.textTheme.dark.headline6.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: Helper.hexToColor('#575757')),
+              ),
+              const SizedBox(
+                height: 12.0,
+              ),
+              Container(
+                height: 140,
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: CertifiedSessionView(sessions[index]),
+                      );
+                    },
+                    itemCount: sessions.length),
+              ),
+            ],
+          ),
+        ),
+      );
 
   @override
   bool get wantKeepAlive => true;

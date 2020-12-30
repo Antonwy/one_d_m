@@ -19,6 +19,7 @@ import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
 import 'package:stripe_payment/stripe_payment.dart';
+
 import 'Campaign.dart';
 import 'Donation.dart';
 import 'User.dart';
@@ -332,9 +333,7 @@ class DatabaseService {
   }
 
   static Stream<List<Campaign>> getTopCampaignsStream() {
-    return campaignsCollection
-        .snapshots()
-        .map((qs) {
+    return campaignsCollection.snapshots().map((qs) {
       return qs.docs.map((e) {
         return Campaign.fromSnapshot(e);
       }).toList();
@@ -342,9 +341,7 @@ class DatabaseService {
   }
 
   static Future<List<Campaign>> getTopCampaigns([int limit = 5]) async {
-    return (await campaignsCollection
-            .limit(limit)
-            .get())
+    return (await campaignsCollection.limit(limit).get())
         .docs
         .map(Campaign.fromSnapshot)
         .toList();
@@ -730,7 +727,11 @@ class DatabaseService {
     return sessionsCollection
         .where(BaseSession.END_DATE, isNull: true)
         .snapshots()
-        .map((Session.fromQuerySnapshot));
+        .map((qs) {
+      return qs.docs.map((e) {
+        return Session.fromDoc(e);
+      }).toList();
+    });
   }
 
   static Stream<Session> getSession(String sid) {
@@ -747,6 +748,34 @@ class DatabaseService {
         .doc(uid)
         .snapshots()
         .map((doc) => doc.exists);
+  }
+
+  static Future<bool> userIsFollowSession(String uid, String sid) {
+    return sessionsCollection
+        .doc(sid)
+        .collection(SESSION_MEMBERS)
+        .doc(uid)
+        .get()
+        .then((value) => value.exists);
+  }
+
+  static Future<List<BaseSession>> getUserFollowingSessions(String uid) {
+    List<BaseSession> sessions;
+    getCertifiedSessions().listen((session) async{
+      session.forEach((e) {
+        sessionsCollection
+            .doc(e.id)
+            .collection(SESSION_MEMBERS)
+            .doc(uid)
+            .get()
+            .then((value){
+              if(value.exists){
+                sessions.add(e);
+              }
+        });
+      });
+      return sessions;
+    });
   }
 
   static Future<Session> getSessionFuture(String sid) async {

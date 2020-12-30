@@ -21,6 +21,7 @@ class CertifiedSessionsList extends StatelessWidget {
       child: StreamBuilder<List<Session>>(
           stream: stream ?? DatabaseService.getCertifiedSessions(),
           builder: (context, snapshot) {
+            print(snapshot);
             List<BaseSession> sessions = snapshot.data ?? [];
 
             if (snapshot.connectionState == ConnectionState.active &&
@@ -37,7 +38,7 @@ class CertifiedSessionsList extends StatelessWidget {
                         padding: EdgeInsets.only(
                             left: index == 0 ? 12.0 : 0.0,
                             right: index == sessions.length - 1 ? 12.0 : 0.0),
-                        child: _CertifiedSessionView(sessions[index]),
+                        child: CertifiedSessionView(sessions[index]),
                       ),
                   itemCount: sessions.length),
             );
@@ -46,10 +47,10 @@ class CertifiedSessionsList extends StatelessWidget {
   }
 }
 
-class _CertifiedSessionView extends StatelessWidget {
+class CertifiedSessionView extends StatelessWidget {
   final Session session;
 
-  _CertifiedSessionView(this.session);
+  CertifiedSessionView(this.session);
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +91,7 @@ class _CertifiedSessionView extends StatelessWidget {
                     children: [
                       Expanded(
                           child: AutoSizeText(
-                        session.name,
+                        session.name??'',
                         style: session?.imgUrl == null
                             ? _theme.textTheme.dark.bodyText1
                             : _theme.textTheme.light.bodyText1,

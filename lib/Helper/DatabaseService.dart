@@ -377,6 +377,20 @@ class DatabaseService {
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
 
+  static Stream<List<News>> getSessionPosts() {
+    return newsCollection
+        .where('session_id', isNotEqualTo: '')
+        .snapshots()
+        .map((doc) => News.listFromSnapshot(doc.docs));
+  }
+
+  static Stream<List<News>> getPostBySessionId(String sessionId) {
+    return newsCollection
+        .where('session_id', isEqualTo: sessionId)
+        .snapshots()
+        .map((doc) => News.listFromSnapshot(doc.docs));
+  }
+
   static Future<ApiResult> createNews(News news) async {
     try {
       await newsCollection.doc(news.id).set(news.toMap());
@@ -761,25 +775,27 @@ class DatabaseService {
 
   static Future<List<BaseSession>> getUserFollowingSessions(String uid) {
     List<BaseSession> sessions;
-    getCertifiedSessions().listen((session) async{
+    getCertifiedSessions().listen((session) async {
       session.forEach((e) {
         sessionsCollection
             .doc(e.id)
             .collection(SESSION_MEMBERS)
             .doc(uid)
             .get()
-            .then((value){
-              if(value.exists){
-                sessions.add(e);
-              }
+            .then((value) {
+          if (value.exists) {
+            sessions.add(e);
+          }
         });
       });
       return sessions;
     });
   }
 
-  static Future<Session> getSessionFuture(String sid) async {
-    return Session.fromDoc((await sessionsCollection.doc(sid).get()));
+  static Stream<Session> getSessionFuture(String sid) {
+    return sessionsCollection.doc(sid).snapshots().map((qs) {
+      return Session.fromDoc(qs);
+    });
   }
 
   static Stream<List<SessionMember>> getSessionMembers(String sid,

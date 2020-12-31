@@ -8,6 +8,7 @@ import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
+import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -18,9 +19,7 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/CreateSessionPage.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
-import 'package:one_d_m/Pages/SessionInvitesPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
@@ -226,33 +225,78 @@ class _ProfilePageState extends State<ProfilePage>
             ),
           ),
         ),
+
+        _buildPostFeed(),
+        const SliverToBoxAdapter(
+          child: const SizedBox(
+            height: 120,
+          ),
+        )
         // _buildPostFeed(),
       ],
     );
   }
 
   Widget _buildPostFeed() => StreamBuilder<List<News>>(
-      stream: DatabaseService.getNews(),
-      builder: (context, snapshot) {
+      stream: DatabaseService.getSessionPosts(),
+      builder: (context, AsyncSnapshot<List<News>> snapshot) {
         if (!snapshot.hasData)
-          return SliverFillRemaining(
+          return SliverToBoxAdapter(
             child: Center(
               child: CircularProgressIndicator(),
             ),
           );
-
         List<News> news = snapshot.data;
-        if (news.isNotEmpty) {
-          return SliverPadding(
-            padding: EdgeInsets.only(top: 10),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(_getNewsWidget(news)),
-            ),
-          );
+
+        //sort by created date
+        news.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+        List<String> sessionsWithPost = [];
+        List<PostItem> postItem = [];
+
+        news.forEach((element) {
+          sessionsWithPost.add(element.sessionId);
+        });
+
+        ///remove duplicating ids
+        sessionsWithPost.toSet().toList().forEach((element) {
+          postItem.add(HeadingItem(DatabaseService.getSessionFuture(element)));
+          postItem.add(
+              PostContentItem(DatabaseService.getPostBySessionId(element)));
+        });
+
+        if (postItem.isNotEmpty) {
+          // return ListView.builder(
+          //   itemCount: postItem.length,
+          //   shrinkWrap: true,
+          //   itemBuilder: (_,index){
+          //     var item = postItem[index];
+          //     return Column(
+          //       children: [
+          //         item.buildHeading(context),
+          //         item.buildPosts(context)
+          //       ],
+          //     );
+          //   },
+          // );
+          return SliverList(delegate: SliverChildListDelegate(
+            _buildPostWidgets(postItem)
+          ));
         } else {
-          return SizedBox.shrink();
+          return SliverToBoxAdapter(child: SizedBox.shrink());
         }
       });
+
+  List<Widget> _buildPostWidgets(List<PostItem> post) {
+    List<Widget> widgets = [];
+    for (PostItem p in post) {
+      widgets.add(Column(children: [
+        p.buildHeading(context),
+        p.buildPosts(context)
+      ],));
+    }
+    return widgets;
+  }
 
   List<Widget> _getNewsWidget(List<News> news) {
     List<Widget> widgets = [];
@@ -281,16 +325,6 @@ class _ProfilePageState extends State<ProfilePage>
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.end,
-              //   children: [
-              //     _SessionInvitesButton(),
-              //     SizedBox(
-              //       width: 8,
-              //     ),
-              //     _CreateSessionButton()
-              //   ],
-              // ),
               SvgPicture.asset(
                 "assets/images/no-donations.svg",
                 height: 70,
@@ -344,89 +378,4 @@ class _ProfilePageState extends State<ProfilePage>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class _CreateSessionButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return CustomOpenContainer(
-      openBuilder: (context, close, scrollController) =>
-          CreateSessionPage(scrollController),
-      closedBuilder: (context, open) => InkWell(
-        onTap: open,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            Icons.add,
-            color: _bTheme.textOnContrast,
-            size: 24,
-          ),
-        ),
-      ),
-      closedShape: CircleBorder(),
-      closedElevation: 0,
-      closedColor: _bTheme.contrast,
-    );
-  }
-}
-
-class _SessionInvitesButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return Consumer<UserManager>(
-      builder: (context, um, child) => StreamBuilder<List<SessionInvite>>(
-          stream: DatabaseService.getSessionInvites(um.uid),
-          builder: (context, snapshot) {
-            List<SessionInvite> invites = snapshot.data ?? [];
-
-            if (invites.isEmpty) return Container();
-
-            return Stack(
-              overflow: Overflow.visible,
-              alignment: Alignment.topRight,
-              children: [
-                CustomOpenContainer(
-                  openBuilder: (context, close, scrollController) =>
-                      SessionInvitesPage(
-                    scrollController: scrollController,
-                    invites: invites,
-                  ),
-                  closedBuilder: (context, open) => InkWell(
-                    onTap: open,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.announcement,
-                        color: _bTheme.textOnContrast,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                  closedShape: CircleBorder(),
-                  closedElevation: 0,
-                  closedColor: _bTheme.contrast,
-                ),
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: Material(
-                    color: Colors.red,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Center(
-                          child: Text(
-                        invites.length.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      )),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }),
-    );
-  }
 }

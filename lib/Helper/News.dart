@@ -10,7 +10,8 @@ class News {
       SHORTTEXT = "short_text",
       CREATEDAT = "created_at",
       CAMPAIGNIMGURL = "campaign_img_url",
-      IMAGEURL = "image_url";
+      IMAGEURL = "image_url",
+      SESSION_ID="session_id";
 
   String campaignId,
       userId,
@@ -20,7 +21,7 @@ class News {
       text,
       shortText,
       imageUrl,
-      id;
+      id,sessionId;
   DateTime createdAt;
 
   News({
@@ -34,6 +35,7 @@ class News {
     this.createdAt,
     this.campaignName,
     this.imageUrl,
+    this.sessionId,
   });
 
   Map<String, dynamic> toMap() {
@@ -46,7 +48,8 @@ class News {
       SHORTTEXT: shortText,
       IMAGEURL: imageUrl,
       CAMPAIGNIMGURL: campaignImgUrl,
-      CREATEDAT: Timestamp.now()
+      CREATEDAT: Timestamp.now(),
+      SESSION_ID:sessionId,
     };
   }
 
@@ -60,6 +63,7 @@ class News {
       shortText: snapshot.data()[SHORTTEXT],
       campaignName: snapshot.data()[CAMPAIGNNAME],
       campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
+      sessionId: snapshot.data()[SESSION_ID],
       imageUrl: snapshot.data()[IMAGEURL],
       createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
     );

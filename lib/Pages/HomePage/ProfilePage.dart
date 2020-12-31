@@ -33,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage>
   ThemeManager _theme;
   Stream<List<BaseSession>> _sessionStream;
   Stream<List<BaseSession>> _certifiedSessionsStream;
-  List<BaseSession> mySessions = [];
+  List<Session> mySessions = [];
 
   @override
   void initState() {
@@ -150,27 +150,6 @@ class _ProfilePageState extends State<ProfilePage>
                                 ),
                                 Row(
                                   children: <Widget>[
-                                    // CustomOpenContainer(
-                                    //   openBuilder:
-                                    //       (context, close, controller) =>
-                                    //           PaymentInfosPage(
-                                    //               scrollController: controller),
-                                    //   closedShape: CircleBorder(),
-                                    //   closedElevation: 0,
-                                    //   closedColor: _bTheme.contrast,
-                                    //   closedBuilder: (context, open) =>
-                                    //       RoundButtonHomePage(
-                                    //     icon: Icons
-                                    //         .credit_card, // toPage: BuyCoinsPage(),
-                                    //     // toPage: BuyCoinsPage(),
-                                    //     onTap: () {
-                                    //       open();
-                                    //     },
-                                    //   ),
-                                    // ),
-                                    // SizedBox(
-                                    //   width: 10,
-                                    // ),
                                     CustomOpenContainer(
                                       openBuilder:
                                           (context, close, controller) =>
@@ -249,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage>
         List<News> news = snapshot.data;
 
         //sort by created date
-        news.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         List<String> sessionsWithPost = [];
         List<PostItem> postItem = [];
@@ -266,19 +245,6 @@ class _ProfilePageState extends State<ProfilePage>
         });
 
         if (postItem.isNotEmpty) {
-          // return ListView.builder(
-          //   itemCount: postItem.length,
-          //   shrinkWrap: true,
-          //   itemBuilder: (_,index){
-          //     var item = postItem[index];
-          //     return Column(
-          //       children: [
-          //         item.buildHeading(context),
-          //         item.buildPosts(context)
-          //       ],
-          //     );
-          //   },
-          // );
           return SliverList(delegate: SliverChildListDelegate(
             _buildPostWidgets(postItem)
           ));
@@ -290,10 +256,13 @@ class _ProfilePageState extends State<ProfilePage>
   List<Widget> _buildPostWidgets(List<PostItem> post) {
     List<Widget> widgets = [];
     for (PostItem p in post) {
-      widgets.add(Column(children: [
-        p.buildHeading(context),
-        p.buildPosts(context)
-      ],));
+      widgets.add(Padding(
+        padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+        child: Column(children: [
+          p.buildHeading(context),
+          p.buildPosts(context)
+        ],),
+      ));
     }
     return widgets;
   }

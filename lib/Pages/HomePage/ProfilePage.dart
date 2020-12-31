@@ -267,27 +267,7 @@ class _ProfilePageState extends State<ProfilePage>
     return widgets;
   }
 
-  List<Widget> _getNewsWidget(List<News> news) {
-    List<Widget> widgets = [];
-    int adRate = Constants.AD_NEWS_RATE;
-    int rateCount = 0;
 
-    for (News n in news) {
-      rateCount++;
-
-      widgets.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: NewsPost(n),
-      ));
-
-      if (rateCount >= adRate) {
-        widgets.add(NewsNativeAd());
-        rateCount = 0;
-      }
-    }
-
-    return widgets;
-  }
 
   Widget _buildEmptySession() => SliverToBoxAdapter(
         child: Padding(

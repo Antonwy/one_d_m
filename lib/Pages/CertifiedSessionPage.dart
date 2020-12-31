@@ -3,9 +3,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/NativeAd.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -13,6 +17,7 @@ import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:provider/provider.dart';
 
@@ -448,16 +453,17 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                           .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
-                    csm.session.creatorId.isNotEmpty?
-                    StreamBuilder(
-                      stream:
-                          DatabaseService.getUserStream(csm.session.creatorId),
-                      builder: (context, AsyncSnapshot<User> snapshot) {
-                        return Text(
-                          'by ${snapshot.data?.name}',
-                        );
-                      },
-                    ):SizedBox.shrink(),
+                    csm.session.creatorId.isNotEmpty
+                        ? StreamBuilder(
+                            stream: DatabaseService.getUserStream(
+                                csm.session.creatorId),
+                            builder: (context, AsyncSnapshot<User> snapshot) {
+                              return Text(
+                                'by ${snapshot.data?.name}',
+                              );
+                            },
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -537,12 +543,71 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           sliver: _CertifiedSessionMembers(),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(
-            height: 100,
+          child: const YMargin(30),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'News',
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
           ),
-        )
+        ),
+        _buildPostFeed(),
+        SliverToBoxAdapter(
+          child: const YMargin(30),
+        ),
       ]),
     );
+  }
+
+  Widget _buildPostFeed() => Consumer<CertifiedSessionManager>(
+      builder: (context, sm, child) => StreamBuilder(
+            stream: DatabaseService.getPostBySessionId(sm.session.id),
+            builder: (_, snapshot) {
+              if (snapshot.hasData) {
+                List<News> posts = snapshot.data;
+                if (posts.isNotEmpty) {
+                  posts.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+                  return SliverList(
+                    delegate: SliverChildListDelegate(_getNewsWidget(posts)),
+                  );
+                } else {
+                  return SliverToBoxAdapter(child: SizedBox.shrink());
+                }
+              } else {
+                return SliverToBoxAdapter(
+                    child: Center(
+                  child: CircularProgressIndicator(),
+                ));
+              }
+            },
+          ));
+
+  List<Widget> _getNewsWidget(List<News> news) {
+    List<Widget> widgets = [];
+    int adRate = Constants.AD_NEWS_RATE;
+    int rateCount = 0;
+
+    for (News n in news) {
+      rateCount++;
+
+      widgets.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: NewsPost(n),
+      ));
+
+      if (rateCount >= adRate) {
+        widgets.add(NewsNativeAd());
+        rateCount = 0;
+      }
+    }
+
+    return widgets;
   }
 }
 
@@ -701,48 +766,49 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                 ? _theme.colors.textOnDark
                 : _theme.colors.textOnContrast;
             return MaterialButton(
-              height: 50,
-              onPressed: () async {
-                setState(() {
-                  _loading = true;
-                });
-                if (snapshot.data)
-                  await DatabaseService.leaveCertifiedSession(
-                          csm.baseSession.id)
-                      .then((value) {
-                    setState(() {
-                      _loading = false;
-                    });
+                height: 50,
+                onPressed: () async {
+                  setState(() {
+                    _loading = true;
                   });
-                else
-                  await DatabaseService.joinCertifiedSession(csm.baseSession.id)
-                      .then((value) {
-                    setState(() {
-                      _loading = false;
+                  if (snapshot.data)
+                    await DatabaseService.leaveCertifiedSession(
+                            csm.baseSession.id)
+                        .then((value) {
+                      setState(() {
+                        _loading = false;
+                      });
                     });
-                  });
-              },
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
-              textColor: color,
-              child: _loading
-                  ? Container(
-                  width: 20,
-                  height: 20,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(_theme.colors.light),
-                  ))
-                  : AutoSizeText(
-                snapshot.data ? "VERLASSEN" : 'BEITRETEN',
-                maxLines: 1,
-                style: Theme.of(context)
-                    .accentTextTheme
-                    .button
-                    .copyWith(fontWeight: FontWeight.bold),
-              )
-            );
+                  else
+                    await DatabaseService.joinCertifiedSession(
+                            csm.baseSession.id)
+                        .then((value) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
+                textColor: color,
+                child: _loading
+                    ? Container(
+                        width: 20,
+                        height: 20,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation(_theme.colors.light),
+                        ))
+                    : AutoSizeText(
+                        snapshot.data ? "VERLASSEN" : 'BEITRETEN',
+                        maxLines: 1,
+                        style: Theme.of(context)
+                            .accentTextTheme
+                            .button
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ));
           }),
     );
   }

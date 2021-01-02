@@ -4,13 +4,10 @@ import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
-import 'package:one_d_m/Components/NativeAd.dart';
-import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
-import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -227,27 +224,35 @@ class _ProfilePageState extends State<ProfilePage>
           );
         List<News> news = snapshot.data;
 
+
+
         //sort by created date
         news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         List<String> sessionsWithPost = [];
+        List<String> mySessionPosts = [];
         List<PostItem> postItem = [];
 
         news.forEach((element) {
           sessionsWithPost.add(element.sessionId);
         });
+        //filter user following session posts
+        for (Session s in mySessions) {
+          if(sessionsWithPost.contains(s.id)){
+            mySessionPosts.add(s.id);
+          }
+        }
 
         ///remove duplicating ids
-        sessionsWithPost.toSet().toList().forEach((element) {
+        mySessionPosts.toSet().toList().forEach((element) {
           postItem.add(HeadingItem(DatabaseService.getSessionFuture(element)));
           postItem.add(
               PostContentItem(DatabaseService.getPostBySessionId(element)));
         });
 
         if (postItem.isNotEmpty) {
-          return SliverList(delegate: SliverChildListDelegate(
-            _buildPostWidgets(postItem)
-          ));
+          return SliverList(
+              delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
         } else {
           return SliverToBoxAdapter(child: SizedBox.shrink());
         }
@@ -257,17 +262,14 @@ class _ProfilePageState extends State<ProfilePage>
     List<Widget> widgets = [];
     for (PostItem p in post) {
       widgets.add(Padding(
-        padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-        child: Column(children: [
-          p.buildHeading(context),
-          p.buildPosts(context)
-        ],),
+        padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+        child: Column(
+          children: [p.buildHeading(context), p.buildPosts(context)],
+        ),
       ));
     }
     return widgets;
   }
-
-
 
   Widget _buildEmptySession() => SliverToBoxAdapter(
         child: Padding(

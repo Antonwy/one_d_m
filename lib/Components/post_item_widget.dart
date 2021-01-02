@@ -31,41 +31,44 @@ class HeadingItem implements PostItem {
       builder: (_, snapshot) {
         if (snapshot.hasData) {
           Session session = snapshot.data;
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CachedNetworkImage(
-                imageUrl: session.imgUrl ?? '',
-                imageBuilder: (context, imageProvider) => Container(
-                  height: 58.0,
-                  width: 88.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CachedNetworkImage(
+                  imageUrl: session.imgUrl ?? '',
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 58.0,
+                    width: 88.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const XMargin(8.0),
-              Text(
-                session.name ?? '',
-                maxLines: 2,
-                softWrap: true,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
-              ),
-              const XMargin(8.0),
-              Icon(
-                Icons.verified,
-                color: Helper.hexToColor("#71e34b"),
-              )
-            ],
+                const XMargin(8.0),
+                Text(
+                  session.name ?? '',
+                  maxLines: 2,
+                  softWrap: true,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
+                ),
+                const XMargin(8.0),
+                Icon(
+                  Icons.verified,
+                  color: Helper.hexToColor("#71e34b"),
+                )
+              ],
+            ),
           );
         } else {
           return CircularProgressIndicator();
@@ -110,30 +113,8 @@ class PostContentItem implements PostItem {
                   lineGap: 24.0,
                   strokeWidth: 3.0,
                   gutterSpacing: 8.0,
+                  itemGap: 24,
                 ),
-                // ListView.builder(
-                //   itemCount: news.length > 2 ? 2 : news.length,
-                //   shrinkWrap: true,
-                //   physics: ClampingScrollPhysics(),
-                //   itemBuilder: (_, index) {
-                //     var item = news[index];
-                //     return Row(
-                //       mainAxisAlignment: MainAxisAlignment.start,
-                //       crossAxisAlignment: CrossAxisAlignment.center,
-                //       children: [
-                //         Expanded(
-                //             flex: 1,
-                //             child: _buildTimelineWidget(context, item.createdAt,
-                //                 news.length > 2 ? index == 1 : index == 0)),
-                //         Expanded(
-                //           flex: 4,
-                //           child: _buildPostItem(context, item),
-                //         )
-                //       ],
-                //     );
-                //   },
-                // ),
-
                 ///show more button if limit exceeds 2
                 news.length > 2
                     ? _buildShowMore(context, news[0].sessionId)
@@ -164,7 +145,6 @@ class PostContentItem implements PostItem {
 
   _buildPostItem(BuildContext context, News post) => Container(
         height: 280,
-        margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 0.0),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
             color: Colors.white,
@@ -258,27 +238,30 @@ class PostContentItem implements PostItem {
             openBuilder: (context, close) => CertifiedSessionPage(
               session: snapshot.data,
             ),
-            closedBuilder: (context, open) => Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                XMargin(context.screenWidth(percent: 0.2)),
-                FlatButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(color: Colors.black)),
-                  onPressed: open,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Mehr anzeigen',
-                      style: Theme.of(context).textTheme.headline6.copyWith(
-                          fontWeight: FontWeight.bold, fontSize: 18.0),
+            closedBuilder: (context, open) => Container(
+              margin: const EdgeInsets.only(top: 12.0,bottom: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  XMargin(context.screenWidth(percent: 0.2)),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.black)),
+                    onPressed: open,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Mehr anzeigen',
+                        style: Theme.of(context).textTheme.headline6.copyWith(
+                            fontWeight: FontWeight.bold, fontSize: 18.0),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         } else {

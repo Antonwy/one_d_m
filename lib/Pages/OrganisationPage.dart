@@ -39,7 +39,7 @@ class OrganisationPage extends StatelessWidget {
                   Container(
                     width: 150,
                     height: 150,
-                    child: CachedNetworkImage(imageUrl: organisation.imgUrl),
+                    child: CachedNetworkImage(imageUrl: organisation.imgUrl??''),
                   ),
                   SizedBox(
                     height: 20,

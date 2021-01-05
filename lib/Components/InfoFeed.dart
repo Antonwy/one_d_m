@@ -38,7 +38,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 150,
+        height: 140,
         child: StreamBuilder<Statistics>(
             stream: DatabaseService.getStatistics(),
             builder: (context, snapshot) {

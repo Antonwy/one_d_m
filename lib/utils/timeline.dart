@@ -72,7 +72,7 @@ class Timeline extends StatelessWidget {
 
         final timelineTile = <Widget>[
           CustomPaint(
-            foregroundPainter: _TimelinePainter(
+            foregroundPainter: TimelinePainter(
               hideDefaultIndicator: indicator != null,
               lineColor: lineColor,
               indicatorColor: indicatorColor,
@@ -108,8 +108,8 @@ class Timeline extends StatelessWidget {
   }
 }
 
-class _TimelinePainter extends CustomPainter {
-  _TimelinePainter({
+class TimelinePainter extends CustomPainter {
+  TimelinePainter({
     @required this.hideDefaultIndicator,
     @required this.indicatorColor,
     @required this.indicatorStyle,

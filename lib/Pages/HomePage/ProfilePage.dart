@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
@@ -156,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
-                                        icon: Icons.play_arrow,
+                                        icon: LineIcons.play,
                                         onTap: open,
                                       ),
                                     ),
@@ -164,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       width: 10,
                                     ),
                                     RoundButtonHomePage(
-                                      icon: Icons.settings,
+                                      icon: LineIcons.cog,
                                       onTap: () {
                                         BottomDialog(context)
                                             .show(SettingsDialog());
@@ -189,19 +190,6 @@ class _ProfilePageState extends State<ProfilePage>
             ? _buildMySessions(mySessions)
             : _buildEmptySession(),
         // SessionsFeed(),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              "News",
-              style: _theme.textTheme.dark.headline6.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                  color: Helper.hexToColor('#575757')),
-            ),
-          ),
-        ),
-
         _buildPostFeed(),
         const SliverToBoxAdapter(
           child: const SizedBox(
@@ -224,8 +212,6 @@ class _ProfilePageState extends State<ProfilePage>
           );
         List<News> news = snapshot.data;
 
-
-
         //sort by created date
         news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -238,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage>
         });
         //filter user following session posts
         for (Session s in mySessions) {
-          if(sessionsWithPost.contains(s.id)){
+          if (sessionsWithPost.contains(s.id)) {
             mySessionPosts.add(s.id);
           }
         }
@@ -260,12 +246,10 @@ class _ProfilePageState extends State<ProfilePage>
 
   List<Widget> _buildPostWidgets(List<PostItem> post) {
     List<Widget> widgets = [];
+    widgets.add(_buildNewsTitleWidget());
     for (PostItem p in post) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-        child: Column(
-          children: [p.buildHeading(context), p.buildPosts(context)],
-        ),
+      widgets.add(Column(
+        children: [p.buildHeading(context), p.buildPosts(context)],
       ));
     }
     return widgets;
@@ -296,7 +280,8 @@ class _ProfilePageState extends State<ProfilePage>
 
   Widget _buildMySessions(List<BaseSession> sessions) => SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.only(
+              left: 12.0, top: 12.0, bottom: 12.0, right: 0.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -311,7 +296,7 @@ class _ProfilePageState extends State<ProfilePage>
                 height: 12.0,
               ),
               Container(
-                height: 140,
+                height: 116,
                 child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) {
@@ -324,6 +309,17 @@ class _ProfilePageState extends State<ProfilePage>
               ),
             ],
           ),
+        ),
+      );
+
+  Widget _buildNewsTitleWidget() => Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          "News",
+          style: _theme.textTheme.dark.headline6.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Helper.hexToColor('#575757')),
         ),
       );
 

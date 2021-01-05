@@ -545,18 +545,6 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
         SliverToBoxAdapter(
           child: const YMargin(30),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              'News',
-              style: Theme.of(context)
-                  .textTheme
-                  .headline6
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
         _buildPostFeed(),
         SliverToBoxAdapter(
           child: const YMargin(30),
@@ -572,9 +560,10 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               if (snapshot.hasData) {
                 List<News> posts = snapshot.data;
                 if (posts.isNotEmpty) {
-                  posts.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+                  posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
                   return SliverList(
-                    delegate: SliverChildListDelegate(_getNewsWidget(posts)),
+                    delegate:
+                        SliverChildListDelegate(_getNewsWidget(context, posts)),
                   );
                 } else {
                   return SliverToBoxAdapter(child: SizedBox.shrink());
@@ -588,11 +577,21 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
             },
           ));
 
-  List<Widget> _getNewsWidget(List<News> news) {
+  List<Widget> _getNewsWidget(BuildContext context, List<News> news) {
     List<Widget> widgets = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
-
+    Widget newsTitle = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+      child: Text(
+        'News',
+        style: Theme.of(context)
+            .textTheme
+            .headline6
+            .copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+    widgets.add(newsTitle);
     for (News n in news) {
       rateCount++;
 

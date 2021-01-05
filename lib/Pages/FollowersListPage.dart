@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/User.dart';
 
 class FollowersListPage extends StatelessWidget {
   String title;
@@ -28,12 +30,23 @@ class FollowersListPage extends StatelessWidget {
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: UserButton(
-                  userIDs[index],
-                  color: ColorTheme.whiteBlue,
-                  textStyle: TextStyle(color: ColorTheme.blue),
-                  elevation: 0,
-                  avatarColor: ColorTheme.blue,
+                child: FutureBuilder(
+                  future: DatabaseService.getUser(userIDs[index]),
+                  builder: (context, snapshot) {
+                    if(snapshot.hasData) {
+                      User user = snapshot.data;
+                      return UserButton(
+                        userIDs[index],
+                        user: user,
+                        color: ColorTheme.whiteBlue,
+                        textStyle: TextStyle(color: ColorTheme.blue),
+                        elevation: 0,
+                        avatarColor: ColorTheme.blue,
+                      );
+                    }else{
+                      return SizedBox.shrink();
+                    }
+                  }
                 ),
               );
             },

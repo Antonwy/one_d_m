@@ -63,6 +63,8 @@ dependencies:
   number_slide_animation: ^0.1.1
   flutter_local_notifications: ^3.0.2
   rxdart: ^0.25.0
+  line_icons: ^0.2.0
+  timeline_tile: ^1.0.0
 
 
 dev_dependencies:

@@ -34,16 +34,16 @@ class Donation {
       this.sessionId});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
-    return Donation(doc[AMOUNT],
-        campaignId: doc[CAMPAIGNID],
-        alternativeCampaignId: doc[ALTERNATIVECAMPAIGNID],
-        userId: doc[USERID],
-        campaignImgUrl: doc[CAMPAIGNIMGURL],
-        campaignName: doc[CAMPAIGNNAME],
-        anonym: doc[ISANONYM] ?? false,
-        createdAt: (doc[CREATEDAT] as Timestamp).toDate(),
-        useDCs: doc[USEDCS] ?? false,
-        sessionId: doc[SESSION_ID]);
+    return Donation(doc.data()[AMOUNT],
+        campaignId: doc.data()[CAMPAIGNID],
+        alternativeCampaignId: doc.data()[ALTERNATIVECAMPAIGNID],
+        userId: doc.data()[USERID],
+        campaignImgUrl: doc.data()[CAMPAIGNIMGURL],
+        campaignName: doc.data()[CAMPAIGNNAME],
+        anonym: doc.data()[ISANONYM] ?? false,
+        createdAt: (doc.data()[CREATEDAT] as Timestamp).toDate(),
+        useDCs: doc.data()[USEDCS] ?? false,
+        sessionId: doc.data()[SESSION_ID]);
   }
 
   static List<Donation> listFromSnapshots(List<DocumentSnapshot> list) {

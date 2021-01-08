@@ -75,11 +75,16 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
-            actions: [_CertifiedSessionPageIndicator(_pageController)],
+            ///removed chat feature for now
+            // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
-          body: PageView(
-              controller: _pageController,
-              children: [_CertifiedSessionInfoPage(), _CertifiedSessionChat()]),
+          body:_CertifiedSessionInfoPage(),
+
+          ///removed chat feature for now
+
+          // body: PageView(
+          //     controller: _pageController,
+          //     children: [_CertifiedSessionInfoPage(), _CertifiedSessionChat()]),
         );
       },
     );

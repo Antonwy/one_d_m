@@ -231,6 +231,7 @@ class DatabaseService {
   static Future<List<Campaign>> getCampaignFromQuery(String query) async {
     QuerySnapshot qs = await campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
+        .limit(5)
         .get();
 
     List<Campaign> campaigns =

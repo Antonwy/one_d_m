@@ -2,7 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -33,8 +33,7 @@ class HeadingItem implements PostItem {
         if (snapshot.hasData) {
           Session session = snapshot.data;
           return Container(
-            margin:
-                const EdgeInsets.only(bottom: 0.0, left: 12.0, right: 12.0),
+            margin: const EdgeInsets.only(bottom: 0.0, left: 12.0, right: 12.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -113,18 +112,24 @@ class PostContentItem implements PostItem {
             news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
             ///limit only to display latest two posts
-            List<News> sublist = news.length > 2 ? news.sublist(0, 2) : news;
+            List<News> sublist = news.length > 5 ? news.sublist(0, 5) : news;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildPosts(context, sublist),
+                ListView(
+                  controller: ScrollController(),
+                  shrinkWrap: true,
+                  physics: BouncingScrollPhysics(),
+                  children: _buildPostWidgets(context, sublist),
+                ),
+                // _buildPosts(context, sublist),
                 ///show more button if limit exceeds 2
-                news.length > 2
+                news.length > 5
                     ? _buildShowMore(context, news[0].sessionId)
                     : SizedBox.shrink(),
                 Padding(
-                  padding: const EdgeInsets.only(top: 0,bottom: 12.0),
+                  padding: const EdgeInsets.only(top: 0, bottom: 12.0),
                   child: Divider(),
                 )
               ],
@@ -135,19 +140,79 @@ class PostContentItem implements PostItem {
         },
       );
 
-  List<Widget> _buildPostWidget(BuildContext context, List<News> post) {
+  List<Widget> _buildPostWidgets(BuildContext context, List<News> post) {
     List<Widget> widgets = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
-
-    for (News n in post) {
+    for (var i = 0; i < post.length; i++) {
+      bool isFirst = i == 0;
+      bool isLast = i == post.length - 1;
       rateCount++;
 
-      widgets.add(SizedBox(height: 480, child: NewsPost(n)));
+      widgets.add(Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 48.0, right: 12.0),
+            child: PostWidget(post: post[i]),
+          ),
+          Positioned.fill(
+            top: 0,
+            left: 18,
+            child: CustomPaint(
+              foregroundPainter: TimelinePainter(
+                hideDefaultIndicator: false,
+                lineColor: Helper.hexToColor('#707070'),
+                indicatorColor: Helper.hexToColor('#2e313f'),
+                indicatorSize: 16,
+                indicatorStyle: PaintingStyle.fill,
+                isFirst: isFirst,
+                isLast: isLast,
+                lineGap: 8.0,
+                strokeCap: StrokeCap.butt,
+                strokeWidth: 2.5,
+                style: PaintingStyle.stroke,
+                itemGap: 0.0,
+              ),
+              child: SizedBox(),
+            ),
+          ),
+        ],
+      ));
 
-      if (rateCount >= adRate) {
-        widgets.add(NewsNativeAd());
-        rateCount = 0;
+      ///add native add only if post length is higher than adrate
+      if(post.length>adRate) {
+        if (rateCount >= adRate) {
+          widgets.add(Stack(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(left: 48.0, right: 12.0),
+                child: NewsNativeAd(),
+              ),
+              Positioned.fill(
+                top: 0,
+                left: 18,
+                child: CustomPaint(
+                  foregroundPainter: TimelinePainter(
+                    hideDefaultIndicator: false,
+                    lineColor: Helper.hexToColor('#707070'),
+                    indicatorColor: Helper.hexToColor('#f9a900'),
+                    indicatorSize: 16,
+                    indicatorStyle: PaintingStyle.fill,
+                    isFirst: false,
+                    isLast: isLast,
+                    lineGap: 8.0,
+                    strokeCap: StrokeCap.butt,
+                    strokeWidth: 2.5,
+                    style: PaintingStyle.stroke,
+                    itemGap: 0.0,
+                  ),
+                  child: SizedBox(),
+                ),
+              ),
+            ],
+          ));
+          rateCount = 0;
+        }
       }
     }
 
@@ -165,7 +230,9 @@ class PostContentItem implements PostItem {
         int adRate = Constants.AD_NEWS_RATE;
         int rateCount = 0;
 
-        Widget childItem = NewsPost(item);
+        Widget childItem = PostWidget(
+          post: item,
+        );
         for (News n in post) {
           rateCount++;
 
@@ -175,7 +242,9 @@ class PostContentItem implements PostItem {
           }
         }
         if (rateCount == 0) {
-          childItem = NewsPost(item);
+          childItem = PostWidget(
+            post: item,
+          );
         }
 
         return new Stack(
@@ -202,8 +271,7 @@ class PostContentItem implements PostItem {
                   style: PaintingStyle.stroke,
                   itemGap: 0.0,
                 ),
-                child: SizedBox(
-                ),
+                child: SizedBox(),
               ),
             ),
           ],
@@ -241,7 +309,7 @@ class PostContentItem implements PostItem {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        'Mehr anzeigen',
+                        'Zur Session',
                         style: Theme.of(context).textTheme.headline6.copyWith(
                             fontWeight: FontWeight.bold, fontSize: 18.0),
                       ),

@@ -62,7 +62,7 @@ class CampaignButton extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Avatar(
-                          snapshot.data.thumbnailUrl ?? snapshot.data.imgUrl),
+                          snapshot.data.imgUrl??''),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(

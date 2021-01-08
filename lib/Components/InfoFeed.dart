@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
@@ -9,6 +10,7 @@ import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 
 class InfoFeed extends StatelessWidget {
@@ -38,7 +40,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 140,
+        height: 120,
         child: StreamBuilder<Statistics>(
             stream: DatabaseService.getStatistics(),
             builder: (context, snapshot) {
@@ -136,7 +138,7 @@ class _ColumnStats extends StatelessWidget {
           Numeral(value).value(),
           style: TextStyle(
               color: _bTheme.contrast,
-              fontSize: 50,
+              fontSize: 32,
               fontWeight: FontWeight.w600),
         ),
         Text(
@@ -180,27 +182,26 @@ class _DCInformation extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
                               children: [
                                 Text(
                                   '${snapshot?.data?.dcBalance ?? 0}',
                                   style: TextStyle(
-                                      fontSize: 35.0,
+                                      fontSize: 24.0,
                                       fontWeight: FontWeight.bold,
                                       color: ThemeManager.of(context)
                                           .colors
                                           .contrast),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('Donation Votes'),
-                                ),
+                                const XMargin(5),
+                                Text('Donation Votes'),
                               ],
                             ),
                             SizedBox(height: 5.0),
-                            Text(
+                            AutoSizeText(
                               'Entspricht ${snapshot?.data?.dcBalance*5??0} Cent ',
                               style: TextStyle(
+                                fontSize: 14,
                                 fontWeight: FontWeight.w200,
                               ),
                             ),
@@ -208,7 +209,7 @@ class _DCInformation extends StatelessWidget {
                         ),
                         _PercentCircle(
                           percent: snapshot?.data?.activityScore ?? 0,
-                          radius: 40.0,
+                          radius: 30.0,
                         ),
                       ],
                     );

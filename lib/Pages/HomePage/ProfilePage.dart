@@ -190,6 +190,8 @@ class _ProfilePageState extends State<ProfilePage>
             ? _buildMySessions(mySessions)
             : _buildEmptySession(),
         // SessionsFeed(),
+        // _buildPostFeed(),
+
         _buildPostFeed(),
         const SliverToBoxAdapter(
           child: const SizedBox(
@@ -212,9 +214,6 @@ class _ProfilePageState extends State<ProfilePage>
           );
         List<News> news = snapshot.data;
 
-        //sort by created date
-        news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
         List<String> sessionsWithPost = [];
         List<String> mySessionPosts = [];
         List<PostItem> postItem = [];
@@ -235,7 +234,6 @@ class _ProfilePageState extends State<ProfilePage>
           postItem.add(
               PostContentItem(DatabaseService.getPostBySessionId(element)));
         });
-
         if (postItem.isNotEmpty) {
           return SliverList(
               delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));

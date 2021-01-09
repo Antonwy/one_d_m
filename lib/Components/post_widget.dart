@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -36,7 +37,7 @@ class PostWidget extends StatelessWidget {
         children: [
           _buildPostImage(_bTheme.dark),
           _buildTitle(context),
-          _buildContent(context)
+          _buildExpandableContent(context)
         ],
       ),
     );
@@ -106,6 +107,102 @@ class PostWidget extends StatelessWidget {
               fontSize: 15,
               color: Helper.hexToColor('#707070'),
               fontWeight: FontWeight.w400),
+        ),
+      );
+
+  Widget _buildExpandableContent(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+        child: ExpandableNotifier(
+          child: Column(
+            children: [
+              Expandable(
+                collapsed: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.shortText,
+                      maxLines: 3,
+                      softWrap: true,
+                      textAlign: TextAlign.start,
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          fontSize: 15,
+                          color: Helper.hexToColor('#707070'),
+                          fontWeight: FontWeight.w400),
+                    ),
+                    post.shortText.length > 90
+                        ? Align(
+                            alignment: Alignment.bottomRight,
+                            child: ExpandableButton(
+                                child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'mehr',
+                                  textAlign: TextAlign.start,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .copyWith(
+                                          fontSize: 15,
+                                          color: Helper.hexToColor('#707070'),
+                                          fontWeight: FontWeight.w400),
+                                ),
+                                Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: Helper.hexToColor('#707070'),
+                                )
+                              ],
+                            )),
+                          )
+                        : SizedBox.shrink()
+                  ],
+                ),
+                expanded: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.shortText,
+                      maxLines: null,
+                      softWrap: true,
+                      textAlign: TextAlign.start,
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          fontSize: 15,
+                          color: Helper.hexToColor('#707070'),
+                          fontWeight: FontWeight.w400),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: ExpandableButton(
+                          child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'weniger',
+                            textAlign: TextAlign.start,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(
+                                    fontSize: 15,
+                                    color: Helper.hexToColor('#707070'),
+                                    fontWeight: FontWeight.w400),
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_up_outlined,
+                            color: Helper.hexToColor('#707070'),
+                          )
+                        ],
+                      )),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       );
 }

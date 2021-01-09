@@ -120,7 +120,7 @@ class PostContentItem implements PostItem {
                 ListView(
                   controller: ScrollController(),
                   shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   children: _buildPostWidgets(context, sublist),
                 ),
                 // _buildPosts(context, sublist),
@@ -180,7 +180,7 @@ class PostContentItem implements PostItem {
       ));
 
       ///add native add only if post length is higher than adrate
-      if(post.length>adRate) {
+      if (post.length > adRate) {
         if (rateCount >= adRate) {
           widgets.add(Stack(
             children: <Widget>[

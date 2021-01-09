@@ -6,6 +6,7 @@ import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
+import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -602,11 +603,14 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
 
       widgets.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: NewsPost(n),
+        child: PostWidget(post: n,),
       ));
 
       if (rateCount >= adRate) {
-        widgets.add(NewsNativeAd());
+        widgets.add(Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: NewsNativeAd(),
+        ));
         rateCount = 0;
       }
     }

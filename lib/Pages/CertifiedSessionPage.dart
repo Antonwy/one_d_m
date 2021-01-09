@@ -415,7 +415,7 @@ class _ChatTextField extends StatelessWidget {
 }
 
 class _CertifiedSessionInfoPage extends StatelessWidget {
-  bool isCreator = true;
+  bool isCreator = false;
 
   @override
   Widget build(BuildContext context) {

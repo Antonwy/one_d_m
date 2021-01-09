@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
-import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -20,6 +19,7 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
+import 'package:one_d_m/Pages/create_post.dart';
 import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
@@ -35,6 +35,8 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   ThemeManager _theme;
 
   Session session;
+
+  bool isCreator = true;
 
   PageController _pageController = PageController();
   ValueNotifier<double> _pagePosition = ValueNotifier(0);
@@ -76,10 +78,11 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
+
             ///removed chat feature for now
             // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
-          body:_CertifiedSessionInfoPage(),
+          body: _CertifiedSessionInfoPage(),
 
           ///removed chat feature for now
 
@@ -412,6 +415,8 @@ class _ChatTextField extends StatelessWidget {
 }
 
 class _CertifiedSessionInfoPage extends StatelessWidget {
+  bool isCreator = true;
+
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
@@ -475,7 +480,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               ),
               Expanded(
                 flex: 3,
-                child: _SessionJoinButton(),
+                child: isCreator ? CreatePostButton() : _SessionJoinButton(),
               )
             ],
           )),
@@ -603,7 +608,9 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
 
       widgets.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: PostWidget(post: n,),
+        child: PostWidget(
+          post: n,
+        ),
       ));
 
       if (rateCount >= adRate) {
@@ -817,6 +824,46 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                             .button
                             .copyWith(fontWeight: FontWeight.bold),
                       ));
+          }),
+    );
+  }
+}
+
+class CreatePostButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Consumer<CertifiedSessionManager>(
+      builder: (context, csm, child) => StreamBuilder<bool>(
+          initialData: false,
+          stream: csm.isInSession,
+          builder: (context, snapshot) {
+            Color color = snapshot.data
+                ? _theme.colors.textOnDark
+                : _theme.colors.textOnContrast;
+            return MaterialButton(
+                height: 50,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) => CreatePostScreen(
+                                session: csm.session,
+                              )));
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
+                textColor: color,
+                child: AutoSizeText(
+                  'Post erstellen',
+                  maxLines: 3,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .accentTextTheme
+                      .button
+                      .copyWith(fontWeight: FontWeight.bold),
+                ));
           }),
     );
   }

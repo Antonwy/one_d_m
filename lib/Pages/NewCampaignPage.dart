@@ -20,7 +20,6 @@ import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Helper/image_placeholder.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -68,6 +67,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
     super.initState();
   }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -117,6 +117,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         context: context,
                                         close: bd.close,
                                       ));
+
                                     }
                               : () {
                                   Helper.showConnectionSnackBar(context);
@@ -138,7 +139,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                       height: _mq.size.height * .3 + 30,
                       width: _mq.size.width,
                       child: CachedNetworkImage(
-                        imageUrl:widget.campaign.imgUrl ,
+                        imageUrl: widget.campaign.imgUrl,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -360,7 +361,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData)
                                   return SliverToBoxAdapter();
-                                snapshot.data.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+                                snapshot.data.sort((a, b) =>
+                                    b.createdAt.compareTo(a.createdAt));
                                 return SliverPadding(
                                   padding: EdgeInsets.symmetric(horizontal: 4),
                                   sliver: SliverList(
@@ -601,5 +603,4 @@ class _AmountWidget extends StatelessWidget {
           }),
     );
   }
-
 }

@@ -97,19 +97,6 @@ class PostWidget extends StatelessWidget {
         ),
       );
 
-  Widget _buildContent(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
-        child: Text(
-          post.shortText,
-          maxLines: 3,
-          textAlign: TextAlign.start,
-          style: Theme.of(context).textTheme.bodyText1.copyWith(
-              fontSize: 15,
-              color: Helper.hexToColor('#707070'),
-              fontWeight: FontWeight.w400),
-        ),
-      );
-
   Widget _buildExpandableContent(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
         child: ExpandableNotifier(
@@ -122,7 +109,7 @@ class PostWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.shortText,
+                      post.text,
                       maxLines: 3,
                       softWrap: true,
                       textAlign: TextAlign.start,
@@ -131,7 +118,7 @@ class PostWidget extends StatelessWidget {
                           color: Helper.hexToColor('#707070'),
                           fontWeight: FontWeight.w400),
                     ),
-                    post.shortText.length > 90
+                    post.text.length > 90
                         ? Align(
                             alignment: Alignment.bottomRight,
                             child: ExpandableButton(
@@ -165,7 +152,7 @@ class PostWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.shortText,
+                      post.text,
                       maxLines: null,
                       softWrap: true,
                       textAlign: TextAlign.start,

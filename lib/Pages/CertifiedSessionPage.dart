@@ -96,7 +96,10 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           backgroundColor: Colors.white,
           appBar: AppBar(
             leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_down_rounded,size: 48,),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 48,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             backgroundColor: Colors.white,
@@ -574,12 +577,21 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           sliver: SliverToBoxAdapter(
-            child: Text(
-              'Donators',
-              style: Theme.of(context)
-                  .textTheme
-                  .headline6
-                  .copyWith(fontWeight: FontWeight.bold),
+            child: Consumer<CertifiedSessionManager>(
+              builder: (context, sm, child) => StreamBuilder(
+                  stream: sm.membersStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return SizedBox.shrink();
+                    List<SessionMember> members = snapshot.data ?? [];
+                    if (members.isEmpty) return SizedBox.shrink();
+                    return Text(
+                      'Donators',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(fontWeight: FontWeight.bold),
+                    );
+                  }),
             ),
           ),
         ),

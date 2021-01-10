@@ -35,7 +35,7 @@ class HeadingItem implements PostItem {
           return Container(
             margin: const EdgeInsets.only(bottom: 0.0, left: 12.0, right: 12.0),
             child: Row(
-              mainAxisSize: MainAxisSize.max,
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

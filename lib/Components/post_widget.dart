@@ -16,7 +16,7 @@ class PostWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
+      margin: const EdgeInsets.only(bottom: 12.0,),
       width: context.screenWidth(percent: 1),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),

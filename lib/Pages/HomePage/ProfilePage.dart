@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
@@ -18,7 +17,6 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +24,11 @@ import 'package:provider/provider.dart';
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
 
-  const ProfilePage({Key key, this.onExploreTapped, }) : super(key: key);
+  const ProfilePage({
+    Key key,
+    this.onExploreTapped,
+  }) : super(key: key);
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -254,6 +256,9 @@ class _ProfilePageState extends State<ProfilePage>
     widgets.add(_buildNewsTitleWidget());
     for (PostItem p in post) {
       widgets.add(Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [p.buildHeading(context), p.buildPosts(context)],
       ));
     }
@@ -288,12 +293,13 @@ class _ProfilePageState extends State<ProfilePage>
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Entdecke Sessions',
-                    style: Theme.of(context).textTheme.headline6.copyWith(
-                        fontWeight: FontWeight.bold, fontSize: 18.0),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6
+                        .copyWith(fontWeight: FontWeight.bold, fontSize: 18.0),
                   ),
                 ),
               ),
-
             ],
           ),
         ),
@@ -302,30 +308,36 @@ class _ProfilePageState extends State<ProfilePage>
   Widget _buildMySessions(List<BaseSession> sessions) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(
-              left: 12.0, top: 12.0, bottom: 12.0, right: 0.0),
+              left: 0.0, top: 12.0, bottom: 12.0, right: 0.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Deine Sessions",
-                style: _theme.textTheme.dark.headline6.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: Helper.hexToColor('#575757')),
+              Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  "Deine Sessions",
+                  style: _theme.textTheme.dark.headline6.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      color: Helper.hexToColor('#575757')),
+                ),
               ),
               const SizedBox(
                 height: 12.0,
               ),
               Container(
                 height: 116,
-                child: ListView.builder(
+                child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: CertifiedSessionView(sessions[index]),
-                      );
-                    },
+                    separatorBuilder: (context, index) => SizedBox(
+                          width: 8,
+                        ),
+                    itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(
+                              left: index == 0 ? 12.0 : 0.0,
+                              right: index == sessions.length - 1 ? 12.0 : 0.0),
+                          child: CertifiedSessionView(sessions[index]),
+                        ),
                     itemCount: sessions.length),
               ),
             ],

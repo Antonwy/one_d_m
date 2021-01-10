@@ -43,7 +43,7 @@ class HomePageState extends State<HomePage> {
 
   void _changePage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 250), curve: Curves.fastOutSlowIn);
+        duration: Duration(milliseconds: 150), curve: Curves.fastOutSlowIn);
   }
 
   @override

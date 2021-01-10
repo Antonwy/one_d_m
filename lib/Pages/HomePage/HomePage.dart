@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/chart/size_const.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';
-import 'NewsHomePage.dart';
 import 'ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key key}) : super(key: key);
+
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   PageController _pageController = PageController(initialPage: 0);
 
   @override
@@ -27,7 +26,9 @@ class _HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               children: <Widget>[
-                ProfilePage(),
+                ProfilePage(
+                  onExploreTapped: () => _changePage(1),
+                ),
                 // NewsHomePage(() => _changePage(2)),
                 ExplorePage(),
               ],
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
     _pageController.animateToPage(page,
         duration: Duration(milliseconds: 250), curve: Curves.fastOutSlowIn);
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();

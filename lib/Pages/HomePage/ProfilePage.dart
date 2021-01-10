@@ -17,17 +17,24 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
+  final VoidCallback onExploreTapped;
+
+  const ProfilePage({Key key, this.onExploreTapped, }) : super(key: key);
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin {
+  GlobalKey<_ProfilePageState> _myKey = GlobalKey();
+
   ThemeManager _theme;
   Stream<List<BaseSession>> _sessionStream;
   Stream<List<BaseSession>> _certifiedSessionsStream;
@@ -157,7 +164,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
-                                        icon: LineIcons.play,
+                                        icon: Icons.play_arrow,
                                         onTap: open,
                                       ),
                                     ),
@@ -165,7 +172,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       width: 10,
                                     ),
                                     RoundButtonHomePage(
-                                      icon: LineIcons.cog,
+                                      icon: Icons.settings,
                                       onTap: () {
                                         BottomDialog(context)
                                             .show(SettingsDialog());
@@ -267,10 +274,26 @@ class _ProfilePageState extends State<ProfilePage>
                 height: 20,
               ),
               Text(
-                "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
+                "Du bist momentan kein Mitglied einer Session",
                 style: _theme.textTheme.dark.bodyText1,
                 textAlign: TextAlign.center,
               ),
+              const YMargin(20),
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.black)),
+                onPressed: widget.onExploreTapped,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Entdecke Sessions',
+                    style: Theme.of(context).textTheme.headline6.copyWith(
+                        fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                ),
+              ),
+
             ],
           ),
         ),

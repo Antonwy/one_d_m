@@ -219,67 +219,6 @@ class PostContentItem implements PostItem {
     return widgets;
   }
 
-  Widget _buildPosts(BuildContext context, List<News> post) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        final isLast = index == post.length - 1;
-
-        var item = post[index];
-        int adRate = Constants.AD_NEWS_RATE;
-        int rateCount = 0;
-
-        Widget childItem = PostWidget(
-          post: item,
-        );
-        for (News n in post) {
-          rateCount++;
-
-          if (rateCount >= adRate) {
-            childItem = NewsNativeAd();
-            rateCount = 0;
-          }
-        }
-        if (rateCount == 0) {
-          childItem = PostWidget(
-            post: item,
-          );
-        }
-
-        return new Stack(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 48.0, right: 12.0),
-              child: childItem,
-            ),
-            Positioned.fill(
-              top: 0,
-              left: 18,
-              child: CustomPaint(
-                foregroundPainter: TimelinePainter(
-                  hideDefaultIndicator: false,
-                  lineColor: Helper.hexToColor('#707070'),
-                  indicatorColor: Helper.hexToColor('#2e313f'),
-                  indicatorSize: 16,
-                  indicatorStyle: PaintingStyle.fill,
-                  isFirst: index == 0,
-                  isLast: isLast,
-                  lineGap: 8.0,
-                  strokeCap: StrokeCap.butt,
-                  strokeWidth: 2.5,
-                  style: PaintingStyle.stroke,
-                  itemGap: 0.0,
-                ),
-                child: SizedBox(),
-              ),
-            ),
-          ],
-        );
-      },
-      itemCount: post.length,
-    );
-  }
 
   _buildShowMore(BuildContext context, String sessionId) => StreamBuilder(
       stream: DatabaseService.getSession(sessionId),

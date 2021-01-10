@@ -2,6 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -33,19 +35,21 @@ class HeadingItem implements PostItem {
         if (snapshot.hasData) {
           Session session = snapshot.data;
           return Container(
-            margin: const EdgeInsets.only(bottom: 0.0, left: 12.0, right: 12.0),
+            margin: const EdgeInsets.only(
+                bottom: 0.0, left: 12.0, right: 12.0, top: 0),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                OpenContainer(
+                CustomOpenContainer(
                   closedColor: Colors.transparent,
                   closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),
                   closedElevation: 0,
-                  openBuilder: (context, close) => CertifiedSessionPage(
+                  openBuilder: (context, close,scrollController) => CertifiedSessionPage(
                     session: snapshot.data,
+                    scrollController: scrollController,
                   ),
                   closedBuilder: (_, open) => InkWell(
                     onTap: open,
@@ -153,7 +157,7 @@ class PostContentItem implements PostItem {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(left: 48.0, right: 12.0),
-            child: PostWidget(post: post[i]),
+            child: NewsPost(post[i],withCampaign: false,),
           ),
           Positioned.fill(
             top: 0,
@@ -218,7 +222,6 @@ class PostContentItem implements PostItem {
 
     return widgets;
   }
-
 
   _buildShowMore(BuildContext context, String sessionId) => StreamBuilder(
       stream: DatabaseService.getSession(sessionId),

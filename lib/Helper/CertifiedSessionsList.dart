@@ -57,13 +57,14 @@ class CertifiedSessionView extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     return Container(
       width: 220,
-      child: OpenContainer(
+      child: CustomOpenContainer(
         closedColor: Colors.grey[200],
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         closedElevation: 0,
-        openBuilder: (context, close) => CertifiedSessionPage(
+        openBuilder: (context, close,scrollController) => CertifiedSessionPage(
           session: session,
+          scrollController: scrollController,
         ),
         closedBuilder: (context, open) => Stack(
           children: [

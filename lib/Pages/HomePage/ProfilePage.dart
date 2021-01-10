@@ -81,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage>
                   automaticallyImplyLeading: false,
                   actions: <Widget>[],
                   bottom: PreferredSize(
-                    preferredSize: Size(MediaQuery.of(context).size.width, 110),
+                    preferredSize: Size(MediaQuery.of(context).size.width, 100),
                     child: SafeArea(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -132,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage>
                               ],
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 20,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -166,7 +166,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
-                                        icon: Icons.play_arrow,
+                                        icon: Icons.play_arrow_rounded,
                                         onTap: open,
                                       ),
                                     ),
@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       width: 10,
                                     ),
                                     RoundButtonHomePage(
-                                      icon: Icons.settings,
+                                      icon: Icons.settings_sharp,
                                       onTap: () {
                                         BottomDialog(context)
                                             .show(SettingsDialog());
@@ -198,8 +198,6 @@ class _ProfilePageState extends State<ProfilePage>
         mySessions.isNotEmpty
             ? _buildMySessions(mySessions)
             : _buildEmptySession(),
-        // SessionsFeed(),
-        // _buildPostFeed(),
 
         _buildPostFeed(),
         const SliverToBoxAdapter(
@@ -308,7 +306,7 @@ class _ProfilePageState extends State<ProfilePage>
   Widget _buildMySessions(List<BaseSession> sessions) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(
-              left: 0.0, top: 12.0, bottom: 12.0, right: 0.0),
+              left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -318,12 +316,12 @@ class _ProfilePageState extends State<ProfilePage>
                   "Deine Sessions",
                   style: _theme.textTheme.dark.headline6.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 24,
+                      fontSize: 22,
                       color: Helper.hexToColor('#575757')),
                 ),
               ),
               const SizedBox(
-                height: 12.0,
+                height: 10.0,
               ),
               Container(
                 height: 116,
@@ -346,12 +344,12 @@ class _ProfilePageState extends State<ProfilePage>
       );
 
   Widget _buildNewsTitleWidget() => Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.only(left: 12, bottom: 10),
         child: Text(
           "News",
           style: _theme.textTheme.dark.headline6.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 24,
+              fontSize: 22,
               color: Helper.hexToColor('#575757')),
         ),
       );

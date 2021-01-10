@@ -18,7 +18,7 @@ class InfoFeed extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 14.0, 10.0, 8),
+        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0,0),
         child: _ChartsPageView(),
       ),
     );

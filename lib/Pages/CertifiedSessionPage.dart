@@ -24,8 +24,10 @@ import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
   Session session;
+  final ScrollController scrollController;
 
-  CertifiedSessionPage({Key key, this.session}) : super(key: key);
+  CertifiedSessionPage({Key key, this.session, this.scrollController})
+      : super(key: key);
 
   @override
   _CertifiedSessionPageState createState() => _CertifiedSessionPageState();
@@ -41,13 +43,31 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   PageController _pageController = PageController();
   ValueNotifier<double> _pagePosition = ValueNotifier(0);
 
+  ScrollController _scrollController;
+  ValueNotifier _scrollOffset;
+
   @override
   void initState() {
+    _scrollController = widget.scrollController ?? ScrollController();
+
+    _scrollOffset = ValueNotifier(0);
+
+    _scrollController.addListener(() {
+      _scrollOffset.value = _scrollController.offset;
+    });
+
     session = widget.session;
     _pageController.addListener(() {
       _pagePosition.value = _pageController.page;
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollOffset.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,14 +95,21 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           ),
           backgroundColor: Colors.white,
           appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.keyboard_arrow_down_rounded,size: 48,),
+              onPressed: () => Navigator.pop(context),
+            ),
             backgroundColor: Colors.white,
             elevation: 0,
+            titleSpacing: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
 
             ///removed chat feature for now
             // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
-          body: _CertifiedSessionInfoPage(),
+          body: _CertifiedSessionInfoPage(
+            controller: _scrollController,
+          ),
 
           ///removed chat feature for now
 
@@ -416,14 +443,18 @@ class _ChatTextField extends StatelessWidget {
 
 class _CertifiedSessionInfoPage extends StatelessWidget {
   bool isCreator = false;
+  ScrollController controller;
+
+  _CertifiedSessionInfoPage({Key key, this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return Consumer<CertifiedSessionManager>(
-      builder: (context, csm, child) => CustomScrollView(slivers: [
+      builder: (context, csm, child) =>
+          CustomScrollView(controller: controller, slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
             child: Container(
               height: 220,
@@ -446,15 +477,18 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          padding: const EdgeInsets.fromLTRB(12.0, 4, 12, 6),
           sliver: SliverToBoxAdapter(
               child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 6,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     AutoSizeText(
                       csm.session.name,
@@ -486,7 +520,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           )),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          padding: const EdgeInsets.fromLTRB(12.0, 4, 12, 6),
           sliver: SliverToBoxAdapter(
             child: Row(
               children: [
@@ -494,7 +528,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 1,
+                        flex: 4,
                         child: _InfoView(
                           description: "DV",
                           value: snapshot.data?.currentAmount ??
@@ -510,7 +544,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 2,
+                        flex: 6,
                         child: _InfoView(
                             imageUrl: snapshot.data?.campaignImgUrl ??
                                 csm.session.campaignImgUrl,
@@ -525,7 +559,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 1,
+                        flex: 4,
                         child: _InfoView(
                           description: "Mitglieder",
                           value: snapshot.data?.memberCount ??
@@ -538,7 +572,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           sliver: SliverToBoxAdapter(
             child: Text(
               'Donators',
@@ -550,15 +584,15 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          padding: const EdgeInsets.only(top: 4.0),
           sliver: _CertifiedSessionMembers(),
         ),
         SliverToBoxAdapter(
-          child: const YMargin(30),
+          child: const YMargin(10),
         ),
         _buildPostFeed(),
         SliverToBoxAdapter(
-          child: const YMargin(30),
+          child: const YMargin(20),
         ),
       ]),
     );
@@ -646,11 +680,14 @@ class _InfoView extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(imageUrl != null ? 2.0 : 8.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             imageUrl != null
                 ? Container(
-                    height: 65,
-                    width: 50,
+                    height: 44,
+                    width: 44,
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       imageBuilder: (_, imgProvider) => Container(
@@ -665,31 +702,29 @@ class _InfoView extends StatelessWidget {
                         ),
                       ),
                     ))
-                : Container(
-                    height: 65,
-                    width: 50,
-                    child: Center(
-                      child: AutoSizeText(
-                        Numeral(value).value(),
-                        maxLines: 1,
-                        style: _theme.textTheme.textOnDark.headline5
-                            .copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                : AutoSizeText(
+                    Numeral(value).value(),
+                    maxLines: 1,
+                    style: _theme.textTheme.textOnDark.headline5
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
             SizedBox(
-              height: imageUrl != null ? 6 : 0,
+              height: imageUrl != null ? 2 : 0,
             ),
-            AutoSizeText(
-              description,
-              maxLines: imageUrl != null ? 2 : 1,
-              softWrap: true,
-              style: imageUrl != null
-                  ? _theme.textTheme.textOnDark.bodyText2.copyWith(
-                      fontWeight: FontWeight.bold,
-                    )
-                  : _theme.textTheme.textOnDark.bodyText2,
-              textAlign: TextAlign.center,
+            Container(
+              width: 44,
+              child: AutoSizeText(
+                description,
+                maxLines: imageUrl != null ? 2 : 1,
+                softWrap: true,
+                style: imageUrl != null
+                    ? _theme.textTheme.textOnDark.bodyText2.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      )
+                    : _theme.textTheme.textOnDark.bodyText2,
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

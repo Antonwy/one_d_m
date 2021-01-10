@@ -227,13 +227,14 @@ class PostContentItem implements PostItem {
       stream: DatabaseService.getSession(sessionId),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return OpenContainer(
+          return CustomOpenContainer(
             closedColor: Colors.transparent,
             closedShape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             closedElevation: 0,
-            openBuilder: (context, close) => CertifiedSessionPage(
+            openBuilder: (context, close,scrollController) => CertifiedSessionPage(
               session: snapshot.data,
+              scrollController: scrollController,
             ),
             closedBuilder: (context, open) => Container(
               margin: const EdgeInsets.only(top: 0.0, bottom: 8),

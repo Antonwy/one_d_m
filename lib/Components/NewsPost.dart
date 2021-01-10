@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import 'CampaignButton.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class NewsPost extends StatelessWidget {
   News news;
@@ -15,6 +15,7 @@ class NewsPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var shortText = news.shortText ?? '';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Material(
@@ -42,7 +43,7 @@ class NewsPost extends StatelessWidget {
                   CachedNetworkImage(
                     width: double.infinity,
                     height: 260,
-                    imageUrl: news.imageUrl??'',
+                    imageUrl: news.imageUrl ?? '',
                     errorWidget: (_, __, ___) => Center(
                         child: Icon(
                       Icons.error,
@@ -95,11 +96,11 @@ class NewsPost extends StatelessWidget {
                           .headline6
                           .copyWith(color: Colors.black),
                     ),
-                    news.shortText.isEmpty ? Container() : SizedBox(height: 5),
-                    news.shortText.isEmpty
+                    shortText.isEmpty ? Container() : SizedBox(height: 5),
+                    shortText.isEmpty
                         ? Container()
                         : Text(
-                            news.shortText,
+                            shortText,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black),

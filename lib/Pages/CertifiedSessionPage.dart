@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
-import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -37,8 +37,6 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   ThemeManager _theme;
 
   Session session;
-
-  bool isCreator = true;
 
   PageController _pageController = PageController();
   ValueNotifier<double> _pagePosition = ValueNotifier(0);
@@ -444,18 +442,25 @@ class _ChatTextField extends StatelessWidget {
   }
 }
 
-class _CertifiedSessionInfoPage extends StatelessWidget {
-  bool isCreator = false;
+class _CertifiedSessionInfoPage extends StatefulWidget {
   ScrollController controller;
 
   _CertifiedSessionInfoPage({Key key, this.controller}) : super(key: key);
+
+  @override
+  __CertifiedSessionInfoPageState createState() =>
+      __CertifiedSessionInfoPageState();
+}
+
+class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
+  bool isCreator = false;
 
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return Consumer<CertifiedSessionManager>(
       builder: (context, csm, child) =>
-          CustomScrollView(controller: controller, slivers: [
+          CustomScrollView(controller: widget.controller, slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
@@ -469,7 +474,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       clipBehavior: Clip.antiAlias,
                       child: CachedNetworkImage(
-                        imageUrl: csm.session.imgUrl??'',
+                        imageUrl: csm.session.imgUrl ?? '',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -501,7 +506,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                           .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
-                    csm.session.creatorId.isNotEmpty
+                    csm.session.creatorId?.isNotEmpty??false
                         ? StreamBuilder(
                             stream: DatabaseService.getUserStream(
                                 csm.session.creatorId),
@@ -517,7 +522,13 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
               ),
               Expanded(
                 flex: 3,
-                child: isCreator ? CreatePostButton() : _SessionJoinButton(),
+                child: csm.session.creatorId?.isNotEmpty??true
+                    ? Consumer<UserManager>(
+                        builder: (context, um, child) =>
+                            um.uid == csm.session.creatorId
+                                ? CreatePostButton()
+                                : _SessionJoinButton())
+                    : _SessionJoinButton(),
               )
             ],
           )),
@@ -654,8 +665,9 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
 
       widgets.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: PostWidget(
-          post: n,
+        child: NewsPost(
+          n,
+          withCampaign: false,
         ),
       ));
 

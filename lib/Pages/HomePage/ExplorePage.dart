@@ -114,9 +114,6 @@ class _ExplorePageState extends State<ExplorePage>
             if (d.isEmpty) return SizedBox.shrink();
 
             d.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            d.forEach((element) {
-              print('${element.createdAt.toString()}');
-            });
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

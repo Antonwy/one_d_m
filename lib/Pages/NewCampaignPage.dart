@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
-import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
@@ -195,10 +194,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                             sliver: SliverList(
                               delegate: SliverChildListDelegate([
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Expanded(
+                                      flex: 4,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -212,10 +212,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                 children: [
                                                   AutoSizeText(
                                                     campaign.name,
-                                                    maxLines: 1,
+                                                    maxLines: 3,
                                                     style: _textTheme.headline5
                                                         .copyWith(
-                                                            fontSize: 30,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .w700),
@@ -254,8 +253,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                 ],
                                               ),
                                               Expanded(child: SizedBox()),
-                                              Consumer<UserManager>(builder:
-                                                  (context, um, child) {
+                                              Consumer<UserManager>(
+                                                  builder:
+                                                      (context, um, child) {
                                                 return StreamBuilder<bool>(
                                                     initialData: false,
                                                     stream: DatabaseService
@@ -266,12 +266,12 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                         (context, snapshot) {
                                                       _subscribed =
                                                           snapshot.data;
-                                                      return FollowButton(
-                                                        onPressed: () async =>
-                                                            _toggleSubscribed(
-                                                                um.uid),
-                                                        followed: _subscribed,
-                                                      );
+                                                      return _buildFollowButton(
+                                                          context,
+                                                          () async =>
+                                                              _toggleSubscribed(
+                                                                  um.uid),
+                                                          _subscribed);
                                                     });
                                               }),
                                             ],
@@ -338,8 +338,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 18.0),
-                                      child: Text(
-                                          "Neuigkeiten (${snapshot.data.length})",
+                                      child: Text("Neuigkeiten",
                                           style: _textTheme.headline6),
                                     ),
                                     ...snapshot.data
@@ -432,15 +431,13 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 14.0),
+                      padding: const EdgeInsets.only(left: 14.0),
                       child: Text("Sessions",
                           style: _textTheme.headline6.copyWith(
                               fontWeight: FontWeight.w600, fontSize: 28)),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 14),
+                      padding: const EdgeInsets.only(left: 14),
                       child: Text(
                           '${sessions.length} Influencer engagieren sich für dieses Projekt',
                           style: _textTheme.headline6.copyWith(
@@ -468,7 +465,12 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                   ],
                 );
               } else {
-                return CircularProgressIndicator();
+                return Center(
+                  child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator()),
+                );
               }
             }),
       );
@@ -502,10 +504,13 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                                color: Colors.black,
-                                size: 32,
+                              Padding(
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: Colors.black,
+                                  size: 32,
+                                ),
                               ),
                               Text(
                                 'mehr',
@@ -565,6 +570,27 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             )
           ],
         ),
+      );
+
+  Widget _buildFollowButton(
+          BuildContext context, Function function, bool isFollow) =>
+      Container(
+        width: 90,
+        height: 50,
+        child: MaterialButton(
+
+            color: _bTheme.dark,
+            textColor: _bTheme.light,
+            child: AutoSizeText(
+              isFollow ? 'Unfollow' : "Follow",
+              maxLines: 1,
+              style: Theme.of(context).textTheme.button.copyWith(
+                    color: ThemeManager.of(context).colors.light,
+                  ),
+            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            onPressed: function),
       );
 
   Future<void> _toggleSubscribed(String uid) async {

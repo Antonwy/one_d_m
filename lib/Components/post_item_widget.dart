@@ -230,7 +230,7 @@ class PostContentItem implements PostItem {
           return CustomOpenContainer(
             closedColor: Colors.transparent,
             closedShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             closedElevation: 0,
             openBuilder: (context, close,scrollController) => CertifiedSessionPage(
               session: snapshot.data,

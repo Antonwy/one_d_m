@@ -469,7 +469,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       clipBehavior: Clip.antiAlias,
                       child: CachedNetworkImage(
-                        imageUrl: csm.session.imgUrl,
+                        imageUrl: csm.session.imgUrl??'',
                         fit: BoxFit.cover,
                       ),
                     ),

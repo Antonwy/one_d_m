@@ -531,6 +531,13 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
+  static Stream<List<Donation>> getLatestDonations() {
+    return donationsCollection
+        .where(Donation.ISANONYM, isEqualTo: false)
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.docs));
+  }
+
   static Future<UserCharge> getUserCharge(String uid) async {
     return UserCharge.fromMap(await userChargeCollection.doc(uid).get());
   }
@@ -748,10 +755,12 @@ class DatabaseService {
       }).toList();
     });
   }
-  static Stream<List<Session>> getCertifiedSessionsFromCampaign(String campaignId) {
+
+  static Stream<List<Session>> getCertifiedSessionsFromCampaign(
+      String campaignId) {
     return sessionsCollection
         .where(BaseSession.END_DATE, isNull: true)
-        .where('campaign_id',isEqualTo: campaignId)
+        .where('campaign_id', isEqualTo: campaignId)
         .snapshots()
         .map((qs) {
       return qs.docs.map((e) {

@@ -38,16 +38,11 @@ class _ProfilePageState extends State<ProfilePage>
   GlobalKey<_ProfilePageState> _myKey = GlobalKey();
 
   ThemeManager _theme;
-  Stream<List<BaseSession>> _sessionStream;
-  Stream<List<BaseSession>> _certifiedSessionsStream;
   List<Session> mySessions = [];
 
   @override
   void initState() {
     String uid = Provider.of<UserManager>(context, listen: false).uid;
-    _sessionStream = DatabaseService.getSessionsFromUser(uid);
-    _certifiedSessionsStream =
-        DatabaseService.getCertifiedSessionsFromUser(uid);
 
     ///listen events for user followed sessions
     DatabaseService.getCertifiedSessions().listen((event) {

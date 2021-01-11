@@ -92,7 +92,7 @@ class CertifiedSessionView extends StatelessWidget {
                     children: [
                       Expanded(
                           child: AutoSizeText(
-                        session.name??'',
+                        session?.name??'',
                         style: session?.imgUrl == null
                             ? _theme.textTheme.dark.bodyText1
                             : _theme.textTheme.light.bodyText1,

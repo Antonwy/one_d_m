@@ -2,14 +2,15 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
-import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
@@ -17,9 +18,11 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -117,7 +120,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         context: context,
                                         close: bd.close,
                                       ));
-
                                     }
                               : () {
                                   Helper.showConnectionSnackBar(context);
@@ -189,7 +191,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           ),
                           SliverPadding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 18),
+                                horizontal: 14, vertical: 8),
                             sliver: SliverList(
                               delegate: SliverChildListDelegate([
                                 Row(
@@ -201,91 +203,95 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          Material(
-                                            color: _bTheme.dark,
-                                            clipBehavior: Clip.antiAlias,
-                                            borderRadius:
-                                                BorderRadius.circular(4.0),
-                                            child: FutureBuilder<Organisation>(
-                                                future: DatabaseService
-                                                    .getOrganisation(
-                                                        campaign.authorId),
-                                                builder: (context, snapshot) {
-                                                  Organisation organisation =
-                                                      snapshot.data;
-                                                  return InkWell(
-                                                    onTap: !snapshot.hasData
-                                                        ? null
-                                                        : () {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder: (context) =>
-                                                                        OrganisationPage(
-                                                                            organisation)));
-                                                          },
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 8.0,
-                                                          vertical: 4.0),
-                                                      child: Text(
-                                                        organisation?.name ??
-                                                            "Laden...",
-                                                        style: _textTheme
-                                                            .bodyText1
-                                                            .copyWith(
-                                                                color: _bTheme
-                                                                    .contrast,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
-                                          ),
                                           SizedBox(height: 5),
-                                          AutoSizeText(
-                                            campaign.name,
-                                            maxLines: 1,
-                                            style: _textTheme.headline5
-                                                .copyWith(
-                                                    fontSize: 30,
-                                                    fontWeight:
-                                                        FontWeight.w500),
+                                          Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  AutoSizeText(
+                                                    campaign.name,
+                                                    maxLines: 1,
+                                                    style: _textTheme.headline5
+                                                        .copyWith(
+                                                            fontSize: 30,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700),
+                                                  ),
+                                                  FutureBuilder<Organisation>(
+                                                      future: DatabaseService
+                                                          .getOrganisation(
+                                                              campaign
+                                                                  .authorId),
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        Organisation
+                                                            organisation =
+                                                            snapshot.data;
+                                                        return InkWell(
+                                                          onTap:
+                                                              !snapshot.hasData
+                                                                  ? null
+                                                                  : () {
+                                                                      Navigator.push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) => OrganisationPage(organisation)));
+                                                                    },
+                                                          child: Text(
+                                                            'by ${organisation?.name ?? 'Laden...'}',
+                                                            style: _textTheme
+                                                                .bodyText1
+                                                                .copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ],
+                                              ),
+                                              Expanded(child: SizedBox()),
+                                              Consumer<UserManager>(builder:
+                                                  (context, um, child) {
+                                                return StreamBuilder<bool>(
+                                                    initialData: false,
+                                                    stream: DatabaseService
+                                                        .hasSubscribedCampaignStream(
+                                                            um.uid,
+                                                            campaign.id),
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      _subscribed =
+                                                          snapshot.data;
+                                                      return FollowButton(
+                                                        onPressed: () async =>
+                                                            _toggleSubscribed(
+                                                                um.uid),
+                                                        followed: _subscribed,
+                                                      );
+                                                    });
+                                              }),
+                                            ],
                                           ),
+                                          const YMargin(12),
                                           Text(
                                             "${campaign?.shortDescription}",
-                                            style: _textTheme.caption,
+                                            style: _textTheme.caption.copyWith(
+                                                fontWeight: FontWeight.w400,
+                                                color: Helper.hexToColor(
+                                                    '#2e313f'),
+                                                fontSize: 15),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Consumer<UserManager>(
-                                        builder: (context, um, child) {
-                                      return StreamBuilder<bool>(
-                                          initialData: false,
-                                          stream: DatabaseService
-                                              .hasSubscribedCampaignStream(
-                                                  um.uid, campaign.id),
-                                          builder: (context, snapshot) {
-                                            _subscribed = snapshot.data;
-                                            return FollowButton(
-                                              onPressed: () async =>
-                                                  _toggleSubscribed(um.uid),
-                                              followed: _subscribed,
-                                            );
-                                          });
-                                    }),
+                                    const YMargin(12),
                                   ],
                                 ),
-                                SizedBox(
-                                  height: 20,
-                                ),
+                                const YMargin(12),
                                 Container(
                                   height: 100,
                                   child: Row(
@@ -302,80 +308,18 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     ],
                                   ),
                                 ),
-                                Consumer<UserManager>(
-                                  builder: (context, um, child) => Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      _AmountWidget(
-                                        1,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                      _AmountWidget(
-                                        2,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                      _AmountWidget(
-                                        5,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
+                                const YMargin(12),
                                 Text("Beschreibung",
-                                    style: _textTheme.headline6),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(campaign.description ?? "",
-                                    style: _textTheme.bodyText2),
-                                StreamBuilder<List<Donation>>(
-                                    stream: _donationStream,
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) return Container();
-                                      if (snapshot.data.isEmpty)
-                                        return Container();
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          SizedBox(
-                                            height: 20,
-                                          ),
-                                          Text("Spenden",
-                                              style: _textTheme.headline6),
-                                        ],
-                                      );
-                                    }),
+                                    style: _textTheme.headline6.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 28)),
+                                const YMargin(8),
+                                _buildExpandableContent(
+                                    context, campaign.description ?? ""),
                               ]),
                             ),
                           ),
-                          StreamBuilder<List<Donation>>(
-                              stream: _donationStream,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData)
-                                  return SliverToBoxAdapter();
-                                snapshot.data.sort((a, b) =>
-                                    b.createdAt.compareTo(a.createdAt));
-                                return SliverPadding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4),
-                                  sliver: SliverList(
-                                    delegate:
-                                        SliverChildListDelegate(snapshot.data
-                                            .map((d) => DonationWidget(
-                                                  d,
-                                                  campaignPage: true,
-                                                ))
-                                            .toList()),
-                                  ),
-                                );
-                              }),
+                          _buildCampaignSessions(),
                           StreamBuilder<List<News>>(
                               stream: DatabaseService.getNewsFromCampaignStream(
                                   campaign),
@@ -474,6 +418,155 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             }));
   }
 
+  Widget _buildCampaignSessions() => SliverToBoxAdapter(
+        child: StreamBuilder(
+            stream: DatabaseService.getCertifiedSessionsFromCampaign(
+                widget.campaign.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<Session> sessions = snapshot.data;
+
+                if (sessions.isEmpty) return SizedBox.shrink();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 14.0),
+                      child: Text("Sessions",
+                          style: _textTheme.headline6.copyWith(
+                              fontWeight: FontWeight.w600, fontSize: 28)),
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 14),
+                      child: Text(
+                          '${sessions.length} Influencer engagieren sich für dieses Projekt',
+                          style: _textTheme.headline6.copyWith(
+                              fontWeight: FontWeight.w600, fontSize: 15)),
+                    ),
+                    const YMargin(8),
+                    Container(
+                      height: 116,
+                      child: ListView.separated(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          separatorBuilder: (context, index) => SizedBox(
+                                width: 8,
+                              ),
+                          itemBuilder: (context, index) => Padding(
+                                padding: EdgeInsets.only(
+                                    left: index == 0 ? 12.0 : 0.0,
+                                    right: index == sessions.length - 1
+                                        ? 12.0
+                                        : 0.0),
+                                child: CertifiedSessionView(sessions[index]),
+                              ),
+                          itemCount: sessions.length),
+                    ),
+                  ],
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
+            }),
+      );
+
+  Widget _buildExpandableContent(BuildContext context, String text) =>
+      ExpandableNotifier(
+        child: Column(
+          children: [
+            Expandable(
+              collapsed: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    maxLines: 4,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Helper.hexToColor('#2e313f'),
+                        fontWeight: FontWeight.w400),
+                  ),
+                  text.length > 90
+                      ? Align(
+                          alignment: Alignment.bottomLeft,
+                          child: ExpandableButton(
+                              child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.keyboard_arrow_down_outlined,
+                                color: Colors.black,
+                                size: 32,
+                              ),
+                              Text(
+                                'mehr',
+                                textAlign: TextAlign.start,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          )),
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
+              expanded: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    maxLines: null,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Helper.hexToColor('#2e313f'),
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: ExpandableButton(
+                        child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.keyboard_arrow_up_outlined,
+                          color: Colors.black,
+                        ),
+                        Text(
+                          'weniger',
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    )),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      );
+
   Future<void> _toggleSubscribed(String uid) async {
     if (_subscribed)
       await DatabaseService.deleteSubscription(campaign, uid);
@@ -509,18 +602,15 @@ class _StatCollumn extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyText1.copyWith(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30),
-            ),
-            SizedBox(
-              height: 6,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 35),
             ),
             Text(
               description,
               style: TextStyle(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),

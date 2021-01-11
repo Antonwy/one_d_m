@@ -748,6 +748,17 @@ class DatabaseService {
       }).toList();
     });
   }
+  static Stream<List<Session>> getCertifiedSessionsFromCampaign(String campaignId) {
+    return sessionsCollection
+        .where(BaseSession.END_DATE, isNull: true)
+        .where('campaign_id',isEqualTo: campaignId)
+        .snapshots()
+        .map((qs) {
+      return qs.docs.map((e) {
+        return Session.fromDoc(e);
+      }).toList();
+    });
+  }
 
   static Stream<Session> getSession(String sid) {
     return sessionsCollection

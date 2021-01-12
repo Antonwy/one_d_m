@@ -103,13 +103,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 _showImage(),
                 const YMargin(20),
                 _textField(
-                    hint: "Titel",
-                    validator: Validate.postTitle,
-                    onSaved: (text) {
-                      _postTitle = text;
-                    }),
-                const YMargin(20),
-                _textField(
                     hint: "Beschreibung",
                     multiline: true,
                     onSaved: (text) {
@@ -146,7 +139,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           campaignImgUrl: widget.session.campaignImgUrl,
           createdAt: DateTime.now(),
           userId: um.uid,
-          title: _postTitle,
+          title: '',
           text: _postText,
           shortText: _postShortText,
           imageUrl: path);
@@ -211,17 +204,20 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       int maxLength = null,
       Function onSaved}) {
     return TextFormField(
-      validator: validator,
+      textAlignVertical: TextAlignVertical.top,
       onSaved: onSaved,
+      maxLines: 5,
       cursorColor: Colors.grey,
       style: TextStyle(color: Colors.grey),
       keyboardType: multiline ? TextInputType.multiline : TextInputType.text,
       maxLength: maxLength,
       decoration: InputDecoration(
+          alignLabelWithHint: true,
           counterText: "",
           labelStyle: TextStyle(color: Colors.grey, fontSize: 24),
           labelText: hint,
-          hintStyle: TextStyle(color: Colors.grey),
+          hintText: "",
+          hintStyle: TextStyle(color: Colors.red),
           border: OutlineInputBorder(),
           errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),

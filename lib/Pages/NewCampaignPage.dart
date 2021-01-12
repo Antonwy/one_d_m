@@ -581,12 +581,13 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Widget _buildFollowButton(
           BuildContext context, Function function, bool isFollow) =>
       Container(
+        width: 90,
         height: 50,
         child: MaterialButton(
             color: _bTheme.dark,
             textColor: _bTheme.light,
             child: AutoSizeText(
-              isFollow ? 'Unfollow' : "Follow",
+              isFollow ? 'Entfolgen' : "Folgen",
               maxLines: 1,
               style: Theme.of(context).textTheme.button.copyWith(
                     color: ThemeManager.of(context).colors.light,

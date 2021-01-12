@@ -36,23 +36,24 @@ class HeadingItem implements PostItem {
           return Container(
             margin: const EdgeInsets.only(
                 bottom: 0.0, left: 12.0, right: 12.0, top: 0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CustomOpenContainer(
-                  closedColor: Colors.transparent,
-                  closedShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  closedElevation: 0,
-                  openBuilder: (context, close,scrollController) => CertifiedSessionPage(
-                    session: snapshot.data,
-                    scrollController: scrollController,
-                  ),
-                  closedBuilder: (_, open) => InkWell(
-                    onTap: open,
-                    child: CachedNetworkImage(
+            child: CustomOpenContainer(
+              closedColor: Colors.transparent,
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              closedElevation: 0,
+              openBuilder: (context, close, scrollController) =>
+                  CertifiedSessionPage(
+                session: snapshot.data,
+                scrollController: scrollController,
+              ),
+              closedBuilder: (_, open) => InkWell(
+                onTap: open,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CachedNetworkImage(
                       imageUrl: session.imgUrl ?? '',
                       imageBuilder: (context, imageProvider) => Container(
                         height: 58.0,
@@ -66,24 +67,24 @@ class HeadingItem implements PostItem {
                         ),
                       ),
                     ),
-                  ),
+                    const XMargin(8.0),
+                    Text(
+                      session.name ?? '',
+                      maxLines: 2,
+                      softWrap: true,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
+                    ),
+                    const XMargin(8.0),
+                    Icon(
+                      Icons.verified,
+                      color: Helper.hexToColor("#71e34b"),
+                    )
+                  ],
                 ),
-                const XMargin(8.0),
-                Text(
-                  session.name ?? '',
-                  maxLines: 2,
-                  softWrap: true,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
-                ),
-                const XMargin(8.0),
-                Icon(
-                  Icons.verified,
-                  color: Helper.hexToColor("#71e34b"),
-                )
-              ],
+              ),
             ),
           );
         } else {
@@ -121,14 +122,15 @@ class PostContentItem extends StatefulWidget implements PostItem {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: [
-
                 ListView(
                   shrinkWrap: true,
                   addAutomaticKeepAlives: true,
                   padding: EdgeInsets.only(top: 20),
-                  physics: const NeverScrollableScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  physics: const NeverScrollableScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics()),
                   children: _buildPostWidgets(context, sublist),
                 ),
+
                 ///show more button if limit exceeds 2
                 news.length > 5
                     ? _buildShowMore(context, news[0].sessionId)
@@ -157,11 +159,14 @@ class PostContentItem extends StatefulWidget implements PostItem {
       widgets.add(Stack(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 32.0, right: 12.0,top: 0),
-            child: NewsPost(post[i],withCampaign: false,),
+            padding: const EdgeInsets.only(left: 32.0, right: 12.0, top: 0),
+            child: NewsPost(
+              post[i],
+              withCampaign: false,
+            ),
           ),
           Positioned.fill(
-            top: isFirst?10:0,
+            top: isFirst ? 10 : 0,
             left: 12,
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
@@ -210,7 +215,6 @@ class PostContentItem extends StatefulWidget implements PostItem {
                     strokeWidth: 2.5,
                     style: PaintingStyle.stroke,
                     itemGap: 0.0,
-
                   ),
                   child: SizedBox(),
                 ),
@@ -234,7 +238,8 @@ class PostContentItem extends StatefulWidget implements PostItem {
             closedShape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             closedElevation: 0,
-            openBuilder: (context, close,scrollController) => CertifiedSessionPage(
+            openBuilder: (context, close, scrollController) =>
+                CertifiedSessionPage(
               session: snapshot.data,
               scrollController: scrollController,
             ),
@@ -270,5 +275,4 @@ class PostContentItem extends StatefulWidget implements PostItem {
   State<StatefulWidget> createState() {
     throw UnimplementedError();
   }
-
 }

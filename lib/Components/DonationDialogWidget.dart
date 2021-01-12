@@ -912,17 +912,17 @@ class DonationAnimationWidget extends HookWidget {
                       child: Column(
                         children: [
                           FieldWidget(
-                            amount: '85',
+                            amount: '70',
                             title: 'erhält das Projekt',
                             color: ColorTheme.donationGreen,
                           ),
                           FieldWidget(
-                            amount: '12',
-                            title: 'Influencer',
+                            amount: '25',
+                            title: 'Advertising',
                             color: ColorTheme.donationOrange,
                           ),
                           FieldWidget(
-                            amount: '3',
+                            amount: '5',
                             title: 'erhält ODM',
                             color: ColorTheme.donationBlack,
                           )

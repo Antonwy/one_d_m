@@ -181,17 +181,10 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                     CurvedAnimation(
                         parent: _controller,
                         curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(begin: Offset(0, -1.5), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                              parent: _controller,
-                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                  child: Image.asset(
-                    'assets/images/ic_onedm.png',
-                    width: 250,
-                    height: 250,
-                  ),
+                child: Image.asset(
+                  'assets/images/ic_onedm.png',
+                  width: 250,
+                  height: 200,
                 ),
               ),
               FadeTransition(
@@ -199,17 +192,10 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                     CurvedAnimation(
                         parent: _controller,
                         curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                              parent: _controller,
-                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                  child: AutoSizeText("One Dollar Movement",
-                      maxLines: 1,
-                      style: _theme.textTheme.dark.headline5
-                          .copyWith(fontWeight: FontWeight.w600,fontSize: 32)),
-                ),
+                child: AutoSizeText("One Dollar Movement",
+                    maxLines: 1,
+                    style: _theme.textTheme.dark.headline5
+                        .copyWith(fontWeight: FontWeight.w600,fontSize: 24)),
               ),
             ],
           ),

@@ -87,31 +87,31 @@ class NewsPost extends StatelessWidget {
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
-                padding: EdgeInsets.all(18),
+                padding: EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      news.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(color: Colors.black),
-                    ),
-                    shortText.isEmpty ? Container() : SizedBox(height: 5),
-                    shortText.isEmpty
-                        ? Container()
-                        : Text(
-                            shortText,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
-                    news.text.isEmpty
-                        ? Container()
-                        : SizedBox(
-                            height: 5,
-                          ),
+                    // Text(
+                    //   news.title,
+                    //   style: Theme.of(context)
+                    //       .textTheme
+                    //       .headline6
+                    //       .copyWith(color: Colors.black),
+                    // ),
+                    // shortText.isEmpty ? Container() : SizedBox(height: 5),
+                    // shortText.isEmpty
+                    //     ? Container()
+                    //     : Text(
+                    //         shortText,
+                    //         style: TextStyle(
+                    //             fontWeight: FontWeight.bold,
+                    //             color: Colors.black),
+                    //       ),
+                    // news.text.isEmpty
+                    //     ? Container()
+                    //     : SizedBox(
+                    //         height: 5,
+                    //       ),
                     news.text.isEmpty
                         ? Container()
                         : _buildExpandableContent(context, news.text)

@@ -157,22 +157,22 @@ class PostContentItem extends StatefulWidget implements PostItem {
       widgets.add(Stack(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 48.0, right: 12.0,top: 0),
+            padding: const EdgeInsets.only(left: 32.0, right: 12.0,top: 0),
             child: NewsPost(post[i],withCampaign: false,),
           ),
           Positioned.fill(
             top: isFirst?10:0,
-            left: 18,
+            left: 12,
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
                 lineColor: Helper.hexToColor('#707070'),
                 indicatorColor: Helper.hexToColor('#2e313f'),
-                indicatorSize: 16,
+                indicatorSize: 12,
                 indicatorStyle: PaintingStyle.fill,
                 isFirst: isFirst,
                 isLast: isLast,
-                lineGap: 8.0,
+                lineGap: 4.0,
                 strokeCap: StrokeCap.butt,
                 strokeWidth: 2.5,
                 style: PaintingStyle.stroke,
@@ -190,26 +190,27 @@ class PostContentItem extends StatefulWidget implements PostItem {
           widgets.add(Stack(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(left: 48.0, right: 12.0),
+                padding: const EdgeInsets.only(left: 32.0, right: 12.0),
                 child: NewsNativeAd(),
               ),
               Positioned.fill(
                 top: 0,
-                left: 18,
+                left: 12,
                 child: CustomPaint(
                   foregroundPainter: TimelinePainter(
                     hideDefaultIndicator: false,
                     lineColor: Helper.hexToColor('#707070'),
                     indicatorColor: Helper.hexToColor('#f9a900'),
-                    indicatorSize: 16,
+                    indicatorSize: 12,
                     indicatorStyle: PaintingStyle.fill,
                     isFirst: false,
                     isLast: isLast,
-                    lineGap: 8.0,
+                    lineGap: 4.0,
                     strokeCap: StrokeCap.butt,
                     strokeWidth: 2.5,
                     style: PaintingStyle.stroke,
                     itemGap: 0.0,
+
                   ),
                   child: SizedBox(),
                 ),

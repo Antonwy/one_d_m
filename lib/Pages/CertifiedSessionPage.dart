@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
@@ -18,6 +19,7 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
 import 'package:provider/provider.dart';
@@ -506,7 +508,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                           .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
-                    csm.session.creatorId?.isNotEmpty??false
+                    csm.session.creatorId?.isNotEmpty ?? false
                         ? StreamBuilder(
                             stream: DatabaseService.getUserStream(
                                 csm.session.creatorId),
@@ -522,7 +524,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
               ),
               Expanded(
                 flex: 3,
-                child: csm.session.creatorId?.isNotEmpty??true
+                child: csm.session.creatorId?.isNotEmpty ?? true
                     ? Consumer<UserManager>(
                         builder: (context, um, child) =>
                             um.uid == csm.session.creatorId
@@ -559,11 +561,28 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                     builder: (context, snapshot) {
                       return Expanded(
                         flex: 6,
-                        child: _InfoView(
-                            imageUrl: snapshot.data?.campaignImgUrl ??
-                                csm.session.campaignImgUrl,
-                            description: snapshot.data?.campaignName ??
-                                csm.session.campaignName),
+                        child: CustomOpenContainer(
+                          closedShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          closedElevation: 0,
+                          openBuilder: (context, close, scrollController) =>
+                              StreamBuilder(
+                                  stream: csm.campaign,
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData)
+                                      return SizedBox.shrink();
+                                    return NewCampaignPage(
+                                      snapshot.data,
+                                      scrollController: scrollController,
+                                    );
+                                  }),
+                          closedColor: ColorTheme.wildGreen,
+                          closedBuilder: (context, open) => _InfoView(
+                              imageUrl: snapshot.data?.campaignImgUrl ??
+                                  csm.session.campaignImgUrl,
+                              description: snapshot.data?.campaignName ??
+                                  csm.session.campaignName),
+                        ),
                       );
                     }),
                 SizedBox(
@@ -736,7 +755,8 @@ class _InfoView extends StatelessWidget {
               height: imageUrl != null ? 2 : 0,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0,horizontal: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
               child: AutoSizeText(
                 description,
                 maxLines: imageUrl != null ? 2 : 1,

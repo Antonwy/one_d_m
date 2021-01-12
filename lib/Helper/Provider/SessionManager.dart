@@ -1,3 +1,4 @@
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Session.dart';
 
@@ -31,6 +32,7 @@ class CertifiedSessionManager extends BaseSessionManager {
   final String uid;
   Stream<bool> isInSession;
   Session session;
+  Stream<Campaign> campaign;
 
   CertifiedSessionManager({this.session, this.uid}) : super(session);
 
@@ -38,5 +40,6 @@ class CertifiedSessionManager extends BaseSessionManager {
   void initStreams() {
     isInSession = DatabaseService.userIsInSession(uid, baseSession.id);
     membersStream = DatabaseService.getSessionMembers(baseSession.id, 10);
+    campaign = DatabaseService.getCampaignStream(session.campaignId);
   }
 }

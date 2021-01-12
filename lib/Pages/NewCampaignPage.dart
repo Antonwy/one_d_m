@@ -52,6 +52,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Stream<List<Donation>> _donationStream;
 
   bool _isAuthorOfCampaign = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -586,23 +587,42 @@ class _NewCampaignPageState extends State<NewCampaignPage>
         child: MaterialButton(
             color: _bTheme.dark,
             textColor: _bTheme.light,
-            child: AutoSizeText(
-              isFollow ? 'Entfolgen' : "Folgen",
-              maxLines: 1,
-              style: Theme.of(context).textTheme.button.copyWith(
-                    color: ThemeManager.of(context).colors.light,
+            child: _isLoading
+                ? SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                          valueColor:
+                              new AlwaysStoppedAnimation<Color>(Colors.white)),
+                    ),
+                  )
+                : AutoSizeText(
+                    isFollow ? 'Entfolgen' : "Folgen",
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.button.copyWith(
+                          color: ThemeManager.of(context).colors.light,
+                        ),
                   ),
-            ),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             onPressed: function),
       );
 
   Future<void> _toggleSubscribed(String uid) async {
+    setState(() {
+      _isLoading = true;
+    });
     if (_subscribed)
-      await DatabaseService.deleteSubscription(campaign, uid);
+      await DatabaseService.deleteSubscription(campaign, uid)
+          .then((value) => setState(() {
+                _isLoading = false;
+              }));
     else
-      await DatabaseService.createSubscription(campaign, uid);
+      await DatabaseService.createSubscription(campaign, uid)
+          .then((value) => setState(() {
+                _isLoading = false;
+              }));
   }
 }
 
@@ -633,8 +653,8 @@ class _StatCollumn extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyText1.copyWith(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 35),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 28),
             ),
             Text(
               description,

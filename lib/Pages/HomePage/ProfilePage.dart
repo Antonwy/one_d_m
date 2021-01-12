@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
+import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -188,13 +189,12 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-
         ///build the sessions that follow by user
         mySessions.isNotEmpty
             ? _buildMySessions(mySessions)
             : _buildEmptySession(),
 
-        _buildPostFeed(),
+        SessionPostFeed(userSessions: mySessions,),
         const SliverToBoxAdapter(
           child: const SizedBox(
             height: 120,
@@ -203,59 +203,6 @@ class _ProfilePageState extends State<ProfilePage>
         // _buildPostFeed(),
       ],
     );
-  }
-
-  Widget _buildPostFeed() => StreamBuilder<List<News>>(
-      stream: DatabaseService.getSessionPosts(),
-      builder: (context, AsyncSnapshot<List<News>> snapshot) {
-        if (!snapshot.hasData)
-          return SliverToBoxAdapter(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        List<News> news = snapshot.data;
-
-        List<String> sessionsWithPost = [];
-        List<String> mySessionPosts = [];
-        List<PostItem> postItem = [];
-
-        news.forEach((element) {
-          sessionsWithPost.add(element.sessionId);
-        });
-        //filter user following session posts
-        for (Session s in mySessions) {
-          if (sessionsWithPost.contains(s.id)) {
-            mySessionPosts.add(s.id);
-          }
-        }
-
-        ///remove duplicating ids
-        mySessionPosts.toSet().toList().forEach((element) {
-          postItem.add(HeadingItem(DatabaseService.getSessionFuture(element)));
-          postItem.add(
-              PostContentItem(DatabaseService.getPostBySessionId(element)));
-        });
-        if (postItem.isNotEmpty) {
-          return SliverList(
-              delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
-        } else {
-          return SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-      });
-
-  List<Widget> _buildPostWidgets(List<PostItem> post) {
-    List<Widget> widgets = [];
-    widgets.add(_buildNewsTitleWidget());
-    for (PostItem p in post) {
-      widgets.add(Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [p.buildHeading(context), p.buildPosts(context)],
-      ));
-    }
-    return widgets;
   }
 
   Widget _buildEmptySession() => SliverToBoxAdapter(
@@ -335,17 +282,6 @@ class _ProfilePageState extends State<ProfilePage>
               ),
             ],
           ),
-        ),
-      );
-
-  Widget _buildNewsTitleWidget() => Padding(
-        padding: const EdgeInsets.only(left: 12, bottom: 10),
-        child: Text(
-          "News",
-          style: _theme.textTheme.dark.headline6.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-              color: Helper.hexToColor('#575757')),
         ),
       );
 

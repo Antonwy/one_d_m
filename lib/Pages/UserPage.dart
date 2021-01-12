@@ -219,10 +219,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Text("Sessions",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .copyWith(fontWeight: FontWeight.w600, fontSize: 28)),
+                  style: Theme.of(context).textTheme.headline6.copyWith(
+                        fontWeight: FontWeight.w600,
+                      )),
             ),
             const YMargin(8),
             Container(
@@ -259,10 +258,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
     list.add(Padding(
       padding: const EdgeInsets.only(left: 10.0, bottom: 10, top: 20),
-      child: Text(
-        "Unterstützte Projekte (${campaigns.length})",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-      ),
+      child: Text("Unterstützte Projekte (${campaigns.length})",
+          style: Theme.of(context).textTheme.headline6.copyWith(
+                fontWeight: FontWeight.w600,
+              )),
     ));
 
     for (Campaign c in campaigns) {

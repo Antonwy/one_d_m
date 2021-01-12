@@ -153,7 +153,7 @@ class TimelinePainter extends CustomPainter {
     final indicatorMargin = indicatorRadius + lineGap;
 
     final top = size.topLeft(Offset(indicatorRadius, 0.0 - halfItemGap));
-    final topFirst = size.topLeft(Offset(indicatorRadius, 0.0 - itemGap/20));
+    final topFirst = size.topLeft(Offset(indicatorRadius, 0.0 - itemGap/30));
     final centerTop = size.centerLeft(
       Offset(indicatorRadius, -indicatorMargin),
     );

@@ -7,7 +7,6 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 
 class ExplorePage extends StatefulWidget {
@@ -22,9 +21,7 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   Widget build(BuildContext context) {
-    textTheme = Theme
-        .of(context)
-        .textTheme;
+    textTheme = Theme.of(context).textTheme;
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -36,9 +33,7 @@ class _ExplorePageState extends State<ExplorePage>
             preferredSize: Size(0, 80),
             child: Container(),
           ),
-          actions: [
-            _buildLatestDonations()
-          ],
+          actions: [_buildLatestDonations()],
           flexibleSpace: SafeArea(
             child: Container(
               child: Column(
@@ -77,24 +72,26 @@ class _ExplorePageState extends State<ExplorePage>
                 : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return CampaignList(campaigns: snapshot.data,);
+                return CampaignList(
+                  campaigns: snapshot.data,
+                );
               } else {
                 return SliverToBoxAdapter(
                   child: Center(
                       child: Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: 20,
-                          ),
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text("Lade Projekte")
-                        ],
-                      )),
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text("Lade Projekte")
+                    ],
+                  )),
                 );
               }
             })
@@ -102,8 +99,7 @@ class _ExplorePageState extends State<ExplorePage>
     );
   }
 
-  Widget _buildLatestDonations() =>
-      Container(
+  Widget _buildLatestDonations() => Container(
         height: 100,
         margin: const EdgeInsets.only(right: 12),
         child: StreamBuilder(
@@ -120,18 +116,16 @@ class _ExplorePageState extends State<ExplorePage>
               children: [
                 _buildDonationAmount(
                     amount: d[2]?.amount.toString(),
-                    uid: d[2]?.userId,
+                    uid: d[2]?.userId ?? '',
                     index: 2),
                 _buildDonationAmount(
                     amount: d[1]?.amount.toString(),
-                    uid: d[1]?.userId,
+                    uid: d[1]?.userId ?? '',
                     index: 1),
                 _buildDonationAmount(
                     amount: d[0]?.amount.toString(),
-                    uid: d[0]?.userId,
+                    uid: d[0]?.userId ?? '',
                     index: 0),
-
-
               ],
             );
           },
@@ -155,10 +149,12 @@ class _ExplorePageState extends State<ExplorePage>
                   fontWeight: FontWeight.w600, fontSize: 12, color: textColor),
               children: [
                 TextSpan(text: '${u.name} donated '),
-                TextSpan(text: '$amount DV',
-                    style: TextStyle(decoration: TextDecoration.underline,))
-              ]
-          ),
+                TextSpan(
+                    text: '$amount DV',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                    ))
+              ]),
         );
       },
     );

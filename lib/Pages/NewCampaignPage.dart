@@ -210,14 +210,18 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  AutoSizeText(
-                                                    campaign.name,
-                                                    maxLines: 3,
-                                                    style: _textTheme.headline5
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700),
+                                                  SizedBox(
+                                                    width: 220,
+                                                    child: AutoSizeText(
+                                                      campaign.name,
+                                                      maxLines: 1,
+                                                      style: _textTheme
+                                                          .headline5
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                    ),
                                                   ),
                                                   FutureBuilder<Organisation>(
                                                       future: DatabaseService
@@ -253,9 +257,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                 ],
                                               ),
                                               Expanded(child: SizedBox()),
-                                              Consumer<UserManager>(
-                                                  builder:
-                                                      (context, um, child) {
+                                              Consumer<UserManager>(builder:
+                                                  (context, um, child) {
                                                 return StreamBuilder<bool>(
                                                     initialData: false,
                                                     stream: DatabaseService
@@ -311,8 +314,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                 const YMargin(12),
                                 Text("Beschreibung",
                                     style: _textTheme.headline6.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 28)),
+                                      fontWeight: FontWeight.w600,
+                                    )),
                                 const YMargin(8),
                                 _buildExpandableContent(
                                     context, campaign.description ?? ""),
@@ -434,14 +437,17 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                       padding: const EdgeInsets.only(left: 14.0),
                       child: Text("Sessions",
                           style: _textTheme.headline6.copyWith(
-                              fontWeight: FontWeight.w600, fontSize: 28)),
+                            fontWeight: FontWeight.w600,
+                          )),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 14),
                       child: Text(
                           '${sessions.length} Influencer engagieren sich für dieses Projekt',
                           style: _textTheme.headline6.copyWith(
-                              fontWeight: FontWeight.w600, fontSize: 15)),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(0.6))),
                     ),
                     const YMargin(8),
                     Container(
@@ -575,10 +581,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Widget _buildFollowButton(
           BuildContext context, Function function, bool isFollow) =>
       Container(
-        width: 90,
         height: 50,
         child: MaterialButton(
-
             color: _bTheme.dark,
             textColor: _bTheme.light,
             child: AutoSizeText(

@@ -1,15 +1,14 @@
-import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
-import 'package:one_d_m/Components/post_widget.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'package:one_d_m/utils/timeline.dart';
@@ -29,7 +28,7 @@ class HeadingItem implements PostItem {
 
   @override
   Widget buildHeading(BuildContext context) {
-    return StreamBuilder(
+    return KeepAliveStreamBuilder(
       stream: session,
       builder: (_, snapshot) {
         if (snapshot.hasData) {
@@ -98,7 +97,7 @@ class HeadingItem implements PostItem {
   Widget buildPosts(BuildContext context) => SizedBox.shrink();
 }
 
-class PostContentItem implements PostItem {
+class PostContentItem extends StatefulWidget implements PostItem {
   final Stream<List<News>> post;
 
   PostContentItem(this.post);
@@ -107,7 +106,7 @@ class PostContentItem implements PostItem {
   Widget buildHeading(BuildContext context) => SizedBox.shrink();
 
   @override
-  Widget buildPosts(BuildContext context) => StreamBuilder(
+  Widget buildPosts(BuildContext context) => KeepAliveStreamBuilder(
         stream: post,
         builder: (_, snapshot) {
           if (snapshot.hasData) {
@@ -118,22 +117,24 @@ class PostContentItem implements PostItem {
             ///limit only to display latest two posts
             List<News> sublist = news.length > 5 ? news.sublist(0, 5) : news;
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
+
                 ListView(
-                  controller: ScrollController(),
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  addAutomaticKeepAlives: true,
+                  padding: EdgeInsets.only(top: 20),
+                  physics: const NeverScrollableScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   children: _buildPostWidgets(context, sublist),
                 ),
-                // _buildPosts(context, sublist),
                 ///show more button if limit exceeds 2
                 news.length > 5
                     ? _buildShowMore(context, news[0].sessionId)
                     : SizedBox.shrink(),
                 Padding(
-                  padding: const EdgeInsets.only(top: 0, bottom: 12.0),
+                  padding: const EdgeInsets.only(top: 0, bottom: 8.0),
                   child: Divider(),
                 )
               ],
@@ -156,11 +157,11 @@ class PostContentItem implements PostItem {
       widgets.add(Stack(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 48.0, right: 12.0),
+            padding: const EdgeInsets.only(left: 48.0, right: 12.0,top: 0),
             child: NewsPost(post[i],withCampaign: false,),
           ),
           Positioned.fill(
-            top: 0,
+            top: isFirst?10:0,
             left: 18,
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
@@ -249,13 +250,10 @@ class PostContentItem implements PostItem {
                         borderRadius: BorderRadius.circular(18.0),
                         side: BorderSide(color: Colors.black)),
                     onPressed: open,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Zur Session',
-                        style: Theme.of(context).textTheme.headline6.copyWith(
-                            fontWeight: FontWeight.bold, fontSize: 18.0),
-                      ),
+                    child: Text(
+                      'Zur Session',
+                      style: Theme.of(context).textTheme.headline6.copyWith(
+                          fontWeight: FontWeight.bold, fontSize: 18.0),
                     ),
                   ),
                 ],
@@ -266,4 +264,10 @@ class PostContentItem implements PostItem {
           return SizedBox.shrink();
         }
       });
+
+  @override
+  State<StatefulWidget> createState() {
+    throw UnimplementedError();
+  }
+
 }

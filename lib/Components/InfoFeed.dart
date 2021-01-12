@@ -71,13 +71,13 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                                   desc: "Nutzer",
                                 ),
                                 _ColumnStats(
-                                  value: statistics.campaignCount,
-                                  desc: "Projekte",
-                                ),
-                                _ColumnStats(
                                   value: statistics
                                       .donationStatistics.donationsCount,
                                   desc: "Unterstützungen",
+                                ),
+                                _ColumnStats(
+                                  value: statistics.campaignCount,
+                                  desc: "Projekte",
                                 ),
                               ],
                             ),

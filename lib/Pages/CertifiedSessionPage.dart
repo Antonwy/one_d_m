@@ -735,8 +735,8 @@ class _InfoView extends StatelessWidget {
             SizedBox(
               height: imageUrl != null ? 2 : 0,
             ),
-            Container(
-              width: 44,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0,horizontal: 8.0),
               child: AutoSizeText(
                 description,
                 maxLines: imageUrl != null ? 2 : 1,

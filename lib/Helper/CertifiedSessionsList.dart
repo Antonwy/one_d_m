@@ -69,23 +69,51 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
         List<News> news = snapshot.data;
         if (news.isEmpty) return SizedBox.shrink();
 
-        // news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+        news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
 
-        return Container(
-          height: 120,
-          child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => SizedBox(
-                    width: 8,
-                  ),
-              itemBuilder: (context, index) => Padding(
-                    padding: EdgeInsets.only(
-                        left: index == 0 ? 12.0 : 0.0,
-                        right: index == news.length - 1 ? 12.0 : 0.0),
-                    child: _buildSession(news[index].sessionId),
-                  ),
-              itemCount: news.length),
-        );
+        List<String> sessionsWithPost = [];
+
+        news.forEach((element) {
+          sessionsWithPost.add(element.sessionId);
+        });
+        List<String> sessionIds = sessionsWithPost.toSet().toList();
+
+        return StreamBuilder<List<Session>>(
+            stream: DatabaseService.getCertifiedSessions(),
+            builder: (context, snapshot) {
+              print(snapshot);
+              List<BaseSession> sessions = snapshot.data ?? [];
+
+              if (snapshot.connectionState == ConnectionState.active &&
+                  sessions.isEmpty) return SizedBox.shrink();
+              List<String> allSessions = [];
+
+              sessions.forEach((element) {
+                allSessions.add(element.id);
+              });
+
+              sessionIds =[...sessionIds,...allSessions];
+
+              List<String> uniqueIds = sessionIds.toSet().toList();
+
+
+              return Container(
+                height: 120,
+                child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    separatorBuilder: (context, index) => SizedBox(
+                          width: 8,
+                        ),
+                    itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(
+                              left: index == 0 ? 12.0 : 0.0,
+                              right:
+                                  index == uniqueIds.length - 1 ? 12.0 : 0.0),
+                          child: _buildSession(uniqueIds[index]),
+                        ),
+                    itemCount: uniqueIds.length),
+              );
+            });
       },
     );
   }

@@ -1,50 +1,103 @@
-import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 
 import 'Helper.dart';
 
-class CertifiedSessionsList extends StatelessWidget {
+class CertifiedSessionsList extends StatefulWidget {
   final Stream<List<Session>> stream;
 
   CertifiedSessionsList([this.stream]);
 
   @override
+  _CertifiedSessionsListState createState() => _CertifiedSessionsListState();
+}
+
+class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
+  @override
+  void initState() {
+    super.initState();
+    DatabaseService.getNews().listen((news) {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: StreamBuilder<List<Session>>(
-          stream: stream ?? DatabaseService.getCertifiedSessions(),
-          builder: (context, snapshot) {
-            print(snapshot);
-            List<BaseSession> sessions = snapshot.data ?? [];
+      child: _buildLatestSessionsWithPost(),
+    );
+    // return SliverToBoxAdapter(
+    //   child: StreamBuilder<List<Session>>(
+    //       stream: widget.stream ?? DatabaseService.getCertifiedSessions(),
+    //       builder: (context, snapshot) {
+    //         print(snapshot);
+    //         List<BaseSession> sessions = snapshot.data ?? [];
+    //
+    //         if (snapshot.connectionState == ConnectionState.active &&
+    //             sessions.isEmpty) return Container();
+    //
+    //         return Container(
+    //           height: 120,
+    //           child: ListView.separated(
+    //               scrollDirection: Axis.horizontal,
+    //               separatorBuilder: (context, index) => SizedBox(
+    //                     width: 8,
+    //                   ),
+    //               itemBuilder: (context, index) => Padding(
+    //                     padding: EdgeInsets.only(
+    //                         left: index == 0 ? 12.0 : 0.0,
+    //                         right: index == sessions.length - 1 ? 12.0 : 0.0),
+    //                     child: CertifiedSessionView(sessions[index]),
+    //                   ),
+    //               itemCount: sessions.length),
+    //         );
+    //       }),
+    // );
+  }
 
-            if (snapshot.connectionState == ConnectionState.active &&
-                sessions.isEmpty) return Container();
+  Widget _buildLatestSessionsWithPost() {
+    return StreamBuilder(
+      stream: DatabaseService.getSessionPosts(),
+      builder: (_, snapshot) {
+        if (!snapshot.hasData) return CircularProgressIndicator();
+        List<News> news = snapshot.data;
+        if (news.isEmpty) return SizedBox.shrink();
 
-            return Container(
-              height: 120,
-              child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  separatorBuilder: (context, index) => SizedBox(
-                        width: 8,
-                      ),
-                  itemBuilder: (context, index) => Padding(
-                        padding: EdgeInsets.only(
-                            left: index == 0 ? 12.0 : 0.0,
-                            right: index == sessions.length - 1 ? 12.0 : 0.0),
-                        child: CertifiedSessionView(sessions[index]),
-                      ),
-                  itemCount: sessions.length),
-            );
-          }),
+        // news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+
+        return Container(
+          height: 120,
+          child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (context, index) => SizedBox(
+                    width: 8,
+                  ),
+              itemBuilder: (context, index) => Padding(
+                    padding: EdgeInsets.only(
+                        left: index == 0 ? 12.0 : 0.0,
+                        right: index == news.length - 1 ? 12.0 : 0.0),
+                    child: _buildSession(news[index].sessionId),
+                  ),
+              itemCount: news.length),
+        );
+      },
     );
   }
+
+  Widget _buildSession(String sid) => KeepAliveStreamBuilder(
+        stream: DatabaseService.getSession(sid),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData) return SizedBox.shrink();
+          Session s = snapshot.data;
+          return CertifiedSessionView(s);
+        },
+      );
 }
 
 class CertifiedSessionView extends StatelessWidget {
@@ -62,7 +115,7 @@ class CertifiedSessionView extends StatelessWidget {
         closedShape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         closedElevation: 0,
-        openBuilder: (context, close,scrollController) => CertifiedSessionPage(
+        openBuilder: (context, close, scrollController) => CertifiedSessionPage(
           session: session,
           scrollController: scrollController,
         ),
@@ -92,7 +145,7 @@ class CertifiedSessionView extends StatelessWidget {
                     children: [
                       Expanded(
                           child: AutoSizeText(
-                        session?.name??'',
+                        session?.name ?? '',
                         style: session?.imgUrl == null
                             ? _theme.textTheme.dark.bodyText1
                             : _theme.textTheme.light.bodyText1,

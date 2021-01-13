@@ -10,6 +10,9 @@ import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/User.dart';
 
 class ExplorePage extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const ExplorePage({Key key, this.scrollController}) : super(key: key);
   @override
   _ExplorePageState createState() => _ExplorePageState();
 }
@@ -24,6 +27,7 @@ class _ExplorePageState extends State<ExplorePage>
     textTheme = Theme.of(context).textTheme;
 
     return CustomScrollView(
+      controller: widget.scrollController,
       slivers: <Widget>[
         SliverAppBar(
           backgroundColor: Colors.transparent,

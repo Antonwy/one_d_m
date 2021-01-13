@@ -6,12 +6,10 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
-import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
-import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -24,22 +22,24 @@ import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
+  final ScrollController scrollController;
 
   const ProfilePage({
     Key key,
     this.onExploreTapped,
+    this.scrollController,
   }) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with AutomaticKeepAliveClientMixin {
+class _ProfilePageState extends State<ProfilePage> {
   GlobalKey<_ProfilePageState> _myKey = GlobalKey();
 
   ThemeManager _theme;
   List<Session> mySessions = [];
+  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -64,6 +64,7 @@ class _ProfilePageState extends State<ProfilePage>
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return CustomScrollView(
+      controller: widget.scrollController,
       slivers: <Widget>[
         Consumer<UserManager>(
           builder: (context, um, child) => StreamBuilder<User>(
@@ -189,12 +190,15 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
+
         ///build the sessions that follow by user
         mySessions.isNotEmpty
             ? _buildMySessions(mySessions)
             : _buildEmptySession(),
 
-        SessionPostFeed(userSessions: mySessions,),
+        SessionPostFeed(
+          userSessions: mySessions,
+        ),
         const SliverToBoxAdapter(
           child: const SizedBox(
             height: 120,
@@ -284,7 +288,4 @@ class _ProfilePageState extends State<ProfilePage>
           ),
         ),
       );
-
-  @override
-  bool get wantKeepAlive => true;
 }

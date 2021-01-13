@@ -15,7 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  PageController _pageController = PageController(initialPage: 0);
+  PageController _pageController =
+      PageController(initialPage: 0, keepPage: false);
+  ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +29,11 @@ class HomePageState extends State<HomePage> {
               controller: _pageController,
               children: <Widget>[
                 ProfilePage(
+                  scrollController: _scrollController,
                   onExploreTapped: () => _changePage(1),
                 ),
                 // NewsHomePage(() => _changePage(2)),
-                ExplorePage(),
+                ExplorePage(scrollController: _scrollController,),
               ],
             ),
             ChangeNotifierProvider(
@@ -44,6 +47,11 @@ class HomePageState extends State<HomePage> {
   void _changePage(int page) {
     _pageController.animateToPage(page,
         duration: Duration(milliseconds: 150), curve: Curves.fastOutSlowIn);
+    _scrollController.animateTo(
+      0.0,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   @override

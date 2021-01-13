@@ -52,9 +52,16 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   BaseTheme _bTheme;
   FocusScopeNode _keyboardFocus = FocusScopeNode();
   double _selectedValue = 0;
+  ScrollController _scrollController;
 
   @override
   void initState() {
+    _scrollController = ScrollController();
+
+    // _scrollController.addListener(() {
+    //   _scrollController.animateTo(0.0,
+    //       duration: Duration(milliseconds: 1), curve: Curves.linear);
+    // });
     _selectedValue = widget.defaultSelectedAmount.toDouble();
     DatabaseService.getAdBalance(widget.user.id).listen((event) {
       if (event.dcBalance < _selectedValue) {
@@ -338,7 +345,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                 ),
                               ),
                               ddm.showAnimation
-                                  ? DonationAnimationWidget(widget.close)
+                                  ? DonationAnimationWidget(widget.close,_scrollController)
                                   : SizedBox.shrink(),
                               // Positioned(
                               //     top: 20,
@@ -611,8 +618,9 @@ class DonationAnimationWidget extends HookWidget {
   BaseTheme _bTheme;
   ThemeData _theme;
   final Function close;
+  final ScrollController controller;
 
-  DonationAnimationWidget(this.close);
+  DonationAnimationWidget(this.close, this.controller);
 
   @override
   Widget build(BuildContext context) {
@@ -624,36 +632,33 @@ class DonationAnimationWidget extends HookWidget {
           right: 0,
           bottom: 0,
           top: 0,
-          child: IgnorePointer(
-            ignoring: !ddm.showAnimation,
-            child: AnimatedOpacity(
-              opacity: ddm.showAnimation ? 1 : 0,
-              duration: Duration(milliseconds: 250),
-              child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  child: AnimatedSwitcher(
-                    duration: Duration(seconds: 1),
-                    child: !ddm.showThankYou
-                        ? Lottie.asset('assets/anim/anim_start.json',
-                            onLoaded: (composition) {
-                            HapticFeedback.heavyImpact();
-                            Timer(Duration(seconds: 1), () {
-                              ddm.showThankYou = true;
-                            });
-                          })
-                        : _buildThankYou(context, ddm.campaign,
-                            ddm.amount.toString(), close),
-                  )),
-            ),
+          child: AnimatedOpacity(
+            opacity: ddm.showAnimation ? 1 : 0,
+            duration: Duration(milliseconds: 250),
+            child: Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                child: AnimatedSwitcher(
+                  duration: Duration(seconds: 1),
+                  child: !ddm.showThankYou
+                      ? Lottie.asset('assets/anim/anim_start.json',
+                          onLoaded: (composition) {
+                          HapticFeedback.heavyImpact();
+                          Timer(Duration(seconds: 1), () {
+                            ddm.showThankYou = true;
+                          });
+                        })
+                      : _buildThankYou(
+                          context, ddm.campaign, ddm.amount.toString(), close,controller),
+                )),
           ));
     });
   }
 
   Widget _buildThankYou(BuildContext context, Campaign campaign, String amount,
-          Function close) =>
+          Function close,ScrollController controller) =>
       SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
+        controller: controller,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[

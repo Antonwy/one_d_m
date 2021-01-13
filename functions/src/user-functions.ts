@@ -3,10 +3,10 @@ import * as admin from 'firebase-admin';
 import { UserType, PrivateUserDataType } from './types';
 import Stripe from 'stripe';
 import {
-  DatabaseConstants,
   ImagePrefix,
   DonationFields,
-  CampaignFields,
+  DatabaseConstants,
+  ChargesFields,
 } from './database-constants';
 
 const stripe = new Stripe(functions.config().stripe.token, {
@@ -45,29 +45,126 @@ exports.onCreateUser = functions.firestore
   });
 
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
-  const isOrganisation: boolean = (
-    await firestore
-      .collection(DatabaseConstants.organisations)
-      .doc(user.uid)
-      .get()
-  ).exists;
+  // deletion of subscribed_campaigns and subcollections including documents
+  await firestore
+    .collection(DatabaseConstants.subscribed_campaigns)
+    .doc(user.uid)
+    .delete()
+    .then(() => {
+      functions.logger.info('user deleted from subscribed_campaigns');
+    })
+    .catch((e) => {
+      functions.logger.error(e);
+    });
+  await firestore
+    .collection(DatabaseConstants.subscribed_campaigns)
+    .doc(user.uid)
+    .collection(DatabaseConstants.campaigns)
+    .get()
+    .then(async (campaignsList) => {
+      functions.logger.info('Campaigns length:' + campaignsList.docs.length);
+      campaignsList.docs.forEach(async (campaign) => {
+        await firestore
+          .collection(DatabaseConstants.campaigns_subscribed_users)
+          .doc(campaign.id)
+          .collection(DatabaseConstants.users)
+          .doc(user.uid)
+          .delete();
+        await campaign.ref.delete().then(() => {
+          functions.logger.info('campaign:' + campaign.id + ' deleted');
+        });
+      });
+    })
+    .catch((e) => {
+      functions.logger.error(e);
+    });
+  // user count decrease by one
+  await firestore
+    .collection(DatabaseConstants.statistics)
+    .doc(DatabaseConstants.users_info)
+    .update({ user_count: admin.firestore.FieldValue.increment(-1) })
+    .then(() => {
+      functions.logger.info('user count decrease');
+    })
+    .catch((e) => {
+      functions.logger.error(e);
+    });
+  // delete subscribe sessions
+  await firestore
+    .collection(DatabaseConstants.user)
+    .doc(user.uid)
+    .collection(DatabaseConstants.sessions)
+    .get()
+    .then(async (sessionsList) => {
+      functions.logger.info(
+        'campaigns_subscribed_users length:' + sessionsList.docs.length
+      );
+      sessionsList.docs.forEach(async (session) => {
+        await firestore
+          .collection(DatabaseConstants.sessions)
+          .doc(session.id)
+          .collection(DatabaseConstants.session_members)
+          .doc(user.uid)
+          .delete();
+      });
+    });
 
-  if (isOrganisation) {
-    await firestore
-      .collection(DatabaseConstants.organisations)
-      .doc(user.uid)
-      .delete();
+  // delete user from following
+  await firestore
+    .collection(DatabaseConstants.following)
+    .doc(user.uid)
+    .collection(DatabaseConstants.users)
+    .get()
+    .then(async (usersList) => {
+      functions.logger.info('following length:' + usersList.docs.length);
+      usersList.docs.forEach(async (doc) => await doc.ref.delete());
+    });
+  // delete user from followed
+  await firestore
+    .collection(DatabaseConstants.followed)
+    .doc(user.uid)
+    .collection(DatabaseConstants.users)
+    .get()
+    .then(async (usersList) => {
+      functions.logger.info('followed length:' + usersList.docs.length);
+      usersList.docs.forEach(async (doc) => await doc.ref.delete());
+    });
 
-    const campaignsToDelete = await firestore
-      .collection(DatabaseConstants.campaigns)
-      .where(CampaignFields.author_id, '==', user.uid)
-      .get();
+  await firestore
+    .collection(DatabaseConstants.donations)
+    .where(DonationFields.user_id, '==', user.uid)
+    .get()
+    .then(async (donationsList) => {
+      functions.logger.info('domations length:' + donationsList.docs.length);
+      donationsList.docs.forEach(async (doc) => await doc.ref.delete());
+    });
 
-    campaignsToDelete.forEach(async (campaign) => await campaign.ref.delete());
-    return;
-  }
+  await firestore
+    .collection(DatabaseConstants.charges_users)
+    .where(ChargesFields.user_id, '==', user.uid)
+    .get()
+    .then(async (chargesList) => {
+      functions.logger.info('chargesList length:' + chargesList.docs.length);
 
-  return firestore.collection(DatabaseConstants.user).doc(user.uid).delete();
+      chargesList.docs.forEach(async (doc) => await doc.ref.delete());
+    });
+  const userRef = await firestore
+    .collection(DatabaseConstants.user)
+    .doc(user.uid);
+  userRef
+    .listCollections()
+    .then(async (collectionList) => {
+      collectionList.forEach(async (collection) => {
+        await collection.get().then(async (docsList) => {
+          docsList.docs.forEach(async (doc) => await doc.ref.delete());
+        });
+      });
+    })
+    .catch((e) => {
+      functions.logger.error(e);
+    });
+  await userRef.delete();
+  return 'OK';
 });
 
 exports.onUpdateUser = functions.firestore
@@ -219,6 +316,5 @@ exports.onDeleteCard = functions.firestore
   )
   .onDelete(async (snapshot, context) => {
     const token: string = context.params.token;
-
     return await stripe.paymentMethods.detach(token);
   });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';
@@ -16,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   PageController _pageController =
-      PageController(initialPage: 0, keepPage: false);
+      PageController(initialPage: 0, keepPage: false,);
   ScrollController _scrollController = ScrollController();
 
   @override
@@ -27,6 +28,10 @@ class HomePageState extends State<HomePage> {
           children: <Widget>[
             PageView(
               controller: _pageController,
+              physics: CustomPageViewScrollPhysics(),
+              onPageChanged:(page){
+                _resetPageScroll();
+              },
               children: <Widget>[
                 ProfilePage(
                   scrollController: _scrollController,
@@ -46,7 +51,12 @@ class HomePageState extends State<HomePage> {
 
   void _changePage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 150), curve: Curves.fastOutSlowIn);
+        duration: Duration(milliseconds: 150), curve: Curves.linear);
+    _resetPageScroll();
+
+
+  }
+  void _resetPageScroll(){
     _scrollController.animateTo(
       0.0,
       curve: Curves.easeOut,

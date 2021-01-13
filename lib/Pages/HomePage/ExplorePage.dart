@@ -8,6 +8,7 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 
 class ExplorePage extends StatefulWidget {
   final ScrollController scrollController;
@@ -28,6 +29,7 @@ class _ExplorePageState extends State<ExplorePage>
 
     return CustomScrollView(
       controller: widget.scrollController,
+      physics: CustomPageViewScrollPhysics(),
       slivers: <Widget>[
         SliverAppBar(
           backgroundColor: Colors.transparent,

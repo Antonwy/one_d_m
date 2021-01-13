@@ -119,6 +119,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         user: um.user,
                                         context: context,
                                         close: bd.close,
+                                        controller: _scrollController,
                                       ));
                                     }
                               : () {
@@ -335,6 +336,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       height: 100,
                                     ),
                                   );
+                                List<News> n = snapshot.data;
+                                n.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+
                                 return SliverPadding(
                                   padding: EdgeInsets.fromLTRB(18, 0, 18, 80),
                                   sliver: SliverList(
@@ -345,10 +349,12 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       child: Text("Neuigkeiten",
                                           style: _textTheme.headline6),
                                     ),
-                                    ...snapshot.data
-                                        .map((n) =>
-                                            NewsPost(n, withCampaign: false))
-                                        .toList()
+                                    ListView.builder(
+                                      itemCount: n.length,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemBuilder: (_,index)=>NewsPost(n[index],withCampaign: false,),
+                                    )
                                   ])),
                                 );
                               }),
@@ -430,6 +436,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 List<Session> sessions = snapshot.data;
 
                 if (sessions.isEmpty) return SizedBox.shrink();
+
+                sessions.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -670,78 +678,3 @@ class _StatCollumn extends StatelessWidget {
   }
 }
 
-class _AmountWidget extends StatelessWidget {
-  final int amount;
-  final User user;
-  final Campaign campaign;
-
-  _AmountWidget(this.amount, {this.user, this.campaign});
-
-  TextTheme _textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    _textTheme = Theme.of(context).textTheme;
-    return Expanded(
-      child: OfflineBuilder(
-          child: Container(),
-          connectivityBuilder: (context, connection, child) {
-            bool activated = connection != ConnectivityResult.none;
-            return Container(
-              height: 100,
-              child: Card(
-                clipBehavior: Clip.antiAlias,
-                color: ColorTheme.whiteBlue,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: InkWell(
-                  onTap: () {
-                    if (!activated) {
-                      Helper.showConnectionSnackBar(context);
-                      return;
-                    }
-
-                    BottomDialog bd = BottomDialog(context);
-                    bd.show(DonationDialogWidget(
-                      campaign: campaign,
-                      defaultSelectedAmount: amount,
-                      user: user,
-                      context: context,
-                      close: bd.close,
-                    ));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Material(
-                          color: ColorTheme.blue.withOpacity(.2),
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              "DV",
-                              style: TextStyle(
-                                  fontSize: 12, color: ColorTheme.blue),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "${amount}.00",
-                          style: _textTheme.headline6
-                              .copyWith(color: ColorTheme.blue),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
-  }
-}

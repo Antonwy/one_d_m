@@ -33,6 +33,7 @@ class DonationDialogWidget extends StatefulWidget {
   final BuildContext context;
   int defaultSelectedAmount;
   final String sessionId;
+  final ScrollController controller;
 
   DonationDialogWidget(
       {this.close,
@@ -40,7 +41,7 @@ class DonationDialogWidget extends StatefulWidget {
       this.user,
       this.context,
       this.sessionId,
-      this.defaultSelectedAmount = 0});
+      this.defaultSelectedAmount = 0, this.controller});
 
   @override
   _DonationDialogWidgetState createState() => _DonationDialogWidgetState();
@@ -53,19 +54,30 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   FocusScopeNode _keyboardFocus = FocusScopeNode();
   double _selectedValue = 0;
   ScrollController _scrollController;
+  bool _shouldScroll = true;
 
   @override
   void initState() {
-    _scrollController = ScrollController();
 
-    // _scrollController.addListener(() {
-    //   _scrollController.animateTo(0.0,
-    //       duration: Duration(milliseconds: 1), curve: Curves.linear);
-    // });
     _selectedValue = widget.defaultSelectedAmount.toDouble();
     DatabaseService.getAdBalance(widget.user.id).listen((event) {
       if (event.dcBalance < _selectedValue) {
         _selectedValue = 0;
+      }
+    });
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels == 0) {
+          setState(() {
+            _shouldScroll = false;
+          });
+        } else {
+          setState(() {
+            _shouldScroll = true;
+          });
+        }
       }
     });
     super.initState();
@@ -345,7 +357,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                 ),
                               ),
                               ddm.showAnimation
-                                  ? DonationAnimationWidget(widget.close,_scrollController)
+                                  ? DonationAnimationWidget(widget.close,_scrollController,_shouldScroll)
                                   : SizedBox.shrink(),
                               // Positioned(
                               //     top: 20,
@@ -619,8 +631,10 @@ class DonationAnimationWidget extends HookWidget {
   ThemeData _theme;
   final Function close;
   final ScrollController controller;
+  bool shouldScroll;
 
-  DonationAnimationWidget(this.close, this.controller);
+  DonationAnimationWidget(this.close, this.controller,this.shouldScroll);
+
 
   @override
   Widget build(BuildContext context) {
@@ -649,16 +663,17 @@ class DonationAnimationWidget extends HookWidget {
                           });
                         })
                       : _buildThankYou(
-                          context, ddm.campaign, ddm.amount.toString(), close,controller),
+                          context, ddm.campaign, ddm.amount.toString(), close,controller,shouldScroll),
                 )),
           ));
     });
   }
 
   Widget _buildThankYou(BuildContext context, Campaign campaign, String amount,
-          Function close,ScrollController controller) =>
+          Function close,ScrollController controller,bool shouldScroll) =>
       SingleChildScrollView(
         controller: controller,
+        physics: shouldScroll?AlwaysScrollableScrollPhysics():NeverScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -909,7 +924,7 @@ class DonationAnimationWidget extends HookWidget {
                   children: [
                     Expanded(
                         flex: 1,
-                        child: _PercentCircle(
+                        child: PercentCircle(
                           percent: 14,
                         )),
                     Expanded(
@@ -1105,8 +1120,8 @@ class FieldWidget extends StatelessWidget {
   }
 }
 
-class _PercentCircle extends StatelessWidget {
-  const _PercentCircle({
+class PercentCircle extends StatelessWidget {
+  const PercentCircle({
     Key key,
     @required this.percent,
     this.radius = 50,

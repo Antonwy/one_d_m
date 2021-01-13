@@ -32,33 +32,6 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
     return SliverToBoxAdapter(
       child: _buildLatestSessionsWithPost(),
     );
-    // return SliverToBoxAdapter(
-    //   child: StreamBuilder<List<Session>>(
-    //       stream: widget.stream ?? DatabaseService.getCertifiedSessions(),
-    //       builder: (context, snapshot) {
-    //         print(snapshot);
-    //         List<BaseSession> sessions = snapshot.data ?? [];
-    //
-    //         if (snapshot.connectionState == ConnectionState.active &&
-    //             sessions.isEmpty) return Container();
-    //
-    //         return Container(
-    //           height: 120,
-    //           child: ListView.separated(
-    //               scrollDirection: Axis.horizontal,
-    //               separatorBuilder: (context, index) => SizedBox(
-    //                     width: 8,
-    //                   ),
-    //               itemBuilder: (context, index) => Padding(
-    //                     padding: EdgeInsets.only(
-    //                         left: index == 0 ? 12.0 : 0.0,
-    //                         right: index == sessions.length - 1 ? 12.0 : 0.0),
-    //                     child: CertifiedSessionView(sessions[index]),
-    //                   ),
-    //               itemCount: sessions.length),
-    //         );
-    //       }),
-    // );
   }
 
   Widget _buildLatestSessionsWithPost() {
@@ -76,6 +49,9 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
         news.forEach((element) {
           sessionsWithPost.add(element.sessionId);
         });
+
+        ///sort and add sessions with post to the begining of the list
+        ///
         List<String> sessionIds = sessionsWithPost.toSet().toList();
 
         return StreamBuilder<List<Session>>(
@@ -91,6 +67,8 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
               sessions.forEach((element) {
                 allSessions.add(element.id);
               });
+
+              ///add sessions that doesn't have posts
 
               sessionIds =[...sessionIds,...allSessions];
 

@@ -15,7 +15,9 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   ThemeManager _theme;
   List<Session> mySessions = [];
+  List<String> mySessionIds = [];
   ScrollController _scrollController;
 
   @override
@@ -57,6 +60,44 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       });
     });
+
+    DatabaseService.getSessionPosts().listen((news) {
+      mySessionIds.clear();
+      news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+
+      List<String> sessionsWithPost = [];
+
+      news.forEach((element) {
+        sessionsWithPost.add(element.sessionId);
+      });
+
+      ///sort and add sessions with post to the begining of the list
+      ///
+      List<String> sessionIds = sessionsWithPost.toSet().toList();
+      DatabaseService.getCertifiedSessions().listen((sessions) {
+        List<String> allSessions = [];
+
+        sessions.forEach((element) {
+          allSessions.add(element.id);
+        });
+
+        ///add sessions that doesn't have posts
+
+        sessionIds = [...sessionIds, ...allSessions];
+
+        List<String> uniqueIds = sessionIds.toSet().toList();
+        uniqueIds.forEach((element) {
+          DatabaseService.userIsInSession(uid, element).listen((isExist) {
+            if (isExist) {
+              mySessionIds.add(element);
+            }
+            setState(() {});
+          });
+        });
+
+      });
+
+    });
     super.initState();
   }
 
@@ -65,6 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _theme = ThemeManager.of(context);
     return CustomScrollView(
       controller: widget.scrollController,
+      physics: CustomPageViewScrollPhysics(),
       slivers: <Widget>[
         Consumer<UserManager>(
           builder: (context, um, child) => StreamBuilder<User>(
@@ -249,7 +291,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
 
-  Widget _buildMySessions(List<BaseSession> sessions) => SliverToBoxAdapter(
+  Widget _buildMySessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(
               left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),
@@ -279,13 +321,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     itemBuilder: (context, index) => Padding(
                           padding: EdgeInsets.only(
                               left: index == 0 ? 12.0 : 0.0,
-                              right: index == sessions.length - 1 ? 12.0 : 0.0),
-                          child: CertifiedSessionView(sessions[index]),
+                              right: index == sessionsIds.length - 1 ? 12.0 : 0.0),
+                          child:CertifiedSessionView(sessionsIds[index])
                         ),
-                    itemCount: sessions.length),
+                    itemCount: sessionsIds.length),
               ),
             ],
           ),
         ),
       );
+
+  Widget _buildSession(String sid) => KeepAliveStreamBuilder(
+    stream: DatabaseService.getSession(sid),
+    builder: (_, snapshot) {
+      if (!snapshot.hasData) return SizedBox.shrink();
+      Session s = snapshot.data;
+      return CertifiedSessionView(s);
+    },
+  );
 }

@@ -24,6 +24,7 @@ export class DatabaseConstants {
   static readonly ad_balance: string = 'balance';
   static readonly cards: string = 'cards';
   static readonly organisations: string = 'organisations';
+  static readonly session_id: string = 'session_id';
   static readonly charges_users: string = 'charges_users';
   static readonly charges_campaigns: string = 'charges_campaigns';
   static readonly cpm_rates: string = 'cpm_rates';

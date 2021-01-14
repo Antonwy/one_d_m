@@ -337,7 +337,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     ),
                                   );
                                 List<News> n = snapshot.data;
-                                n.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+                                n.sort((a, b) =>
+                                    b.createdAt.compareTo(a.createdAt));
 
                                 return SliverPadding(
                                   padding: EdgeInsets.fromLTRB(18, 0, 18, 80),
@@ -353,7 +354,10 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       itemCount: n.length,
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
-                                      itemBuilder: (_,index)=>NewsPost(n[index],withCampaign: false,),
+                                      itemBuilder: (_, index) => NewsPost(
+                                        n[index],
+                                        withCampaign: false,
+                                      ),
                                     )
                                   ])),
                                 );
@@ -437,7 +441,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
                 if (sessions.isEmpty) return SizedBox.shrink();
 
-                sessions.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+                sessions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,4 +681,3 @@ class _StatCollumn extends StatelessWidget {
     );
   }
 }
-

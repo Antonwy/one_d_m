@@ -202,31 +202,58 @@ exports.onDeleteSession = functions.firestore
   .onDelete(async (snapshot, context) => {
     const bucket = admin.storage().bucket();
 
-    await firestore.collection(DatabaseConstants.sessions).doc(context.params.sessionId)
-      .listCollections().then(async (collectionList) => {
+    await firestore
+      .collection(DatabaseConstants.sessions)
+      .doc(context.params.sessionId)
+      .listCollections()
+      .then(async (collectionList) => {
         collectionList.forEach(async (collection) => {
-          await collection.get().then(async collectionDocs => {
-            functions.logger.info(collection.id + ":" + collectionDocs.docs.length);
-            collectionDocs.docs.forEach(async doc => { await doc.ref.delete(); });
-          })
-        })
-      }).catch(e => { functions.logger.info(e) })
-    await firestore.collection(DatabaseConstants.news)
-      .where(DatabaseConstants.session_id, "==", context.params.sessionId).get()
+          await collection.get().then(async (collectionDocs) => {
+            functions.logger.info(
+              collection.id + ':' + collectionDocs.docs.length
+            );
+            collectionDocs.docs.forEach(async (doc) => {
+              await doc.ref.delete();
+            });
+          });
+        });
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
+    await firestore
+      .collection(DatabaseConstants.news)
+      .where(DatabaseConstants.session_id, '==', context.params.sessionId)
+      .get()
       .then(async (newsSnapshot) => {
         newsSnapshot.docs.forEach(async (doc) => {
           await doc.ref.delete().then(async () => {
-            await bucket.deleteFiles({ prefix: `news/new_${doc.id}/` })
-              .then(() => { functions.logger.info("news Files deleted successfully") })
-              .catch(e => { functions.logger.info(e) });
+            await bucket
+              .deleteFiles({ prefix: `news/news_${doc.id}/` })
+              .then(() => {
+                functions.logger.info('news Files deleted successfully');
+              })
+              .catch((e) => {
+                functions.logger.info(e);
+              });
           });
-        })
-      }).catch(async (err) => { functions.logger.info(err) })
+        });
+      })
+      .catch(async (err) => {
+        functions.logger.info(err);
+      });
 
     // deleting images of of the news
-    await bucket.deleteFiles({ prefix: `certified_sessions/certified_session_${context.params.sessionId}/` })
-      .then(() => { functions.logger.info("Session Files deleted successfully") })
-      .catch(e => { functions.logger.info(e) });
+    await bucket
+      .deleteFiles({
+        prefix: `certified_sessions/certified_session_${context.params.sessionId}/`,
+      })
+      .then(() => {
+        functions.logger.info('Session Files deleted successfully');
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
   });
 
 exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
@@ -306,18 +333,29 @@ exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
     .delete();
 });
 
-
-exports.onUpdateSession = functions.firestore.document(DatabaseConstants.sessions + "/{sessionId}").onUpdate(async (snapshot, context) => {
-  const sessionId = context.params.sessionId;
-  const afterData = snapshot.after.data();
-  snapshot.after.ref.collection(DatabaseConstants.session_members)
-    .get().then(async (sessionMembers) => {
-      sessionMembers.docs.forEach(async doc => {
-        await firestore.collection(DatabaseConstants.user).doc(doc.id)
-          .collection(DatabaseConstants.sessions).doc(sessionId)
-          .update(afterData)
-          .then(() => { console.log("user's session updated") })
-          .catch(error => functions.logger.error(error))
+exports.onUpdateSession = functions.firestore
+  .document(DatabaseConstants.sessions + '/{sessionId}')
+  .onUpdate(async (snapshot, context) => {
+    const sessionId = context.params.sessionId;
+    const afterData = snapshot.after.data();
+    snapshot.after.ref
+      .collection(DatabaseConstants.session_members)
+      .get()
+      .then(async (sessionMembers) => {
+        sessionMembers.docs.forEach(async (doc) => {
+          await firestore
+            .collection(DatabaseConstants.user)
+            .doc(doc.id)
+            .collection(DatabaseConstants.sessions)
+            .doc(sessionId)
+            .update(afterData)
+            .then(() => {
+              console.log("user's session updated");
+            })
+            .catch((error) => functions.logger.error(error));
+        });
       })
-    }).catch(error => { functions.logger.error(error) })
-})
+      .catch((error) => {
+        functions.logger.error(error);
+      });
+  });

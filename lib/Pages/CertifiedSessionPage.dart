@@ -97,8 +97,8 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           appBar: AppBar(
             leading: IconButton(
               icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 48,
+                Icons.keyboard_arrow_down,
+                size: 30,
               ),
               onPressed: () => Navigator.pop(context),
             ),

@@ -70,6 +70,8 @@ export class ImagePrefix {
   static readonly campaign: string = 'campaign';
   static readonly news: string = 'news';
   static readonly user: string = 'user';
+  static readonly certified_sessions: string = 'certified_sessions';
+  static readonly session: string = 'session';
 }
 
 export class ImageSuffix {

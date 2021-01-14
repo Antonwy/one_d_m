@@ -48,6 +48,20 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
           },
           { merge: true }
         );
+  } else if (
+    imageType === ImagePrefix.session ||
+    imageType === ImagePrefix.certified_sessions
+  ) {
+    if (resulution === ImageResolutions.high)
+      await firestore
+        .collection(DatabaseConstants.sessions)
+        .doc(id)
+        .set(
+          {
+            image_url: generateUrl(obj),
+          },
+          { merge: true }
+        );
   } else if (imageType === ImagePrefix.campaign) {
     if (resulution === ImageResolutions.high)
       await firestore

@@ -3,9 +3,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/NativeAd.dart';
+import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -13,13 +18,18 @@ import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
+import 'package:one_d_m/Pages/create_post.dart';
 import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
   Session session;
+  final ScrollController scrollController;
 
-  CertifiedSessionPage({Key key, this.session}) : super(key: key);
+  CertifiedSessionPage({Key key, this.session, this.scrollController})
+      : super(key: key);
 
   @override
   _CertifiedSessionPageState createState() => _CertifiedSessionPageState();
@@ -33,13 +43,31 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   PageController _pageController = PageController();
   ValueNotifier<double> _pagePosition = ValueNotifier(0);
 
+  ScrollController _scrollController;
+  ValueNotifier _scrollOffset;
+
   @override
   void initState() {
+    _scrollController = widget.scrollController ?? ScrollController();
+
+    _scrollOffset = ValueNotifier(0);
+
+    _scrollController.addListener(() {
+      _scrollOffset.value = _scrollController.offset;
+    });
+
     session = widget.session;
     _pageController.addListener(() {
       _pagePosition.value = _pageController.page;
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollOffset.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,12 +95,30 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           ),
           backgroundColor: Colors.white,
           appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 48,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
             backgroundColor: Colors.white,
             elevation: 0,
+            titleSpacing: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
+
+            ///removed chat feature for now
             // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
-          body: _CertifiedSessionInfoPage(),
+          body: _CertifiedSessionInfoPage(
+            controller: _scrollController,
+          ),
+
+          ///removed chat feature for now
+
+          // body: PageView(
+          //     controller: _pageController,
+          //     children: [_CertifiedSessionInfoPage(), _CertifiedSessionChat()]),
         );
       },
     );
@@ -398,14 +444,27 @@ class _ChatTextField extends StatelessWidget {
   }
 }
 
-class _CertifiedSessionInfoPage extends StatelessWidget {
+class _CertifiedSessionInfoPage extends StatefulWidget {
+  ScrollController controller;
+
+  _CertifiedSessionInfoPage({Key key, this.controller}) : super(key: key);
+
+  @override
+  __CertifiedSessionInfoPageState createState() =>
+      __CertifiedSessionInfoPageState();
+}
+
+class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
+  bool isCreator = false;
+
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return Consumer<CertifiedSessionManager>(
-      builder: (context, csm, child) => CustomScrollView(slivers: [
+      builder: (context, csm, child) =>
+          CustomScrollView(controller: widget.controller, slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
             child: Container(
               height: 220,
@@ -417,7 +476,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       clipBehavior: Clip.antiAlias,
                       child: CachedNetworkImage(
-                        imageUrl: csm.session.imgUrl,
+                        imageUrl: csm.session.imgUrl ?? '',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -428,15 +487,18 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          padding: const EdgeInsets.fromLTRB(12.0, 4, 12, 6),
           sliver: SliverToBoxAdapter(
               child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 6,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     AutoSizeText(
                       csm.session.name,
@@ -446,27 +508,35 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                           .headline6
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
-                    StreamBuilder(
-                      stream:
-                          DatabaseService.getUserStream(csm.session.creatorId),
-                      builder: (context, AsyncSnapshot<User> snapshot) {
-                        return Text(
-                          'by ${snapshot.data?.name}',
-                        );
-                      },
-                    ),
+                    csm.session.creatorId?.isNotEmpty ?? false
+                        ? StreamBuilder(
+                            stream: DatabaseService.getUserStream(
+                                csm.session.creatorId),
+                            builder: (context, AsyncSnapshot<User> snapshot) {
+                              return Text(
+                                'by ${snapshot.data?.name}',
+                              );
+                            },
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),
               Expanded(
                 flex: 3,
-                child: _SessionJoinButton(),
+                child: csm.session.creatorId?.isNotEmpty ?? true
+                    ? Consumer<UserManager>(
+                        builder: (context, um, child) =>
+                            um.uid == csm.session.creatorId
+                                ? CreatePostButton()
+                                : _SessionJoinButton())
+                    : _SessionJoinButton(),
               )
             ],
           )),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          padding: const EdgeInsets.fromLTRB(12.0, 4, 12, 6),
           sliver: SliverToBoxAdapter(
             child: Row(
               children: [
@@ -474,7 +544,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 1,
+                        flex: 4,
                         child: _InfoView(
                           description: "DV",
                           value: snapshot.data?.currentAmount ??
@@ -490,12 +560,29 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 2,
-                        child: _InfoView(
-                            imageUrl: snapshot.data?.campaignImgUrl ??
-                                csm.session.campaignImgUrl,
-                            description: snapshot.data?.campaignName ??
-                                csm.session.campaignName),
+                        flex: 6,
+                        child: CustomOpenContainer(
+                          closedShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          closedElevation: 0,
+                          openBuilder: (context, close, scrollController) =>
+                              StreamBuilder(
+                                  stream: csm.campaign,
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData)
+                                      return SizedBox.shrink();
+                                    return NewCampaignPage(
+                                      snapshot.data,
+                                      scrollController: scrollController,
+                                    );
+                                  }),
+                          closedColor: ColorTheme.wildGreen,
+                          closedBuilder: (context, open) => _InfoView(
+                              imageUrl: snapshot.data?.campaignImgUrl ??
+                                  csm.session.campaignImgUrl,
+                              description: snapshot.data?.campaignName ??
+                                  csm.session.campaignName),
+                        ),
                       );
                     }),
                 SizedBox(
@@ -505,7 +592,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
-                        flex: 1,
+                        flex: 4,
                         child: _InfoView(
                           description: "Mitglieder",
                           value: snapshot.data?.memberCount ??
@@ -518,28 +605,101 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           sliver: SliverToBoxAdapter(
-            child: Text(
-              'Donators',
-              style: Theme.of(context)
-                  .textTheme
-                  .headline6
-                  .copyWith(fontWeight: FontWeight.bold),
+            child: Consumer<CertifiedSessionManager>(
+              builder: (context, sm, child) => StreamBuilder(
+                  stream: sm.membersStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return SizedBox.shrink();
+                    List<SessionMember> members = snapshot.data ?? [];
+                    if (members.isEmpty) return SizedBox.shrink();
+                    return Text(
+                      'Donators',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(fontWeight: FontWeight.bold),
+                    );
+                  }),
             ),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          padding: const EdgeInsets.only(top: 4.0),
           sliver: _CertifiedSessionMembers(),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(
-            height: 100,
-          ),
-        )
+          child: const YMargin(10),
+        ),
+        _buildPostFeed(),
+        SliverToBoxAdapter(
+          child: const YMargin(20),
+        ),
       ]),
     );
+  }
+
+  Widget _buildPostFeed() => Consumer<CertifiedSessionManager>(
+      builder: (context, sm, child) => StreamBuilder(
+            stream: DatabaseService.getPostBySessionId(sm.session.id),
+            builder: (_, snapshot) {
+              if (snapshot.hasData) {
+                List<News> posts = snapshot.data;
+                if (posts.isNotEmpty) {
+                  posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                  return SliverList(
+                    delegate:
+                        SliverChildListDelegate(_getNewsWidget(context, posts)),
+                  );
+                } else {
+                  return SliverToBoxAdapter(child: SizedBox.shrink());
+                }
+              } else {
+                return SliverToBoxAdapter(
+                    child: Center(
+                  child: CircularProgressIndicator(),
+                ));
+              }
+            },
+          ));
+
+  List<Widget> _getNewsWidget(BuildContext context, List<News> news) {
+    List<Widget> widgets = [];
+    int adRate = Constants.AD_NEWS_RATE;
+    int rateCount = 0;
+    Widget newsTitle = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+      child: Text(
+        'News',
+        style: Theme.of(context)
+            .textTheme
+            .headline6
+            .copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+    widgets.add(newsTitle);
+    for (News n in news) {
+      rateCount++;
+
+      widgets.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: NewsPost(
+          n,
+          withCampaign: false,
+        ),
+      ));
+
+      if (rateCount >= adRate) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: NewsNativeAd(),
+        ));
+        rateCount = 0;
+      }
+    }
+
+    return widgets;
   }
 }
 
@@ -743,6 +903,46 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                             .button
                             .copyWith(fontWeight: FontWeight.bold),
                       ));
+          }),
+    );
+  }
+}
+
+class CreatePostButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Consumer<CertifiedSessionManager>(
+      builder: (context, csm, child) => StreamBuilder<bool>(
+          initialData: false,
+          stream: csm.isInSession,
+          builder: (context, snapshot) {
+            Color color = snapshot.data
+                ? _theme.colors.textOnDark
+                : _theme.colors.textOnContrast;
+            return MaterialButton(
+                height: 50,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) => CreatePostScreen(
+                                session: csm.session,
+                              )));
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
+                textColor: color,
+                child: AutoSizeText(
+                  'Post erstellen',
+                  maxLines: 3,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .accentTextTheme
+                      .button
+                      .copyWith(fontWeight: FontWeight.bold),
+                ));
           }),
     );
   }

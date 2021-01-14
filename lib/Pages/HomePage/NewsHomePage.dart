@@ -56,7 +56,7 @@ class _NewsHomePageState extends State<NewsHomePage>
         Consumer<UserManager>(
           builder: (context, um, child) {
             return StreamBuilder<List<News>>(
-                stream: DatabaseService.getNews(um.uid),
+                stream: DatabaseService.getNews(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return SliverFillRemaining(

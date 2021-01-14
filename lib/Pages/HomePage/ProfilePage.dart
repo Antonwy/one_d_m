@@ -1,46 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/ActivityDonationFeed.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
-import 'package:one_d_m/Components/DailyReportFeed.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
-import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
+import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
-import 'package:one_d_m/Helper/SessionInvitesFeed.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/CreateSessionPage.dart';
+import 'package:one_d_m/Helper/keep_alive_stream.dart';
+import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/RewardVideoPage.dart';
-import 'package:one_d_m/Pages/SessionInvitesPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
+  final VoidCallback onExploreTapped;
+  final ScrollController scrollController;
+
+  const ProfilePage({
+    Key key,
+    this.onExploreTapped,
+    this.scrollController,
+  }) : super(key: key);
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with AutomaticKeepAliveClientMixin {
+class _ProfilePageState extends State<ProfilePage> {
+  GlobalKey<_ProfilePageState> _myKey = GlobalKey();
+
   ThemeManager _theme;
-  Stream<List<BaseSession>> _sessionStream;
-  Stream<List<BaseSession>> _certifiedSessionsStream;
+  List<Session> mySessions = [];
+  List<String> mySessionIds = [];
+  ScrollController _scrollController;
 
   @override
   void initState() {
     String uid = Provider.of<UserManager>(context, listen: false).uid;
-    _sessionStream = DatabaseService.getSessionsFromUser(uid);
-    _certifiedSessionsStream =
-        DatabaseService.getCertifiedSessionsFromUser(uid);
+
+    ///listen events for user followed sessions
+    DatabaseService.getCertifiedSessions().listen((event) {
+      mySessions.clear();
+      event.forEach((element) {
+        DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
+          if (isExist) {
+            mySessions.add(element);
+          }
+          setState(() {});
+        });
+      });
+    });
+
+    DatabaseService.getSessionPosts().listen((news) {
+      mySessionIds.clear();
+      news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+
+      List<String> sessionsWithPost = [];
+
+      news.forEach((element) {
+        sessionsWithPost.add(element.sessionId);
+      });
+
+      ///sort and add sessions with post to the begining of the list
+      ///
+      List<String> sessionIds = sessionsWithPost.toSet().toList();
+      DatabaseService.getCertifiedSessions().listen((sessions) {
+        List<String> allSessions = [];
+
+        sessions.forEach((element) {
+          allSessions.add(element.id);
+        });
+
+        ///add sessions that doesn't have posts
+
+        sessionIds = [...sessionIds, ...allSessions];
+
+        List<String> uniqueIds = sessionIds.toSet().toList();
+        uniqueIds.forEach((element) {
+          DatabaseService.userIsInSession(uid, element).listen((isExist) {
+            if (isExist) {
+              mySessionIds.add(element);
+            }
+            setState(() {});
+          });
+        });
+
+      });
+
+    });
     super.initState();
   }
 
@@ -48,6 +105,8 @@ class _ProfilePageState extends State<ProfilePage>
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return CustomScrollView(
+      controller: widget.scrollController,
+      physics: CustomPageViewScrollPhysics(),
       slivers: <Widget>[
         Consumer<UserManager>(
           builder: (context, um, child) => StreamBuilder<User>(
@@ -61,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage>
                   automaticallyImplyLeading: false,
                   actions: <Widget>[],
                   bottom: PreferredSize(
-                    preferredSize: Size(MediaQuery.of(context).size.width, 110),
+                    preferredSize: Size(MediaQuery.of(context).size.width, 100),
                     child: SafeArea(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -112,7 +171,7 @@ class _ProfilePageState extends State<ProfilePage>
                               ],
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 20,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,27 +196,6 @@ class _ProfilePageState extends State<ProfilePage>
                                 ),
                                 Row(
                                   children: <Widget>[
-                                    // CustomOpenContainer(
-                                    //   openBuilder:
-                                    //       (context, close, controller) =>
-                                    //           PaymentInfosPage(
-                                    //               scrollController: controller),
-                                    //   closedShape: CircleBorder(),
-                                    //   closedElevation: 0,
-                                    //   closedColor: _bTheme.contrast,
-                                    //   closedBuilder: (context, open) =>
-                                    //       RoundButtonHomePage(
-                                    //     icon: Icons
-                                    //         .credit_card, // toPage: BuyCoinsPage(),
-                                    //     // toPage: BuyCoinsPage(),
-                                    //     onTap: () {
-                                    //       open();
-                                    //     },
-                                    //   ),
-                                    // ),
-                                    // SizedBox(
-                                    //   width: 10,
-                                    // ),
                                     CustomOpenContainer(
                                       openBuilder:
                                           (context, close, controller) =>
@@ -167,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       closedColor: _theme.colors.contrast,
                                       closedBuilder: (context, open) =>
                                           RoundButtonHomePage(
-                                        icon: Icons.play_arrow,
+                                        icon: Icons.play_arrow_rounded,
                                         onTap: open,
                                       ),
                                     ),
@@ -175,7 +213,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       width: 10,
                                     ),
                                     RoundButtonHomePage(
-                                      icon: Icons.settings,
+                                      icon: Icons.settings_sharp,
                                       onTap: () {
                                         BottomDialog(context)
                                             .show(SettingsDialog());
@@ -194,163 +232,111 @@ class _ProfilePageState extends State<ProfilePage>
               }),
         ),
         InfoFeed(),
-        StreamBuilder<List<Session>>(
-          stream: _certifiedSessionsStream,
-          builder: (context, snapshot1) => StreamBuilder<List<BaseSession>>(
-              stream: _sessionStream,
-              builder: (context, snapshot2) {
-                List<BaseSession> sessions = snapshot2.data ?? [];
-                List<BaseSession> certifiedSessions = snapshot1.data ?? [];
 
-                if (sessions.isEmpty && certifiedSessions.isEmpty)
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              _SessionInvitesButton(),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              _CreateSessionButton()
-                            ],
-                          ),
-                          SvgPicture.asset(
-                            "assets/images/no-donations.svg",
-                            height: 200,
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            "Du bist momentan kein Mitglied einer Session.\nDrücke auf das + um eine eigene Session zu erstellen, oder trete einer öffentlichen bei!",
-                            style: _theme.textTheme.dark.bodyText1,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+        ///build the sessions that follow by user
+        mySessions.isNotEmpty
+            ? _buildMySessions(mySessions)
+            : _buildEmptySession(),
 
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Deine Sessions",
-                          style: _theme.textTheme.dark.headline6,
-                        ),
-                        Expanded(child: Container()),
-                        _SessionInvitesButton(),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        _CreateSessionButton()
-                      ],
-                    ),
-                  ),
-                );
-              }),
+        SessionPostFeed(
+          userSessions: mySessions,
         ),
-        Consumer<UserManager>(
-            builder: (context, um, child) => SliverPadding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  sliver: CertifiedSessionsList(_certifiedSessionsStream),
-                )),
-        SessionsFeed()
+        const SliverToBoxAdapter(
+          child: const SizedBox(
+            height: 120,
+          ),
+        )
+        // _buildPostFeed(),
       ],
     );
   }
 
-  @override
-  bool get wantKeepAlive => true;
-}
-
-class _CreateSessionButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return CustomOpenContainer(
-      openBuilder: (context, close, scrollController) =>
-          CreateSessionPage(scrollController),
-      closedBuilder: (context, open) => InkWell(
-        onTap: open,
+  Widget _buildEmptySession() => SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            Icons.add,
-            color: _bTheme.textOnContrast,
-            size: 24,
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              SvgPicture.asset(
+                "assets/images/no-donations.svg",
+                height: 70,
+                width: 70,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text(
+                "Du bist momentan kein Mitglied einer Session",
+                style: _theme.textTheme.dark.bodyText1,
+                textAlign: TextAlign.center,
+              ),
+              const YMargin(20),
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.black)),
+                onPressed: widget.onExploreTapped,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Entdecke Sessions',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6
+                        .copyWith(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-      closedShape: CircleBorder(),
-      closedElevation: 0,
-      closedColor: _bTheme.contrast,
-    );
-  }
-}
+      );
 
-class _SessionInvitesButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return Consumer<UserManager>(
-      builder: (context, um, child) => StreamBuilder<List<SessionInvite>>(
-          stream: DatabaseService.getSessionInvites(um.uid),
-          builder: (context, snapshot) {
-            List<SessionInvite> invites = snapshot.data ?? [];
-
-            if (invites.isEmpty) return Container();
-
-            return Stack(
-              overflow: Overflow.visible,
-              alignment: Alignment.topRight,
-              children: [
-                CustomOpenContainer(
-                  openBuilder: (context, close, scrollController) =>
-                      SessionInvitesPage(
-                    scrollController: scrollController,
-                    invites: invites,
-                  ),
-                  closedBuilder: (context, open) => InkWell(
-                    onTap: open,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.announcement,
-                        color: _bTheme.textOnContrast,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                  closedShape: CircleBorder(),
-                  closedElevation: 0,
-                  closedColor: _bTheme.contrast,
+  Widget _buildMySessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(
+              left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  "Deine Sessions",
+                  style: _theme.textTheme.dark.headline6.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Helper.hexToColor('#575757')),
                 ),
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: Material(
-                    color: Colors.red,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Center(
-                          child: Text(
-                        invites.length.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      )),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }),
-    );
-  }
+              ),
+              const SizedBox(
+                height: 10.0,
+              ),
+              Container(
+                height: 116,
+                child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    separatorBuilder: (context, index) => SizedBox(
+                          width: 8,
+                        ),
+                    itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(
+                              left: index == 0 ? 12.0 : 0.0,
+                              right: index == sessionsIds.length - 1 ? 12.0 : 0.0),
+                          child:CertifiedSessionView(sessionsIds[index])
+                        ),
+                    itemCount: sessionsIds.length),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildSession(String sid) => KeepAliveStreamBuilder(
+    stream: DatabaseService.getSession(sid),
+    builder: (_, snapshot) {
+      if (!snapshot.hasData) return SizedBox.shrink();
+      Session s = snapshot.data;
+      return CertifiedSessionView(s);
+    },
+  );
 }

@@ -1,10 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Helper/CategoryDialog.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
-import 'package:one_d_m/Helper/navigator_util.dart';
 
 class SearchBar extends StatelessWidget {
   final int categoryIndex;
@@ -32,12 +32,17 @@ class SearchBar extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.person_add),
-                      onPressed: () {
-                        context.navigate(FindFriendsPage());
-                      },
-                      color: _theme.colors.dark,
+                    CustomOpenContainer(
+                      closedShape: CircleBorder(),
+                      closedElevation: 0,
+                      openBuilder: (context, close, scrollController) =>
+                          FindFriendsPage(scrollController: scrollController),
+                      closedColor: Colors.white,
+                      closedBuilder: (context, open) => IconButton(
+                        icon: Icon(Icons.person_add),
+                        onPressed: open,
+                        color: _theme.colors.dark,
+                      ),
                     ),
                     IconButton(
                       icon: Stack(

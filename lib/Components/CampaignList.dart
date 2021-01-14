@@ -25,9 +25,6 @@ class _CampaignListState extends State<CampaignList> {
   }
   @override
   void didChangeDependencies() {
-    widget.campaigns.forEach((element) {
-      precacheImage(CachedNetworkImageProvider(element.imgUrl), context);
-    });
     super.didChangeDependencies();
   }
   @override

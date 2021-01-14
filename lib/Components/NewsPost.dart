@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import 'CampaignButton.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class NewsPost extends StatelessWidget {
   News news;
@@ -15,8 +17,9 @@ class NewsPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var shortText = news.shortText ?? '';
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Material(
         clipBehavior: Clip.antiAlias,
         color: Colors.white,
@@ -42,7 +45,7 @@ class NewsPost extends StatelessWidget {
                   CachedNetworkImage(
                     width: double.infinity,
                     height: 260,
-                    imageUrl: news.imageUrl,
+                    imageUrl: news.imageUrl ?? '',
                     errorWidget: (_, __, ___) => Center(
                         child: Icon(
                       Icons.error,
@@ -84,37 +87,34 @@ class NewsPost extends StatelessWidget {
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
-                padding: EdgeInsets.all(18),
+                padding: EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      news.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(color: Colors.black),
-                    ),
-                    news.shortText.isEmpty ? Container() : SizedBox(height: 5),
-                    news.shortText.isEmpty
-                        ? Container()
-                        : Text(
-                            news.shortText,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
+                    // Text(
+                    //   news.title,
+                    //   style: Theme.of(context)
+                    //       .textTheme
+                    //       .headline6
+                    //       .copyWith(color: Colors.black),
+                    // ),
+                    // shortText.isEmpty ? Container() : SizedBox(height: 5),
+                    // shortText.isEmpty
+                    //     ? Container()
+                    //     : Text(
+                    //         shortText,
+                    //         style: TextStyle(
+                    //             fontWeight: FontWeight.bold,
+                    //             color: Colors.black),
+                    //       ),
+                    // news.text.isEmpty
+                    //     ? Container()
+                    //     : SizedBox(
+                    //         height: 5,
+                    //       ),
                     news.text.isEmpty
                         ? Container()
-                        : SizedBox(
-                            height: 5,
-                          ),
-                    news.text.isEmpty
-                        ? Container()
-                        : Text(
-                            news.text,
-                            style: TextStyle(color: Colors.black),
-                          ),
+                        : _buildExpandableContent(context, news.text)
                   ],
                 ),
               ),
@@ -124,4 +124,97 @@ class NewsPost extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildExpandableContent(BuildContext context,String post) => ExpandableNotifier(
+    child: Column(
+      children: [
+        Expandable(
+          collapsed: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                post,
+                maxLines: 3,
+                softWrap: true,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: Helper.hexToColor('#707070'),
+                    fontWeight: FontWeight.w400),
+              ),
+              post.length> 90
+                  ? Align(
+                alignment: Alignment.bottomRight,
+                child: ExpandableButton(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'mehr',
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .copyWith(
+                              fontSize: 15,
+                              color: Helper.hexToColor('#707070'),
+                              fontWeight: FontWeight.w400),
+                        ),
+                        Icon(
+                          Icons.keyboard_arrow_down_outlined,
+                          color: Helper.hexToColor('#707070'),
+                        )
+                      ],
+                    )),
+              )
+                  : SizedBox.shrink()
+            ],
+          ),
+          expanded: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                post,
+                maxLines: null,
+                softWrap: true,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: Helper.hexToColor('#707070'),
+                    fontWeight: FontWeight.w400),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: ExpandableButton(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'weniger',
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .copyWith(
+                              fontSize: 15,
+                              color: Helper.hexToColor('#707070'),
+                              fontWeight: FontWeight.w400),
+                        ),
+                        Icon(
+                          Icons.keyboard_arrow_up_outlined,
+                          color: Helper.hexToColor('#707070'),
+                        )
+                      ],
+                    )),
+              )
+            ],
+          ),
+        )
+      ],
+    ),
+  );
 }

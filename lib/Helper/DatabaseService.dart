@@ -19,6 +19,7 @@ import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
 import 'package:stripe_payment/stripe_payment.dart';
+
 import 'Campaign.dart';
 import 'Donation.dart';
 import 'User.dart';
@@ -230,6 +231,7 @@ class DatabaseService {
   static Future<List<Campaign>> getCampaignFromQuery(String query) async {
     QuerySnapshot qs = await campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
+        .limit(5)
         .get();
 
     List<Campaign> campaigns =
@@ -332,9 +334,7 @@ class DatabaseService {
   }
 
   static Stream<List<Campaign>> getTopCampaignsStream() {
-    return campaignsCollection
-        .snapshots()
-        .map((qs) {
+    return campaignsCollection.snapshots().map((qs) {
       return qs.docs.map((e) {
         return Campaign.fromSnapshot(e);
       }).toList();
@@ -342,9 +342,7 @@ class DatabaseService {
   }
 
   static Future<List<Campaign>> getTopCampaigns([int limit = 5]) async {
-    return (await campaignsCollection
-            .limit(limit)
-            .get())
+    return (await campaignsCollection.limit(limit).get())
         .docs
         .map(Campaign.fromSnapshot)
         .toList();
@@ -374,8 +372,22 @@ class DatabaseService {
         .map((qs) => News.listFromSnapshot(qs.docs));
   }
 
-  static Stream<List<News>> getNews(String uid) {
+  static Stream<List<News>> getNews() {
     return newsCollection
+        .snapshots()
+        .map((doc) => News.listFromSnapshot(doc.docs));
+  }
+
+  static Stream<List<News>> getSessionPosts() {
+    return newsCollection
+        .where('session_id', isNotEqualTo: '')
+        .snapshots()
+        .map((doc) => News.listFromSnapshot(doc.docs));
+  }
+
+  static Stream<List<News>> getPostBySessionId(String sessionId) {
+    return newsCollection
+        .where('session_id', isEqualTo: sessionId)
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
@@ -515,6 +527,13 @@ class DatabaseService {
         .where(Donation.ISANONYM, isEqualTo: false)
         // .orderBy(Donation.CREATEDAT, descending: true)
         .limit(4)
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.docs));
+  }
+
+  static Stream<List<Donation>> getLatestDonations() {
+    return donationsCollection
+        .where(Donation.ISANONYM, isEqualTo: false)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
@@ -730,7 +749,24 @@ class DatabaseService {
     return sessionsCollection
         .where(BaseSession.END_DATE, isNull: true)
         .snapshots()
-        .map((Session.fromQuerySnapshot));
+        .map((qs) {
+      return qs.docs.map((e) {
+        return Session.fromDoc(e);
+      }).toList();
+    });
+  }
+
+  static Stream<List<Session>> getCertifiedSessionsFromCampaign(
+      String campaignId) {
+    return sessionsCollection
+        .where(BaseSession.END_DATE, isNull: true)
+        .where('campaign_id', isEqualTo: campaignId)
+        .snapshots()
+        .map((qs) {
+      return qs.docs.map((e) {
+        return Session.fromDoc(e);
+      }).toList();
+    });
   }
 
   static Stream<Session> getSession(String sid) {
@@ -749,8 +785,38 @@ class DatabaseService {
         .map((doc) => doc.exists);
   }
 
-  static Future<Session> getSessionFuture(String sid) async {
-    return Session.fromDoc((await sessionsCollection.doc(sid).get()));
+  static Future<bool> userIsFollowSession(String uid, String sid) {
+    return sessionsCollection
+        .doc(sid)
+        .collection(SESSION_MEMBERS)
+        .doc(uid)
+        .get()
+        .then((value) => value.exists);
+  }
+
+  static Future<List<BaseSession>> getUserFollowingSessions(String uid) {
+    List<BaseSession> sessions;
+    getCertifiedSessions().listen((session) async {
+      session.forEach((e) {
+        sessionsCollection
+            .doc(e.id)
+            .collection(SESSION_MEMBERS)
+            .doc(uid)
+            .get()
+            .then((value) {
+          if (value.exists) {
+            sessions.add(e);
+          }
+        });
+      });
+      return sessions;
+    });
+  }
+
+  static Stream<Session> getSessionFuture(String sid) {
+    return sessionsCollection.doc(sid).snapshots().map((qs) {
+      return Session.fromDoc(qs);
+    });
   }
 
   static Stream<List<SessionMember>> getSessionMembers(String sid,

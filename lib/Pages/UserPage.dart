@@ -7,17 +7,18 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
-import 'package:one_d_m/Components/FollowButton.dart';
-import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FollowersListPage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
@@ -57,11 +58,25 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   User user;
 
+  List<Session> mySessions = [];
+
   @override
   void initState() {
     super.initState();
 
     user = widget.user;
+
+    DatabaseService.getCertifiedSessions().listen((event) {
+      mySessions.clear();
+      event.forEach((element) {
+        DatabaseService.userIsInSession(user.id, element.id).listen((isExist) {
+          if (isExist) {
+            mySessions.add(element);
+          }
+          setState(() {});
+        });
+      });
+    });
 
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -122,33 +137,17 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                     user: user,
                     followingStream: _followingStream,
                   ),
-                  StreamBuilder<List<Donation>>(
-                      stream: _donationStream,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return SliverToBoxAdapter();
-                        if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-                        return SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
-                          sliver: SliverToBoxAdapter(
-                            child: Text(
-                              "Letzte Unterstützungen",
-                              style: _theme.textTheme.headline6,
-                            ),
-                          ),
-                        );
-                      }),
-                  StreamBuilder<List<Donation>>(
-                      stream: _donationStream,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return SliverToBoxAdapter();
-                        if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-                        return SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0),
-                          sliver: SliverList(
-                              delegate: SliverChildListDelegate(
-                                  _generateDonations(snapshot.data))),
-                        );
-                      }),
+                  SliverToBoxAdapter(
+                      child: Container(
+                    width: double.infinity,
+                    height: 0.3,
+                    color: Colors.black87.withOpacity(0.4),
+                  )),
+                  mySessions.isNotEmpty
+                      ? _buildCampaignSessions(mySessions)
+                      : SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
+                        ),
                   Consumer<UserManager>(builder: (context, um, child) {
                     return StreamBuilder<List<Campaign>>(
                         stream: DatabaseService.getSubscribedCampaignsStream(
@@ -212,6 +211,39 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildCampaignSessions(List<Session> sessions) => SliverToBoxAdapter(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const YMargin(8),
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Text("Sessions",
+                  style: Theme.of(context).textTheme.headline6.copyWith(
+                        fontWeight: FontWeight.w600,
+                      )),
+            ),
+            const YMargin(8),
+            Container(
+              height: 116,
+              child: ListView.separated(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  separatorBuilder: (context, index) => SizedBox(
+                        width: 8,
+                      ),
+                  itemBuilder: (context, index) => Padding(
+                        padding: EdgeInsets.only(
+                            left: index == 0 ? 12.0 : 0.0,
+                            right: index == sessions.length - 1 ? 12.0 : 0.0),
+                        child: CertifiedSessionView(sessions[index]),
+                      ),
+                  itemCount: sessions.length),
+            ),
+          ],
+        ),
+      );
+
   List<Widget> _generateDonations(List<Donation> donations) {
     return donations
         .map((d) => DonationWidget(
@@ -226,14 +258,16 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
     list.add(Padding(
       padding: const EdgeInsets.only(left: 10.0, bottom: 10, top: 20),
-      child: Text(
-        "Unterstützte Projekte (${campaigns.length})",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-      ),
+      child: Text("Unterstützte Projekte (${campaigns.length})",
+          style: Theme.of(context).textTheme.headline6.copyWith(
+                fontWeight: FontWeight.w600,
+              )),
     ));
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(campaign: c,));
+      list.add(CampaignHeader(
+        campaign: c,
+      ));
     }
 
     list.add(SizedBox(height: mq.size.height * .5));
@@ -269,62 +303,55 @@ class __OtherUsersRecommendationsState
             builder: (context, snapshot) {
               if (!snapshot.hasData) return SliverToBoxAdapter();
               if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-              return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
-                sliver: SliverToBoxAdapter(
-                  child: Material(
-                    elevation: 1,
-                    borderRadius: BorderRadius.circular(6),
-                    color: _theme.colors.contrast,
-                    clipBehavior: Clip.antiAlias,
-                    child: Theme(
-                      data: ThemeData(
-                          accentColor: _theme.colors.textOnContrast,
-                          unselectedWidgetColor:
-                              _theme.colors.textOnContrast.withOpacity(.8)),
-                      child: ExpansionTile(
-                          initiallyExpanded: true,
-                          title: RichText(
-                            text: TextSpan(
-                                style:
-                                    _theme.textTheme.textOnContrast.bodyText2,
-                                children: [
-                                  TextSpan(text: "Personen denen "),
-                                  TextSpan(
-                                      text: "${widget.user.name} ",
-                                      style: _theme
-                                          .textTheme.textOnContrast.bodyText1
-                                          .copyWith(
-                                              fontWeight: FontWeight.bold)),
-                                  TextSpan(text: "folgt:"),
-                                ]),
-                          ),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Container(
-                                height: 125,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) => Padding(
-                                    padding: EdgeInsets.only(
-                                        left: index == 0 ? 12 : 0,
-                                        right:
-                                            index == snapshot.data?.length - 1
-                                                ? 12
-                                                : 0),
-                                    child: _RecommendationUser(
-                                        snapshot.data[index]),
-                                  ),
-                                  itemCount: snapshot.data?.length,
-                                ),
-                              ),
+              return (SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  height: 180,
+                  color: Colors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const YMargin(12),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: Helper.hexToColor('#2e313f'),
                             ),
-                          ]),
-                    ),
+                            children: <TextSpan>[
+                              TextSpan(text: 'Users '),
+                              TextSpan(
+                                  text: widget.user.name,
+                                  style: new TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              TextSpan(text: ' follows:'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const YMargin(4),
+                      Expanded(
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) => Padding(
+                            padding: EdgeInsets.only(
+                                left: index == 0 ? 12 : 0,
+                                right: index == snapshot.data?.length - 1
+                                    ? 12
+                                    : 0),
+                            child: _RecommendationUser(snapshot.data[index]),
+                          ),
+                          itemCount: snapshot.data?.length,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              );
+              ));
             })
         : SliverToBoxAdapter();
   }
@@ -344,51 +371,81 @@ class _RecommendationUser extends StatelessWidget {
         User user = snapshot.data;
         bool deleted = snapshot.hasData && snapshot.data?.name == null;
 
-        return Container(
-          height: 100,
-          width: 108,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: CustomOpenContainer(
-              openBuilder: (context, close, scrollController) => UserPage(
-                user,
-                scrollController: scrollController,
-              ),
-              closedElevation: 1,
-              closedColor: Colors.white,
-              closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
-              closedBuilder: (context, open) => Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                        child: RoundedAvatar(
-                      user?.imgUrl,
-                      loading: !snapshot.hasData,
-                      color: _theme.colors.dark,
-                      iconColor: _theme.colors.contrast,
-                    )),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Expanded(
-                      child: Container(
-                        width: 76,
-                        height: double.infinity,
-                        child: AutoSizeText(
-                            deleted
-                                ? "Gelöschter Nutzer"
-                                : user?.name ?? "Laden...",
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            style: _theme.textTheme.dark.headline6),
-                      ),
-                    ),
-                  ],
+        return Padding(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                flex: 7,
+                child: CustomOpenContainer(
+                  openBuilder: (context, close, scrollController) => UserPage(
+                    user,
+                    scrollController: scrollController,
+                  ),
+                  closedElevation: 0,
+                  closedColor: Colors.white,
+                  closedShape: CircleBorder(),
+                  closedBuilder: (context, open) => InkWell(
+                    onTap: open,
+                    child: Container(
+                        height: 90,
+                        width: 90,
+                        child: CachedNetworkImage(
+                          imageUrl: user?.imgUrl ?? '',
+                          imageBuilder: (_, imgProvider) => Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(width: 0.5, color: Colors.black),
+                              image: DecorationImage(
+                                image: imgProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            decoration: BoxDecoration(
+                              color: ThemeManager.of(context).colors.contrast,
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(width: 0.5, color: Colors.black),
+                            ),
+                            child: Center(
+                                child: Icon(
+                              Icons.person,
+                              color: ThemeManager.of(context).colors.dark,
+                            )),
+                          ),
+                          placeholder: (_, __) => Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(width: 0.5, color: Colors.black),
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        )),
+                  ),
                 ),
               ),
-            ),
+              SizedBox(
+                height: 4,
+              ),
+              Expanded(
+                child: AutoSizeText(
+                    deleted ? "Gelöschter Nutzer" : user?.name ?? "Laden...",
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.headline6.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Helper.hexToColor('#2e313f'))),
+              ),
+            ],
           ),
         );
       },
@@ -422,38 +479,46 @@ class UserHeader extends SliverPersistentHeaderDelegate {
             bottom: false,
             child: Wrap(
               alignment: WrapAlignment.center,
-              runSpacing: 20,
-              spacing: 20,
+              runSpacing: 0,
               children: <Widget>[
                 AppBar(
+                  leading: IconButton(
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 48,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
                   brightness: Brightness.dark,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   iconTheme: IconThemeData(color: _theme.colors.textOnDark),
-                  title: Text(
-                    "${user?.name ?? "Gelöschter Account"}",
-                    style: TextStyle(color: _theme.colors.textOnDark),
-                  ),
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                        width: 75,
-                        height: 75,
-                        child: RoundedAvatar(
-                          user.imgUrl,
-                          color: _theme.colors.contrast,
-                          iconColor: _theme.colors.textOnContrast,
-                        )),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    _followButton()
+                    _buildUserImage(context),
+                    const XMargin(15),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${user?.name ?? "Gelöschter Account"}",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        const YMargin(10),
+                        _followButton()
+                      ],
+                    )
                   ],
                 ),
                 Container(
-                  width: constraints.maxWidth * .9,
+                  margin: const EdgeInsets.only(top: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
@@ -499,6 +564,41 @@ class UserHeader extends SliverPersistentHeaderDelegate {
     });
   }
 
+  Widget _buildUserImage(BuildContext context) => CachedNetworkImage(
+        imageUrl: user.imgUrl ?? '',
+        imageBuilder: (context, imageProvider) => Container(
+          height: 88.0,
+          width: 88.0,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => Container(
+          height: 88,
+          width: 88,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            color: ThemeManager.of(context).colors.contrast,
+          ),
+          child: Center(
+              child: Icon(
+            Icons.person,
+            color: ThemeManager.of(context).colors.dark,
+          )),
+        ),
+        placeholder: (_, __) => Container(
+          height: 88,
+          width: 88,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+
   @override
   bool shouldRebuild(SliverPersistentHeaderDelegate _) => true;
 
@@ -530,15 +630,22 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                     return CustomOpenContainer(
                       openBuilder: (context, close, controller) =>
                           EditProfile(),
-                      closedShape: CircleBorder(),
+                      closedShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
                       closedBuilder: (context, open) => Container(
-                        width: 56,
-                        height: 56,
+                        width: 100,
+                        height: 41,
+                        color: ThemeManager.of(context).colors.contrast,
                         child: InkWell(
                           onTap: open,
-                          child: Icon(
-                            Icons.edit,
-                            color: ColorTheme.blue,
+                          child: Center(
+                            child: Text(
+                              'Edit',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeManager.of(context).colors.dark),
+                            ),
                           ),
                         ),
                       ),
@@ -551,13 +658,26 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                 builder: (context, snapshot) {
                   bool _followed = snapshot.data;
 
-                  return Center(
-                      child: FollowButton(
-                    followed: _followed,
-                    onPressed: () async {
-                      await _toggleFollow(um.uid, _followed);
-                    },
-                  ));
+                  return Container(
+                      width: 100,
+                      height: 41,
+                      decoration: BoxDecoration(
+                          color: ThemeManager.of(context).colors.contrast,
+                          borderRadius: BorderRadius.all(Radius.circular(15))),
+                      child: InkWell(
+                        onTap: () async {
+                          await _toggleFollow(um.uid, _followed);
+                        },
+                        child: Center(
+                          child: Text(
+                            _followed ? 'Unfollow' : 'Follow',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: ThemeManager.of(context).colors.dark),
+                          ),
+                        ),
+                      ));
                 });
           });
   }
@@ -572,62 +692,57 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   Widget _followersCollumn(
       {String text, Stream stream, CrossAxisAlignment alignment}) {
-    return Container(
-      height: 57,
-      child: StreamBuilder<List<String>>(
-          stream: stream,
-          builder: (context, snapshot) {
-            return Material(
-              color: Colors.transparent,
-              clipBehavior: Clip.antiAlias,
-              borderRadius: BorderRadius.circular(5),
-              child: InkWell(
-                onTap: snapshot.hasData && snapshot.data.isNotEmpty
-                    ? () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (c) => FollowersListPage(
-                                      title: text,
-                                      userIDs: snapshot.data,
-                                    )));
-                      }
-                    : null,
-                child: _textNumberColumn(
-                    number: snapshot.hasData
-                        ? snapshot.data.length.toString()
-                        : "0",
-                    text: text,
-                    alignment: alignment),
-              ),
-            );
-          }),
-    );
+    return StreamBuilder<List<String>>(
+        stream: stream,
+        builder: (context, snapshot) {
+          return Material(
+            color: Colors.transparent,
+            clipBehavior: Clip.antiAlias,
+            borderRadius: BorderRadius.circular(5),
+            child: InkWell(
+              onTap: snapshot.hasData && snapshot.data.isNotEmpty
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (c) => FollowersListPage(
+                                    title: text,
+                                    userIDs: snapshot.data,
+                                  )));
+                    }
+                  : null,
+              child: _textNumberColumn(
+                  number:
+                      snapshot.hasData ? snapshot.data.length.toString() : "0",
+                  text: text,
+                  alignment: alignment),
+            ),
+          );
+        });
   }
 
   Widget _textNumberColumn(
       {String text,
       String number,
       CrossAxisAlignment alignment = CrossAxisAlignment.center}) {
-    return Container(
-      width: 100,
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            AutoSizeText(
-              number.toString(),
-              maxLines: 1,
-              style: _theme.textTheme.textOnDark.headline6,
-            ),
-            Text(
-              text,
-              style: _theme.materialTheme.accentTextTheme.bodyText1
-                  .copyWith(color: _theme.colors.textOnDark.withOpacity(.5)),
-            )
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          AutoSizeText(
+            number.toString(),
+            maxLines: 1,
+            style: _theme.textTheme.textOnDark.headline6
+                .copyWith(fontWeight: FontWeight.w600, fontSize: 24),
+          ),
+          const YMargin(10),
+          Text(
+            text,
+            style: _theme.materialTheme.accentTextTheme.bodyText1.copyWith(
+                color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+          )
+        ],
       ),
     );
   }

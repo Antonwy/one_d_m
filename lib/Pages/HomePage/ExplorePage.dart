@@ -6,8 +6,14 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Donation.dart';
+import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 
 class ExplorePage extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const ExplorePage({Key key, this.scrollController}) : super(key: key);
   @override
   _ExplorePageState createState() => _ExplorePageState();
 }
@@ -22,6 +28,8 @@ class _ExplorePageState extends State<ExplorePage>
     textTheme = Theme.of(context).textTheme;
 
     return CustomScrollView(
+      controller: widget.scrollController,
+      physics: CustomPageViewScrollPhysics(),
       slivers: <Widget>[
         SliverAppBar(
           backgroundColor: Colors.transparent,
@@ -31,6 +39,7 @@ class _ExplorePageState extends State<ExplorePage>
             preferredSize: Size(0, 80),
             child: Container(),
           ),
+          actions: [_buildLatestDonations()],
           flexibleSpace: SafeArea(
             child: Container(
               child: Column(
@@ -69,7 +78,9 @@ class _ExplorePageState extends State<ExplorePage>
                 : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return CampaignList(campaigns: snapshot.data,);
+                return CampaignList(
+                  campaigns: snapshot.data,
+                );
               } else {
                 return SliverToBoxAdapter(
                   child: Center(
@@ -91,6 +102,67 @@ class _ExplorePageState extends State<ExplorePage>
               }
             })
       ],
+    );
+  }
+
+  Widget _buildLatestDonations() => Container(
+        height: 100,
+        margin: const EdgeInsets.only(right: 12),
+        child: StreamBuilder(
+          stream: DatabaseService.getLatestDonations(),
+          builder: (_, snapshot) {
+            if (!snapshot.hasData) return SizedBox.shrink();
+            List<Donation> d = snapshot.data;
+            if (d.isEmpty) return SizedBox.shrink();
+
+            d.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDonationAmount(
+                    amount: d[2]?.amount.toString(),
+                    uid: d[2]?.userId ?? '',
+                    index: 2),
+                _buildDonationAmount(
+                    amount: d[1]?.amount.toString(),
+                    uid: d[1]?.userId ?? '',
+                    index: 1),
+                _buildDonationAmount(
+                    amount: d[0]?.amount.toString(),
+                    uid: d[0]?.userId ?? '',
+                    index: 0),
+              ],
+            );
+          },
+        ),
+      );
+
+  Widget _buildDonationAmount({String uid, String amount, int index}) {
+    Color textColor = Colors.black;
+    if (index == 0) textColor = textColor;
+    if (index == 1) textColor = textColor.withOpacity(0.7);
+    if (index == 2) textColor = textColor.withOpacity(0.2);
+
+    return StreamBuilder(
+      stream: DatabaseService.getUserStream(uid),
+      builder: (_, snapshot) {
+        if (!snapshot.hasData) return SizedBox.shrink();
+        User u = snapshot.data;
+        return RichText(
+          text: TextSpan(
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, fontSize: 12, color: textColor),
+              children: [
+                TextSpan(text: '${u.name} donated '),
+                TextSpan(
+                    text: '$amount DV',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                    ))
+              ]),
+        );
+      },
     );
   }
 

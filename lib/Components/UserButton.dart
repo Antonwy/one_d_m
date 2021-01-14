@@ -69,7 +69,7 @@ class UserButton extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: AutoSizeText(
-                                  "${user.name ?? "Gelöschter Account"}",
+                                  "${user?.name ?? "Gelöschter Account"}",
                                   maxLines: 1,
                                   style: TextStyle(
                                       color: textStyle.color,

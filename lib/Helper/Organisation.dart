@@ -13,10 +13,10 @@ class Organisation {
 
   factory Organisation.fromMap(DocumentSnapshot doc) {
     return Organisation(
-        name: doc[NAME],
-        imgUrl: doc[IMAGEURL],
-        id: doc.documentID,
-        description: doc[DESCRIPTION],
-        website: doc[WEBSITE]);
+        name: doc.data()[NAME],
+        imgUrl: doc.data()[IMAGEURL],
+        id: doc.id,
+        description: doc.data()[DESCRIPTION],
+        website: doc.data()[WEBSITE]);
   }
 }

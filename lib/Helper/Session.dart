@@ -20,15 +20,15 @@ class BaseSession {
 
   factory BaseSession.fromDoc(DocumentSnapshot doc) {
     return BaseSession(
-      creatorId: doc[CREATOR_ID],
-      campaignId: doc[CAMPAIGN_ID],
-      id: doc.documentID,
-      name: doc[SESSION_NAME],
-      amountPerUser: doc[AMOUNT_PER_USER],
-      createdAt: (doc[CREATED_AT] as Timestamp).toDate(),
+      creatorId: doc.data()[CREATOR_ID],
+      campaignId: doc.data()[CAMPAIGN_ID],
+      id: doc.id,
+      name: doc.data()[SESSION_NAME],
+      amountPerUser: doc.data()[AMOUNT_PER_USER],
+      createdAt: (doc.data()[CREATED_AT] as Timestamp).toDate(),
       endDate:
-          doc[END_DATE] == null ? null : (doc[END_DATE] as Timestamp).toDate(),
-      sessionDescription: doc[SESSION_DESCRIPTION] ?? "",
+          doc.data()[END_DATE] == null ? null : (doc.data()[END_DATE] as Timestamp).toDate(),
+      sessionDescription: doc.data()[SESSION_DESCRIPTION] ?? "",
     );
   }
 
@@ -76,27 +76,30 @@ class Session extends BaseSession {
             sessionDescription: sessionDescription);
 
   factory Session.fromDoc(DocumentSnapshot doc) {
+    if(!doc.exists) return Session();
     return Session(
-        creatorId: doc[BaseSession.CREATOR_ID],
+        creatorId: doc.data()[BaseSession.CREATOR_ID],
         id: doc.id,
-        name: doc[BaseSession.SESSION_NAME],
-        amountPerUser: doc[BaseSession.AMOUNT_PER_USER],
-        createdAt: (doc[BaseSession.CREATED_AT] as Timestamp).toDate(),
-        endDate: doc[BaseSession.END_DATE] == null
+        name: doc.data()[BaseSession.SESSION_NAME],
+        amountPerUser: doc.data()[BaseSession.AMOUNT_PER_USER],
+        createdAt: (doc.data()[BaseSession.CREATED_AT] as Timestamp).toDate(),
+        endDate: doc.data()[BaseSession.END_DATE] == null
             ? null
-            : (doc[BaseSession.END_DATE] as Timestamp).toDate(),
-        campaignId: doc[BaseSession.CAMPAIGN_ID],
-        campaignName: doc[CAMPAIGN_NAME],
-        campaignImgUrl: doc[CAMPAIGN_IMG_URL],
-        currentAmount: doc[CURRENT_AMOUNT],
-        memberCount: doc[MEMBER_COUNT] ?? 0,
-        campaignShortDescription: doc[CAMPAIGN_SHORT_DESCRIPTION],
-        sessionDescription: doc[BaseSession.SESSION_DESCRIPTION] ?? "",
-        imgUrl: doc[IMG_URL]);
+            : (doc.data()[BaseSession.END_DATE] as Timestamp).toDate(),
+        campaignId: doc.data()[BaseSession.CAMPAIGN_ID],
+        campaignName: doc.data()[CAMPAIGN_NAME],
+        campaignImgUrl: doc.data()[CAMPAIGN_IMG_URL],
+        currentAmount: doc.data()[CURRENT_AMOUNT],
+        memberCount: doc.data()[MEMBER_COUNT] ?? 0,
+        campaignShortDescription: doc.data()[CAMPAIGN_SHORT_DESCRIPTION],
+        sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
+        imgUrl: doc.data()[IMG_URL]);
   }
 
   static List<Session> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.documents.map((doc) => Session.fromDoc(doc)).toList();
+    return qs.docs.map((doc){
+      Session.fromDoc(doc);
+    }).toList();
   }
 
   static const CAMPAIGN_IMG_URL = "campaign_img_url",
@@ -151,11 +154,11 @@ class SessionInvite {
 
   factory SessionInvite.fromDoc(DocumentSnapshot doc) {
     return SessionInvite(
-        sessionCreatorId: doc[SESSION_CREATOR_ID],
-        sessionId: doc[ID],
-        sessionName: doc[SESSION_NAME],
-        sessionDescription: doc[BaseSession.SESSION_DESCRIPTION] ?? "",
-        amountPerUser: doc[BaseSession.AMOUNT_PER_USER]);
+        sessionCreatorId: doc.data()[SESSION_CREATOR_ID],
+        sessionId: doc.data()[ID],
+        sessionName: doc.data()[SESSION_NAME],
+        sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
+        amountPerUser: doc.data()[BaseSession.AMOUNT_PER_USER]);
   }
 
   static List<SessionInvite> fromQuerySnapshot(QuerySnapshot qs) {
@@ -187,10 +190,10 @@ class SessionMember {
   SessionMember({this.userId, this.donationAmount});
 
   factory SessionMember.fromDoc(DocumentSnapshot doc) =>
-      SessionMember(userId: doc[ID], donationAmount: doc[DONATION_AMOUNT] ?? 0);
+      SessionMember(userId: doc.data()[ID], donationAmount: doc.data()[DONATION_AMOUNT] ?? 0);
 
   static List<SessionMember> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.documents.map((doc) => SessionMember.fromDoc(doc)).toList();
+    return qs.docs.map((doc) => SessionMember.fromDoc(doc)).toList();
   }
 
   static const String ID = "id", DONATION_AMOUNT = "donation_amount";

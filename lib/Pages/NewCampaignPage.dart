@@ -2,14 +2,14 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
-import 'package:one_d_m/Components/DonationWidget.dart';
-import 'package:one_d_m/Components/FollowButton.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
@@ -17,10 +17,11 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Helper/image_placeholder.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -51,6 +52,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Stream<List<Donation>> _donationStream;
 
   bool _isAuthorOfCampaign = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
     super.initState();
   }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -116,6 +119,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                         user: um.user,
                                         context: context,
                                         close: bd.close,
+                                        controller: _scrollController,
                                       ));
                                     }
                               : () {
@@ -137,9 +141,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     child: Container(
                       height: _mq.size.height * .3 + 30,
                       width: _mq.size.width,
-                      child: ImageWidgetPlaceholder(
-                        image: CachedNetworkImageProvider(widget.campaign.imgUrl),
-                        placeholder: SizedBox.shrink(),
+                      child: CachedNetworkImage(
+                        imageUrl: widget.campaign.imgUrl,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -188,103 +192,111 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           ),
                           SliverPadding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 18),
+                                horizontal: 14, vertical: 8),
                             sliver: SliverList(
                               delegate: SliverChildListDelegate([
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Expanded(
+                                      flex: 4,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          Material(
-                                            color: _bTheme.dark,
-                                            clipBehavior: Clip.antiAlias,
-                                            borderRadius:
-                                                BorderRadius.circular(4.0),
-                                            child: FutureBuilder<Organisation>(
-                                                future: DatabaseService
-                                                    .getOrganisation(
-                                                        campaign.authorId),
-                                                builder: (context, snapshot) {
-                                                  Organisation organisation =
-                                                      snapshot.data;
-                                                  return InkWell(
-                                                    onTap: !snapshot.hasData
-                                                        ? null
-                                                        : () {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder: (context) =>
-                                                                        OrganisationPage(
-                                                                            organisation)));
-                                                          },
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 8.0,
-                                                          vertical: 4.0),
-                                                      child: Text(
-                                                        organisation?.name ??
-                                                            "Laden...",
-                                                        style: _textTheme
-                                                            .bodyText1
-                                                            .copyWith(
-                                                                color: _bTheme
-                                                                    .contrast,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
-                                          ),
                                           SizedBox(height: 5),
-                                          AutoSizeText(
-                                            campaign.name,
-                                            maxLines: 1,
-                                            style: _textTheme.headline5
-                                                .copyWith(
-                                                    fontSize: 30,
-                                                    fontWeight:
-                                                        FontWeight.w500),
+                                          Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 220,
+                                                    child: AutoSizeText(
+                                                      campaign.name,
+                                                      maxLines: 1,
+                                                      style: _textTheme
+                                                          .headline5
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                    ),
+                                                  ),
+                                                  FutureBuilder<Organisation>(
+                                                      future: DatabaseService
+                                                          .getOrganisation(
+                                                              campaign
+                                                                  .authorId),
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        Organisation
+                                                            organisation =
+                                                            snapshot.data;
+                                                        return InkWell(
+                                                          onTap:
+                                                              !snapshot.hasData
+                                                                  ? null
+                                                                  : () {
+                                                                      Navigator.push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) => OrganisationPage(organisation)));
+                                                                    },
+                                                          child: Text(
+                                                            'by ${organisation?.name ?? 'Laden...'}',
+                                                            style: _textTheme
+                                                                .bodyText1
+                                                                .copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ],
+                                              ),
+                                              Expanded(child: SizedBox()),
+                                              Consumer<UserManager>(builder:
+                                                  (context, um, child) {
+                                                return StreamBuilder<bool>(
+                                                    initialData: false,
+                                                    stream: DatabaseService
+                                                        .hasSubscribedCampaignStream(
+                                                            um.uid,
+                                                            campaign.id),
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      _subscribed =
+                                                          snapshot.data;
+                                                      return _buildFollowButton(
+                                                          context,
+                                                          () async =>
+                                                              _toggleSubscribed(
+                                                                  um.uid),
+                                                          _subscribed);
+                                                    });
+                                              }),
+                                            ],
                                           ),
+                                          const YMargin(12),
                                           Text(
                                             "${campaign?.shortDescription}",
-                                            style: _textTheme.caption,
+                                            style: _textTheme.caption.copyWith(
+                                                fontWeight: FontWeight.w400,
+                                                color: Helper.hexToColor(
+                                                    '#2e313f'),
+                                                fontSize: 15),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Consumer<UserManager>(
-                                        builder: (context, um, child) {
-                                      return StreamBuilder<bool>(
-                                          initialData: false,
-                                          stream: DatabaseService
-                                              .hasSubscribedCampaignStream(
-                                                  um.uid, campaign.id),
-                                          builder: (context, snapshot) {
-                                            _subscribed = snapshot.data;
-                                            return FollowButton(
-                                              onPressed: () async =>
-                                                  _toggleSubscribed(um.uid),
-                                              followed: _subscribed,
-                                            );
-                                          });
-                                    }),
+                                    const YMargin(12),
                                   ],
                                 ),
-                                SizedBox(
-                                  height: 20,
-                                ),
+                                const YMargin(12),
                                 Container(
                                   height: 100,
                                   child: Row(
@@ -301,79 +313,18 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     ],
                                   ),
                                 ),
-                                Consumer<UserManager>(
-                                  builder: (context, um, child) => Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      _AmountWidget(
-                                        1,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                      _AmountWidget(
-                                        2,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                      _AmountWidget(
-                                        5,
-                                        user: um.user,
-                                        campaign: campaign,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
+                                const YMargin(12),
                                 Text("Beschreibung",
-                                    style: _textTheme.headline6),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(campaign.description ?? "",
-                                    style: _textTheme.bodyText2),
-                                StreamBuilder<List<Donation>>(
-                                    stream: _donationStream,
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) return Container();
-                                      if (snapshot.data.isEmpty)
-                                        return Container();
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          SizedBox(
-                                            height: 20,
-                                          ),
-                                          Text("Spenden",
-                                              style: _textTheme.headline6),
-                                        ],
-                                      );
-                                    }),
+                                    style: _textTheme.headline6.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    )),
+                                const YMargin(8),
+                                _buildExpandableContent(
+                                    context, campaign.description ?? ""),
                               ]),
                             ),
                           ),
-                          StreamBuilder<List<Donation>>(
-                              stream: _donationStream,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData)
-                                  return SliverToBoxAdapter();
-                                snapshot.data.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
-                                return SliverPadding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4),
-                                  sliver: SliverList(
-                                    delegate:
-                                        SliverChildListDelegate(snapshot.data
-                                            .map((d) => DonationWidget(
-                                                  d,
-                                                  campaignPage: true,
-                                                ))
-                                            .toList()),
-                                  ),
-                                );
-                              }),
+                          _buildCampaignSessions(),
                           StreamBuilder<List<News>>(
                               stream: DatabaseService.getNewsFromCampaignStream(
                                   campaign),
@@ -385,6 +336,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       height: 100,
                                     ),
                                   );
+                                List<News> n = snapshot.data;
+                                n.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+
                                 return SliverPadding(
                                   padding: EdgeInsets.fromLTRB(18, 0, 18, 80),
                                   sliver: SliverList(
@@ -392,14 +346,15 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 18.0),
-                                      child: Text(
-                                          "Neuigkeiten (${snapshot.data.length})",
+                                      child: Text("Neuigkeiten",
                                           style: _textTheme.headline6),
                                     ),
-                                    ...snapshot.data
-                                        .map((n) =>
-                                            NewsPost(n, withCampaign: false))
-                                        .toList()
+                                    ListView.builder(
+                                      itemCount: n.length,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemBuilder: (_,index)=>NewsPost(n[index],withCampaign: false,),
+                                    )
                                   ])),
                                 );
                               }),
@@ -472,11 +427,210 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             }));
   }
 
+  Widget _buildCampaignSessions() => SliverToBoxAdapter(
+        child: StreamBuilder(
+            stream: DatabaseService.getCertifiedSessionsFromCampaign(
+                widget.campaign.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<Session> sessions = snapshot.data;
+
+                if (sessions.isEmpty) return SizedBox.shrink();
+
+                sessions.sort((a,b) =>b.createdAt.compareTo(a.createdAt));
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 14.0),
+                      child: Text("Sessions",
+                          style: _textTheme.headline6.copyWith(
+                            fontWeight: FontWeight.w600,
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 14),
+                      child: Text(
+                          '${sessions.length} Influencer engagieren sich für dieses Projekt',
+                          style: _textTheme.headline6.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(0.6))),
+                    ),
+                    const YMargin(8),
+                    Container(
+                      height: 116,
+                      child: ListView.separated(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          separatorBuilder: (context, index) => SizedBox(
+                                width: 8,
+                              ),
+                          itemBuilder: (context, index) => Padding(
+                                padding: EdgeInsets.only(
+                                    left: index == 0 ? 12.0 : 0.0,
+                                    right: index == sessions.length - 1
+                                        ? 12.0
+                                        : 0.0),
+                                child: CertifiedSessionView(sessions[index]),
+                              ),
+                          itemCount: sessions.length),
+                    ),
+                  ],
+                );
+              } else {
+                return Center(
+                  child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator()),
+                );
+              }
+            }),
+      );
+
+  Widget _buildExpandableContent(BuildContext context, String text) =>
+      ExpandableNotifier(
+        child: Column(
+          children: [
+            Expandable(
+              collapsed: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    maxLines: 4,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Helper.hexToColor('#2e313f'),
+                        fontWeight: FontWeight.w400),
+                  ),
+                  text.length > 90
+                      ? Align(
+                          alignment: Alignment.bottomLeft,
+                          child: ExpandableButton(
+                              child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: Colors.black,
+                                  size: 32,
+                                ),
+                              ),
+                              Text(
+                                'mehr',
+                                textAlign: TextAlign.start,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          )),
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
+              expanded: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    maxLines: null,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Helper.hexToColor('#2e313f'),
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: ExpandableButton(
+                        child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.keyboard_arrow_up_outlined,
+                          color: Colors.black,
+                        ),
+                        Text(
+                          'weniger',
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    )),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      );
+
+  Widget _buildFollowButton(
+          BuildContext context, Function function, bool isFollow) =>
+      Container(
+        width: 90,
+        height: 50,
+        child: MaterialButton(
+            color: _bTheme.dark,
+            textColor: _bTheme.light,
+            child: _isLoading
+                ? SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                          valueColor:
+                              new AlwaysStoppedAnimation<Color>(Colors.white)),
+                    ),
+                  )
+                : AutoSizeText(
+                    isFollow ? 'Entfolgen' : "Folgen",
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.button.copyWith(
+                          color: ThemeManager.of(context).colors.light,
+                        ),
+                  ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            onPressed: function),
+      );
+
   Future<void> _toggleSubscribed(String uid) async {
+    setState(() {
+      _isLoading = true;
+    });
     if (_subscribed)
-      await DatabaseService.deleteSubscription(campaign, uid);
+      await DatabaseService.deleteSubscription(campaign, uid)
+          .then((value) => setState(() {
+                _isLoading = false;
+              }));
     else
-      await DatabaseService.createSubscription(campaign, uid);
+      await DatabaseService.createSubscription(campaign, uid)
+          .then((value) => setState(() {
+                _isLoading = false;
+              }));
   }
 }
 
@@ -507,18 +661,15 @@ class _StatCollumn extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyText1.copyWith(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30),
-            ),
-            SizedBox(
-              height: 6,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 28),
             ),
             Text(
               description,
               style: TextStyle(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -527,79 +678,3 @@ class _StatCollumn extends StatelessWidget {
   }
 }
 
-class _AmountWidget extends StatelessWidget {
-  final int amount;
-  final User user;
-  final Campaign campaign;
-
-  _AmountWidget(this.amount, {this.user, this.campaign});
-
-  TextTheme _textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    _textTheme = Theme.of(context).textTheme;
-    return Expanded(
-      child: OfflineBuilder(
-          child: Container(),
-          connectivityBuilder: (context, connection, child) {
-            bool activated = connection != ConnectivityResult.none;
-            return Container(
-              height: 100,
-              child: Card(
-                clipBehavior: Clip.antiAlias,
-                color: ColorTheme.whiteBlue,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: InkWell(
-                  onTap: () {
-                    if (!activated) {
-                      Helper.showConnectionSnackBar(context);
-                      return;
-                    }
-
-                    BottomDialog bd = BottomDialog(context);
-                    bd.show(DonationDialogWidget(
-                      campaign: campaign,
-                      defaultSelectedAmount: amount,
-                      user: user,
-                      context: context,
-                      close: bd.close,
-                    ));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Material(
-                          color: ColorTheme.blue.withOpacity(.2),
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              "DV",
-                              style: TextStyle(
-                                  fontSize: 12, color: ColorTheme.blue),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "${amount}.00",
-                          style: _textTheme.headline6
-                              .copyWith(color: ColorTheme.blue),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
-  }
-
-}

@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/PushNotification.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
+import 'package:one_d_m/Helper/margin.dart';
 
 import 'HomePage/HomePage.dart';
 import 'VerifyEmailPage.dart';
@@ -173,37 +172,19 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Container(
-                      width: Tween<double>(begin: 0.0, end: 40.0)
-                          .animate(_controller)
-                          .value,
-                      height: 2,
-                      color: _theme.colors.dark,
-                    );
-                  }),
-              SizedBox(
-                height: 4,
-              ),
               FadeTransition(
                 opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                     CurvedAnimation(
                         parent: _controller,
                         curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                              parent: _controller,
-                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                  child: Text("Willkommen bei",
-                      style: _theme.textTheme.dark.headline6
-                          .copyWith(fontWeight: FontWeight.w200)),
+                child: Image.asset(
+                  'assets/images/ic_onedm.png',
+                  width: 250,
+                  height: 200,
                 ),
               ),
               FadeTransition(
@@ -211,17 +192,10 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                     CurvedAnimation(
                         parent: _controller,
                         curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(begin: Offset(0, 1.5), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                              parent: _controller,
-                              curve: Interval(.3, 1.0, curve: Curves.easeOut))),
-                  child: AutoSizeText("One Dollar Movement",
-                      maxLines: 1,
-                      style: _theme.textTheme.dark.headline3
-                          .copyWith(fontWeight: FontWeight.bold)),
-                ),
+                child: AutoSizeText("One Dollar Movement",
+                    maxLines: 1,
+                    style: _theme.textTheme.dark.headline5
+                        .copyWith(fontWeight: FontWeight.w600,fontSize: 24)),
               ),
             ],
           ),

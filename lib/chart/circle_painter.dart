@@ -48,9 +48,9 @@ class CirclePainter extends CustomPainter {
       center: center,
       radius: radius,
       sources: [
-        88,
-        8,
-        4,
+        70,
+        25,
+        5,
       ],
       colors: [
         ColorTheme.donationGreen,

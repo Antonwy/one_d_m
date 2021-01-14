@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
@@ -9,6 +10,7 @@ import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 
 class InfoFeed extends StatelessWidget {
@@ -16,7 +18,7 @@ class InfoFeed extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 14.0, 10.0, 8),
+        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0,0),
         child: _ChartsPageView(),
       ),
     );
@@ -38,7 +40,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       color: _bTheme.dark,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 228,
+        height: 120,
         child: StreamBuilder<Statistics>(
             stream: DatabaseService.getStatistics(),
             builder: (context, snapshot) {
@@ -69,13 +71,13 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                                   desc: "Nutzer",
                                 ),
                                 _ColumnStats(
-                                  value: statistics.campaignCount,
-                                  desc: "Projekte",
-                                ),
-                                _ColumnStats(
                                   value: statistics
                                       .donationStatistics.donationsCount,
                                   desc: "Unterstützungen",
+                                ),
+                                _ColumnStats(
+                                  value: statistics.campaignCount,
+                                  desc: "Projekte",
                                 ),
                               ],
                             ),
@@ -136,7 +138,7 @@ class _ColumnStats extends StatelessWidget {
           Numeral(value).value(),
           style: TextStyle(
               color: _bTheme.contrast,
-              fontSize: 50,
+              fontSize: 32,
               fontWeight: FontWeight.w600),
         ),
         Text(
@@ -180,27 +182,26 @@ class _DCInformation extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
                               children: [
                                 Text(
                                   '${snapshot?.data?.dcBalance ?? 0}',
                                   style: TextStyle(
-                                      fontSize: 35.0,
+                                      fontSize: 24.0,
                                       fontWeight: FontWeight.bold,
                                       color: ThemeManager.of(context)
                                           .colors
                                           .contrast),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('Donation Votes'),
-                                ),
+                                const XMargin(5),
+                                Text('Donation Votes'),
                               ],
                             ),
                             SizedBox(height: 5.0),
-                            Text(
-                              '${100 - ((snapshot?.data?.activityScore ?? 0) * 100).round()}% bis zum nächsten DV',
+                            AutoSizeText(
+                              'Entspricht ${snapshot?.data?.dcBalance*5??0} Cent ',
                               style: TextStyle(
+                                fontSize: 14,
                                 fontWeight: FontWeight.w200,
                               ),
                             ),
@@ -208,53 +209,11 @@ class _DCInformation extends StatelessWidget {
                         ),
                         _PercentCircle(
                           percent: snapshot?.data?.activityScore ?? 0,
-                          radius: 40.0,
+                          radius: 30.0,
                         ),
                       ],
                     );
                   }),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 19.0),
-                child: Divider(
-                  color: ColorTheme.white.withOpacity(0.1),
-                  thickness: 2.0,
-                  height: 2.0,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Tagesziel',
-                      percent: ((statistics?.donationStatistics?.dailyAmount ??
-                                  0) /
-                              statistics?.donationStatistics?.dailyAmountTarget)
-                          .clamp(0.0, 1.0),
-                    ),
-                  ),
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Monatsziel',
-                      percent:
-                          ((statistics?.donationStatistics?.monthlyAmount ??
-                                      0) /
-                                  statistics
-                                      ?.donationStatistics?.monthlyAmountTarget)
-                              .clamp(0.0, 1.0),
-                    ),
-                  ),
-                  Expanded(
-                    child: _GoalWidget(
-                      title: 'Jahresziel',
-                      percent:
-                          ((statistics?.donationStatistics?.yearlyAmount ?? 0) /
-                                  statistics
-                                      ?.donationStatistics?.yearlyAmountTarget)
-                              .clamp(0.0, 1.0),
-                    ),
-                  ),
-                ],
-              )
             ],
           )),
     );

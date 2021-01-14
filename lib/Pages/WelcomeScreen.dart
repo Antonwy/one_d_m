@@ -192,7 +192,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   void _animateToPage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 0),);
+        duration: Duration(milliseconds: 400),);
   }
 }
 

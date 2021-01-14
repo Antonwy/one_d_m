@@ -174,43 +174,6 @@ class _ProfilePageState extends State<ProfilePage>
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    CustomOpenContainer(
-                                      openBuilder:
-                                          (context, close, controller) =>
-                                              UserPage(user,
-                                                  scrollController: controller),
-                                      closedShape: CircleBorder(),
-                                      closedElevation: 0,
-                                      closedColor: _theme.colors.contrast,
-                                      closedBuilder: (context, open) =>
-                                          RoundButtonHomePage(
-                                        icon: Icons.person,
-                                        onTap: open,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    // Row(
-                                    //   children: <Widget>[
-                                    //     user?.admin ?? false
-                                    //         ? RoundButtonHomePage(
-                                    //             icon: Icons.add,
-                                    //             toPage: CreateCampaignPage(),
-                                    //             toColor: Colors.indigo,
-                                    //           )
-                                    //         : Container(
-                                    //             width: 0,
-                                    //           ),
-                                    //     user?.admin ?? false
-                                    //         ? SizedBox(
-                                    //             width: 10,
-                                    //           )
-                                    //         : Container(
-                                    //             width: 0,
-                                    //           ),
-                                    //   ],
-                                    // ),
                                     RoundButtonHomePage(
                                       icon: Icons.settings,
                                       onTap: () {

@@ -155,7 +155,7 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .listCollections()
     .then(async (collectionList) => {
       collectionList.forEach(async (collection) => {
-        collection.get().then(async (docsList) => {
+        await collection.get().then(async (docsList) => {
           docsList.docs.forEach(async (doc) => await doc.ref.delete());
         });
       });

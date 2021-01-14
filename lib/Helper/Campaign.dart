@@ -39,21 +39,21 @@ class Campaign {
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
-        id: snapshot.documentID,
-        name: snapshot[NAME],
-        amount: snapshot[AMOUNT],
-        description: snapshot[DESCRIPTION],
-        city: snapshot[CITY],
-        shortDescription: snapshot[SHORTDESCRIPTION],
-        subscribedCount: snapshot[SUBSCRIBEDCOUNT] ?? 0,
-        createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
-        imgUrl: snapshot[IMAGEURL],
-        thumbnailUrl: snapshot[THUMBNAILURL],
-        authorId: snapshot[AUTHORID],
-        categoryId: snapshot[CATEGORYID],
-        moreImages: snapshot[MOREIMAGES] == null
+        id: snapshot.id,
+        name: snapshot.data()['title'],
+        amount: snapshot.data()['current_amount'],
+        description: snapshot.data()['description'],
+        city: snapshot.data()['city'],
+        shortDescription: snapshot.data()['short_description'],
+        subscribedCount: snapshot.data()['subscribed_count'],
+        createdAt: (snapshot.data()['created_at'] as Timestamp).toDate(),
+        imgUrl: snapshot.data()['image_url'],
+        thumbnailUrl: '',
+        authorId: snapshot.data()['authorId'],
+        categoryId: snapshot.data()['category_id'],
+        moreImages: snapshot.data()['more_images_url'] == null
             ? []
-            : List.from(snapshot[MOREIMAGES]));
+            : List.from(snapshot['more_images_url']));
   }
 
   static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {

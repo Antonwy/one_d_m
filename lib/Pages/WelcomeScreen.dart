@@ -192,7 +192,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   void _animateToPage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+        duration: Duration(milliseconds: 0),);
   }
 }
 
@@ -222,133 +222,118 @@ class _WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _mq = MediaQuery.of(context);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Opacity(
-              opacity: 1 - animatedValue,
-              child: Transform.scale(
-                scale: 1 - animatedValue * .5,
-                child: Transform.translate(
-                  offset: Offset(_mq.size.width * animatedValue * .4, 0),
-                  child: svgName == null
-                      ? Image.asset(
-                          "assets/images/$imageName",
-                        )
-                      : SvgPicture.asset(
-                          "assets/images/$svgName.svg",
-                          height: MediaQuery.of(context).size.height * .25,
-                          placeholderBuilder: (context) => Container(
-                            height: MediaQuery.of(context).size.height * .25,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Opacity(
-              opacity: 1 - animatedValue,
-              child: Transform.translate(
-                offset: Offset(_mq.size.width * animatedValue * .3, 0),
-                child: titleText ??
-                    AutoSizeText(
-                      title,
-                      maxLines: 1,
-                      style: _textTheme.headline3.copyWith(
-                        color:
-                            darkText ? ColorTheme.blue : ColorTheme.whiteBlue,
+    return AnimatedOpacity(
+      duration: const Duration(seconds: 1),
+      opacity: 1 - animatedValue,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              svgName == null
+                  ? Image.asset(
+                      "assets/images/$imageName",
+                    )
+                  : SvgPicture.asset(
+                      "assets/images/$svgName.svg",
+                      height: MediaQuery.of(context).size.height * .25,
+                      placeholderBuilder: (context) => Container(
+                        height: MediaQuery.of(context).size.height * .25,
                       ),
-                      textAlign: TextAlign.center,
                     ),
+              SizedBox(
+                height: 20,
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Opacity(
-              opacity: 1 - animatedValue,
-              child: Transform.translate(
-                offset: Offset(_mq.size.width * animatedValue * .2, 0),
-                child: Text(
-                  description,
-                  style: _textTheme.subtitle2.copyWith(
-                      color: darkText
-                          ? ColorTheme.blue.withOpacity(.8)
-                          : ColorTheme.whiteBlue.withOpacity(.8)),
-                  textAlign: TextAlign.center,
-                ),
+              titleText ??
+                  AutoSizeText(
+                    title,
+                    maxLines: 1,
+                    style: _textTheme.headline3.copyWith(
+                      color:
+                          darkText ? ColorTheme.blue : ColorTheme.whiteBlue,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+              SizedBox(
+                height: 10,
               ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Opacity(
-              opacity: 1 - animatedValue,
-              child: Transform.scale(
-                scale: 1 - animatedValue * .5,
-                child: Transform.translate(
-                  offset: Offset(_mq.size.width * animatedValue * .1, 0),
-                  child: isLastPage
-                      ? Column(
-                          children: <Widget>[
-                            FloatingActionButton.extended(
-                              heroTag: "",
-                              onPressed: onPressed,
-                              label: Text("Berechtigen"),
-                              icon: loading
-                                  ? Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation(
-                                            ColorTheme.blue),
-                                      ),
-                                    )
-                                  : Icon(Icons.done),
-                              elevation: 0,
-                              backgroundColor: ColorTheme.blue,
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            FloatingActionButton.extended(
-                              icon: Icon(Icons.not_interested),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (c) =>
-                                            ChooseLoginMethodPage()));
-                              },
-                              label: Text("Nicht berechtigen"),
-                              elevation: 0,
-                              backgroundColor: ColorTheme.blue,
-                            ),
-                          ],
-                        )
-                      : FloatingActionButton(
+              Text(
+                description,
+                style: _textTheme.subtitle2.copyWith(
+                    color: darkText
+                        ? ColorTheme.blue
+                        : ColorTheme.whiteBlue),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              isLastPage
+                  ? Column(
+                      children: <Widget>[
+                        FloatingActionButton.extended(
+                          heroTag: "",
                           onPressed: onPressed,
-                          child: Icon(
-                            Icons.arrow_forward,
-                            color: darkText
-                                ? ColorTheme.blue
-                                : ColorTheme.whiteBlue,
-                          ),
+                          label: Text("Berechtigen"),
+                          icon: loading
+                              ? Container(
+                                  width: 30,
+                                  height: 30,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation(
+                                        ColorTheme.blue),
+                                  ),
+                                )
+                              : Icon(Icons.done),
                           elevation: 0,
-                          backgroundColor:
-                              darkText ? Colors.black12 : Colors.white12,
+                          backgroundColor: ColorTheme.blue,
                         ),
-                ),
-              ),
-            ),
-          ],
+                        SizedBox(
+                          height: 10,
+                        ),
+                        FloatingActionButton.extended(
+                          icon: Icon(Icons.not_interested),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (c) =>
+                                        ChooseLoginMethodPage()));
+                          },
+                          label: Text("Nicht berechtigen"),
+                          elevation: 0,
+                          backgroundColor: ColorTheme.blue,
+                        ),
+                      ],
+                    )
+                  : FloatingActionButton(
+                      onPressed: onPressed,
+                      child: Icon(
+                        Icons.arrow_forward,
+                        color: darkText
+                            ? ColorTheme.blue
+                            : ColorTheme.whiteBlue,
+                      ),
+                      elevation: 0,
+                      backgroundColor:
+                          darkText ? Colors.black12 : Colors.white12,
+                    ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+class AutoSizeTextWidget extends StatelessWidget {
+  final String text;
+
+  const AutoSizeTextWidget({Key key, this.text}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+

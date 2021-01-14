@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
@@ -16,6 +17,19 @@ class CampaignList extends StatefulWidget {
 }
 
 class _CampaignListState extends State<CampaignList> {
+  
+  @override
+  void initState() {
+
+    super.initState();
+  }
+  @override
+  void didChangeDependencies() {
+    widget.campaigns.forEach((element) {
+      precacheImage(CachedNetworkImageProvider(element.imgUrl), context);
+    });
+    super.didChangeDependencies();
+  }
   @override
   Widget build(BuildContext context) {
     if (widget.campaigns.isEmpty) {
@@ -57,7 +71,7 @@ class _CampaignListState extends State<CampaignList> {
     for (Campaign c in campaigns) {
       rateCount++;
 
-      list.add(CampaignHeader(c));
+      list.add(CampaignHeader(campaign: c,));
 
       if (rateCount >= adRate) {
         list.add(ExploreNativeAd());

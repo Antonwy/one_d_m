@@ -233,7 +233,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     ));
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(c));
+      list.add(CampaignHeader(campaign: c,));
     }
 
     list.add(SizedBox(height: mq.size.height * .5));

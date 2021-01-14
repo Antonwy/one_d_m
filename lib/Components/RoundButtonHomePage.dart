@@ -40,6 +40,7 @@ class RoundButtonHomePage extends StatelessWidget {
           },
           child: Icon(
             icon,
+            size: 32,
             color: ThemeManager.of(context).colors.textOnContrast,
           ),
         ),

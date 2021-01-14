@@ -5,6 +5,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -56,6 +57,7 @@ class SessionView extends StatelessWidget {
 
 class _ProvidedSessionView extends StatelessWidget {
   ThemeManager _theme;
+
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
@@ -488,7 +490,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                 ),
                 closedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
-                closedColor: _theme.colors.contrast,
+                closedColor: ColorTheme.wildGreen,
                 closedElevation: 1,
                 closedBuilder: (context, open) => Column(
                   mainAxisSize: MainAxisSize.min,
@@ -525,18 +527,21 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                                 user?.name ?? "Laden...",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: _theme
-                                    .textTheme.textOnContrast.bodyText1
+                                style: _theme.textTheme.textOnContrast.bodyText1
                                     .copyWith(
                                         fontSize: 18,
-                                        fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                        color: _theme.colors.textOnDark),
                               ),
                             ),
+                            const SizedBox(height: 5,),
                             showTargetAmount
                                 ? Text(
-                                    "${member.donationAmount}/${sm.baseSession.amountPerUser} DV",
+                                    "${member.donationAmount} DV",
                                     style: _theme
-                                        .textTheme.textOnContrast.bodyText1,
+                                        .textTheme.textOnContrast.bodyText1
+                                        .copyWith(
+                                            color: _theme.colors.textOnDark),
                                   )
                                 : Container(),
                           ],

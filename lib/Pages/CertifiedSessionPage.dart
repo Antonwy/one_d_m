@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
@@ -80,6 +81,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
 
 class _CertifiedSessionPageIndicator extends StatefulWidget {
   PageController _pageController;
+
   _CertifiedSessionPageIndicator(this._pageController);
 
   @override
@@ -406,7 +408,7 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           sliver: SliverToBoxAdapter(
             child: Container(
-              height: 250,
+              height: 220,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -420,15 +422,48 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Positioned(
-                    child: _SessionJoinButton(),
-                    bottom: 6,
-                    right: 12,
-                  )
                 ],
               ),
             ),
           ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
+          sliver: SliverToBoxAdapter(
+              child: Row(
+            children: [
+              Expanded(
+                flex: 6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AutoSizeText(
+                      csm.session.name,
+                      maxLines: 1,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    StreamBuilder(
+                      stream:
+                          DatabaseService.getUserStream(csm.session.creatorId),
+                      builder: (context, AsyncSnapshot<User> snapshot) {
+                        return Text(
+                          'by ${snapshot.data?.name}',
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: _SessionJoinButton(),
+              )
+            ],
+          )),
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12.0, 6, 12, 6),
@@ -438,8 +473,8 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
-                      return Container(
-                        width: 90,
+                      return Expanded(
+                        flex: 1,
                         child: _InfoView(
                           description: "DV",
                           value: snapshot.data?.currentAmount ??
@@ -449,12 +484,13 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       );
                     }),
                 SizedBox(
-                  width: 12,
+                  width: 8,
                 ),
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
                       return Expanded(
+                        flex: 2,
                         child: _InfoView(
                             imageUrl: snapshot.data?.campaignImgUrl ??
                                 csm.session.campaignImgUrl,
@@ -463,13 +499,13 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
                       );
                     }),
                 SizedBox(
-                  width: 12,
+                  width: 8,
                 ),
                 StreamBuilder<Session>(
                     stream: csm.sessionStream,
                     builder: (context, snapshot) {
-                      return Container(
-                        width: 90,
+                      return Expanded(
+                        flex: 1,
                         child: _InfoView(
                           description: "Mitglieder",
                           value: snapshot.data?.memberCount ??
@@ -481,15 +517,21 @@ class _CertifiedSessionInfoPage extends StatelessWidget {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Divider(),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'Donators',
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           sliver: _CertifiedSessionMembers(),
-        ),
-        SliverToBoxAdapter(
-          child: Divider(),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -512,48 +554,63 @@ class _InfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return Material(
-      color: imageUrl != null ? _theme.colors.contrast : _theme.colors.dark,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 90,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              imageUrl != null
-                  ? Container(
-                      height: 40,
-                      width: 40,
-                      child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          shape: CircleBorder(),
-                          child: CachedNetworkImage(
-                            imageUrl: imageUrl,
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: imageUrl != null ? ColorTheme.wildGreen : _theme.colors.dark,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(imageUrl != null ? 2.0 : 8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            imageUrl != null
+                ? Container(
+                    height: 44,
+                    width: 44,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      imageBuilder: (_, imgProvider) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              width: 1, color: _theme.colors.textOnDark),
+                          image: DecorationImage(
+                            image: imgProvider,
                             fit: BoxFit.cover,
-                          )),
-                    )
-                  : AutoSizeText(
-                      Numeral(value).value(),
-                      maxLines: 1,
-                      style: _theme.textTheme.textOnDark.headline5
-                          .copyWith(fontWeight: FontWeight.bold),
-                    ),
-              SizedBox(
-                height: imageUrl != null ? 6 : 0,
-              ),
-              AutoSizeText(
+                          ),
+                        ),
+                      ),
+                    ))
+                : AutoSizeText(
+                    Numeral(value).value(),
+                    maxLines: 1,
+                    style: _theme.textTheme.textOnDark.headline5
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+            SizedBox(
+              height: imageUrl != null ? 2 : 0,
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              child: AutoSizeText(
                 description,
-                maxLines: 1,
+                maxLines: imageUrl != null ? 2 : 1,
+                softWrap: true,
                 style: imageUrl != null
-                    ? _theme.textTheme.textOnContrast.bodyText2
-                        .copyWith(fontWeight: FontWeight.bold)
+                    ? _theme.textTheme.textOnDark.bodyText2.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      )
                     : _theme.textTheme.textOnDark.bodyText2,
                 textAlign: TextAlign.center,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -566,75 +623,56 @@ class _CertifiedSessionMembers extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
-        builder: (context, sm, child) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StreamBuilder<List<SessionMember>>(
-                stream: sm.membersStream,
-                builder: (context, snapshot) {
-                  return snapshot.data?.isEmpty ?? true
-                      ? Container()
-                      : Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          child: Text("Mitglieder: ",
-                              style: _theme.textTheme.dark.bodyText1),
-                        );
-                }),
-            SizedBox(
-                height: 130,
-                child: CustomScrollView(
-                  scrollDirection: Axis.horizontal,
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 130,
-                      ),
-                    ),
-                    StreamBuilder<List<SessionMember>>(
-                        stream: sm.membersStream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData)
-                            return SliverToBoxAdapter(
-                              child: Center(
-                                  child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  children: [
-                                    CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation(
-                                          _theme.colors.dark),
-                                    ),
-                                    SizedBox(
-                                      width: 12,
-                                    ),
-                                    Text("Lade Mitglieder...",
-                                        style: _theme.textTheme.dark.bodyText1)
-                                  ],
+        builder: (context, sm, child) => SizedBox(
+            height: 150,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 130,
+                  ),
+                ),
+                StreamBuilder<List<SessionMember>>(
+                    stream: sm.membersStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData)
+                        return SliverToBoxAdapter(
+                          child: Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation(
+                                      _theme.colors.dark),
                                 ),
-                              )),
-                            );
+                                SizedBox(
+                                  width: 12,
+                                ),
+                                Text("Lade Mitglieder...",
+                                    style: _theme.textTheme.dark.bodyText1)
+                              ],
+                            ),
+                          )),
+                        );
 
-                          List<SessionMember> members = snapshot.data ?? [];
-                          return SliverList(
-                            delegate:
-                                SliverChildBuilderDelegate((context, index) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                    left: index <= members.length - 1
-                                        ? 12.0
-                                        : 0.0),
-                                child:
-                                    SessionMemberView<CertifiedSessionManager>(
-                                        member: members[index],
-                                        showTargetAmount: false),
-                              );
-                            }, childCount: members.length),
+                      List<SessionMember> members = snapshot.data ?? [];
+                      members.sort((a, b) =>
+                          b.donationAmount.compareTo(a.donationAmount));
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                                left: index <= members.length - 1 ? 12.0 : 0.0),
+                            child: SessionMemberView<CertifiedSessionManager>(
+                                member: members[index], showTargetAmount: true),
                           );
-                        }),
-                  ],
-                )),
-          ],
-        ),
+                        }, childCount: members.length),
+                      );
+                    }),
+              ],
+            )),
       ),
     );
   }
@@ -661,41 +699,50 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
             Color color = snapshot.data
                 ? _theme.colors.textOnDark
                 : _theme.colors.textOnContrast;
-            return RaisedButton(
-              onPressed: () async {
-                setState(() {
-                  _loading = true;
-                });
-                if (snapshot.data)
-                  await DatabaseService.leaveCertifiedSession(
-                      csm.baseSession.id);
-                else
-                  await DatabaseService.joinCertifiedSession(
-                      csm.baseSession.id);
-                setState(() {
-                  _loading = false;
-                });
-              },
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
-              color:
-                  snapshot.data ? _theme.colors.dark : _theme.colors.contrast,
-              textColor: color,
-              child: Row(
-                children: [
-                  _loading
-                      ? Container(
-                          width: 20,
-                          height: 20,
-                          margin: const EdgeInsets.only(right: 12),
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(color),
-                          ))
-                      : Container(),
-                  snapshot.data ? Text("VERLASSEN") : Text("BEITRETEN"),
-                ],
-              ),
-            );
+            return MaterialButton(
+                height: 50,
+                onPressed: () async {
+                  setState(() {
+                    _loading = true;
+                  });
+                  if (snapshot.data)
+                    await DatabaseService.leaveCertifiedSession(
+                            csm.baseSession.id)
+                        .then((value) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                  else
+                    await DatabaseService.joinCertifiedSession(
+                            csm.baseSession.id)
+                        .then((value) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
+                textColor: color,
+                child: _loading
+                    ? Container(
+                        width: 20,
+                        height: 20,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation(_theme.colors.light),
+                        ))
+                    : AutoSizeText(
+                        snapshot.data ? "VERLASSEN" : 'BEITRETEN',
+                        maxLines: 1,
+                        style: Theme.of(context)
+                            .accentTextTheme
+                            .button
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ));
           }),
     );
   }

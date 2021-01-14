@@ -36,16 +36,16 @@ class User {
   static User fromSnapshot(DocumentSnapshot snapshot) {
     if (snapshot.data == null) return User();
     return User(
-        id: snapshot.documentID,
-        name: snapshot[User.NAME] ?? "No name",
-        admin: snapshot[User.ADMIN],
-        ghost: snapshot[User.GHOST] ?? false,
-        donatedAmount: snapshot[DONATEDAMOUNT],
-        subscribedCampaignsIds: snapshot[User.SUBSCRIBEDCAMPAIGNS] == null
+        id: snapshot.id,
+        name: snapshot.data()[User.NAME] ?? "No name",
+        admin: snapshot.data()[User.ADMIN],
+        ghost: snapshot.data()[User.GHOST] ?? false,
+        donatedAmount: snapshot.data()[DONATEDAMOUNT],
+        subscribedCampaignsIds: snapshot.data()[User.SUBSCRIBEDCAMPAIGNS] == null
             ? []
-            : List.from(snapshot[User.SUBSCRIBEDCAMPAIGNS]),
-        imgUrl: snapshot[IMAGEURL],
-        thumbnailUrl: snapshot[THUMBNAILURL]);
+            : List.from(snapshot.data()[User.SUBSCRIBEDCAMPAIGNS]),
+        imgUrl: snapshot.data()[IMAGEURL],
+        thumbnailUrl: snapshot.data().containsKey(THUMBNAILURL)?snapshot[THUMBNAILURL]:'');
   }
 
   static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {

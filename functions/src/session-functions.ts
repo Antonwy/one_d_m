@@ -280,26 +280,6 @@ exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
     { member_count: admin.firestore.FieldValue.increment(1) },
     { merge: true }
   );
-
-  const session = (await sessionRef.get()).data() as SessionType;
-
-  // add session to User
-  await firestore
-    .collection(DatabaseConstants.user)
-    .doc(userId)
-    .collection(DatabaseConstants.sessions)
-    .doc(sessionId)
-    .set({
-      id: sessionId,
-      session_name: session.session_name,
-      session_description: session.session_description,
-      amount_per_user: session.amount_per_user,
-      created_at: session.created_at,
-      end_date: session.end_date,
-      creator_id: session.creator_id,
-      campaign_id: session.campaign_id,
-      img_url: session.img_url,
-    } as UserSessionType);
 });
 
 exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
@@ -323,14 +303,6 @@ exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
     { member_count: admin.firestore.FieldValue.increment(-1) },
     { merge: true }
   );
-
-  // add session to User
-  await firestore
-    .collection(DatabaseConstants.user)
-    .doc(userId)
-    .collection(DatabaseConstants.sessions)
-    .doc(sessionId)
-    .delete();
 });
 
 exports.onUpdateSession = functions.firestore

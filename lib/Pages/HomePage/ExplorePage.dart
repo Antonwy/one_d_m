@@ -116,6 +116,7 @@ class _ExplorePageState extends State<ExplorePage>
             if (d.isEmpty) return SizedBox.shrink();
 
             d.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            d = d.reversed.toList();
             return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +125,7 @@ class _ExplorePageState extends State<ExplorePage>
                     _buildDonationAmount(
                         amount: d[i]?.amount.toString() ?? 0,
                         uid: d[i]?.userId ?? '',
-                        index: i)
+                        index: d.length - i - 1)
                 ]);
           },
         ),

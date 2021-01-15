@@ -5,7 +5,6 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'dart:math';
 
 import 'package:one_d_m/chart/circle.dart';
-import 'package:one_d_m/chart/size_const.dart';
 
 const BLUE_NORMAL = Color(0xff54c5f8);
 const GREEN_NORMAL = Color(0xff6bde54);
@@ -22,8 +21,9 @@ const List<Point> POINT = [Point(100, 100)];
 class CirclePainter extends CustomPainter {
   final double width;
   final double height;
+  List<Color> colors;
 
-  CirclePainter(this.width, this.height, {this.startAngle});
+  CirclePainter(this.width, this.height, {this.startAngle, this.colors});
 
   final double startAngle;
 
@@ -52,11 +52,7 @@ class CirclePainter extends CustomPainter {
         25,
         5,
       ],
-      colors: [
-        ColorTheme.donationGreen,
-        ColorTheme.donationOrange,
-        ColorTheme.donationBlack
-      ],
+      colors: colors,
       paintWidth: 8.0,
       startAngle: 1.3 * startAngle / radius,
       hasEnd: true,

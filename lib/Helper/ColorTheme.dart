@@ -10,7 +10,7 @@ class ColorTheme {
   static const Color orange = Color.fromARGB(255, 252, 163, 16);
   static const Color green = Color.fromARGB(255, 0, 191, 166);
   static const Color yellow = Color.fromARGB(255, 253, 205, 89);
-  static  Color appGrey = Helper.hexToColor('#d1d9d5');
+  static Color appGrey = Helper.hexToColor('#d1d9d5');
 
   static const Color lightBlue = Color.fromARGB(255, 246, 245, 250);
   static const Color whiteBlue = Color.fromARGB(255, 246, 245, 250);
@@ -18,9 +18,9 @@ class ColorTheme {
 
   static const Color darkOrange = Color.fromARGB(255, 255, 100, 86);
   static const Color wildGreen = Color(0xFF2A6654);
-  static const Color donationGreen = Color(0xFF2a6654);
-  static const Color donationOrange = Color(0xFFf8b323);
-  static const Color donationBlack = Color(0xFF353535);
+  static Color donationBlue = Helper.hexToColor('#457b9d');
+  static Color donationLightBlue = Helper.hexToColor('#a8dadc');
+  static Color donationRed = Helper.hexToColor('#e63946');
 
   static const Color homePage = white;
   static const Color navBar = whiteBlue;

@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                         focusedColor: ColorTheme.blue,
                         activeColor: ColorTheme.blue,
                         onChanged: (text) {
-                          _email = text.toLowerCase();
+                          _email = text.trim().toLowerCase();
                         },
                         validator: Validate.email,
                       ),

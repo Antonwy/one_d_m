@@ -44,12 +44,23 @@ exports.onCreateDonation = functions
 
     // update the donatedAmount in Session Members and session
     if (donation.session_id !== null && donation.session_id !== undefined) {
-      await firestore
-        .collection(DatabaseConstants.sessions)
-        .doc(donation.session_id)
-        .collection(DatabaseConstants.session_members)
-        .doc(donation.user_id)
-        .update({ donation_amount: increment(donation.amount) });
+      let isSessionMember = (
+        await firestore
+          .collection(DatabaseConstants.sessions)
+          .doc(donation.session_id)
+          .collection(DatabaseConstants.session_members)
+          .doc(donation.user_id)
+          .get()
+      ).exists;
+
+      if (isSessionMember) {
+        await firestore
+          .collection(DatabaseConstants.sessions)
+          .doc(donation.session_id)
+          .collection(DatabaseConstants.session_members)
+          .doc(donation.user_id)
+          .update({ donation_amount: increment(donation.amount) });
+      }
 
       await firestore
         .collection(DatabaseConstants.sessions)

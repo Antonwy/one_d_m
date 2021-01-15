@@ -154,7 +154,7 @@ class DatabaseService {
 
     return userAdDocument.set({
       User.INTERSTITIAL_IMPRESSIONS: FieldValue.increment(1),
-    });
+    }, SetOptions(merge: true));
   }
 
   static Future<void> addNativeAdImpression(String uid) async {
@@ -165,7 +165,7 @@ class DatabaseService {
 
     return userAdDocument.set({
       User.NATIVE_AD_IMPRESSIONS: FieldValue.increment(1),
-    });
+    }, SetOptions(merge: true));
   }
 
   static Stream<AdBalance> getAdBalance(String uid) {

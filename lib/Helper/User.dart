@@ -41,11 +41,14 @@ class User {
         admin: snapshot.data()[User.ADMIN],
         ghost: snapshot.data()[User.GHOST] ?? false,
         donatedAmount: snapshot.data()[DONATEDAMOUNT],
-        subscribedCampaignsIds: snapshot.data()[User.SUBSCRIBEDCAMPAIGNS] == null
-            ? []
-            : List.from(snapshot.data()[User.SUBSCRIBEDCAMPAIGNS]),
+        subscribedCampaignsIds:
+            snapshot.data()[User.SUBSCRIBEDCAMPAIGNS] == null
+                ? []
+                : List.from(snapshot.data()[User.SUBSCRIBEDCAMPAIGNS]),
         imgUrl: snapshot.data()[IMAGEURL],
-        thumbnailUrl: snapshot.data().containsKey(THUMBNAILURL)?snapshot[THUMBNAILURL]:'');
+        thumbnailUrl: snapshot.data().containsKey(THUMBNAILURL)
+            ? snapshot[THUMBNAILURL]
+            : '');
   }
 
   static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {
@@ -53,12 +56,7 @@ class User {
   }
 
   Map<String, dynamic> userInfoToMap() {
-    return {
-      "id": id,
-      NAME: name,
-      IMAGEURL: imgUrl,
-      THUMBNAILURL: thumbnailUrl
-    };
+    return {"id": id, NAME: name, IMAGEURL: imgUrl, THUMBNAILURL: thumbnailUrl};
   }
 
   Map<String, dynamic> publicDataToMap() {
@@ -81,6 +79,6 @@ class User {
 
   @override
   String toString() {
-    return 'User{email: $email, name: $name, password: $password, profileImage: $imgUrl, id: $id, ghost: $ghost}';
+    return 'User{email: $email, name: $name, phoneNumber: $phoneNumber, password: $password, profileImage: $imgUrl, id: $id, ghost: $ghost}';
   }
 }

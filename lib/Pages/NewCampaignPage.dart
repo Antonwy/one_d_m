@@ -660,13 +660,13 @@ class _StatCollumn extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            AutoSizeText(
               "${Numeral(value ?? 0).value()}",
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
+              maxLines: 1,
+              style: Theme.of(context).textTheme.headline5.copyWith(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 28),
+                  fontWeight: FontWeight.bold,),
             ),
             Text(
               description,

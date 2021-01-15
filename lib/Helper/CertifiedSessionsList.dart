@@ -40,8 +40,6 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
       builder: (_, snapshot) {
         if (!snapshot.hasData) return CircularProgressIndicator();
         List<News> news = snapshot.data;
-        if (news.isEmpty) return SizedBox.shrink();
-
         news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
 
         List<String> sessionsWithPost = [];
@@ -70,10 +68,9 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
 
               ///add sessions that doesn't have posts
 
-              sessionIds =[...sessionIds,...allSessions];
+              sessionIds = [...sessionIds, ...allSessions];
 
               List<String> uniqueIds = sessionIds.toSet().toList();
-
 
               return Container(
                 height: 120,

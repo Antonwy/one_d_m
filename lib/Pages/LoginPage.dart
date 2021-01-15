@@ -57,12 +57,20 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTheme.orange,
+      backgroundColor: ColorTheme.appGrey,
       body: Form(
         key: _formKey,
         child: CustomScrollView(slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
+            leading: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(
+                Icons.chevron_left_outlined,
+                size: 40,
+                color: ColorTheme.blue,
+              ),
+            ),
             elevation: 0,
           ),
           SliverToBoxAdapter(
@@ -72,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Center(
                     child: SvgPicture.asset(
-                  "assets/images/sign-in.svg",
+                  "assets/images/img_login.svg",
                   height: MediaQuery.of(context).size.height * .25,
                 )),
                 SizedBox(
@@ -86,13 +94,13 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         "Login",
                         style: _textTheme.headline3.copyWith(
-                          color: ColorTheme.whiteBlue,
+                          color: ColorTheme.blue,
                         ),
                       ),
                       Text(
                         "Gib deine Email und dein Passwort ein.",
-                        style: _textTheme.caption
-                            .copyWith(color: ColorTheme.whiteBlue),
+                        style:
+                            _textTheme.caption.copyWith(color: ColorTheme.blue),
                       ),
                       SizedBox(
                         height: 20,
@@ -102,9 +110,9 @@ class _LoginPageState extends State<LoginPage> {
                         hint: "tester@gmail.com",
                         preficIcon: Icon(Icons.email),
                         textInputType: TextInputType.emailAddress,
-                        textColor: ColorTheme.whiteBlue,
-                        focusedColor: ColorTheme.whiteBlue,
-                        activeColor: Colors.white54,
+                        textColor: ColorTheme.blue,
+                        focusedColor: ColorTheme.blue,
+                        activeColor: ColorTheme.blue,
                         onChanged: (text) {
                           _email = text.toLowerCase();
                         },
@@ -118,9 +126,9 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: true,
                         preficIcon: Icon(Icons.vpn_key),
                         textInputType: TextInputType.visiblePassword,
-                        textColor: ColorTheme.whiteBlue,
-                        focusedColor: ColorTheme.whiteBlue,
-                        activeColor: Colors.white54,
+                        textColor: ColorTheme.blue,
+                        focusedColor: ColorTheme.blue,
+                        activeColor: ColorTheme.blue,
                         onChanged: (text) {
                           _password = text;
                         },
@@ -139,29 +147,29 @@ class _LoginPageState extends State<LoginPage> {
                                     : _login,
                             elevation: 0,
                             highlightElevation: 7,
-                            splashColor: ColorTheme.orange,
-                            hoverColor: ColorTheme.orange,
-                            focusColor: ColorTheme.orange,
+                            splashColor: ColorTheme.appGrey,
+                            hoverColor: ColorTheme.appGrey,
+                            focusColor: ColorTheme.appGrey,
                             shape: RoundedRectangleBorder(
                                 side: BorderSide(
-                                    width: 2, color: ColorTheme.whiteBlue),
+                                    width: 2, color: ColorTheme.blue),
                                 borderRadius: BorderRadius.circular(23)),
-                            backgroundColor: ColorTheme.orange,
-                            icon: _um.status == Status.Authenticating ||
-                                    _loading
-                                ? Container(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation(
-                                        ColorTheme.whiteBlue,
-                                      ),
-                                    ),
-                                  )
-                                : Icon(Icons.done, color: ColorTheme.whiteBlue),
+                            backgroundColor: ColorTheme.appGrey,
+                            icon:
+                                _um.status == Status.Authenticating || _loading
+                                    ? Container(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation(
+                                            ColorTheme.blue,
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(Icons.done, color: ColorTheme.blue),
                             label: Text(
                               "Login",
-                              style: TextStyle(color: ColorTheme.whiteBlue),
+                              style: TextStyle(color: ColorTheme.blue),
                             ),
                           ),
                           Consumer<UserManager>(
@@ -181,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: Text(
                                   "Passwort zurücksetzen",
                                   style: TextStyle(
-                                      color: ColorTheme.whiteBlue,
+                                      color: ColorTheme.blue,
                                       decoration: TextDecoration.underline),
                                 ),
                               ),
@@ -202,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login() async {
     if (!_formKey.currentState.validate()) return;
-    ApiResult<FirebaseUser> res = await _um.signIn(_email, _password);
+    ApiResult<User> res = await _um.signIn(_email, _password);
 
     if (res.hasError()) {
       _showSnackBar(res.message);

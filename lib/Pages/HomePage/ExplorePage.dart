@@ -117,23 +117,15 @@ class _ExplorePageState extends State<ExplorePage>
 
             d.sort((a, b) => b.createdAt.compareTo(a.createdAt));
             return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDonationAmount(
-                    amount: d[2]?.amount.toString(),
-                    uid: d[2]?.userId ?? '',
-                    index: 2),
-                _buildDonationAmount(
-                    amount: d[1]?.amount.toString(),
-                    uid: d[1]?.userId ?? '',
-                    index: 1),
-                _buildDonationAmount(
-                    amount: d[0]?.amount.toString(),
-                    uid: d[0]?.userId ?? '',
-                    index: 0),
-              ],
-            );
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (int i = 0; i < d.length; i++)
+                    _buildDonationAmount(
+                        amount: d[i]?.amount.toString() ?? 0,
+                        uid: d[i]?.userId ?? '',
+                        index: i)
+                ]);
           },
         ),
       );
@@ -144,8 +136,8 @@ class _ExplorePageState extends State<ExplorePage>
     if (index == 1) textColor = textColor.withOpacity(0.7);
     if (index == 2) textColor = textColor.withOpacity(0.2);
 
-    return StreamBuilder(
-      stream: DatabaseService.getUserStream(uid),
+    return FutureBuilder(
+      future: DatabaseService.getUser(uid),
       builder: (_, snapshot) {
         if (!snapshot.hasData) return SizedBox.shrink();
         User u = snapshot.data;

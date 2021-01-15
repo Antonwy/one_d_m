@@ -368,6 +368,7 @@ class DatabaseService {
   static Stream<List<News>> getNewsFromCampaignStream(Campaign campaign) {
     return newsCollection
         .where(News.CAMPAIGNID, isEqualTo: campaign.id)
+        .where(News.SESSION_ID, isEqualTo: "")
         .snapshots()
         .map((qs) => News.listFromSnapshot(qs.docs));
   }
@@ -534,6 +535,7 @@ class DatabaseService {
   static Stream<List<Donation>> getLatestDonations() {
     return donationsCollection
         .where(Donation.ISANONYM, isEqualTo: false)
+        .limit(3)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
@@ -785,6 +787,10 @@ class DatabaseService {
         .map((doc) => doc.exists);
   }
 
+  static Stream<bool> userExist(String uid) {
+    return userCollection.doc(uid).snapshots().map((doc) => doc.exists);
+  }
+
   static Future<bool> userIsFollowSession(String uid, String sid) {
     return sessionsCollection
         .doc(sid)
@@ -848,10 +854,11 @@ class DatabaseService {
   }
 
   static Stream<List<Donation>> getDonationsFromSession(String sid,
-      [int limit = 5]) {
+      [int limit = 100]) {
     return donationsCollection
         .where(Donation.SESSION_ID, isEqualTo: sid)
-        .limit(5)
+        .limit(limit)
+        .where(Donation.ISANONYM, isEqualTo: false)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }

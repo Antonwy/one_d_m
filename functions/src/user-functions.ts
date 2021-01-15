@@ -72,16 +72,6 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
   }
 
   // deletion of subscribed_campaigns and subcollections including documents
-  await firestore
-    .collection(DatabaseConstants.subscribed_campaigns)
-    .doc(user.uid)
-    .delete()
-    .then(() => {
-      functions.logger.info('user deleted from subscribed_campaigns');
-    })
-    .catch((e) => {
-      functions.logger.error(e);
-    });
 
   await firestore
     .collection(DatabaseConstants.subscribed_campaigns)
@@ -105,6 +95,18 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .catch((e) => {
       functions.logger.error(e);
     });
+
+  await firestore
+    .collection(DatabaseConstants.subscribed_campaigns)
+    .doc(user.uid)
+    .delete()
+    .then(() => {
+      functions.logger.info('user deleted from subscribed_campaigns');
+    })
+    .catch((e) => {
+      functions.logger.error(e);
+    });
+
   // user count decrease by one
   await firestore
     .collection(DatabaseConstants.statistics)
@@ -185,6 +187,7 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
   const userRef = await firestore
     .collection(DatabaseConstants.user)
     .doc(user.uid);
+
   userRef
     .listCollections()
     .then(async (collectionList) => {

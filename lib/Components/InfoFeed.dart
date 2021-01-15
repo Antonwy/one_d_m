@@ -10,6 +10,7 @@ import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,7 @@ class InfoFeed extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0,0),
+        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0),
         child: _ChartsPageView(),
       ),
     );
@@ -199,7 +200,7 @@ class _DCInformation extends StatelessWidget {
                             ),
                             SizedBox(height: 5.0),
                             AutoSizeText(
-                              'Entspricht ${snapshot?.data?.dcBalance*5??0} Cent ',
+                              'Entspricht ${Currency((snapshot.data?.dcBalance ?? 0) * 5).value()}',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w200,

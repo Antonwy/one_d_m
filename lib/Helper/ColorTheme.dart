@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'Helper.dart';
+
 class ColorTheme {
   static const Color black = Color.fromARGB(255, 0, 0, 0);
   static const Color white = Color.fromARGB(255, 255, 255, 255);
@@ -8,6 +10,7 @@ class ColorTheme {
   static const Color orange = Color.fromARGB(255, 252, 163, 16);
   static const Color green = Color.fromARGB(255, 0, 191, 166);
   static const Color yellow = Color.fromARGB(255, 253, 205, 89);
+  static  Color appGrey = Helper.hexToColor('#d1d9d5');
 
   static const Color lightBlue = Color.fromARGB(255, 246, 245, 250);
   static const Color whiteBlue = Color.fromARGB(255, 246, 245, 250);

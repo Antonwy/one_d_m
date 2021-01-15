@@ -112,6 +112,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           ),
           body: _CertifiedSessionInfoPage(
             controller: _scrollController,
+            sessionId: widget.session.id,
           ),
 
           ///removed chat feature for now
@@ -127,8 +128,9 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
 
 class _CertifiedSessionPageIndicator extends StatefulWidget {
   PageController _pageController;
+  final String sessionId;
 
-  _CertifiedSessionPageIndicator(this._pageController);
+  _CertifiedSessionPageIndicator(this._pageController, this.sessionId);
 
   @override
   __CertifiedSessionPageIndicatorState createState() =>
@@ -146,6 +148,7 @@ class __CertifiedSessionPageIndicatorState
         _pageValue = widget._pageController.page;
       });
     });
+
     super.initState();
   }
 
@@ -446,8 +449,10 @@ class _ChatTextField extends StatelessWidget {
 
 class _CertifiedSessionInfoPage extends StatefulWidget {
   ScrollController controller;
+  final String sessionId;
 
-  _CertifiedSessionInfoPage({Key key, this.controller}) : super(key: key);
+  _CertifiedSessionInfoPage({Key key, this.controller, this.sessionId})
+      : super(key: key);
 
   @override
   __CertifiedSessionInfoPageState createState() =>
@@ -594,10 +599,9 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                       return Expanded(
                         flex: 4,
                         child: _InfoView(
-                          description: "Mitglieder",
-                          value: snapshot.data?.memberCount ??
-                              csm.session.memberCount,
-                        ),
+                            description: "Mitglieder",
+                            value: (snapshot.data?.memberCount ??
+                                    csm.session.memberCount)),
                       );
                     }),
               ],
@@ -627,14 +631,16 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         ),
         SliverPadding(
           padding: const EdgeInsets.only(top: 4.0),
-          sliver: _CertifiedSessionMembers(),
+          sliver: _CertifiedSessionMembers(
+            sessionId: widget.sessionId,
+          ),
         ),
         SliverToBoxAdapter(
           child: const YMargin(10),
         ),
         _buildPostFeed(),
         SliverToBoxAdapter(
-          child: const YMargin(20),
+          child: const YMargin(100),
         ),
       ]),
     );
@@ -777,7 +783,71 @@ class _InfoView extends StatelessWidget {
   }
 }
 
-class _CertifiedSessionMembers extends StatelessWidget {
+class _CertifiedSessionMembers extends StatefulWidget {
+  final String sessionId;
+
+  const _CertifiedSessionMembers({Key key, this.sessionId}) : super(key: key);
+
+  @override
+  __CertifiedSessionMembersState createState() =>
+      __CertifiedSessionMembersState();
+}
+
+class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
+  List<SessionMember> members = [];
+  List<SessionMember> sessionMembers = [];
+  List<SessionMember> allMembers = [];
+  List<SessionMember> uniqueAllMembers = [];
+  List<String> userIds = [];
+  List<String> uniqueId = [];
+
+  @override
+  void initState() {
+    ///get donated members
+    DatabaseService.getDonationsFromSession(widget.sessionId).listen((d) {
+      members.clear();
+      sessionMembers.clear();
+      userIds.clear();
+      uniqueId.clear();
+      uniqueAllMembers.clear();
+      allMembers.clear();
+
+      d.forEach((don) {
+        members
+            .add(SessionMember(userId: don.userId, donationAmount: don.amount));
+      });
+
+      DatabaseService.getSessionMembers(widget.sessionId).listen((m) {
+        sessionMembers.clear();
+        userIds.clear();
+        uniqueId.clear();
+        uniqueAllMembers.clear();
+        allMembers.clear();
+        allMembers = [...m,...members];
+
+        allMembers.sort((a,b) =>b.donationAmount.compareTo(a.donationAmount));
+        //remove duplicates
+        allMembers.forEach((element) {
+          userIds.add(element.userId);
+        });
+        uniqueId = userIds.toSet().toList();
+
+        uniqueId.forEach((id) {
+          SessionMember sm = allMembers.firstWhere((element) => element.userId == id);
+          uniqueAllMembers.add(sm);
+        });
+
+        setState(() {});
+      });
+
+
+
+
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
@@ -793,44 +863,21 @@ class _CertifiedSessionMembers extends StatelessWidget {
                     height: 130,
                   ),
                 ),
-                StreamBuilder<List<SessionMember>>(
-                    stream: sm.membersStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData)
-                        return SliverToBoxAdapter(
-                          child: Center(
-                              child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              children: [
-                                CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation(
-                                      _theme.colors.dark),
-                                ),
-                                SizedBox(
-                                  width: 12,
-                                ),
-                                Text("Lade Mitglieder...",
-                                    style: _theme.textTheme.dark.bodyText1)
-                              ],
-                            ),
-                          )),
-                        );
-
-                      List<SessionMember> members = snapshot.data ?? [];
-                      members.sort((a, b) =>
-                          b.donationAmount.compareTo(a.donationAmount));
-                      return SliverList(
+                uniqueAllMembers.isNotEmpty
+                    ? SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                                left: index <= members.length - 1 ? 12.0 : 0.0),
+                                left: index <= uniqueAllMembers.length - 1
+                                    ? 12.0
+                                    : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
-                                member: members[index], showTargetAmount: true),
+                                member: uniqueAllMembers[index],
+                                showTargetAmount: true),
                           );
-                        }, childCount: members.length),
-                      );
-                    }),
+                        }, childCount: uniqueAllMembers.length),
+                      )
+                    : SliverToBoxAdapter(child: SizedBox.shrink())
               ],
             )),
       ),

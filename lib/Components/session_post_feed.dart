@@ -81,7 +81,7 @@ class _SessionPostFeedState extends State<SessionPostFeed>{
       style: ThemeManager.of(context).textTheme.dark.headline6.copyWith(
           fontWeight: FontWeight.bold,
           fontSize: 22,
-          color: Helper.hexToColor('#575757')),
+          color: Helper.hexToColor('#3E313F')),
     ),
   );
 

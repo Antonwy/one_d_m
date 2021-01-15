@@ -99,7 +99,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                                   height: 70,
                                   child: Material(
                                     shape: CircleBorder(),
-                                    color: ColorTheme.orange,
+                                    color: ColorTheme.appGrey,
                                     elevation: 10,
                                     clipBehavior: Clip.antiAlias,
                                     child: InkWell(

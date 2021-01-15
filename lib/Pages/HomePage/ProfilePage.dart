@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
@@ -94,9 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
             setState(() {});
           });
         });
-
       });
-
     });
     super.initState();
   }
@@ -256,10 +255,11 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
+              const YMargin(20),
               SvgPicture.asset(
                 "assets/images/no-donations.svg",
-                height: 70,
-                width: 70,
+                height: 130,
+                width: 130,
               ),
               SizedBox(
                 height: 20,
@@ -270,19 +270,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 textAlign: TextAlign.center,
               ),
               const YMargin(20),
-              FlatButton(
+              MaterialButton(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: Colors.black)),
+                    borderRadius: BorderRadius.circular(4)),
                 onPressed: widget.onExploreTapped,
+                textColor: ThemeManager.of(context).colors.light,
+                color: Helper.hexToColor('#3E313F'),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
+                  child: AutoSizeText(
                     'Entdecke Sessions',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        .copyWith(fontWeight: FontWeight.bold, fontSize: 18.0),
+                    style: Theme.of(context).accentTextTheme.button,
                   ),
                 ),
               ),
@@ -305,7 +303,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: _theme.textTheme.dark.headline6.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
-                      color: Helper.hexToColor('#575757')),
+                      color: Helper.hexToColor('#3E313F')),
                 ),
               ),
               const SizedBox(
@@ -319,11 +317,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           width: 8,
                         ),
                     itemBuilder: (context, index) => Padding(
-                          padding: EdgeInsets.only(
-                              left: index == 0 ? 12.0 : 0.0,
-                              right: index == sessionsIds.length - 1 ? 12.0 : 0.0),
-                          child:CertifiedSessionView(sessionsIds[index])
-                        ),
+                        padding: EdgeInsets.only(
+                            left: index == 0 ? 12.0 : 0.0,
+                            right:
+                                index == sessionsIds.length - 1 ? 12.0 : 0.0),
+                        child: CertifiedSessionView(sessionsIds[index])),
                     itemCount: sessionsIds.length),
               ),
             ],
@@ -332,11 +330,11 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
   Widget _buildSession(String sid) => KeepAliveStreamBuilder(
-    stream: DatabaseService.getSession(sid),
-    builder: (_, snapshot) {
-      if (!snapshot.hasData) return SizedBox.shrink();
-      Session s = snapshot.data;
-      return CertifiedSessionView(s);
-    },
-  );
+        stream: DatabaseService.getSession(sid),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData) return SizedBox.shrink();
+          Session s = snapshot.data;
+          return CertifiedSessionView(s);
+        },
+      );
 }

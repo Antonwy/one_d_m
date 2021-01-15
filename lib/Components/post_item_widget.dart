@@ -171,8 +171,8 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
-                lineColor: Helper.hexToColor('#707070'),
-                indicatorColor: Helper.hexToColor('#2e313f'),
+                lineColor: Helper.hexToColor('#3E313F'),
+                indicatorColor: Helper.hexToColor('#3E313F'),
                 indicatorSize: 12,
                 indicatorStyle: PaintingStyle.fill,
                 isFirst: isFirst,

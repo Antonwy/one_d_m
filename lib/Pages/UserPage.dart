@@ -53,6 +53,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   Stream _donationStream;
   Stream<List<String>> _followingStream;
+  List<String> _followers = [];
 
   double _headerHeight, _headerTop = _staticHeaderTop, _scrollOffset = 0.0;
 
@@ -95,8 +96,20 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       });
 
     _donationStream = DatabaseService.getDonationsFromUserLimit(widget.user.id);
-    _followingStream =
-        DatabaseService.getFollowingUsersStream(widget.user.id, limit: 5);
+
+    ///add exisiting followers
+    DatabaseService.getFollowingUsersStream(widget.user.id, limit: 5)
+        .listen((users) {
+      _followers.clear();
+      users.forEach((element) {
+        DatabaseService.userExist(element).listen((isExist) {
+          if (isExist) {
+            _followers.add(element);
+          }
+          setState(() {});
+        });
+      });
+    });
   }
 
   @override
@@ -135,7 +148,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                   ),
                   _OtherUsersRecommendations(
                     user: user,
-                    followingStream: _followingStream,
+                    followingStream: _followers,
                   ),
                   SliverToBoxAdapter(
                       child: Container(
@@ -277,7 +290,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 }
 
 class _OtherUsersRecommendations extends StatefulWidget {
-  final Stream<List<String>> followingStream;
+  final List<String> followingStream;
   final User user;
 
   _OtherUsersRecommendations({Key key, this.followingStream, this.user})
@@ -298,12 +311,9 @@ class __OtherUsersRecommendationsState
     _theme = ThemeManager.of(context);
 
     return _show
-        ? StreamBuilder<List<String>>(
-            stream: widget.followingStream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return SliverToBoxAdapter();
-              if (snapshot.data.isEmpty) return SliverToBoxAdapter();
-              return (SliverToBoxAdapter(
+        ? widget.followingStream.isEmpty
+            ? SliverToBoxAdapter()
+            : SliverToBoxAdapter(
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 8.0),
                   height: 180,
@@ -340,19 +350,20 @@ class __OtherUsersRecommendationsState
                           itemBuilder: (context, index) => Padding(
                             padding: EdgeInsets.only(
                                 left: index == 0 ? 12 : 0,
-                                right: index == snapshot.data?.length - 1
-                                    ? 12
-                                    : 0),
-                            child: _RecommendationUser(snapshot.data[index]),
+                                right:
+                                    index == widget.followingStream.length - 1
+                                        ? 12
+                                        : 0),
+                            child: _RecommendationUser(
+                                widget.followingStream[index]),
                           ),
-                          itemCount: snapshot.data?.length,
+                          itemCount: widget.followingStream.length,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ));
-            })
+              )
         : SliverToBoxAdapter();
   }
 }
@@ -378,7 +389,7 @@ class _RecommendationUser extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
-                flex: 7,
+                flex: 3,
                 child: CustomOpenContainer(
                   openBuilder: (context, close, scrollController) => UserPage(
                     user,
@@ -390,8 +401,8 @@ class _RecommendationUser extends StatelessWidget {
                   closedBuilder: (context, open) => InkWell(
                     onTap: open,
                     child: Container(
-                        height: 90,
-                        width: 90,
+                        height: 75,
+                        width: 75,
                         child: CachedNetworkImage(
                           imageUrl: user?.imgUrl ?? '',
                           imageBuilder: (_, imgProvider) => Container(
@@ -433,7 +444,7 @@ class _RecommendationUser extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: 4,
+                height: 3,
               ),
               Expanded(
                 child: AutoSizeText(
@@ -441,8 +452,8 @@ class _RecommendationUser extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     style: Theme.of(context).textTheme.headline6.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
                         color: Helper.hexToColor('#2e313f'))),
               ),
             ],
@@ -670,7 +681,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         },
                         child: Center(
                           child: Text(
-                            _followed ? 'Unfollow' : 'Follow',
+                            _followed ? 'Entfolgen' : 'Folgen',
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,

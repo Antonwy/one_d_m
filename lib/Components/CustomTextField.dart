@@ -52,7 +52,7 @@ class CustomTextField extends StatelessWidget {
               ? null
               : Icon(
                   preficIcon.icon,
-                  color: ColorTheme.whiteBlue.withOpacity(.5),
+                  color: activeColor.withOpacity(.5),
                 ),
           border: OutlineInputBorder(),
           enabledBorder:

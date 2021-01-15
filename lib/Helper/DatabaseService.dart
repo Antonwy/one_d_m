@@ -44,7 +44,7 @@ class DatabaseService {
       DONATIONINFO = "donation_info",
       CARDS = "cards",
       PRIVATEDATA = "private_data",
-      ORGANISATIONS = "organisations",
+      ORGANISATIONS = "organizations",
       ADVERTISING_DATA = 'ad_data',
       ADVERTISING_BALANCE = 'balance',
       ADVERTISING_IMPRESSIONS = 'impressions',
@@ -108,7 +108,7 @@ class DatabaseService {
         .doc(user.id)
         .collection(PRIVATEDATA)
         .doc(DATA)
-        .set(user.privateDataToMap());
+        .set({User.PHONE_NUMBER: user.phoneNumber}, SetOptions(merge: true));
   }
 
   static Future<void> updateUser(User user) async {

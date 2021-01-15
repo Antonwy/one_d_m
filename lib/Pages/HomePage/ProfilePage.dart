@@ -94,9 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
             setState(() {});
           });
         });
-
       });
-
     });
     super.initState();
   }
@@ -319,11 +317,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           width: 8,
                         ),
                     itemBuilder: (context, index) => Padding(
-                          padding: EdgeInsets.only(
-                              left: index == 0 ? 12.0 : 0.0,
-                              right: index == sessionsIds.length - 1 ? 12.0 : 0.0),
-                          child:CertifiedSessionView(sessionsIds[index])
-                        ),
+                        padding: EdgeInsets.only(
+                            left: index == 0 ? 12.0 : 0.0,
+                            right:
+                                index == sessionsIds.length - 1 ? 12.0 : 0.0),
+                        child: CertifiedSessionView(sessionsIds[index])),
                     itemCount: sessionsIds.length),
               ),
             ],
@@ -332,11 +330,11 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
   Widget _buildSession(String sid) => KeepAliveStreamBuilder(
-    stream: DatabaseService.getSession(sid),
-    builder: (_, snapshot) {
-      if (!snapshot.hasData) return SizedBox.shrink();
-      Session s = snapshot.data;
-      return CertifiedSessionView(s);
-    },
-  );
+        stream: DatabaseService.getSession(sid),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData) return SizedBox.shrink();
+          Session s = snapshot.data;
+          return CertifiedSessionView(s);
+        },
+      );
 }

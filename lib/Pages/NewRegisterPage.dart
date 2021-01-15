@@ -150,7 +150,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                               preficIcon: Icon(Icons.email),
                               textInputType: TextInputType.emailAddress,
                               onChanged: (text) {
-                                _email = text.toLowerCase();
+                                _email = text.trim().toLowerCase();
                               },
                               validator: Validate.email,
                               focusedColor: ColorTheme.orange,
@@ -167,7 +167,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                         textInputType: TextInputType.text,
                         autoCorrect: false,
                         onChanged: (text) {
-                          _username = text;
+                          _username = text.trim();
                         },
                         validator: Validate.username,
                         focusedColor: ColorTheme.orange,

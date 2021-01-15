@@ -7,6 +7,8 @@ import {
   DonationFields,
   DatabaseConstants,
   ChargesFields,
+  ImageResolutions,
+  ImageSuffix,
 } from './database-constants';
 
 const stripe = new Stripe(functions.config().stripe.token, {
@@ -32,9 +34,21 @@ exports.onCreateUser = functions.firestore
       .set(
         {
           email_address: user.email,
-          phone_number: '',
           customer_id: customer.id,
         } as PrivateUserDataType,
+        { merge: true }
+      );
+
+    await firestore
+      .collection(DatabaseConstants.user)
+      .doc(user.uid)
+      .collection(DatabaseConstants.advertising_data)
+      .doc(DatabaseConstants.ad_balance)
+      .set(
+        {
+          dc_balance: 3,
+          activity_score: 0,
+        },
         { merge: true }
       );
 
@@ -45,6 +59,18 @@ exports.onCreateUser = functions.firestore
   });
 
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
+  if (
+    !(await firestore.collection(DatabaseConstants.user).doc(user.uid).get())
+      .exists
+  ) {
+    await firestore
+      .collection(DatabaseConstants.organisations)
+      .doc(user.uid)
+      .delete();
+
+    return;
+  }
+
   // deletion of subscribed_campaigns and subcollections including documents
   await firestore
     .collection(DatabaseConstants.subscribed_campaigns)
@@ -56,6 +82,7 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .catch((e) => {
       functions.logger.error(e);
     });
+
   await firestore
     .collection(DatabaseConstants.subscribed_campaigns)
     .doc(user.uid)
@@ -89,6 +116,7 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .catch((e) => {
       functions.logger.error(e);
     });
+
   // delete subscribe sessions
   await firestore
     .collection(DatabaseConstants.user)
@@ -106,6 +134,11 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
           .collection(DatabaseConstants.session_members)
           .doc(user.uid)
           .delete();
+
+        await firestore
+          .collection(DatabaseConstants.sessions)
+          .doc(session.id)
+          .update({ member_count: admin.firestore.FieldValue.increment(-1) });
       });
     });
 
@@ -117,16 +150,6 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .get()
     .then(async (usersList) => {
       functions.logger.info('following length:' + usersList.docs.length);
-      usersList.docs.forEach(async (doc) => await doc.ref.delete());
-    });
-  // delete user from followed
-  await firestore
-    .collection(DatabaseConstants.followed)
-    .doc(user.uid)
-    .collection(DatabaseConstants.users)
-    .get()
-    .then(async (usersList) => {
-      functions.logger.info('followed length:' + usersList.docs.length);
       usersList.docs.forEach(async (doc) => await doc.ref.delete());
     });
 
@@ -148,6 +171,17 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
 
       chargesList.docs.forEach(async (doc) => await doc.ref.delete());
     });
+
+  await firestore
+    .collection(DatabaseConstants.friends)
+    .doc(user.uid)
+    .collection('users')
+    .get()
+    .then(async (friendsList) => {
+      functions.logger.info('friendslist length:' + friendsList.docs.length);
+      friendsList.docs.forEach(async (doc) => await doc.ref.delete());
+    });
+
   const userRef = await firestore
     .collection(DatabaseConstants.user)
     .doc(user.uid);
@@ -163,7 +197,21 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
     .catch((e) => {
       functions.logger.error(e);
     });
+
   await userRef.delete();
+
+  const bucket = admin.storage().bucket();
+  await bucket
+    .deleteFiles({
+      prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${user.uid}/`,
+    })
+    .then(() => {
+      functions.logger.info('File deleted successfully');
+    })
+    .catch((e) => {
+      functions.logger.info(e);
+    });
+
   return 'OK';
 });
 
@@ -174,7 +222,13 @@ exports.onUpdateUser = functions.firestore
     const beforeUser: UserType = snapshot.before.data() as UserType;
     const afterUser: UserType = snapshot.after.data() as UserType;
 
-    if (beforeUser.image_url !== null && afterUser.image_url === null) {
+    if (
+      beforeUser.image_url !== null &&
+      afterUser.image_url === null &&
+      beforeUser.image_url.endsWith(
+        `${ImageResolutions.high}${ImageSuffix.dottJpg}`
+      )
+    ) {
       await admin
         .storage()
         .bucket()
@@ -188,104 +242,12 @@ exports.onDeleteUser = functions.firestore
   .document(`${DatabaseConstants.user}/{userId}`)
   .onDelete(async (snapshot, context) => {
     const userId: string = context.params.userId;
-    const user: UserType = snapshot.data() as UserType;
 
-    const userRef = firestore.collection(DatabaseConstants.user).doc(userId);
-    const privateRef = userRef
-      .collection(DatabaseConstants.private_data)
-      .doc(DatabaseConstants.data);
-    const cardRef = userRef.collection(DatabaseConstants.cards);
-    const adRef = userRef.collection(DatabaseConstants.advertising_data);
-    const sessionsRef = userRef.collection(DatabaseConstants.sessions);
-    const sessionsInvitesRef = userRef.collection(
-      DatabaseConstants.session_invites
-    );
-
-    const privateUserData: PrivateUserDataType = (
-      await privateRef.get()
-    ).data() as PrivateUserDataType;
-
-    // delete Cards
-    (await cardRef.get()).forEach(async (c) => await c.ref.delete());
-
-    //delete ads
-    (await adRef.get()).forEach(async (doc) => await doc.ref.delete());
-
-    // delete sessions
-    (await sessionsRef.get()).forEach(async (doc) => await doc.ref.delete());
-
-    // delete sessions invites
-    (await sessionsInvitesRef.get()).forEach(
-      async (doc) => await doc.ref.delete()
-    );
-
-    // delete privateData
-    await privateRef.delete();
-
-    if (!(await userRef.get()).exists) return;
-
-    (
-      await firestore
-        .collection(DatabaseConstants.friends)
-        .doc(userId)
-        .collection(DatabaseConstants.users)
-        .get()
-    ).forEach(async (doc) => await doc.ref.delete());
-
-    if (privateUserData.customer_id !== undefined)
-      await stripe.customers.del(privateUserData.customer_id);
-
-    // delete following
-    const followingUserColl = await firestore
-      .collection(DatabaseConstants.following)
-      .doc(userId)
-      .collection(DatabaseConstants.users)
-      .get();
-
-    // delete follow and FriendRanking
-    followingUserColl.forEach(async (doc) => await doc.ref.delete());
-
-    // delete donations
-    const qs = await firestore
-      .collection(DatabaseConstants.donations)
-      .where(DonationFields.user_id, '==', userId)
-      .get();
-    qs.forEach(async (doc) => await doc.ref.delete());
-
-    // decrement campaign subscribe count
-    user.subscribed_campaigns.forEach(
-      async (id) =>
-        await firestore
-          .collection(DatabaseConstants.campaigns)
-          .doc(id)
-          .update({
-            subscribed_count: increment(-1),
-          })
-    );
-
-    // decrement user count
-    await firestore
-      .collection(DatabaseConstants.statistics)
-      .doc(DatabaseConstants.users_info)
-      .update({ user_count: increment(-1) });
-
-    // delete subscribed_campaigns
-    (
-      await firestore
-        .collection(DatabaseConstants.subscribed_campaigns)
-        .doc(userId)
-        .collection(DatabaseConstants.campaigns)
-        .get()
-    ).forEach(async (doc) => await doc.ref.delete());
-
-    if (user.image_url === null || !user.image_url.startsWith('user_')) return;
-
-    await admin
-      .storage()
-      .bucket()
-      .deleteFiles({
-        prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${userId}/`,
-      });
+    return admin
+      .auth()
+      .deleteUser(userId)
+      .then(() => functions.logger.info('Deleted User'))
+      .catch((e) => functions.logger.error(e));
   });
 
 exports.onAddCard = functions.firestore

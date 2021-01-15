@@ -1,11 +1,12 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { CampaignType, NewsType } from './types';
+import { CampaignType } from './types';
 import {
   DatabaseConstants,
   CampaignFields,
   ImageResolutions,
   ImageSuffix,
+  DonationFields,
 } from './database-constants';
 
 const firestore = admin.firestore();
@@ -135,8 +136,23 @@ exports.onDeleteCampaign = functions.firestore
         functions.logger.info('File deleted successfully');
       })
       .catch((e) => {
-        functions.logger.info(e);
+        functions.logger.error(e);
       });
+
+    // set all donations from campaign to deleted
+    const cDonations = firestore
+      .collection(DatabaseConstants.donations)
+      .where(DonationFields.campaign_id, '==', campaignId);
+
+    await cDonations
+      .get()
+      .then(async (list) => {
+        list.forEach(
+          async (d) => await d.ref.update({ campaign_deleted: true })
+        );
+      })
+      .catch((e) => functions.logger.error(e));
+
     return 'Ok';
   });
 
@@ -241,30 +257,6 @@ exports.onCreateSubscription = functions.firestore
       .collection(DatabaseConstants.users)
       .doc(userId)
       .set({ id: userId });
-
-    const campaignNews = await firestore
-      .collection(DatabaseConstants.news)
-      .where(CampaignFields.campaign_id, '==', campaignId)
-      .get();
-
-    campaignNews.forEach(async (doc) => {
-      const news: NewsType = doc.data() as NewsType;
-      await firestore
-        .collection(DatabaseConstants.news_feed)
-        .doc(userId)
-        .collection(DatabaseConstants.news)
-        .add({
-          campaign_id: news.campaign_id,
-          campaign_img_url: news.campaign_img_url,
-          campaign_name: news.campaign_name,
-          created_at: news.created_at,
-          image_url: news.image_url,
-          short_text: news.short_text,
-          text: news.text,
-          title: news.title,
-          user_id: news.user_id,
-        });
-    });
   });
 
 exports.onDeleteSubscription = functions.firestore
@@ -286,15 +278,4 @@ exports.onDeleteSubscription = functions.firestore
       .collection(DatabaseConstants.users)
       .doc(userId)
       .delete();
-
-    const campaignNews = await firestore
-      .collection(DatabaseConstants.news_feed)
-      .doc(userId)
-      .collection(DatabaseConstants.news)
-      .where(CampaignFields.campaign_id, '==', campaignId)
-      .get();
-
-    campaignNews.forEach(async (doc) => {
-      await doc.ref.delete();
-    });
   });

@@ -28,7 +28,6 @@ class HomePageState extends State<HomePage> {
           children: <Widget>[
             PageView(
               controller: _pageController,
-              physics: CustomPageViewScrollPhysics(),
               onPageChanged:(page){
                 _resetPageScroll();
               },
@@ -51,7 +50,7 @@ class HomePageState extends State<HomePage> {
 
   void _changePage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 150), curve: Curves.linear);
+        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
     _resetPageScroll();
 
 

@@ -141,32 +141,35 @@ class NewsPost extends StatelessWidget {
                 textAlign: TextAlign.start,
                 style: Theme.of(context).textTheme.bodyText1.copyWith(
                     fontSize: 15,
-                    color: Helper.hexToColor('#707070'),
+                    color: Colors.black,
                     fontWeight: FontWeight.w400),
               ),
               post.length> 90
                   ? Align(
                 alignment: Alignment.bottomRight,
                 child: ExpandableButton(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'mehr',
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .copyWith(
-                              fontSize: 15,
-                              color: Helper.hexToColor('#707070'),
-                              fontWeight: FontWeight.w400),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_down_outlined,
-                          color: Helper.hexToColor('#707070'),
-                        )
-                      ],
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(4.0,2,2,0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'mehr',
+                            textAlign: TextAlign.start,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400),
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_down_outlined,
+                            color: Colors.black,
+                          )
+                        ],
+                      ),
                     )),
               )
                   : SizedBox.shrink()
@@ -184,31 +187,34 @@ class NewsPost extends StatelessWidget {
                 textAlign: TextAlign.start,
                 style: Theme.of(context).textTheme.bodyText1.copyWith(
                     fontSize: 15,
-                    color: Helper.hexToColor('#707070'),
+                    color: Colors.black,
                     fontWeight: FontWeight.w400),
               ),
               Align(
                 alignment: Alignment.bottomRight,
                 child: ExpandableButton(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'weniger',
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .copyWith(
-                              fontSize: 15,
-                              color: Helper.hexToColor('#707070'),
-                              fontWeight: FontWeight.w400),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_up_outlined,
-                          color: Helper.hexToColor('#707070'),
-                        )
-                      ],
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(4.0,2,2,0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'weniger',
+                            textAlign: TextAlign.start,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400),
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_up_outlined,
+                            color: Colors.black,
+                          )
+                        ],
+                      ),
                     )),
               )
             ],

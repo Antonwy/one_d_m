@@ -24,9 +24,10 @@ class FaqPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Center(
-                    child: SvgPicture.asset(
-                      "assets/images/odm-logo.svg",
-                      height: 100,
+                    child: Image.asset(
+                      "assets/images/ic_onedm.png",
+                      height: 180,
+                      width: 180,
                     ),
                   ),
                   SizedBox(

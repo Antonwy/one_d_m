@@ -305,7 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: _theme.textTheme.dark.headline6.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
-                      color: Helper.hexToColor('#575757')),
+                      color: Helper.hexToColor('#3E313F')),
                 ),
               ),
               const SizedBox(

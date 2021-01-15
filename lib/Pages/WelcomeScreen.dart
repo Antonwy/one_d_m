@@ -276,7 +276,7 @@ class _WelcomePage extends StatelessWidget {
                 height: 20,
               ),
               isPermission
-                  ? FlatButton(
+                  ? MaterialButton(
                       onPressed: onPressed,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),

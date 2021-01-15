@@ -785,6 +785,12 @@ class DatabaseService {
         .snapshots()
         .map((doc) => doc.exists);
   }
+  static Stream<bool> userExist(String uid) {
+    return userCollection
+        .doc(uid)
+        .snapshots()
+        .map((doc) => doc.exists);
+  }
 
   static Future<bool> userIsFollowSession(String uid, String sid) {
     return sessionsCollection

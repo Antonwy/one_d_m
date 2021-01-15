@@ -18,9 +18,6 @@ class NotificationPlugin {
 
   init() async {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    if (Platform.isIOS) {
-      _requestIOSPermission();
-    }
     initializePlatformSpecifics();
   }
 
@@ -41,16 +38,7 @@ class NotificationPlugin {
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
   }
 
-  _requestIOSPermission() {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        .requestPermissions(
-          alert: false,
-          badge: true,
-          sound: true,
-        );
-  }
+
 
   setListenerForLowerVersions(Function onNotificationInLowerVersions) {
     didReceivedLocalNotificationSubject.listen((receivedNotification) {

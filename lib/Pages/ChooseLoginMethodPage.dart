@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/LoginPage.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
@@ -37,7 +38,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SvgPicture.asset(
-              "assets/images/login.svg",
+              "assets/images/img_login_register.svg",
               height: MediaQuery.of(context).size.height * .25,
             ),
             SizedBox(
@@ -62,7 +63,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
               child: Row(
                 children: <Widget>[
                   _RoundButton(false,
-                      toPage: LoginPage(), pageColor: ColorTheme.yellow),
+                      toPage: LoginPage(), pageColor: Helper.hexToColor("D1D9D5")),
                   SizedBox(
                     width: 12,
                   ),
@@ -162,12 +163,12 @@ class _RoundButton extends StatelessWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         openColor: pageColor,
         closedElevation: 0,
-        closedColor: isRegister ? ColorTheme.blue : ColorTheme.orange,
+        closedColor: isRegister ? ColorTheme.blue : Helper.hexToColor('#D1D9D5'),
         closedBuilder: (context, open) => Container(
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(26),
-            color: isRegister ? null : ColorTheme.orange,
+            color: isRegister ? null : Helper.hexToColor('#D1D9D5'),
           ),
           child: Material(
             color: Colors.transparent,

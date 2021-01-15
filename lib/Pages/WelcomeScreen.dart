@@ -44,7 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               controller: _pageController,
               children: <Widget>[
                 _WelcomePage(
-                  svgName: "welcome-2",
+                  svgName: "img_odm_logo",
                   title: "Wir sind\n One Dollar Movement!",
                   titleText: AutoSizeText.rich(
                     TextSpan(children: [
@@ -68,14 +68,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onPressed: () => _animateToPage(1),
                 ),
                 _WelcomePage(
-                    svgName: "landing-page",
+                    svgName: "img_session",
                     title: "Sessions",
                     description:
                         "Sessions sind Bereiche von bekannten Menschen mit großer Reichweite in Sozialen Netwerken. Du kannst dich ihnen anschließen und das ausgewählte Projekt einer Sessions unterstützen!",
                     animatedValue: _getAnimatedValue(1, _page),
                     onPressed: () => _animateToPage(2)),
                 _WelcomePage(
-                    svgName: "projects",
+                    svgName: "img_project",
                     title: "Projekte",
                     description:
                         "Jedes Projekt widmet sich einem Problem auf dieser Erde. Du kannst dabei Tiere, Menschen oder die Umwelt unterstützen. Miteinem Klick.",
@@ -83,7 +83,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     animatedValue: _getAnimatedValue(2, _page),
                     onPressed: () => _animateToPage(3)),
                 _WelcomePage(
-                  svgName: "explore",
+                  svgName: "img_push",
                   title: "Push Nachrichten",
                   description:
                       "Push Nachrichten halten dich über Sessions, Projekte und Freunde auf dem laufenden.",
@@ -91,9 +91,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   isPermission: true,
                   animatedValue: _getAnimatedValue(3, _page),
                   onPressed: () async {
-                          _requestNotificationPermission()
-                              .then((value) => _animateToPage(4));
-                        },
+                    _requestNotificationPermission()
+                        .then((value) => _animateToPage(4));
+                  },
                 ),
 
                 // _WelcomePage(
@@ -112,38 +112,40 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 //   onPressed: () => _animateToPage(6),
                 // ),
                 _WelcomePage(
-                  svgName: "contacts",
+                  svgName: "img_contact",
                   title: "Kontaktbuch",
                   description:
                       "Damit wir dir eine angenehme User-Experience geben können, brauchen wir einige Berechtigungen von dir.",
                   animatedValue: _getAnimatedValue(4, _page),
                   onPressed: () async {
-                          await _getPermission();
+                    await _getPermission();
 
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChooseLoginMethodPage()));
-                        },
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChooseLoginMethodPage()));
+                  },
                   isPermission: true,
                 ),
               ],
             ),
           ),
           _page != 4
-              ? Positioned(
-                  top: 0,
-                  right: 10,
-                  child: SafeArea(
-                      child: FlatButton(
-                          onPressed: () {
-                            _animateToPage(6);
-                          },
-                          child: Text(
-                            "Überspringen",
-                            style: TextStyle(color: ColorTheme.blue),
-                          ))))
+              ? Visibility(
+                  visible: false,
+                  child: Positioned(
+                      top: 0,
+                      right: 10,
+                      child: SafeArea(
+                          child: FlatButton(
+                              onPressed: () {
+                                _animateToPage(6);
+                              },
+                              child: Text(
+                                "Überspringen",
+                                style: TextStyle(color: ColorTheme.blue),
+                              )))),
+                )
               : Container(),
           Align(
             alignment: Alignment.bottomCenter,
@@ -277,12 +279,17 @@ class _WelcomePage extends StatelessWidget {
               ),
               isPermission
                   ? MaterialButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
                       onPressed: onPressed,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(12.0),
                         child: Text(
                           "Erlauben",
-                          style: TextStyle(color: Colors.white,fontSize: 16),
+                          style: Theme.of(context)
+                              .accentTextTheme
+                              .button
+                              .copyWith(fontSize: 18),
                         ),
                       ),
                       color: Helper.hexToColor('#3E313F'),

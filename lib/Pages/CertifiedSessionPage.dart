@@ -601,10 +601,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                         child: _InfoView(
                             description: "Mitglieder",
                             value: (snapshot.data?.memberCount ??
-                                    csm.session.memberCount) +
-                                (csm.session.creatorId?.isNotEmpty ?? false
-                                    ? 1
-                                    : 0)),
+                                    csm.session.memberCount)),
                       );
                     }),
               ],

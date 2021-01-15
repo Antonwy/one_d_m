@@ -144,7 +144,7 @@ class NewsPost extends StatelessWidget {
                     color: Colors.black,
                     fontWeight: FontWeight.w400),
               ),
-              post.length> 90
+              post.length> 120
                   ? Align(
                 alignment: Alignment.bottomRight,
                 child: ExpandableButton(

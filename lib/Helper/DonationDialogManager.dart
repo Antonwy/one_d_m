@@ -106,7 +106,6 @@ class DonationDialogManager extends ChangeNotifier {
     notifyListeners();
   }
 
-
   bool get loading => _loading;
 
   set loading(bool l) {

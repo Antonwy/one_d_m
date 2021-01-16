@@ -79,9 +79,10 @@ class SessionPage extends StatelessWidget {
 }
 
 class FloatingDonationButton extends StatelessWidget {
-  BaseSession session;
+  final BaseSession session;
+  final Color color;
 
-  FloatingDonationButton(this.session);
+  FloatingDonationButton(this.session, {this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -96,13 +97,12 @@ class FloatingDonationButton extends StatelessWidget {
                     ? () async {
                         BottomDialog bd = BottomDialog(context);
                         bd.show(DonationDialogWidget(
-                          campaign: await DatabaseService.getCampaign(
-                              session.campaignId),
-                          user: um.user,
-                          context: context,
-                          close: bd.close,
-                          sessionId: session.id,
-                        ));
+                            campaign: await DatabaseService.getCampaign(
+                                session.campaignId),
+                            user: um.user,
+                            context: context,
+                            close: bd.close,
+                            sessionId: session.id));
                       }
                     : null,
                 label: Text(
@@ -112,7 +112,8 @@ class FloatingDonationButton extends StatelessWidget {
                           ? _theme.colors.textOnDark
                           : Colors.white60),
                 ),
-                backgroundColor: _connected ? _theme.colors.dark : Colors.grey),
+                backgroundColor:
+                    _connected ? color ?? _theme.colors.dark : Colors.grey),
           );
         });
   }

@@ -89,10 +89,11 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
 
     return ChangeNotifierProvider<DonationDialogManager>(
         create: (context) => DonationDialogManager(
-            adBalanceStream: DatabaseService.getAdBalance(widget.user.id),
-            defaultSelectedAmount: widget.defaultSelectedAmount,
-            sessionId: widget.sessionId,
-            campaign: widget.campaign),
+              adBalanceStream: DatabaseService.getAdBalance(widget.user.id),
+              defaultSelectedAmount: widget.defaultSelectedAmount,
+              sessionId: widget.sessionId,
+              campaign: widget.campaign,
+            ),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,

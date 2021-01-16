@@ -2,6 +2,7 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:palette_generator/palette_generator.dart';
 
 abstract class BaseSessionManager {
   final BaseSession baseSession;
@@ -41,7 +42,7 @@ class CertifiedSessionManager extends BaseSessionManager {
   @override
   void initStreams() {
     isInSession = DatabaseService.userIsInSession(uid, baseSession.id);
-    membersStream = DatabaseService.getSessionMembers(baseSession.id,100);
+    membersStream = DatabaseService.getSessionMembers(baseSession.id, 100);
     donationStream = DatabaseService.getDonationsFromSession(baseSession.id);
     campaign = DatabaseService.getCampaignStream(session.campaignId);
   }

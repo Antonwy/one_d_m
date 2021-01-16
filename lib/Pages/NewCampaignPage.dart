@@ -245,14 +245,34 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                                           MaterialPageRoute(
                                                                               builder: (context) => OrganisationPage(organisation)));
                                                                     },
-                                                          child: Text(
-                                                            'by ${organisation?.name ?? 'Laden...'}',
-                                                            style: _textTheme
-                                                                .bodyText1
-                                                                .copyWith(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400),
+                                                          child: RichText(
+                                                            text: TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                    text:
+                                                                        'by '),
+                                                                TextSpan(
+                                                                    text:
+                                                                        '${organisation?.name ?? 'Laden...'}',
+                                                                    style: _textTheme.bodyText1.copyWith(
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        decoration:
+                                                                            TextDecoration
+                                                                                .underline,
+                                                                        color: _bTheme
+                                                                            .dark)),
+                                                              ],
+                                                              style: _textTheme.bodyText1.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                  color: _bTheme
+                                                                      .dark
+                                                                      .withOpacity(
+                                                                          .54)),
+                                                            ),
                                                           ),
                                                         );
                                                       }),
@@ -286,9 +306,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                             "${campaign?.shortDescription}",
                                             style: _textTheme.caption.copyWith(
                                                 fontWeight: FontWeight.w400,
-                                                color: Helper.hexToColor(
-                                                    '#2e313f'),
-                                                fontSize: 15),
+                                                color: _bTheme.dark
+                                                    .withOpacity(.7),
+                                                fontSize: 14),
                                           ),
                                         ],
                                       ),
@@ -314,11 +334,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                   ),
                                 ),
                                 const YMargin(12),
-                                Text("Beschreibung",
-                                    style: _textTheme.headline6.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    )),
-                                const YMargin(8),
                                 _buildExpandableContent(
                                     context, campaign.description ?? ""),
                               ]),
@@ -593,33 +608,27 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
   Widget _buildFollowButton(
           BuildContext context, Function function, bool isFollow) =>
-      Container(
-        width: 90,
-        height: 50,
-        child: MaterialButton(
-            color: _bTheme.dark,
-            textColor: _bTheme.light,
-            child: _isLoading
-                ? SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              new AlwaysStoppedAnimation<Color>(Colors.white)),
-                    ),
-                  )
-                : AutoSizeText(
-                    isFollow ? 'Entfolgen' : "Folgen",
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.button.copyWith(
-                          color: ThemeManager.of(context).colors.light,
-                        ),
+      RaisedButton(
+          color: isFollow ? _bTheme.contrast : _bTheme.dark,
+          textColor: isFollow ? _bTheme.textOnContrast : _bTheme.textOnDark,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          child: _isLoading
+              ? SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                        strokeWidth: 3.0,
+                        valueColor: new AlwaysStoppedAnimation<Color>(isFollow
+                            ? _bTheme.textOnContrast
+                            : _bTheme.textOnDark)),
                   ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            onPressed: function),
-      );
+                )
+              : AutoSizeText(
+                  isFollow ? 'Entfolgen' : "Folgen",
+                  maxLines: 1,
+                ),
+          onPressed: function);
 
   Future<void> _toggleSubscribed(String uid) async {
     setState(() {
@@ -665,8 +674,9 @@ class _StatCollumn extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               style: Theme.of(context).textTheme.headline5.copyWith(
-                  color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontWeight: FontWeight.bold,),
+                    color: isDark ? _bTheme.contrast : _bTheme.dark,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             Text(
               description,

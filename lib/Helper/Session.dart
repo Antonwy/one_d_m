@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 
 import 'Campaign.dart';
+import 'Helper.dart';
 import 'User.dart';
 
 class BaseSession {
@@ -26,8 +29,9 @@ class BaseSession {
       name: doc.data()[SESSION_NAME],
       amountPerUser: doc.data()[AMOUNT_PER_USER],
       createdAt: (doc.data()[CREATED_AT] as Timestamp).toDate(),
-      endDate:
-          doc.data()[END_DATE] == null ? null : (doc.data()[END_DATE] as Timestamp).toDate(),
+      endDate: doc.data()[END_DATE] == null
+          ? null
+          : (doc.data()[END_DATE] as Timestamp).toDate(),
       sessionDescription: doc.data()[SESSION_DESCRIPTION] ?? "",
     );
   }
@@ -49,6 +53,7 @@ class BaseSession {
 class Session extends BaseSession {
   final String campaignImgUrl, campaignName, campaignShortDescription, imgUrl;
   final int currentAmount, memberCount;
+  final Color primaryColor, secondaryColor;
 
   Session(
       {String id,
@@ -64,7 +69,9 @@ class Session extends BaseSession {
       this.memberCount,
       this.campaignImgUrl,
       this.campaignName,
-      this.campaignShortDescription})
+      this.campaignShortDescription,
+      this.primaryColor,
+      this.secondaryColor})
       : super(
             id: id,
             name: name,
@@ -76,28 +83,35 @@ class Session extends BaseSession {
             sessionDescription: sessionDescription);
 
   factory Session.fromDoc(DocumentSnapshot doc) {
-    if(!doc.exists) return Session();
+    if (!doc.exists) return Session();
     return Session(
-        creatorId: doc.data()[BaseSession.CREATOR_ID],
-        id: doc.id,
-        name: doc.data()[BaseSession.SESSION_NAME],
-        amountPerUser: doc.data()[BaseSession.AMOUNT_PER_USER],
-        createdAt: (doc.data()[BaseSession.CREATED_AT] as Timestamp).toDate(),
-        endDate: doc.data()[BaseSession.END_DATE] == null
-            ? null
-            : (doc.data()[BaseSession.END_DATE] as Timestamp).toDate(),
-        campaignId: doc.data()[BaseSession.CAMPAIGN_ID],
-        campaignName: doc.data()[CAMPAIGN_NAME],
-        campaignImgUrl: doc.data()[CAMPAIGN_IMG_URL],
-        currentAmount: doc.data()[CURRENT_AMOUNT],
-        memberCount: doc.data()[MEMBER_COUNT] ?? 0,
-        campaignShortDescription: doc.data()[CAMPAIGN_SHORT_DESCRIPTION],
-        sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
-        imgUrl: doc.data()[IMG_URL]);
+      creatorId: doc.data()[BaseSession.CREATOR_ID],
+      id: doc.id,
+      name: doc.data()[BaseSession.SESSION_NAME],
+      amountPerUser: doc.data()[BaseSession.AMOUNT_PER_USER],
+      createdAt: (doc.data()[BaseSession.CREATED_AT] as Timestamp).toDate(),
+      endDate: doc.data()[BaseSession.END_DATE] == null
+          ? null
+          : (doc.data()[BaseSession.END_DATE] as Timestamp).toDate(),
+      campaignId: doc.data()[BaseSession.CAMPAIGN_ID],
+      campaignName: doc.data()[CAMPAIGN_NAME],
+      campaignImgUrl: doc.data()[CAMPAIGN_IMG_URL],
+      currentAmount: doc.data()[CURRENT_AMOUNT],
+      memberCount: doc.data()[MEMBER_COUNT] ?? 0,
+      campaignShortDescription: doc.data()[CAMPAIGN_SHORT_DESCRIPTION],
+      sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
+      imgUrl: doc.data()[IMG_URL],
+      primaryColor: doc.data()[PRIMARY_COLOR] != null
+          ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
+          : ColorTheme.wildGreen,
+      secondaryColor: doc.data()[SECONDARY_COLOR] != null
+          ? Helper.hexToColor(doc.data()[SECONDARY_COLOR])
+          : ColorTheme.darkblue,
+    );
   }
 
   static List<Session> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.docs.map((doc){
+    return qs.docs.map((doc) {
       Session.fromDoc(doc);
     }).toList();
   }
@@ -107,6 +121,8 @@ class Session extends BaseSession {
       CURRENT_AMOUNT = "current_amount",
       MEMBER_COUNT = "member_count",
       CAMPAIGN_SHORT_DESCRIPTION = "campaign_short_description",
+      PRIMARY_COLOR = "primary_color",
+      SECONDARY_COLOR = "secondary_color",
       IMG_URL = "img_url";
 }
 
@@ -162,7 +178,7 @@ class SessionInvite {
   }
 
   static List<SessionInvite> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.documents.map((doc) => SessionInvite.fromDoc(doc)).toList();
+    return qs.docs.map((doc) => SessionInvite.fromDoc(doc)).toList();
   }
 
   Map<String, dynamic> toMap() {
@@ -189,8 +205,8 @@ class SessionMember {
 
   SessionMember({this.userId, this.donationAmount});
 
-  factory SessionMember.fromDoc(DocumentSnapshot doc) =>
-      SessionMember(userId: doc.data()[ID], donationAmount: doc.data()[DONATION_AMOUNT] ?? 0);
+  factory SessionMember.fromDoc(DocumentSnapshot doc) => SessionMember(
+      userId: doc.data()[ID], donationAmount: doc.data()[DONATION_AMOUNT] ?? 0);
 
   static List<SessionMember> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) => SessionMember.fromDoc(doc)).toList();

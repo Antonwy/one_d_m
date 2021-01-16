@@ -5,6 +5,7 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'CampaignButton.dart';
@@ -86,37 +87,13 @@ class NewsPost extends StatelessWidget {
             ),
             Align(
               alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Text(
-                    //   news.title,
-                    //   style: Theme.of(context)
-                    //       .textTheme
-                    //       .headline6
-                    //       .copyWith(color: Colors.black),
-                    // ),
-                    // shortText.isEmpty ? Container() : SizedBox(height: 5),
-                    // shortText.isEmpty
-                    //     ? Container()
-                    //     : Text(
-                    //         shortText,
-                    //         style: TextStyle(
-                    //             fontWeight: FontWeight.bold,
-                    //             color: Colors.black),
-                    //       ),
-                    // news.text.isEmpty
-                    //     ? Container()
-                    //     : SizedBox(
-                    //         height: 5,
-                    //       ),
-                    news.text.isEmpty
-                        ? Container()
-                        : _buildExpandableContent(context, news.text)
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  news.text.isEmpty
+                      ? Container()
+                      : _buildExpandableContent(context, news.text)
+                ],
               ),
             )
           ],
@@ -125,102 +102,113 @@ class NewsPost extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandableContent(BuildContext context,String post) => ExpandableNotifier(
-    child: Column(
-      children: [
-        Expandable(
-          collapsed: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                post,
-                maxLines: 3,
-                softWrap: true,
-                textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.bodyText1.copyWith(
-                    fontSize: 15,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400),
-              ),
-              post.length> 120
-                  ? Align(
-                alignment: Alignment.bottomRight,
-                child: ExpandableButton(
-                    child: Container(
-                      margin: const EdgeInsets.fromLTRB(4.0,2,2,0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+  Widget _buildExpandableContent(BuildContext context, String post) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return ExpandableNotifier(
+      child: Column(
+        children: [
+          Expandable(
+            collapsed: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    post,
+                    maxLines: 3,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400),
+                  ),
+                ),
+                post.length > 120
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'mehr',
+                          Divider(
+                            height: 1,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
+                            child: ExpandableButton(
+                                child: Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                              child: Text(
+                                'MEHR',
+                                textAlign: TextAlign.start,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(
+                                        fontSize: 15,
+                                        color: _theme.colors.dark,
+                                        fontWeight: FontWeight.w700),
+                              ),
+                            )),
+                          ),
+                        ],
+                      )
+                    : SizedBox.shrink()
+              ],
+            ),
+            expanded: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    post,
+                    maxLines: null,
+                    softWrap: true,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 15,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: ExpandableButton(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Divider(
+                        height: 1,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
+                        child: ExpandableButton(
+                            child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                          child: Text(
+                            'WENIGER',
                             textAlign: TextAlign.start,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyText1
                                 .copyWith(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400),
+                                    fontSize: 15,
+                                    color: _theme.colors.dark,
+                                    fontWeight: FontWeight.w700),
                           ),
-                          Icon(
-                            Icons.keyboard_arrow_down_outlined,
-                            color: Colors.black,
-                          )
-                        ],
+                        )),
                       ),
-                    )),
-              )
-                  : SizedBox.shrink()
-            ],
-          ),
-          expanded: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                post,
-                maxLines: null,
-                softWrap: true,
-                textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.bodyText1.copyWith(
-                    fontSize: 15,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: ExpandableButton(
-                    child: Container(
-                      margin: const EdgeInsets.fromLTRB(4.0,2,2,0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'weniger',
-                            textAlign: TextAlign.start,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .copyWith(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Icon(
-                            Icons.keyboard_arrow_up_outlined,
-                            color: Colors.black,
-                          )
-                        ],
-                      ),
-                    )),
-              )
-            ],
-          ),
-        )
-      ],
-    ),
-  );
+                    ],
+                  )),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }

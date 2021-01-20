@@ -372,6 +372,8 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
       print(e);
     }
 
+    _um.firstSignIn = true;
+
     Navigator.push(
         context,
         MaterialPageRoute(

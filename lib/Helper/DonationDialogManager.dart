@@ -118,7 +118,7 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   void _adBalanceListener(AdBalance ab) {
-    adBalance = ab;
+    if (ab != null) adBalance = ab;
   }
 
   void _hasPaymentMethodListener(bool hpm) {

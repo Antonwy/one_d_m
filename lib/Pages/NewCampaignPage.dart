@@ -116,6 +116,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       BottomDialog bd = BottomDialog(context);
                                       bd.show(DonationDialogWidget(
                                         campaign: snapshot.data,
+                                        uid: um.uid,
                                         user: um.user,
                                         context: context,
                                         close: bd.close,
@@ -526,7 +527,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     textAlign: TextAlign.start,
                     style: Theme.of(context).textTheme.bodyText1.copyWith(
                         fontSize: 15,
-                        color: Helper.hexToColor('#2e313f'),
+                        color: _bTheme.dark,
                         fontWeight: FontWeight.w400),
                   ),
                   text.length > 90
@@ -538,23 +539,21 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Padding(
-                                padding: EdgeInsets.zero,
-                                child: Icon(
-                                  Icons.keyboard_arrow_down_outlined,
-                                  color: Colors.black,
-                                  size: 32,
-                                ),
+                              Icon(
+                                Icons.keyboard_arrow_down_outlined,
+                                color: _bTheme.dark,
+                                size: 25,
                               ),
+                              YMargin(4),
                               Text(
-                                'mehr',
+                                'MEHR',
                                 textAlign: TextAlign.start,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyText1
                                     .copyWith(
-                                        fontSize: 16,
-                                        color: Colors.black,
+                                        fontSize: 14,
+                                        color: _bTheme.dark,
                                         fontWeight: FontWeight.w700),
                               ),
                             ],
@@ -575,25 +574,24 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     textAlign: TextAlign.start,
                     style: Theme.of(context).textTheme.bodyText1.copyWith(
                         fontSize: 15,
-                        color: Helper.hexToColor('#2e313f'),
+                        color: _bTheme.dark,
                         fontWeight: FontWeight.w400),
                   ),
+                  YMargin(4),
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: ExpandableButton(
                         child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.keyboard_arrow_up_outlined,
-                          color: Colors.black,
-                        ),
+                        Icon(Icons.keyboard_arrow_up_outlined,
+                            color: _bTheme.dark, size: 25),
                         Text(
-                          'weniger',
+                          'WENIGER',
                           textAlign: TextAlign.start,
                           style: Theme.of(context).textTheme.bodyText1.copyWith(
-                              fontSize: 16,
-                              color: Colors.black,
+                              fontSize: 14,
+                              color: _bTheme.dark,
                               fontWeight: FontWeight.w700),
                         ),
                       ],

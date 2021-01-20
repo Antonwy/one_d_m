@@ -26,6 +26,7 @@ class UserManager extends ChangeNotifier {
   firebaseAuth.User _fireUser;
   Status _status = Status.Uninitialized;
   GoogleSignIn _googleSignIn;
+  bool firstSignIn = false;
 
   Status get status => _status;
 
@@ -180,7 +181,7 @@ class UserManager extends ChangeNotifier {
         phoneNumber: phonenumber,
         name: username.trim(),
         email: fireUser.email,
-        imgUrl: fireUser.photoUrl,
+        imgUrl: fireUser.photoURL,
         id: fireUser.uid);
     try {
       await DatabaseService.addUser(user);
@@ -202,10 +203,15 @@ class UserManager extends ChangeNotifier {
       }
 
       print(user);
+      firebaseAuth.UserCredential res;
 
-      firebaseAuth.UserCredential res =
-          await _auth.createUserWithEmailAndPassword(
-              email: user.email, password: user.password);
+      try {
+        res = await _auth.createUserWithEmailAndPassword(
+            email: user.email, password: user.password);
+      } on firebaseAuth.FirebaseAuthException catch (e) {
+        status = Status.Unauthenticated;
+        return ApiError(e.message);
+      }
 
       if (image != null) {
         StorageService service = StorageService(file: image);

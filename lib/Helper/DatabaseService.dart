@@ -535,6 +535,7 @@ class DatabaseService {
   static Stream<List<Donation>> getLatestDonations() {
     return donationsCollection
         .where(Donation.ISANONYM, isEqualTo: false)
+        .orderBy(Donation.CREATEDAT, descending: true)
         .limit(3)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));

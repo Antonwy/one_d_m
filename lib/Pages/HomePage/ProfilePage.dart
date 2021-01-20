@@ -212,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       width: 10,
                                     ),
                                     RoundButtonHomePage(
-                                      icon: Icons.settings_sharp,
+                                      icon: Icons.settings,
                                       onTap: () {
                                         BottomDialog(context)
                                             .show(SettingsDialog());

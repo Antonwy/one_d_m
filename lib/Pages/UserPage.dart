@@ -148,14 +148,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                   ),
                   _OtherUsersRecommendations(
                     user: user,
-                    followingStream: _followers,
+                    followers: _followers,
                   ),
-                  SliverToBoxAdapter(
-                      child: Container(
-                    width: double.infinity,
-                    height: 0.3,
-                    color: Colors.black87.withOpacity(0.4),
-                  )),
                   mySessions.isNotEmpty
                       ? _buildCampaignSessions(mySessions)
                       : SliverToBoxAdapter(
@@ -290,10 +284,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 }
 
 class _OtherUsersRecommendations extends StatefulWidget {
-  final List<String> followingStream;
+  final List<String> followers;
   final User user;
 
-  _OtherUsersRecommendations({Key key, this.followingStream, this.user})
+  _OtherUsersRecommendations({Key key, this.followers, this.user})
       : super(key: key);
 
   @override
@@ -310,60 +304,62 @@ class __OtherUsersRecommendationsState
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
 
+    if (widget.followers.isEmpty) return SliverToBoxAdapter();
     return _show
-        ? widget.followingStream.isEmpty
-            ? SliverToBoxAdapter()
-            : SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8.0),
-                  height: 180,
-                  color: Colors.white,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const YMargin(12),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              color: Helper.hexToColor('#2e313f'),
-                            ),
-                            children: <TextSpan>[
-                              TextSpan(text: 'Users '),
+        ? SliverPadding(
+            padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
+            sliver: SliverToBoxAdapter(
+              child: Material(
+                elevation: 1,
+                borderRadius: BorderRadius.circular(6),
+                color: _theme.colors.contrast,
+                clipBehavior: Clip.antiAlias,
+                child: Theme(
+                  data: ThemeData(
+                      accentColor: _theme.colors.textOnContrast,
+                      unselectedWidgetColor:
+                          _theme.colors.textOnContrast.withOpacity(.8)),
+                  child: ExpansionTile(
+                      initiallyExpanded: true,
+                      title: RichText(
+                        text: TextSpan(
+                            style: _theme.textTheme.textOnContrast.bodyText2,
+                            children: [
+                              TextSpan(text: "Personen denen "),
                               TextSpan(
-                                  text: widget.user.name,
-                                  style: new TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              TextSpan(text: ' follows:'),
-                            ],
-                          ),
-                        ),
+                                  text: "${widget.user.name} ",
+                                  style: _theme
+                                      .textTheme.textOnContrast.bodyText1
+                                      .copyWith(fontWeight: FontWeight.bold)),
+                              TextSpan(text: "folgt:"),
+                            ]),
                       ),
-                      const YMargin(4),
-                      Expanded(
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) => Padding(
-                            padding: EdgeInsets.only(
-                                left: index == 0 ? 12 : 0,
-                                right:
-                                    index == widget.followingStream.length - 1
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            height: 125,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) => Padding(
+                                padding: EdgeInsets.only(
+                                    left: index == 0 ? 12 : 0,
+                                    right: index == widget.followers?.length ??
+                                            1 - 1
                                         ? 12
                                         : 0),
-                            child: _RecommendationUser(
-                                widget.followingStream[index]),
+                                child: _RecommendationUser(
+                                    widget.followers[index]),
+                              ),
+                              itemCount: widget.followers?.length,
+                            ),
                           ),
-                          itemCount: widget.followingStream.length,
                         ),
-                      ),
-                    ],
-                  ),
+                      ]),
                 ),
-              )
+              ),
+            ),
+          )
         : SliverToBoxAdapter();
   }
 }
@@ -382,81 +378,51 @@ class _RecommendationUser extends StatelessWidget {
         User user = snapshot.data;
         bool deleted = snapshot.hasData && snapshot.data?.name == null;
 
-        return Padding(
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                flex: 3,
-                child: CustomOpenContainer(
-                  openBuilder: (context, close, scrollController) => UserPage(
-                    user,
-                    scrollController: scrollController,
-                  ),
-                  closedElevation: 0,
-                  closedColor: Colors.white,
-                  closedShape: CircleBorder(),
-                  closedBuilder: (context, open) => InkWell(
-                    onTap: open,
-                    child: Container(
-                        height: 75,
-                        width: 75,
-                        child: CachedNetworkImage(
-                          imageUrl: user?.imgUrl ?? '',
-                          imageBuilder: (_, imgProvider) => Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(width: 0.5, color: Colors.black),
-                              image: DecorationImage(
-                                image: imgProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            decoration: BoxDecoration(
-                              color: ThemeManager.of(context).colors.contrast,
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(width: 0.5, color: Colors.black),
-                            ),
-                            child: Center(
-                                child: Icon(
-                              Icons.person,
-                              color: ThemeManager.of(context).colors.dark,
-                            )),
-                          ),
-                          placeholder: (_, __) => Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(width: 0.5, color: Colors.black),
-                            ),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                        )),
-                  ),
+        return Container(
+          height: 100,
+          width: 108,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: CustomOpenContainer(
+              openBuilder: (context, close, scrollController) => UserPage(
+                user,
+                scrollController: scrollController,
+              ),
+              closedElevation: 1,
+              closedColor: Colors.white,
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6)),
+              closedBuilder: (context, open) => Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                        child: RoundedAvatar(
+                      user?.imgUrl,
+                      loading: !snapshot.hasData,
+                      color: _theme.colors.dark,
+                      iconColor: _theme.colors.contrast,
+                    )),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Expanded(
+                      child: Container(
+                        width: 76,
+                        height: double.infinity,
+                        child: AutoSizeText(
+                            deleted
+                                ? "Gelöschter Nutzer"
+                                : user?.name ?? "Laden...",
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            style: _theme.textTheme.dark.headline6),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(
-                height: 3,
-              ),
-              Expanded(
-                child: AutoSizeText(
-                    deleted ? "Gelöschter Nutzer" : user?.name ?? "Laden...",
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.headline6.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        color: Helper.hexToColor('#2e313f'))),
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -495,8 +461,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                 AppBar(
                   leading: IconButton(
                     icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 48,
+                      Icons.keyboard_arrow_down,
+                      size: 30,
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -581,7 +547,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           height: 88.0,
           width: 88.0,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(15)),
+            borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
               image: imageProvider,
               fit: BoxFit.cover,
@@ -592,7 +558,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           height: 88,
           width: 88,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(15)),
+            borderRadius: BorderRadius.circular(12),
             color: ThemeManager.of(context).colors.contrast,
           ),
           child: Center(
@@ -614,7 +580,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(SliverPersistentHeaderDelegate _) => true;
 
   @override
-  double get maxExtent => 280.0;
+  double get maxExtent => 270.0;
 
   @override
   double get minExtent => _minExtend;
@@ -638,26 +604,20 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         ),
                         backgroundColor: ColorTheme.whiteBlue,
                       );
-                    return CustomOpenContainer(
-                      openBuilder: (context, close, controller) =>
-                          EditProfile(),
-                      closedShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      closedBuilder: (context, open) => Container(
-                        width: 100,
-                        height: 41,
-                        color: ThemeManager.of(context).colors.contrast,
-                        child: InkWell(
-                          onTap: open,
-                          child: Center(
-                            child: Text(
-                              'Edit',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: ThemeManager.of(context).colors.dark),
-                            ),
-                          ),
+                    return RaisedButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EditProfile()));
+                      },
+                      child: Center(
+                        child: Text(
+                          'Edit',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: ThemeManager.of(context).colors.dark),
                         ),
                       ),
                     );
@@ -669,26 +629,21 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                 builder: (context, snapshot) {
                   bool _followed = snapshot.data;
 
-                  return Container(
-                      width: 100,
-                      height: 41,
-                      decoration: BoxDecoration(
-                          color: ThemeManager.of(context).colors.contrast,
-                          borderRadius: BorderRadius.all(Radius.circular(15))),
-                      child: InkWell(
-                        onTap: () async {
-                          await _toggleFollow(um.uid, _followed);
-                        },
-                        child: Center(
-                          child: Text(
-                            _followed ? 'Entfolgen' : 'Folgen',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: ThemeManager.of(context).colors.dark),
-                          ),
-                        ),
-                      ));
+                  return RaisedButton(
+                    color: _theme.colors.contrast,
+                    onPressed: () async {
+                      await _toggleFollow(um.uid, _followed);
+                    },
+                    child: Center(
+                      child: Text(
+                        _followed ? 'Entfolgen' : 'Folgen',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: _theme.colors.textOnContrast),
+                      ),
+                    ),
+                  );
                 });
           });
   }
@@ -745,13 +700,13 @@ class UserHeader extends SliverPersistentHeaderDelegate {
             number.toString(),
             maxLines: 1,
             style: _theme.textTheme.textOnDark.headline6
-                .copyWith(fontWeight: FontWeight.w600, fontSize: 24),
+                .copyWith(fontWeight: FontWeight.w700, fontSize: 20),
           ),
-          const YMargin(10),
+          const YMargin(4),
           Text(
             text,
             style: _theme.materialTheme.accentTextTheme.bodyText1.copyWith(
-                color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+                color: Colors.white, fontWeight: FontWeight.w400, fontSize: 14),
           )
         ],
       ),

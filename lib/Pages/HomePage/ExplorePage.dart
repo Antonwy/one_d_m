@@ -147,7 +147,7 @@ class _ExplorePageState extends State<ExplorePage>
               style: TextStyle(
                   fontWeight: FontWeight.w600, fontSize: 12, color: textColor),
               children: [
-                TextSpan(text: '${u.name} donated '),
+                TextSpan(text: '${u.name} spendete '),
                 TextSpan(
                     text: '$amount DV',
                     style: TextStyle(

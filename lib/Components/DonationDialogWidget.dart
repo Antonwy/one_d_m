@@ -10,6 +10,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
+import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -34,9 +35,11 @@ class DonationDialogWidget extends StatefulWidget {
   int defaultSelectedAmount;
   final String sessionId;
   final ScrollController controller;
+  final String uid;
 
   DonationDialogWidget(
       {this.close,
+      @required this.uid,
       this.campaign,
       this.user,
       this.context,
@@ -57,14 +60,20 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   ScrollController _scrollController;
   bool _shouldScroll = true;
 
+  Stream<AdBalance> _adbalanceStream;
+
   @override
   void initState() {
     _selectedValue = widget.defaultSelectedAmount.toDouble();
-    DatabaseService.getAdBalance(widget.user.id).listen((event) {
+    _adbalanceStream =
+        DatabaseService.getAdBalance(widget.user?.id ?? widget.uid);
+
+    _adbalanceStream.listen((event) {
       if (event.dcBalance < _selectedValue) {
         _selectedValue = 0;
       }
     });
+
     _scrollController = ScrollController();
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
@@ -89,7 +98,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
 
     return ChangeNotifierProvider<DonationDialogManager>(
         create: (context) => DonationDialogManager(
-              adBalanceStream: DatabaseService.getAdBalance(widget.user.id),
+              adBalanceStream: _adbalanceStream,
               defaultSelectedAmount: widget.defaultSelectedAmount,
               sessionId: widget.sessionId,
               campaign: widget.campaign,
@@ -131,9 +140,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
                                         _buildheading(
-                                            widget.campaign.imgUrl,
-                                            widget.campaign.name,
-                                            widget.campaign.authorId),
+                                            widget.campaign?.imgUrl ?? "",
+                                            widget.campaign?.name ??
+                                                "Not found",
+                                            widget.campaign?.authorId ?? ""),
                                         SizedBox(
                                           height: 20,
                                         ),
@@ -167,7 +177,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            'von ${ddm.adBalance.dcBalance} DV',
+                                            'von ${ddm?.adBalance?.dcBalance ?? 0} DV',
                                             style: _theme.textTheme.subtitle1
                                                 .copyWith(
                                                     fontWeight: FontWeight.w700,
@@ -237,8 +247,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                             LineIcons.plus),
                                                         color: _bTheme.light,
                                                         onPressed: () {
-                                                          if (ddm.adBalance
-                                                                  .dcBalance >
+                                                          if ((ddm?.adBalance
+                                                                      ?.dcBalance ??
+                                                                  0) >
                                                               _selectedValue) {
                                                             HapticFeedback
                                                                 .heavyImpact();
@@ -285,10 +296,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         Align(
                                           alignment: Alignment.center,
                                           child: DonationButton(
-                                            keyboardFocus: _keyboardFocus,
-                                            campaign: widget.campaign,
-                                            user: widget.user,
-                                          ),
+                                              keyboardFocus: _keyboardFocus,
+                                              campaign: widget.campaign,
+                                              user: widget.user,
+                                              uid: widget.uid),
                                         ),
                                         AnimatedContainer(
                                           curve: Curves.fastOutSlowIn,
@@ -446,9 +457,10 @@ class DonationButton extends StatelessWidget {
 
   Campaign campaign;
   FocusScopeNode keyboardFocus;
-  User user;
+  final User user;
+  final String uid;
 
-  DonationButton({this.campaign, this.keyboardFocus, this.user});
+  DonationButton({this.campaign, this.keyboardFocus, this.user, this.uid});
 
   @override
   Widget build(BuildContext context) {
@@ -472,8 +484,9 @@ class DonationButton extends StatelessWidget {
               color: _bTheme.dark,
               disabledColor: Colors.grey,
               onPressed: ddm.amount != null &&
-                      ddm.amount != 0 &&
-                      ddm.amount <= ddm.adBalance.dcBalance
+                          ddm.amount != 0 &&
+                          ddm.amount <= ddm.adBalance?.dcBalance ??
+                      0
                   ? connected
                       ? _donate
                       : () {
@@ -526,7 +539,7 @@ class DonationButton extends StatelessWidget {
         campaignId: campaign.id,
         alternativeCampaignId: campaign.id,
         campaignImgUrl: campaign.imgUrl,
-        userId: user.id,
+        userId: uid,
         campaignName: campaign.name,
         anonym: ddm.anonym,
         useDCs: ddm.useDCs,

@@ -14,11 +14,11 @@ class Constants {
   static const String THEME_KEY = "theme_key";
   static const int DEFAULT_THEME_INDEX = 1;
   static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~1231771836";
-  static const String ADMOB_NEWS_ID = "ca-app-pub-3940256099942544/2247696110";
+  static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/2483531295";
   static const String ADMOB_REWARD_ID =
-      "ca-app-pub-3940256099942544/5224354917";
+      "ca-app-pub-6737404453820737/1355850091";
   static const String ADMOB_EXPLORE_ID =
-      "ca-app-pub-3940256099942544/2247696110";
+      "ca-app-pub-6737404453820737/6411168019";
   static const int AD_NEWS_RATE = 3;
   static const int AD_CAMPAIGNS_RATE = 3;
 

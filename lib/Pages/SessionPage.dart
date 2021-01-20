@@ -97,12 +97,14 @@ class FloatingDonationButton extends StatelessWidget {
                     ? () async {
                         BottomDialog bd = BottomDialog(context);
                         bd.show(DonationDialogWidget(
-                            campaign: await DatabaseService.getCampaign(
-                                session.campaignId),
-                            user: um.user,
-                            context: context,
-                            close: bd.close,
-                            sessionId: session.id));
+                          campaign: await DatabaseService.getCampaign(
+                              session.campaignId),
+                          user: um.user,
+                          context: context,
+                          close: bd.close,
+                          sessionId: session.id,
+                          uid: um.uid,
+                        ));
                       }
                     : null,
                 label: Text(

@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class Avatar extends StatefulWidget {
@@ -29,15 +28,16 @@ class _AvatarState extends State<Avatar> {
   @override
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
+    bool _hasImage = widget.imageUrl != null && widget.imageUrl.isNotEmpty;
     return GestureDetector(
       onTap: widget.onTap,
       child: CircleAvatar(
         radius: widget.radius,
-        backgroundImage: widget.imageUrl != null
-            ? CachedNetworkImageProvider(widget.imageUrl)
-            : null,
-        onBackgroundImageError: widget.imageUrl != null
+        backgroundImage:
+            _hasImage ? CachedNetworkImageProvider(widget.imageUrl) : null,
+        onBackgroundImageError: _hasImage
             ? (exception, stackTrace) {
+                print("ERROR: " + exception.toString());
                 setState(() {
                   _hasError = true;
                 });
@@ -49,7 +49,7 @@ class _AvatarState extends State<Avatar> {
                 Icons.error,
                 color: _bTheme.contrast,
               )
-            : widget.imageUrl == null
+            : !_hasImage
                 ? Icon(
                     widget.icon ?? Icons.person,
                     color: widget.iconColor ?? _bTheme.contrast,

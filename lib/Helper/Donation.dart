@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Donation {
   final int amount;
-  final bool anonym, useDCs;
+  final bool anonym, useDCs, campaignDeleted;
   final String campaignId,
       alternativeCampaignId,
       userId,
@@ -20,7 +20,8 @@ class Donation {
       ISANONYM = "anonym",
       USEDCS = "useDCs",
       SESSION_ID = "session_id",
-      CREATEDAT = "created_at";
+      CREATEDAT = "created_at",
+      CAMPAIGN_DELETED = "campaign_deleted";
 
   Donation(this.amount,
       {this.campaignId,
@@ -31,7 +32,8 @@ class Donation {
       this.createdAt,
       this.anonym,
       this.useDCs,
-      this.sessionId});
+      this.sessionId,
+      this.campaignDeleted});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
     return Donation(doc.data()[AMOUNT],
@@ -43,7 +45,8 @@ class Donation {
         anonym: doc.data()[ISANONYM] ?? false,
         createdAt: (doc.data()[CREATEDAT] as Timestamp).toDate(),
         useDCs: doc.data()[USEDCS] ?? false,
-        sessionId: doc.data()[SESSION_ID]);
+        sessionId: doc.data()[SESSION_ID],
+        campaignDeleted: doc.data()[CAMPAIGN_DELETED] ?? false);
   }
 
   static List<Donation> listFromSnapshots(List<DocumentSnapshot> list) {

@@ -23,7 +23,8 @@ export class DatabaseConstants {
   static readonly ad_impressions: string = 'impressions';
   static readonly ad_balance: string = 'balance';
   static readonly cards: string = 'cards';
-  static readonly organisations: string = 'organisations';
+  static readonly organisations: string = 'organizations';
+  static readonly session_id: string = 'session_id';
   static readonly charges_users: string = 'charges_users';
   static readonly charges_campaigns: string = 'charges_campaigns';
   static readonly cpm_rates: string = 'cpm_rates';
@@ -41,6 +42,8 @@ export class CampaignFields {
 export class DonationFields {
   static readonly user_id: string = 'user_id';
   static readonly created_at: string = 'created_at';
+  static readonly campaign_id: string = 'campaign_id';
+  static readonly campaign_deleted: string = 'campaign_deleted';
 }
 
 export class PrivateUserFields {
@@ -69,6 +72,8 @@ export class ImagePrefix {
   static readonly campaign: string = 'campaign';
   static readonly news: string = 'news';
   static readonly user: string = 'user';
+  static readonly certified_sessions: string = 'certified_sessions';
+  static readonly session: string = 'session';
 }
 
 export class ImageSuffix {

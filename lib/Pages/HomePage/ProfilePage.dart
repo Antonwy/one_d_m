@@ -270,19 +270,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 textAlign: TextAlign.center,
               ),
               const YMargin(20),
-              MaterialButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)),
+              RaisedButton(
                 onPressed: widget.onExploreTapped,
-                textColor: ThemeManager.of(context).colors.light,
-                color: Helper.hexToColor('#3E313F'),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: AutoSizeText(
-                    'Entdecke Sessions',
-                    style: Theme.of(context).accentTextTheme.button,
-                  ),
+                child: AutoSizeText(
+                  'Entdecke Sessions',
+                  style: Theme.of(context).accentTextTheme.button,
                 ),
+                color: ThemeManager.of(context).colors.dark,
               ),
             ],
           ),

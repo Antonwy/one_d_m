@@ -69,8 +69,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
           SliverAppBar(
             leading: IconButton(
               icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 48,
+                Icons.keyboard_arrow_down,
+                size: 30,
               ),
               onPressed: () => Navigator.pop(context),
             ),
@@ -128,13 +128,12 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                               SizedBox(
                                 height: 10,
                               ),
-                              SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                (context, index) => Padding(
+                              ...snapshot.data.map(
+                                (element) => Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 18.0, vertical: 5),
                                   child: UserButton(
-                                    snapshot.data[index],
+                                    element,
                                     withAddButton: true,
                                     color: ColorTheme.whiteBlue,
                                     textStyle:
@@ -143,8 +142,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                                     avatarColor: ColorTheme.blue,
                                   ),
                                 ),
-                                childCount: snapshot.data.length,
-                              ))
+                              ),
                             ],
                           ),
                         );

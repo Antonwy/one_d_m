@@ -177,7 +177,7 @@ class SettingsDialog extends StatelessWidget {
                     stream: DatabaseService.isGhost(um.uid),
                     initialData: false,
                     builder: (context, snapshot) {
-                      bool isGhost = snapshot.data;
+                      bool isGhost = snapshot.data ?? false;
                       return ListTile(
                         title: Text("Ghost Modus"),
                         subtitle: Text(

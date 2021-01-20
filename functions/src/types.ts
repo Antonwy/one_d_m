@@ -106,6 +106,7 @@ export interface UserSessionType {
 export interface SessionMemberType {
   id: string;
   donation_amount: number;
+  created_at: FirebaseFirestore.Timestamp;
 }
 
 export interface SessionInviteType {

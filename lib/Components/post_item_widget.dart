@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
@@ -28,6 +30,7 @@ class HeadingItem implements PostItem {
 
   @override
   Widget buildHeading(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
     return KeepAliveStreamBuilder(
       stream: session,
       builder: (_, snapshot) {
@@ -59,7 +62,7 @@ class HeadingItem implements PostItem {
                         height: 58.0,
                         width: 88.0,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                          borderRadius: BorderRadius.circular(12),
                           image: DecorationImage(
                             image: imageProvider,
                             fit: BoxFit.cover,
@@ -68,15 +71,11 @@ class HeadingItem implements PostItem {
                       ),
                     ),
                     const XMargin(8.0),
-                    Text(
-                      session.name ?? '',
-                      maxLines: 2,
-                      softWrap: true,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
-                    ),
+                    AutoSizeText(session.name ?? '',
+                        maxLines: 1,
+                        softWrap: true,
+                        style: _theme.textTheme.dark.headline6
+                            .copyWith(fontWeight: FontWeight.w600)),
                     const XMargin(8.0),
                     Icon(
                       Icons.verified,
@@ -107,50 +106,54 @@ class PostContentItem extends StatefulWidget implements PostItem {
   Widget buildHeading(BuildContext context) => SizedBox.shrink();
 
   @override
-  Widget buildPosts(BuildContext context) => KeepAliveStreamBuilder(
-        stream: post,
-        builder: (_, snapshot) {
-          if (snapshot.hasData) {
-            List<News> news = snapshot.data;
+  Widget buildPosts(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return KeepAliveStreamBuilder(
+      stream: post,
+      builder: (_, snapshot) {
+        if (snapshot.hasData) {
+          List<News> news = snapshot.data;
 
-            news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-            ///limit only to display latest two posts
-            List<News> sublist = news.length > 5 ? news.sublist(0, 5) : news;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                ListView(
-                  shrinkWrap: true,
-                  addAutomaticKeepAlives: true,
-                  padding: EdgeInsets.only(top: 20),
-                  physics: const NeverScrollableScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics()),
-                  children: _buildPostWidgets(context, sublist),
-                ),
+          ///limit only to display latest two posts
+          List<News> sublist = news.length > 5 ? news.sublist(0, 5) : news;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              ListView(
+                shrinkWrap: true,
+                addAutomaticKeepAlives: true,
+                padding: EdgeInsets.only(top: 20),
+                physics: const NeverScrollableScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics()),
+                children: _buildPostWidgets(context, sublist),
+              ),
 
-                ///show more button if limit exceeds 2
-                news.length > 5
-                    ? _buildShowMore(context, news[0].sessionId)
-                    : SizedBox.shrink(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 0, bottom: 8.0),
-                  child: Divider(),
-                )
-              ],
-            );
-          } else {
-            return CircularProgressIndicator();
-          }
-        },
-      );
+              ///show more button if limit exceeds 2
+              news.length > 5
+                  ? _buildShowMore(context, news[0].sessionId)
+                  : SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.only(top: 0, bottom: 8.0),
+                child: Divider(),
+              )
+            ],
+          );
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
+    );
+  }
 
   List<Widget> _buildPostWidgets(BuildContext context, List<News> post) {
     List<Widget> widgets = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
+    ThemeManager _theme = ThemeManager.of(context);
     for (var i = 0; i < post.length; i++) {
       bool isFirst = i == 0;
       bool isLast = i == post.length - 1;
@@ -171,15 +174,15 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
-                lineColor: Helper.hexToColor('#3E313F'),
-                indicatorColor: Helper.hexToColor('#3E313F'),
-                indicatorSize: 12,
+                lineColor: _theme.colors.dark,
+                indicatorColor: _theme.colors.dark,
+                indicatorSize: 10,
                 indicatorStyle: PaintingStyle.fill,
                 isFirst: isFirst,
                 isLast: isLast,
                 lineGap: 4.0,
                 strokeCap: StrokeCap.butt,
-                strokeWidth: 2.5,
+                strokeWidth: 1,
                 style: PaintingStyle.stroke,
                 itemGap: 0.0,
               ),
@@ -204,15 +207,15 @@ class PostContentItem extends StatefulWidget implements PostItem {
                 child: CustomPaint(
                   foregroundPainter: TimelinePainter(
                     hideDefaultIndicator: false,
-                    lineColor: Helper.hexToColor('#707070'),
+                    lineColor: _theme.colors.dark,
                     indicatorColor: Helper.hexToColor('#f9a900'),
-                    indicatorSize: 12,
+                    indicatorSize: 10,
                     indicatorStyle: PaintingStyle.fill,
                     isFirst: false,
                     isLast: isLast,
                     lineGap: 4.0,
                     strokeCap: StrokeCap.butt,
-                    strokeWidth: 2.5,
+                    strokeWidth: 1,
                     style: PaintingStyle.stroke,
                     itemGap: 0.0,
                   ),

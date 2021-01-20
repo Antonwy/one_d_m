@@ -464,11 +464,15 @@ class SessionMemberList extends StatelessWidget {
 class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
   final SessionMember member;
   final bool invited, showTargetAmount;
+  final Color color, avatarColor, avatarBackColor;
   ThemeManager _theme;
 
   SessionMemberView(
       {Key key,
       this.member,
+      this.color = ColorTheme.wildGreen,
+      this.avatarColor,
+      this.avatarBackColor,
       this.invited = false,
       this.showTargetAmount = true})
       : super(key: key);
@@ -490,7 +494,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                 ),
                 closedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
-                closedColor: ColorTheme.wildGreen,
+                closedColor: color,
                 closedElevation: 1,
                 closedBuilder: (context, open) => Column(
                   mainAxisSize: MainAxisSize.min,
@@ -498,13 +502,13 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                   children: [
                     user?.imgUrl == null
                         ? Container(
-                            color: _theme.colors.dark,
+                            color: avatarBackColor ?? _theme.colors.dark,
                             height: 75,
                             width: 100,
                             child: Center(
                               child: Icon(
                                 Icons.person,
-                                color: _theme.colors.contrast,
+                                color: avatarColor ?? _theme.colors.contrast,
                               ),
                             ),
                           )
@@ -534,7 +538,9 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                                         color: _theme.colors.textOnDark),
                               ),
                             ),
-                            const SizedBox(height: 5,),
+                            const SizedBox(
+                              height: 5,
+                            ),
                             showTargetAmount
                                 ? Text(
                                     "${member.donationAmount} DV",

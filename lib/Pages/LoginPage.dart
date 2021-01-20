@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
           SliverAppBar(
             backgroundColor: Colors.transparent,
             leading: IconButton(
-              onPressed: ()=>Navigator.pop(context),
+              onPressed: () => Navigator.pop(context),
               icon: Icon(
                 Icons.chevron_left_outlined,
                 size: 40,
@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                         focusedColor: ColorTheme.blue,
                         activeColor: ColorTheme.blue,
                         onChanged: (text) {
-                          _email = text.toLowerCase();
+                          _email = text.trim().toLowerCase();
                         },
                         validator: Validate.email,
                       ),
@@ -210,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login() async {
     if (!_formKey.currentState.validate()) return;
-    ApiResult<FirebaseUser> res = await _um.signIn(_email, _password);
+    ApiResult<User> res = await _um.signIn(_email, _password);
 
     if (res.hasError()) {
       _showSnackBar(res.message);

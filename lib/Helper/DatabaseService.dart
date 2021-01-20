@@ -44,7 +44,7 @@ class DatabaseService {
       DONATIONINFO = "donation_info",
       CARDS = "cards",
       PRIVATEDATA = "private_data",
-      ORGANISATIONS = "organisations",
+      ORGANISATIONS = "organizations",
       ADVERTISING_DATA = 'ad_data',
       ADVERTISING_BALANCE = 'balance',
       ADVERTISING_IMPRESSIONS = 'impressions',
@@ -108,7 +108,7 @@ class DatabaseService {
         .doc(user.id)
         .collection(PRIVATEDATA)
         .doc(DATA)
-        .set(user.privateDataToMap());
+        .set({User.PHONE_NUMBER: user.phoneNumber}, SetOptions(merge: true));
   }
 
   static Future<void> updateUser(User user) async {
@@ -154,7 +154,7 @@ class DatabaseService {
 
     return userAdDocument.set({
       User.INTERSTITIAL_IMPRESSIONS: FieldValue.increment(1),
-    });
+    }, SetOptions(merge: true));
   }
 
   static Future<void> addNativeAdImpression(String uid) async {
@@ -165,7 +165,7 @@ class DatabaseService {
 
     return userAdDocument.set({
       User.NATIVE_AD_IMPRESSIONS: FieldValue.increment(1),
-    });
+    }, SetOptions(merge: true));
   }
 
   static Stream<AdBalance> getAdBalance(String uid) {
@@ -535,6 +535,7 @@ class DatabaseService {
   static Stream<List<Donation>> getLatestDonations() {
     return donationsCollection
         .where(Donation.ISANONYM, isEqualTo: false)
+        .limit(3)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
@@ -785,11 +786,9 @@ class DatabaseService {
         .snapshots()
         .map((doc) => doc.exists);
   }
+
   static Stream<bool> userExist(String uid) {
-    return userCollection
-        .doc(uid)
-        .snapshots()
-        .map((doc) => doc.exists);
+    return userCollection.doc(uid).snapshots().map((doc) => doc.exists);
   }
 
   static Future<bool> userIsFollowSession(String uid, String sid) {

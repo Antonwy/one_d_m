@@ -200,7 +200,7 @@ class _DCInformation extends StatelessWidget {
                             ),
                             SizedBox(height: 5.0),
                             AutoSizeText(
-                              'Entspricht ${Currency(snapshot.data.dcBalance * 5 ?? 0).value()}',
+                              'Entspricht ${Currency((snapshot.data?.dcBalance ?? 0) * 5).value()}',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w200,

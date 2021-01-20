@@ -52,7 +52,7 @@ class UserManager extends ChangeNotifier {
       'email',
     ]);
     _auth = firebaseAuth.FirebaseAuth.instance;
-    _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+    _auth.authStateChanges().listen(_onAuthStateChanged);
   }
 
   Future<User> getUser() async {
@@ -75,7 +75,7 @@ class UserManager extends ChangeNotifier {
       );
 
       final firebaseAuth.AuthCredential credential =
-          firebaseAuth.OAuthProvider('apple.com').getCredential(
+          firebaseAuth.OAuthProvider('apple.com').credential(
         accessToken: appleResult.authorizationCode,
         idToken: appleResult.identityToken,
       );
@@ -131,7 +131,7 @@ class UserManager extends ChangeNotifier {
           email: email, password: password);
       status = Status.Authenticated;
       return ApiSuccess(data: res.user);
-    } on PlatformException catch (e) {
+    } on firebaseAuth.FirebaseAuthException catch (e) {
       status = Status.Unauthenticated;
       return ApiError(e.message);
     }
@@ -212,7 +212,6 @@ class UserManager extends ChangeNotifier {
         user.imgUrl = await service
             .uploadImage(StorageService.userImageName(res.user.uid));
       }
-
 
       await res.user.updateProfile(displayName: user.name.trim());
 

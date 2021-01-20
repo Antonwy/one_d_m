@@ -22,6 +22,7 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
@@ -46,6 +47,8 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   ScrollController _scrollController;
   ValueNotifier _scrollOffset;
 
+  ImageProvider _sessionImage;
+
   @override
   void initState() {
     _scrollController = widget.scrollController ?? ScrollController();
@@ -60,6 +63,9 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
     _pageController.addListener(() {
       _pagePosition.value = _pageController.page;
     });
+
+    _sessionImage = CachedNetworkImageProvider(widget.session.imgUrl ?? '');
+
     super.initState();
   }
 
@@ -75,10 +81,8 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
     _theme = ThemeManager.of(context);
     UserManager _um = Provider.of<UserManager>(context, listen: false);
     return Provider<CertifiedSessionManager>(
-      create: (context) => CertifiedSessionManager(
-        session: session,
-        uid: _um.uid,
-      ),
+      create: (context) =>
+          CertifiedSessionManager(session: session, uid: _um.uid),
       builder: (context, child) {
         return Scaffold(
           floatingActionButton: ValueListenableBuilder(
@@ -89,6 +93,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
                 scale: 1 - val,
                 child: FloatingDonationButton(
                   session,
+                  color: session.primaryColor,
                 ),
               ),
             ),
@@ -97,8 +102,8 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           appBar: AppBar(
             leading: IconButton(
               icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 48,
+                Icons.keyboard_arrow_down,
+                size: 30,
               ),
               onPressed: () => Navigator.pop(context),
             ),
@@ -113,6 +118,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           body: _CertifiedSessionInfoPage(
             controller: _scrollController,
             sessionId: widget.session.id,
+            image: _sessionImage,
           ),
 
           ///removed chat feature for now
@@ -450,8 +456,10 @@ class _ChatTextField extends StatelessWidget {
 class _CertifiedSessionInfoPage extends StatefulWidget {
   ScrollController controller;
   final String sessionId;
+  ImageProvider image;
 
-  _CertifiedSessionInfoPage({Key key, this.controller, this.sessionId})
+  _CertifiedSessionInfoPage(
+      {Key key, this.controller, this.sessionId, this.image})
       : super(key: key);
 
   @override
@@ -477,14 +485,13 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 children: [
                   Positioned.fill(
                     child: Material(
-                      elevation: 10,
-                      borderRadius: BorderRadius.circular(6),
-                      clipBehavior: Clip.antiAlias,
-                      child: CachedNetworkImage(
-                        imageUrl: csm.session.imgUrl ?? '',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                        elevation: 10,
+                        borderRadius: BorderRadius.circular(6),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image(
+                          image: widget.image,
+                          fit: BoxFit.cover,
+                        )),
                   ),
                 ],
               ),
@@ -508,18 +515,33 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                     AutoSizeText(
                       csm.session.name,
                       maxLines: 1,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.headline6.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _theme.colors.dark),
                     ),
                     csm.session.creatorId?.isNotEmpty ?? false
                         ? StreamBuilder(
                             stream: DatabaseService.getUserStream(
                                 csm.session.creatorId),
                             builder: (context, AsyncSnapshot<User> snapshot) {
-                              return Text(
-                                'by ${snapshot.data?.name}',
+                              return RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(text: 'by '),
+                                    TextSpan(
+                                        text:
+                                            '${snapshot.data?.name ?? 'Laden...'}',
+                                        style: _theme.textTheme.dark.bodyText1
+                                            .copyWith(
+                                                decoration:
+                                                    TextDecoration.underline,
+                                                fontWeight: FontWeight.w700)),
+                                  ],
+                                  style: _theme.textTheme.dark.bodyText1
+                                      .copyWith(
+                                          color: _theme.colors.dark
+                                              .withOpacity(.54)),
+                                ),
                               );
                             },
                           )
@@ -581,7 +603,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                                       scrollController: scrollController,
                                     );
                                   }),
-                          closedColor: ColorTheme.wildGreen,
+                          closedColor: csm.session.primaryColor,
                           closedBuilder: (context, open) => _InfoView(
                               imageUrl: snapshot.data?.campaignImgUrl ??
                                   csm.session.campaignImgUrl,
@@ -601,7 +623,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                         child: _InfoView(
                             description: "Mitglieder",
                             value: (snapshot.data?.memberCount ??
-                                    csm.session.memberCount)),
+                                csm.session.memberCount)),
                       );
                     }),
               ],
@@ -720,11 +742,13 @@ class _InfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
+    Session _session = Provider.of<CertifiedSessionManager>(context).session;
     return Container(
       height: 100,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: imageUrl != null ? ColorTheme.wildGreen : _theme.colors.dark,
+        color:
+            imageUrl != null ? _session.primaryColor : _session.secondaryColor,
       ),
       child: Padding(
         padding: EdgeInsets.all(imageUrl != null ? 2.0 : 8.0),
@@ -743,7 +767,7 @@ class _InfoView extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                              width: 1, color: _theme.colors.textOnDark),
+                              width: 2, color: _theme.colors.textOnDark),
                           image: DecorationImage(
                             image: imgProvider,
                             fit: BoxFit.cover,
@@ -823,9 +847,9 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
         uniqueId.clear();
         uniqueAllMembers.clear();
         allMembers.clear();
-        allMembers = [...m,...members];
+        allMembers = [...m, ...members];
 
-        allMembers.sort((a,b) =>b.donationAmount.compareTo(a.donationAmount));
+        allMembers.sort((a, b) => b.donationAmount.compareTo(a.donationAmount));
         //remove duplicates
         allMembers.forEach((element) {
           userIds.add(element.userId);
@@ -833,16 +857,13 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
         uniqueId = userIds.toSet().toList();
 
         uniqueId.forEach((id) {
-          SessionMember sm = allMembers.firstWhere((element) => element.userId == id);
+          SessionMember sm =
+              allMembers.firstWhere((element) => element.userId == id);
           uniqueAllMembers.add(sm);
         });
 
         setState(() {});
       });
-
-
-
-
     });
 
     super.initState();
@@ -850,7 +871,6 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
         builder: (context, sm, child) => SizedBox(
@@ -872,8 +892,12 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
                                     ? 12.0
                                     : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
-                                member: uniqueAllMembers[index],
-                                showTargetAmount: true),
+                              member: uniqueAllMembers[index],
+                              showTargetAmount: true,
+                              color: sm.session.primaryColor,
+                              avatarColor: Colors.white,
+                              avatarBackColor: sm.session.secondaryColor,
+                            ),
                           );
                         }, childCount: uniqueAllMembers.length),
                       )
@@ -904,52 +928,50 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
           stream: csm.isInSession,
           builder: (context, snapshot) {
             Color color = snapshot.data
-                ? _theme.colors.textOnDark
-                : _theme.colors.textOnContrast;
-            return MaterialButton(
-                height: 50,
-                onPressed: () async {
-                  setState(() {
-                    _loading = true;
-                  });
-                  if (snapshot.data)
-                    await DatabaseService.leaveCertifiedSession(
-                            csm.baseSession.id)
-                        .then((value) {
-                      setState(() {
-                        _loading = false;
-                      });
-                    });
-                  else
-                    await DatabaseService.joinCertifiedSession(
-                            csm.baseSession.id)
-                        .then((value) {
-                      setState(() {
-                        _loading = false;
-                      });
-                    });
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
-                textColor: color,
-                child: _loading
-                    ? Container(
-                        width: 20,
-                        height: 20,
-                        margin: const EdgeInsets.only(right: 12),
+                ? _theme.colors.textOnContrast
+                : _theme.colors.textOnDark;
+            return RaisedButton(
+              color: snapshot.data
+                  ? csm.session.primaryColor
+                  : csm.session.secondaryColor,
+              textColor: color,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6)),
+              child: _loading
+                  ? Container(
+                      width: 18,
+                      height: 18,
+                      child: Center(
                         child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation(_theme.colors.light),
-                        ))
-                    : AutoSizeText(
-                        snapshot.data ? "VERLASSEN" : 'BEITRETEN',
-                        maxLines: 1,
-                        style: Theme.of(context)
-                            .accentTextTheme
-                            .button
-                            .copyWith(fontWeight: FontWeight.bold),
-                      ));
+                          strokeWidth: 3.0,
+                          valueColor: AlwaysStoppedAnimation(color),
+                        ),
+                      ))
+                  : AutoSizeText(
+                      snapshot.data ? "VERLASSEN" : 'BEITRETEN',
+                      maxLines: 1,
+                    ),
+              onPressed: () async {
+                setState(() {
+                  _loading = true;
+                });
+                if (snapshot.data)
+                  await DatabaseService.leaveCertifiedSession(
+                          csm.baseSession.id)
+                      .then((value) {
+                    setState(() {
+                      _loading = false;
+                    });
+                  });
+                else
+                  await DatabaseService.joinCertifiedSession(csm.baseSession.id)
+                      .then((value) {
+                    setState(() {
+                      _loading = false;
+                    });
+                  });
+              },
+            );
           }),
     );
   }
@@ -964,11 +986,12 @@ class CreatePostButton extends StatelessWidget {
           initialData: false,
           stream: csm.isInSession,
           builder: (context, snapshot) {
-            Color color = snapshot.data
-                ? _theme.colors.textOnDark
-                : _theme.colors.textOnContrast;
-            return MaterialButton(
-                height: 50,
+            return RaisedButton(
+                color: csm.session.primaryColor,
+                textColor: _theme.colors.textOnDark,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6)),
+                child: AutoSizeText("Post erstellen", maxLines: 1),
                 onPressed: () {
                   Navigator.push(
                       context,
@@ -976,20 +999,7 @@ class CreatePostButton extends StatelessWidget {
                           builder: (c) => CreatePostScreen(
                                 session: csm.session,
                               )));
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                color: snapshot.data ? _theme.colors.dark : _theme.colors.dark,
-                textColor: color,
-                child: AutoSizeText(
-                  'Post erstellen',
-                  maxLines: 3,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .accentTextTheme
-                      .button
-                      .copyWith(fontWeight: FontWeight.bold),
-                ));
+                });
           }),
     );
   }

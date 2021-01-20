@@ -137,7 +137,6 @@ class _CreateNewsPageState extends State<CreateNewsPage> {
         campaignId: widget.campaign.id,
         campaignName: widget.campaign.name,
         campaignImgUrl: widget.campaign.thumbnailUrl ?? widget.campaign.imgUrl,
-        userId: um.uid,
         title: _postTitle,
         text: _postText,
         shortText: _postShortText,

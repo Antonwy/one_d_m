@@ -130,7 +130,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     });
 
     StorageService service = StorageService(file: _image);
-    service.uploadImage(StorageService.newsImageName(_newsId)).then((path) {
+    service.uploadNewsImage(StorageService.newsImageName(_newsId)).then((path) {
       News news = News(
           id: _newsId,
           sessionId: widget.session.id,

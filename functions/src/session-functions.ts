@@ -159,6 +159,7 @@ exports.acceptInvite = functions.https.onCall(async (req, res) => {
     .set({
       id: userId,
       donation_amount: 0,
+      created_at: admin.firestore.Timestamp.now(),
     } as SessionMemberType);
 
   const session: SessionType = (await sessionDoc.get()).data() as SessionType;
@@ -199,27 +200,60 @@ exports.declineInvite = functions.https.onCall(async (req, res) => {
 exports.onDeleteSession = functions.firestore
   .document(`${DatabaseConstants.sessions}/{sessionId}`)
   .onDelete(async (snapshot, context) => {
-    const sessionDocs = await firestore
-      .collectionGroup(DatabaseConstants.sessions)
-      .where(DatabaseConstants.id, '==', snapshot.id)
-      .get();
+    const bucket = admin.storage().bucket();
 
-    sessionDocs.forEach(async (doc) => await doc.ref.delete());
-
-    const sessionInviteDocs = await firestore
-      .collectionGroup(DatabaseConstants.session_invites)
-      .where(DatabaseConstants.id, '==', snapshot.id)
-      .get();
-
-    sessionInviteDocs.forEach(async (doc) => await doc.ref.delete());
-
-    const sessionMembers = await firestore
+    await firestore
       .collection(DatabaseConstants.sessions)
       .doc(context.params.sessionId)
-      .collection(DatabaseConstants.session_members)
-      .get();
+      .listCollections()
+      .then(async (collectionList) => {
+        collectionList.forEach(async (collection) => {
+          await collection.get().then(async (collectionDocs) => {
+            functions.logger.info(
+              collection.id + ':' + collectionDocs.docs.length
+            );
+            collectionDocs.docs.forEach(async (doc) => {
+              await doc.ref.delete();
+            });
+          });
+        });
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
+    await firestore
+      .collection(DatabaseConstants.news)
+      .where(DatabaseConstants.session_id, '==', context.params.sessionId)
+      .get()
+      .then(async (newsSnapshot) => {
+        newsSnapshot.docs.forEach(async (doc) => {
+          await doc.ref.delete().then(async () => {
+            await bucket
+              .deleteFiles({ prefix: `news/news_${doc.id}/` })
+              .then(() => {
+                functions.logger.info('news Files deleted successfully');
+              })
+              .catch((e) => {
+                functions.logger.info(e);
+              });
+          });
+        });
+      })
+      .catch(async (err) => {
+        functions.logger.info(err);
+      });
 
-    sessionMembers.forEach(async (doc) => await doc.ref.delete());
+    // deleting images of of the news
+    await bucket
+      .deleteFiles({
+        prefix: `certified_sessions/certified_session_${context.params.sessionId}/`,
+      })
+      .then(() => {
+        functions.logger.info('Session Files deleted successfully');
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
   });
 
 exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
@@ -246,26 +280,6 @@ exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
     { member_count: admin.firestore.FieldValue.increment(1) },
     { merge: true }
   );
-
-  const session = (await sessionRef.get()).data() as SessionType;
-
-  // add session to User
-  await firestore
-    .collection(DatabaseConstants.user)
-    .doc(userId)
-    .collection(DatabaseConstants.sessions)
-    .doc(sessionId)
-    .set({
-      id: sessionId,
-      session_name: session.session_name,
-      session_description: session.session_description,
-      amount_per_user: session.amount_per_user,
-      created_at: session.created_at,
-      end_date: session.end_date,
-      creator_id: session.creator_id,
-      campaign_id: session.campaign_id,
-      img_url: session.img_url,
-    } as UserSessionType);
 });
 
 exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
@@ -289,12 +303,31 @@ exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
     { member_count: admin.firestore.FieldValue.increment(-1) },
     { merge: true }
   );
-
-  // add session to User
-  await firestore
-    .collection(DatabaseConstants.user)
-    .doc(userId)
-    .collection(DatabaseConstants.sessions)
-    .doc(sessionId)
-    .delete();
 });
+
+exports.onUpdateSession = functions.firestore
+  .document(DatabaseConstants.sessions + '/{sessionId}')
+  .onUpdate(async (snapshot, context) => {
+    const sessionId = context.params.sessionId;
+    const afterData = snapshot.after.data();
+    snapshot.after.ref
+      .collection(DatabaseConstants.session_members)
+      .get()
+      .then(async (sessionMembers) => {
+        sessionMembers.docs.forEach(async (doc) => {
+          await firestore
+            .collection(DatabaseConstants.user)
+            .doc(doc.id)
+            .collection(DatabaseConstants.sessions)
+            .doc(sessionId)
+            .update(afterData)
+            .then(() => {
+              console.log("user's session updated");
+            })
+            .catch((error) => functions.logger.error(error));
+        });
+      })
+      .catch((error) => {
+        functions.logger.error(error);
+      });
+  });

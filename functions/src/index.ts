@@ -13,3 +13,4 @@ exports.httpFunctions = require('./http-functions');
 exports.friends = require('./friends-functions');
 exports.ads = require('./ad-functions');
 exports.session = require('./session-functions');
+exports.organization = require('./organization-functions');

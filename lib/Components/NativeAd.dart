@@ -23,6 +23,7 @@ class NewsNativeAd extends StatelessWidget {
               adUnitId: Constants.ADMOB_NEWS_ID,
               layoutName: "NewsAd",
               onAdImpression: () {
+                print("NEW IMPRESSION");
                 DatabaseService.addNativeAdImpression(
                   Provider.of<UserManager>(
                     context,
@@ -60,6 +61,7 @@ class ExploreNativeAd extends StatelessWidget {
                 adUnitId: Constants.ADMOB_EXPLORE_ID,
                 layoutName: "ExploreAd",
                 onAdImpression: () {
+                  print("NEW IMPRESSION");
                   DatabaseService.addNativeAdImpression(
                     Provider.of<UserManager>(
                       context,

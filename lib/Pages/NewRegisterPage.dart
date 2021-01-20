@@ -74,7 +74,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                 ),
                 Center(
                   child: SvgPicture.asset(
-                    'assets/images/register.svg',
+                    'assets/images/img_signup.svg',
                     height: MediaQuery.of(context).size.height * .25,
                   ),
                 ),
@@ -153,7 +153,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                                 _email = text.toLowerCase();
                               },
                               validator: Validate.email,
-                              focusedColor: ColorTheme.orange,
+                              focusedColor: ColorTheme.appDarkGrey,
                               activeColor: ColorTheme.white.withOpacity(.4),
                             ),
                       SizedBox(
@@ -170,7 +170,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                           _username = text;
                         },
                         validator: Validate.username,
-                        focusedColor: ColorTheme.orange,
+                        focusedColor: ColorTheme.appDarkGrey,
                         activeColor: ColorTheme.white.withOpacity(.4),
                       ),
                       SizedBox(
@@ -189,7 +189,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                                 _phone = text;
                               },
                               validator: Validate.telephone,
-                              focusedColor: ColorTheme.orange,
+                              focusedColor: ColorTheme.appDarkGrey,
                               activeColor: ColorTheme.white.withOpacity(.4),
                             )
                           : Container(),
@@ -209,7 +209,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                                 _password1 = text;
                               },
                               validator: Validate.password,
-                              focusedColor: ColorTheme.orange,
+                              focusedColor: ColorTheme.appDarkGrey,
                               activeColor: ColorTheme.white.withOpacity(.4),
                             ),
                       SizedBox(
@@ -228,7 +228,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                                 _password2 = text;
                               },
                               validator: Validate.password,
-                              focusedColor: ColorTheme.orange,
+                              focusedColor: ColorTheme.appDarkGrey,
                               activeColor: ColorTheme.white.withOpacity(.4),
                             ),
                       SizedBox(
@@ -243,7 +243,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                               _acceptedAGBs = check;
                             });
                           },
-                          activeColor: ColorTheme.orange,
+                          activeColor: ColorTheme.appDarkGrey,
                           title: RichText(
                             text: TextSpan(
                               style: TextStyle(color: ColorTheme.whiteBlue),

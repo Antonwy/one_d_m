@@ -294,10 +294,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.only(left: 12.0),
                 child: Text(
                   "Deine Sessions",
-                  style: _theme.textTheme.dark.headline6.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      color: Helper.hexToColor('#3E313F')),
+                  style: _theme.textTheme.dark.headline6
+                      .copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               const SizedBox(

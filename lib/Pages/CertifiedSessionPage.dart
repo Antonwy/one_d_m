@@ -927,14 +927,11 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
           initialData: false,
           stream: csm.isInSession,
           builder: (context, snapshot) {
-            Color color = snapshot.data
-                ? _theme.colors.textOnContrast
-                : _theme.colors.textOnDark;
             return RaisedButton(
               color: snapshot.data
                   ? csm.session.primaryColor
                   : csm.session.secondaryColor,
-              textColor: color,
+              textColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6)),
               child: _loading
@@ -944,7 +941,7 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                       child: Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 3.0,
-                          valueColor: AlwaysStoppedAnimation(color),
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
                         ),
                       ))
                   : AutoSizeText(

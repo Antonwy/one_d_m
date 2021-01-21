@@ -63,13 +63,11 @@ class _LoginPageState extends State<LoginPage> {
         child: CustomScrollView(slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: Icon(
-                Icons.chevron_left_outlined,
-                size: 40,
-                color: ColorTheme.blue,
-              ),
+            leading: BackButton(
+              onPressed: () {
+                _um.status = Status.Unauthenticated;
+                Navigator.pop(context);
+              },
             ),
             elevation: 0,
           ),

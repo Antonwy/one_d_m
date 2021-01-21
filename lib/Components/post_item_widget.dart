@@ -40,49 +40,44 @@ class HeadingItem implements PostItem {
             margin: const EdgeInsets.only(
                 bottom: 0.0, left: 12.0, right: 12.0, top: 0),
             child: CustomOpenContainer(
-              closedColor: Colors.transparent,
-              closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
+              closedColor: Colors.white,
               closedElevation: 0,
               openBuilder: (context, close, scrollController) =>
                   CertifiedSessionPage(
                 session: snapshot.data,
                 scrollController: scrollController,
               ),
-              closedBuilder: (_, open) => InkWell(
-                onTap: open,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: session.imgUrl ?? '',
-                      imageBuilder: (context, imageProvider) => Container(
-                        height: 58.0,
-                        width: 88.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          image: DecorationImage(
-                            image: imageProvider,
-                            fit: BoxFit.cover,
-                          ),
+              closedBuilder: (_, open) => Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: session.imgUrl ?? '',
+                    imageBuilder: (context, imageProvider) => Container(
+                      height: 58.0,
+                      width: 88.0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                    const XMargin(8.0),
-                    AutoSizeText(session.name ?? '',
-                        maxLines: 1,
-                        softWrap: true,
-                        style: _theme.textTheme.dark.headline6
-                            .copyWith(fontWeight: FontWeight.w600)),
-                    const XMargin(8.0),
-                    Icon(
-                      Icons.verified,
-                      color: Helper.hexToColor("#71e34b"),
-                    )
-                  ],
-                ),
+                  ),
+                  const XMargin(8.0),
+                  AutoSizeText(session.name ?? '',
+                      maxLines: 1,
+                      softWrap: true,
+                      style: _theme.textTheme.dark.headline6
+                          .copyWith(fontWeight: FontWeight.w600)),
+                  const XMargin(8.0),
+                  Icon(
+                    Icons.verified,
+                    color: Helper.hexToColor("#71e34b"),
+                  )
+                ],
               ),
             ),
           );
@@ -174,14 +169,14 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
-                lineColor: _theme.colors.dark,
+                lineColor: _theme.colors.dark.withOpacity(.3),
                 indicatorColor: _theme.colors.dark,
-                indicatorSize: 10,
+                indicatorSize: 8,
                 indicatorStyle: PaintingStyle.fill,
                 isFirst: isFirst,
                 isLast: isLast,
-                lineGap: 4.0,
-                strokeCap: StrokeCap.butt,
+                lineGap: 0.0,
+                strokeCap: StrokeCap.round,
                 strokeWidth: 1,
                 style: PaintingStyle.stroke,
                 itemGap: 0.0,
@@ -207,9 +202,9 @@ class PostContentItem extends StatefulWidget implements PostItem {
                 child: CustomPaint(
                   foregroundPainter: TimelinePainter(
                     hideDefaultIndicator: false,
-                    lineColor: _theme.colors.dark,
-                    indicatorColor: Helper.hexToColor('#f9a900'),
-                    indicatorSize: 10,
+                    lineColor: _theme.colors.dark.withOpacity(.2),
+                    indicatorColor: Colors.orange,
+                    indicatorSize: 8,
                     indicatorStyle: PaintingStyle.fill,
                     isFirst: false,
                     isLast: isLast,
@@ -237,7 +232,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return CustomOpenContainer(
-            closedColor: Colors.transparent,
+            closedColor: Colors.white,
             closedShape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             closedElevation: 0,

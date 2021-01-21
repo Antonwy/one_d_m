@@ -63,6 +63,12 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
             backgroundColor: ColorTheme.blue,
             elevation: 0,
             title: Text(_socialSignIn ? "Weitere Daten" : "Registrieren"),
+            leading: BackButton(
+              onPressed: () {
+                _um.status = Status.Unauthenticated;
+                Navigator.pop(context);
+              },
+            ),
           ),
           SliverToBoxAdapter(
             child: Column(

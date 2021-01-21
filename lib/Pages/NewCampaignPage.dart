@@ -116,8 +116,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       BottomDialog bd = BottomDialog(context);
                                       bd.show(DonationDialogWidget(
                                         campaign: snapshot.data,
-                                        uid: um.uid,
-                                        user: um.user,
+                                        uid: null,
+                                        user: null,
                                         context: context,
                                         close: bd.close,
                                         controller: _scrollController,

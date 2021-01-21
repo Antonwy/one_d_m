@@ -14,9 +14,12 @@ class SessionPostFeed extends StatefulWidget {
   _SessionPostFeedState createState() => _SessionPostFeedState();
 }
 
-class _SessionPostFeedState extends State<SessionPostFeed>{
+class _SessionPostFeedState extends State<SessionPostFeed> {
+  ThemeManager _theme;
+
   @override
   Widget build(BuildContext context) {
+    _theme = ThemeManager.of(context);
     return StreamBuilder<List<News>>(
         stream: DatabaseService.getSessionPosts(),
         builder: (context, AsyncSnapshot<List<News>> snapshot) {
@@ -44,7 +47,8 @@ class _SessionPostFeedState extends State<SessionPostFeed>{
 
           ///remove duplicating ids
           mySessionPosts.toSet().toList().forEach((element) {
-            postItem.add(HeadingItem(DatabaseService.getSessionFuture(element)));
+            postItem
+                .add(HeadingItem(DatabaseService.getSessionFuture(element)));
             postItem.add(
                 PostContentItem(DatabaseService.getPostBySessionId(element)));
           });
@@ -55,8 +59,8 @@ class _SessionPostFeedState extends State<SessionPostFeed>{
             return SliverToBoxAdapter(child: SizedBox.shrink());
           }
         });
-
   }
+
   List<Widget> _buildPostWidgets(List<PostItem> post) {
     List<Widget> widgets = [];
     widgets.add(_buildNewsTitleWidget());
@@ -65,24 +69,18 @@ class _SessionPostFeedState extends State<SessionPostFeed>{
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          p.buildHeading(context),
-          p.buildPosts(context)
-        ],
+        children: [p.buildHeading(context), p.buildPosts(context)],
       ));
     }
     return widgets;
   }
 
   Widget _buildNewsTitleWidget() => Padding(
-    padding: const EdgeInsets.only(left: 12, bottom: 10),
-    child: Text(
-      "News",
-      style: ThemeManager.of(context).textTheme.dark.headline6.copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize: 22,
-          color: Helper.hexToColor('#3E313F')),
-    ),
-  );
-
+        padding: const EdgeInsets.only(left: 12, bottom: 10),
+        child: Text(
+          "News",
+          style: _theme.textTheme.dark.headline6
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
+      );
 }

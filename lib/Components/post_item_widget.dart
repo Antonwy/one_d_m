@@ -208,7 +208,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
                     indicatorStyle: PaintingStyle.fill,
                     isFirst: false,
                     isLast: isLast,
-                    lineGap: 4.0,
+                    lineGap: 0.0,
                     strokeCap: StrokeCap.butt,
                     strokeWidth: 1,
                     style: PaintingStyle.stroke,

@@ -7,22 +7,28 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 class RoundButtonHomePage extends StatelessWidget {
   final IconData icon;
   final Widget toPage;
+  final bool dark;
   Function onTap;
   final GlobalKey _key = GlobalKey();
   final Color toColor;
 
   RoundButtonHomePage(
-      {this.icon, this.toPage, this.toColor = Colors.white, this.onTap});
+      {this.icon,
+      this.toPage,
+      this.toColor = Colors.white,
+      this.onTap,
+      this.dark = false});
 
   @override
   Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
     return Container(
       key: _key,
       width: 50,
       height: 50,
       child: Material(
         clipBehavior: Clip.antiAlias,
-        color: ThemeManager.of(context).colors.contrast,
+        color: dark ? _theme.colors.dark : _theme.colors.contrast,
         shape: CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -40,8 +46,8 @@ class RoundButtonHomePage extends StatelessWidget {
           },
           child: Icon(
             icon,
-            size: 32,
-            color: ThemeManager.of(context).colors.textOnContrast,
+            size: 28,
+            color: dark ? _theme.colors.contrast : _theme.colors.dark,
           ),
         ),
       ),

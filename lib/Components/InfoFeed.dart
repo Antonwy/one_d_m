@@ -17,11 +17,9 @@ import 'package:provider/provider.dart';
 class InfoFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0),
-        child: _ChartsPageView(),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: _ChartsPageView(),
     );
   }
 }
@@ -171,50 +169,46 @@ class _DCInformation extends StatelessWidget {
           ),
           child: Column(
             children: [
-              StreamBuilder<AdBalance>(
-                  stream: DatabaseService.getAdBalance(
-                    Provider.of<UserManager>(context).uid,
-                  ),
-                  builder: (context, snapshot) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Builder(builder: (context) {
+                AdBalance balance = context.watch<AdBalance>();
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              children: [
-                                Text(
-                                  '${snapshot?.data?.dcBalance ?? 0}',
-                                  style: TextStyle(
-                                      fontSize: 24.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: ThemeManager.of(context)
-                                          .colors
-                                          .contrast),
-                                ),
-                                const XMargin(5),
-                                Text('Donation Votes'),
-                              ],
-                            ),
-                            SizedBox(height: 5.0),
-                            AutoSizeText(
-                              'Entspricht ${Currency((snapshot.data?.dcBalance ?? 0) * 5).value()}',
+                            Text(
+                              '${balance?.dcBalance ?? 0}',
                               style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w200,
-                              ),
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      ThemeManager.of(context).colors.contrast),
                             ),
+                            const XMargin(5),
+                            Text('Donation Votes'),
                           ],
                         ),
-                        _PercentCircle(
-                          percent: snapshot?.data?.activityScore ?? 0,
-                          radius: 30.0,
+                        SizedBox(height: 5.0),
+                        AutoSizeText(
+                          'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w200,
+                          ),
                         ),
                       ],
-                    );
-                  }),
+                    ),
+                    PercentCircle(
+                      percent: balance?.activityScore ?? 0,
+                      radius: 30.0,
+                    ),
+                  ],
+                );
+              }),
             ],
           )),
     );
@@ -251,15 +245,19 @@ class _GoalWidget extends StatelessWidget {
   }
 }
 
-class _PercentCircle extends StatelessWidget {
-  const _PercentCircle({
-    Key key,
-    @required this.percent,
-    this.radius = 40,
-  }) : super(key: key);
+class PercentCircle extends StatelessWidget {
+  const PercentCircle(
+      {Key key,
+      @required this.percent,
+      this.radius = 40,
+      this.fontSize = 15,
+      this.dark = false})
+      : super(key: key);
 
   final double radius;
   final double percent;
+  final double fontSize;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
@@ -268,14 +266,16 @@ class _PercentCircle extends StatelessWidget {
       width: 2 * radius,
       child: CustomPaint(
         painter: _PercentCirclePainter(percent,
-            color: ThemeManager.of(context).colors.contrast),
+            color: dark
+                ? ThemeManager.of(context).colors.dark
+                : ThemeManager.of(context).colors.contrast),
         child: Center(
           child: Text(
             '${((percent * 100) % 100).round().toString()}%',
             style: TextStyle(
-              color: ColorTheme.white,
+              color: dark ? ColorTheme.blue : ColorTheme.white,
               fontWeight: FontWeight.w700,
-              fontSize: 15.0,
+              fontSize: fontSize,
             ),
           ),
         ),
@@ -295,7 +295,7 @@ class _PercentCirclePainter extends CustomPainter {
     final double strokeWidth = 5;
 
     final Paint backgroundPaint = Paint()
-      ..color = ColorTheme.white.withOpacity(0.05)
+      ..color = color.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

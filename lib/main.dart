@@ -31,7 +31,7 @@ void main() async {
 
   /// Debug configuration with dialog report mode and console handler. It will show dialog and once user accepts it, error will be shown   /// in console.
   CatcherOptions debugOptions =
-      CatcherOptions(CustomReportMode(), [ConsoleHandler()]);
+      CatcherOptions(SilentReportMode(), [ConsoleHandler()]);
 
   /// Release configuration. Same as above, but once user accepts dialog, user will be prompted to send email with crash to support.
   CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [

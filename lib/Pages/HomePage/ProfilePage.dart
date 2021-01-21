@@ -8,14 +8,17 @@ import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
+import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
@@ -113,124 +116,12 @@ class _ProfilePageState extends State<ProfilePage> {
               stream: DatabaseService.getUserStream(um.uid),
               builder: (context, snapshot) {
                 User user = snapshot.data;
-                return SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  actions: <Widget>[],
-                  bottom: PreferredSize(
-                    preferredSize: Size(MediaQuery.of(context).size.width, 100),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                      "Willkommen,",
-                                      style: _theme
-                                          .materialTheme.textTheme.headline5
-                                          .copyWith(
-                                              fontSize: 32,
-                                              color: _theme.colors.dark),
-                                    ),
-                                    Text(
-                                      "${user?.name}",
-                                      style: _theme
-                                          .materialTheme.textTheme.headline5
-                                          .copyWith(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                              color: _theme.colors.dark),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  child: CustomOpenContainer(
-                                    openBuilder: (context, close, controller) =>
-                                        UserPage(user,
-                                            scrollController: controller),
-                                    closedShape: CircleBorder(),
-                                    closedElevation: 0,
-                                    closedBuilder: (context, open) => Avatar(
-                                      user?.thumbnailUrl ?? user?.imgUrl,
-                                      onTap: open,
-                                    ),
-                                  ),
-                                  width: 60,
-                                  height: 60,
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      "Gespendet: ",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: _theme.colors.dark),
-                                    ),
-                                    Text(
-                                      "${Numeral(user?.donatedAmount ?? 0).value()} DV",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                          color: _theme.colors.dark),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    CustomOpenContainer(
-                                      openBuilder:
-                                          (context, close, controller) =>
-                                              RewardVideoPage(),
-                                      closedShape: CircleBorder(),
-                                      closedElevation: 0,
-                                      closedColor: _theme.colors.contrast,
-                                      closedBuilder: (context, open) =>
-                                          RoundButtonHomePage(
-                                        icon: Icons.play_arrow_rounded,
-                                        onTap: open,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    RoundButtonHomePage(
-                                      icon: Icons.settings,
-                                      onTap: () {
-                                        BottomDialog(context)
-                                            .show(SettingsDialog());
-                                      },
-                                    )
-                                  ],
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                return SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _ProfileHeader(user),
                 );
               }),
         ),
-        InfoFeed(),
 
         ///build the sessions that follow by user
         mySessions.isNotEmpty
@@ -329,4 +220,266 @@ class _ProfilePageState extends State<ProfilePage> {
           return CertifiedSessionView(s);
         },
       );
+}
+
+class _ProfileHeader extends SliverPersistentHeaderDelegate {
+  final User user;
+  double _minExtend = 80.0, _maxExtend = 330;
+  bool _fullVisible = true;
+
+  _ProfileHeader(this.user);
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    ThemeManager _theme = ThemeManager.of(context);
+    _minExtend = MediaQuery.of(context).padding.top + 64.0;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final double percentage =
+          (constraints.maxHeight - _minExtend) / (_maxExtend - minExtent);
+      _fullVisible = percentage < 0.5;
+      return Container(
+        height: constraints.maxHeight,
+        child: Material(
+          elevation: Tween<double>(begin: 1.0, end: 0.0).transform(percentage),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            runSpacing: 0,
+            children: [
+              StreamProvider<AdBalance>(
+                create: (context) => DatabaseService.getAdBalance(
+                    context.read<UserManager>().uid),
+                builder: (context, child) => Stack(
+                  children: [
+                    Opacity(
+                        opacity: 1 - percentage,
+                        child: IgnorePointer(
+                          ignoring: !_fullVisible,
+                          child: Container(
+                              height: constraints.maxHeight,
+                              width: constraints.maxWidth,
+                              child: Material(
+                                  color: _theme.colors.light,
+                                  child: SafeArea(
+                                      bottom: false,
+                                      child: Builder(builder: (context) {
+                                        AdBalance balance =
+                                            context.watch<AdBalance>();
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .baseline,
+                                                    children: [
+                                                      Text(
+                                                        '${balance?.dcBalance ?? 0}',
+                                                        style: TextStyle(
+                                                            fontSize: 24.0,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: _theme
+                                                                .colors.dark),
+                                                      ),
+                                                      const XMargin(5),
+                                                      Text('Donation Votes',
+                                                          style: _theme
+                                                              .textTheme
+                                                              .dark
+                                                              .bodyText1),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 5.0),
+                                                  AutoSizeText(
+                                                    'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color:
+                                                            _theme.colors.dark),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  PercentCircle(
+                                                    percent: balance
+                                                            ?.activityScore ??
+                                                        0,
+                                                    radius: 25.0,
+                                                    fontSize: 12,
+                                                    dark: true,
+                                                  ),
+                                                  XMargin(8),
+                                                  RoundButtonHomePage(
+                                                    dark: true,
+                                                    icon: Icons.settings,
+                                                    onTap: () {
+                                                      BottomDialog(context)
+                                                          .show(
+                                                              SettingsDialog());
+                                                    },
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      })))),
+                        )),
+                    Opacity(
+                      opacity: percentage,
+                      child: IgnorePointer(
+                        ignoring: _fullVisible,
+                        child: SafeArea(
+                          bottom: false,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          "Willkommen,",
+                                          style: _theme
+                                              .materialTheme.textTheme.headline5
+                                              .copyWith(
+                                                  fontSize: 32,
+                                                  color: _theme.colors.dark),
+                                        ),
+                                        Text(
+                                          "${user?.name}",
+                                          style: _theme
+                                              .materialTheme.textTheme.headline5
+                                              .copyWith(
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _theme.colors.dark),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      child: CustomOpenContainer(
+                                        openBuilder: (context, close,
+                                                controller) =>
+                                            UserPage(user,
+                                                scrollController: controller),
+                                        closedShape: CircleBorder(),
+                                        closedElevation: 0,
+                                        closedBuilder: (context, open) =>
+                                            Avatar(
+                                          user?.thumbnailUrl ?? user?.imgUrl,
+                                          onTap: open,
+                                        ),
+                                      ),
+                                      width: 60,
+                                      height: 60,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text(
+                                          "Gespendet: ",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: _theme.colors.dark),
+                                        ),
+                                        Text(
+                                          "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                                          style: TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.bold,
+                                              color: _theme.colors.dark),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        CustomOpenContainer(
+                                          openBuilder:
+                                              (context, close, controller) =>
+                                                  RewardVideoPage(),
+                                          closedShape: CircleBorder(),
+                                          closedElevation: 0,
+                                          closedColor: _theme.colors.contrast,
+                                          closedBuilder: (context, open) =>
+                                              RoundButtonHomePage(
+                                            icon: Icons.play_arrow_rounded,
+                                            onTap: open,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        RoundButtonHomePage(
+                                          icon: Icons.settings,
+                                          onTap: () {
+                                            BottomDialog(context)
+                                                .show(SettingsDialog());
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                InfoFeed(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  @override
+  double get maxExtent => _maxExtend;
+
+  @override
+  double get minExtent => _minExtend;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
+  }
 }

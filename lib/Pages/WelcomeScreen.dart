@@ -63,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     maxLines: 2,
                   ),
                   description:
-                      "Wir möchten mit One Dollar Movement Spenden kostenlos, einfach und alltäglich machen. Wenn du ODM nutzt, bist du Teil unserer Community um die Welt ein kleines Stück besser zu machen!",
+                      "Wir möchten mit One Dollar Movement Spenden kostenlos, einfach und alltäglich machen.",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
@@ -71,7 +71,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "img_session",
                     title: "Sessions",
                     description:
-                        "Sessions sind Bereiche von bekannten Menschen mit großer Reichweite in Sozialen Netwerken. Du kannst dich ihnen anschließen und das ausgewählte Projekt einer Sessions unterstützen!",
+                        "Sessions sind „Profile“ von bekannten Menschen mit großer Reichweite in Sozialen Netzwerken, die sich auf ein ausgewähltes Projekt fokussieren und dieses unterstützen.",
                     animatedValue: _getAnimatedValue(1, _page),
                     onPressed: () => _animateToPage(2)),
                 _WelcomePage(
@@ -113,9 +113,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 // ),
                 _WelcomePage(
                   svgName: "img_contact",
-                  title: "Kontaktbuch",
+                  title: "Finde Deine Freunde",
                   description:
-                      "Damit wir dir eine angenehme User-Experience geben können, brauchen wir einige Berechtigungen von dir.",
+                      "Damit Du deine Freunde findest, benötigen wir deine Erlaubnis um auf das Kontaktbuch zuzugreifen. Deine Kontakte werden an niemanden weitergegeben und sind bei uns sicher.",
                   animatedValue: _getAnimatedValue(4, _page),
                   onPressed: () async {
                     await _getPermission();
@@ -125,28 +125,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         MaterialPageRoute(
                             builder: (context) => ChooseLoginMethodPage()));
                   },
-                  isPermission: true,
                 ),
               ],
             ),
           ),
-          _page != 4
-              ? Visibility(
-                  visible: false,
-                  child: Positioned(
-                      top: 0,
-                      right: 10,
-                      child: SafeArea(
-                          child: FlatButton(
-                              onPressed: () {
-                                _animateToPage(6);
-                              },
-                              child: Text(
-                                "Überspringen",
-                                style: TextStyle(color: ColorTheme.blue),
-                              )))),
-                )
-              : Container(),
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
@@ -200,10 +182,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _animateToPage(int page) {
-    _pageController.animateToPage(
-      page,
-      duration: Duration(milliseconds: 400),
-    );
+    _pageController.animateToPage(page,
+        duration: Duration(milliseconds: 400), curve: Curves.easeInOut);
   }
 }
 
@@ -271,14 +251,15 @@ class _WelcomePage extends StatelessWidget {
               Text(
                 description,
                 style: _textTheme.subtitle2.copyWith(
-                    color: darkText ? ColorTheme.blue : ColorTheme.whiteBlue),
+                    color: darkText ? ColorTheme.blue : ColorTheme.whiteBlue,
+                    fontWeight: FontWeight.normal),
                 textAlign: TextAlign.center,
               ),
               SizedBox(
                 height: 20,
               ),
               isPermission
-                  ? MaterialButton(
+                  ? RaisedButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4)),
                       onPressed: onPressed,
@@ -292,7 +273,7 @@ class _WelcomePage extends StatelessWidget {
                               .copyWith(fontSize: 18),
                         ),
                       ),
-                      color: Helper.hexToColor('#3E313F'),
+                      color: ColorTheme.blue,
                     )
                   : FloatingActionButton(
                       onPressed: onPressed,

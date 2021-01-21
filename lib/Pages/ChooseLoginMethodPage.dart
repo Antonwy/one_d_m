@@ -55,7 +55,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
             Text(
               "Logge dich ein, um Mitglied von One Dollar Movement zu werden!",
               style: _theme.textTheme.subtitle1
-                  .copyWith(color: ColorTheme.blue.withOpacity(.5)),
+                  .copyWith(color: ColorTheme.blue.withOpacity(.7)),
               textAlign: TextAlign.center,
             ),
             Padding(
@@ -63,7 +63,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
               child: Row(
                 children: <Widget>[
                   _RoundButton(false,
-                      toPage: LoginPage(), pageColor: Helper.hexToColor("D1D9D5")),
+                      toPage: LoginPage(), pageColor: ColorTheme.appGrey),
                   SizedBox(
                     width: 12,
                   ),
@@ -163,13 +163,9 @@ class _RoundButton extends StatelessWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         openColor: pageColor,
         closedElevation: 0,
-        closedColor: isRegister ? ColorTheme.blue : Helper.hexToColor('#D1D9D5'),
+        closedColor: isRegister ? ColorTheme.blue : ColorTheme.appGrey,
         closedBuilder: (context, open) => Container(
           height: 52,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            color: isRegister ? null : Helper.hexToColor('#D1D9D5'),
-          ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(

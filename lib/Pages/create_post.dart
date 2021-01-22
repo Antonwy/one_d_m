@@ -255,7 +255,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           counterText: "",
           labelStyle: TextStyle(
               color: ThemeManager.of(context).colors.textOnContrast,
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.w700),
           labelText: hint,
           hintText: "",

@@ -24,7 +24,7 @@ class SessionMessage {
   }
 
   static List<SessionMessage> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.documents.map((e) => SessionMessage.fromDoc(e)).toList();
+    return qs.docs.map((e) => SessionMessage.fromDoc(e)).toList();
   }
 
   static const String FROM_UID = "from_uid",

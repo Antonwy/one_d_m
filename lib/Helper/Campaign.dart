@@ -58,7 +58,7 @@ class Campaign {
 
   static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
-      id: snapshot.documentID,
+      id: snapshot.id,
       name: snapshot[NAME],
       shortDescription: snapshot[SHORTDESCRIPTION],
       imgUrl: snapshot[IMAGEURL],

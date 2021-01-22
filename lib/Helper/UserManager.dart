@@ -180,7 +180,7 @@ class UserManager extends ChangeNotifier {
         phoneNumber: phonenumber,
         name: username.trim(),
         email: fireUser.email,
-        imgUrl: fireUser.photoUrl,
+        imgUrl: fireUser.photoURL,
         id: fireUser.uid);
     try {
       await DatabaseService.addUser(user);

@@ -14,14 +14,14 @@ class Statistics {
 
   static Statistics fromQuerySnapshot(QuerySnapshot qs) {
     return Statistics(
-        donationStatistics: DonationInfo.fromSnapshot(qs.documents
-            .where((doc) => doc.documentID == DatabaseService.DONATIONINFO)
+        donationStatistics: DonationInfo.fromSnapshot(qs.docs
+            .where((doc) => doc.id == DatabaseService.DONATIONINFO)
             .first),
-        userCount: qs.documents
-            .where((doc) => doc.documentID == USERINFO)
+        userCount: qs.docs
+            .where((doc) => doc.id == USERINFO)
             .first[USERCOUNT],
-        campaignCount: qs.documents
-            .where((doc) => doc.documentID == CAMPAIGNINFO)
+        campaignCount: qs.docs
+            .where((doc) => doc.id == CAMPAIGNINFO)
             .first[CAMPAIGNCOUNT]);
   }
 }

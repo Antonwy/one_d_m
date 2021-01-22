@@ -37,7 +37,7 @@ class BaseSession {
   }
 
   static List<BaseSession> fromQuerySnapshot(QuerySnapshot qs) {
-    return qs.documents.map((doc) => BaseSession.fromDoc(doc)).toList();
+    return qs.docs.map((doc) => BaseSession.fromDoc(doc)).toList();
   }
 
   static const String CREATED_AT = "created_at",

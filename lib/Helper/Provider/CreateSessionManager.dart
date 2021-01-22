@@ -70,7 +70,7 @@ class CreateSessionManager extends ChangeNotifier {
 
     try {
       await DatabaseService.createSession(session);
-    } on CloudFunctionsException catch (e) {
+    } on FirebaseFunctionsException catch (e) {
       setLoading(false);
       return e.message;
     } catch (e) {

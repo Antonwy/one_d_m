@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,15 +13,20 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Helper/Validate.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/utils/video/encoding_provider.dart';
+import 'package:one_d_m/utils/video/video_info.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final Session session;
+  final ScrollController controller;
 
-  const CreatePostScreen({Key key, this.session}) : super(key: key);
+  const CreatePostScreen({Key key, this.session, this.controller})
+      : super(key: key);
 
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
@@ -43,6 +51,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   bool _isLoading = false;
 
+  final thumbWidth = 100;
+  final thumbHeight = 150;
+  bool _imagePickerActive = false;
+  bool _processing = false;
+  bool _canceled = false;
+  double _progress = 0.0;
+  int _videoDuration = 0;
+  String _processPhase = '';
+  VideoInfo videoInfo;
+  bool _isVideo = true;
+
   @override
   void didChangeDependencies() {
     _displaySize = MediaQuery.of(context).size;
@@ -54,6 +73,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   void initState() {
+    EncodingProvider.enableStatisticsCallback((int time,
+        int size,
+        double bitrate,
+        double speed,
+        int videoFrameNumber,
+        double videoQuality,
+        double videoFps) {
+      if (_canceled) return;
+
+      setState(() {
+        _progress = time / _videoDuration;
+      });
+    });
     super.initState();
   }
 
@@ -66,7 +98,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(
-            Icons.chevron_left_outlined,
+            Icons.keyboard_arrow_down,
             color: Colors.black,
             size: 42,
           ),
@@ -78,40 +110,33 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ),
         centerTitle: true,
         elevation: 0,
-        actions: <Widget>[
-          _isLoading
-              ? Center(
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    margin: EdgeInsets.only(right: 20),
-                    child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Colors.white)),
-                  ),
-                )
-              : Container()
-        ],
       ),
       body: SingleChildScrollView(
+        controller: widget.controller,
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 _showImage(),
+                const YMargin(40),
+                Material(
+                  elevation: 5,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12)),
+                  child: _textField(
+                      hint: "Beschreibung",
+                      multiline: true,
+                      onSaved: (text) {
+                        _postText = text;
+                      }),
+                ),
                 const YMargin(20),
-                _textField(
-                    hint: "Beschreibung",
-                    multiline: true,
-                    onSaved: (text) {
-                      _postText = text;
-                    }),
-                const YMargin(20),
-                Align(
-                    alignment: Alignment.center,
-                    child: _buildCreatePostButton(context))
+                _buildCreatePostButton(context)
               ],
             ),
           ),
@@ -121,44 +146,49 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _createNews() async {
-    if (!_formKey.currentState.validate() || _image == null) return;
+    if (!_formKey.currentState.validate() || _isVideo
+        ? videoInfo == null
+        : _image == null) return;
 
     _formKey.currentState.save();
+    String imgUrl;
 
     setState(() {
       _isLoading = true;
     });
 
-    StorageService service = StorageService(file: _image);
-    service.uploadNewsImage(StorageService.newsImageName(_newsId)).then((path) {
-      News news = News(
-          id: _newsId,
-          sessionId: widget.session.id,
-          campaignId: widget.session.campaignId,
-          campaignName: widget.session.campaignName,
-          campaignImgUrl: widget.session.campaignImgUrl,
-          createdAt: DateTime.now(),
-          userId: um.uid,
-          title: '',
-          text: _postText,
-          shortText: _postShortText,
-          imageUrl: path);
+    if (!_isVideo) {
+      StorageService service = StorageService(file: _image);
+      imgUrl =
+          await service.uploadNewsImage(StorageService.newsImageName(_newsId));
+    }
 
-      DatabaseService.createNews(news).then((value) {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.pop(context);
-      }).catchError((e) {
-        setState(() {
-          _isLoading = false;
-        });
+    News news = News(
+        id: _newsId,
+        sessionId: widget.session.id,
+        campaignId: widget.session.campaignId,
+        campaignName: widget.session.campaignName,
+        campaignImgUrl: widget.session.campaignImgUrl,
+        createdAt: DateTime.now(),
+        userId: um.uid,
+        title: '',
+        text: _postText,
+        shortText: _postShortText,
+        videoUrl: _isVideo ? videoInfo.videoUrl : null,
+        imageUrl: _isVideo ? videoInfo.coverUrl : imgUrl);
 
-        Helper.showAlert(
-            context, "Etwas ist schief gelaufen! Versuche es später erneut!");
+    DatabaseService.createNews(news).then((value) {
+      setState(() {
+        _isLoading = false;
       });
+      Navigator.pop(context);
     }).catchError((e) {
-      _createNews();
+      setState(() {
+        _isLoading = false;
+      });
+
+      Helper.showAlert(
+          context, "Etwas ist schief gelaufen! Versuche es später erneut!");
     });
   }
 
@@ -166,6 +196,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     File _file = await ImagePicker.pickImage(source: ImageSource.gallery);
     if (_file == null) return;
     setState(() {
+      _isVideo = false;
       _image = _file;
     });
   }
@@ -177,20 +208,28 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         height: 200,
         child: Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12), topRight: Radius.circular(12)),
               border: Border.all(width: 1, color: Colors.grey)),
           clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: _getImage,
-            child: Center(
-              child: _image == null
-                  ? _buildPlaceholder()
-                  : Image.file(
-                      _image,
-                      width: _displaySize.width * 85,
-                      fit: BoxFit.cover,
-                    ),
-            ),
+          child: Center(
+            child: _isVideo
+                ? _processing
+                    ? _getProgressBar()
+                    : videoInfo == null
+                        ? _buildPlaceholder()
+                        : Image.network(
+                            videoInfo.thumbUrl,
+                            width: _displaySize.width * 85,
+                            fit: BoxFit.cover,
+                          )
+                : _image == null
+                    ? _buildPlaceholder()
+                    : Image.file(
+                        _image,
+                        width: _displaySize.width * 85,
+                        fit: BoxFit.cover,
+                      ),
           ),
         ),
       ),
@@ -206,77 +245,294 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return TextFormField(
       textAlignVertical: TextAlignVertical.top,
       onSaved: onSaved,
-      maxLines: 5,
+      maxLines: 7,
       cursorColor: Colors.grey,
-      style: TextStyle(color: Colors.grey),
+      style: TextStyle(color: ThemeManager.of(context).colors.textOnContrast),
       keyboardType: multiline ? TextInputType.multiline : TextInputType.text,
       maxLength: maxLength,
       decoration: InputDecoration(
           alignLabelWithHint: true,
           counterText: "",
-          labelStyle: TextStyle(color: Colors.grey, fontSize: 24),
+          labelStyle: TextStyle(
+              color: ThemeManager.of(context).colors.textOnContrast,
+              fontSize: 24,
+              fontWeight: FontWeight.w700),
           labelText: hint,
           hintText: "",
           hintStyle: TextStyle(color: Colors.red),
           border: OutlineInputBorder(),
           errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12)),
               borderSide: BorderSide(color: Colors.red)),
           enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12)),
               borderSide: BorderSide(color: Colors.grey)),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12)),
               borderSide: BorderSide(color: Colors.grey))),
     );
   }
 
-  Widget _buildPlaceholder() => Column(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildPlaceholder() => Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildMediaButton(true),
+          _buildMediaButton(false),
+        ],
+      );
+
+  Widget _buildMediaButton(bool isPhoto) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            "assets/images/ic_image_pick.png",
-            height: 98,
-            width: 100,
+          MaterialButton(
+            clipBehavior: Clip.antiAlias,
+            color: ThemeManager.of(context).colors.contrast,
+            shape: CircleBorder(),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                isPhoto
+                    ? Icons.photo_library_rounded
+                    : Icons.video_collection_rounded,
+                size: 40,
+                color: ThemeManager.of(context).colors.textOnContrast,
+              ),
+            ),
+            onPressed: () => isPhoto ? _getImage() : _takeVideo(),
           ),
-          Text(
-            'Wähle durch Tippen ein Bild aus',
+          const YMargin(10),
+          AutoSizeText(
+            isPhoto ? 'Fuge ein \nFoto hinzu' : 'Fuge ein \nVideo hinzu',
+            maxLines: 2,
             textAlign: TextAlign.center,
-            style: _theme.textTheme.subtitle1
-                .copyWith(color: Colors.grey, fontSize: 24),
+            style: Theme.of(context).textTheme.bodyText1,
           )
         ],
       );
 
-  Widget _buildCreatePostButton(BuildContext context) => RaisedButton(
-      color: ThemeManager.of(context).colors.dark,
-      textColor: ThemeManager.of(context).colors.light,
-      child: Container(
+  Widget _buildCreatePostButton(BuildContext context) => Container(
         width: 220,
         height: 48,
-        child: Padding(
-            padding: const EdgeInsets.all(8.0),
+        child: MaterialButton(
+            color: ThemeManager.of(context).colors.dark,
+            disabledColor: Colors.grey,
             child: !_isLoading
                 ? Center(
                     child: Text(
                       'Post erstellen',
-                      style: Theme.of(context).textTheme.button.copyWith(
-                          color: ThemeManager.of(context).colors.light,
-                          fontSize: 20),
+                      style: Theme.of(context)
+                          .accentTextTheme
+                          .button
+                          .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                   )
-                : Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(
-                          ThemeManager.of(context).colors.light),
-                    ),
-                  )),
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    ],
+                  ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            onPressed: _isLoading
+                ? null
+                : () {
+                    _createNews();
+                  }),
+      );
+
+  ///video uploading content
+
+  void _onUploadProgress(TaskSnapshot event) {
+    if (event.state == TaskState.running) {
+      final double progress = event.bytesTransferred / event.totalBytes;
+      setState(() {
+        _progress = progress;
+      });
+    }
+  }
+
+  Future<String> _uploadFile(filePath, folderName, isVideo) async {
+    final file = new File(filePath);
+    final basename = p.basename(filePath);
+    final dir = isVideo
+        ? 'news/news_$_newsId/videos'
+        : 'news/news_$_newsId';
+
+    final Reference ref = FirebaseStorage.instance
+        .ref()
+        .child(dir)
+        .child(folderName)
+        .child(basename);
+    UploadTask uploadTask = ref.putFile(file);
+    uploadTask.snapshotEvents.listen(_onUploadProgress);
+    String videoUrl = '';
+    await uploadTask
+        .then((ts) async => videoUrl = await ts.ref.getDownloadURL());
+    return videoUrl;
+  }
+
+  String getFileExtension(String fileName) {
+    final exploded = fileName.split('.');
+    return exploded[exploded.length - 1];
+  }
+
+  void _updatePlaylistUrls(File file, String videoName) {
+    final lines = file.readAsLinesSync();
+    var updatedLines = List<String>();
+
+    for (final String line in lines) {
+      var updatedLine = line;
+      if (line.contains('.ts') || line.contains('.m3u8')) {
+        updatedLine = '$videoName%2F$line?alt=media';
+      }
+      updatedLines.add(updatedLine);
+    }
+    final updatedContents =
+        updatedLines.reduce((value, element) => value + '\n' + element);
+
+    file.writeAsStringSync(updatedContents);
+  }
+
+  Future<String> _uploadHLSFiles(dirPath, videoName) async {
+    final videosDir = Directory(dirPath);
+
+    var playlistUrl = '';
+
+    final files = videosDir.listSync();
+    int i = 1;
+    for (FileSystemEntity file in files) {
+      final fileName = p.basename(file.path);
+      final fileExtension = getFileExtension(fileName);
+      if (fileExtension == 'm3u8') _updatePlaylistUrls(file, videoName);
+
+      setState(() {
+        _processPhase = 'Uploading video';
+        _progress = 0.0;
+      });
+
+      final downloadUrl = await _uploadFile(file.path, videoName,true);
+
+      if (fileName == 'master.m3u8') {
+        playlistUrl = downloadUrl;
+      }
+      i++;
+    }
+
+    return playlistUrl;
+  }
+
+  Future<void> _processVideo(File rawVideoFile) async {
+    final String rand = '${new Random().nextInt(10000)}';
+    final videoName = 'video$rand';
+    final Directory extDir = await getApplicationDocumentsDirectory();
+    final outDirPath = '${extDir.path}/Videos/$videoName';
+    final videosDir = new Directory(outDirPath);
+    videosDir.createSync(recursive: true);
+
+    final rawVideoPath = rawVideoFile.path;
+    final info = await EncodingProvider.getMediaInformation(rawVideoPath);
+    final aspectRatio = EncodingProvider.getAspectRatio(info);
+
+    setState(() {
+      _processPhase = 'Processing video...';
+      _videoDuration = EncodingProvider.getDuration(info);
+      _progress = 0.0;
+    });
+
+    final thumbFilePath =
+        await EncodingProvider.getThumb(rawVideoPath, thumbWidth, thumbHeight);
+
+    setState(() {
+      _processPhase = 'Processing video...';
+      _progress = 0.0;
+    });
+
+    final encodedFilesDir =
+        await EncodingProvider.encodeHLS(rawVideoPath, outDirPath);
+
+    setState(() {
+      _processPhase = 'Processing video...';
+      _progress = 0.0;
+    });
+    final thumbUrl = await _uploadFile(thumbFilePath, 'video_thumbnail',false);
+    final videoUrl = await _uploadHLSFiles(encodedFilesDir, videoName);
+
+    videoInfo = VideoInfo(
+      videoUrl: videoUrl,
+      thumbUrl: thumbUrl,
+      coverUrl: thumbUrl,
+      aspectRatio: aspectRatio,
+      uploadedAt: DateTime.now().millisecondsSinceEpoch,
+      videoName: videoName,
+    );
+
+    setState(() {
+      _processPhase = 'Processing video...';
+      _progress = 0.0;
+    });
+
+    ///todo save video in firebase
+
+    setState(() {
+      _processPhase = '';
+      _progress = 0.0;
+      _processing = false;
+    });
+  }
+
+  void _takeVideo() async {
+    PickedFile videoFile;
+    if (_imagePickerActive) return;
+
+    _imagePickerActive = true;
+    videoFile = await ImagePicker().getVideo(source: ImageSource.gallery);
+    _imagePickerActive = false;
+    if (videoFile == null) return;
+    setState(() {
+      _isVideo = true;
+      _processing = true;
+    });
+
+    try {
+      await _processVideo(File(videoFile.path));
+    } catch (e) {
+      print('${e.toString()}');
+    } finally {
+      setState(() {
+        _processing = false;
+      });
+    }
+  }
+
+  _getProgressBar() {
+    return Container(
+      padding: EdgeInsets.all(30.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(bottom: 30.0),
+            child: Text(_processPhase),
+          ),
+          LinearProgressIndicator(
+            value: _progress,
+          ),
+        ],
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onPressed: _isLoading
-          ? null
-          : () {
-              _createNews();
-            });
+    );
+  }
 }

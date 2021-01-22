@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'CampaignButton.dart';
@@ -13,8 +14,9 @@ import 'CampaignButton.dart';
 class NewsPost extends StatelessWidget {
   News news;
   bool withCampaign;
+  bool isInView;
 
-  NewsPost(this.news, {this.withCampaign = true});
+  NewsPost(this.news, {this.withCampaign = true,this.isInView = false});
 
   @override
   Widget build(BuildContext context) {
@@ -43,20 +45,37 @@ class NewsPost extends StatelessWidget {
               height: 260,
               child: Stack(
                 children: <Widget>[
-                  CachedNetworkImage(
-                    width: double.infinity,
-                    height: 260,
-                    imageUrl: news.imageUrl ?? '',
-                    errorWidget: (_, __, ___) => Center(
-                        child: Icon(
-                      Icons.error,
-                      color: ColorTheme.orange,
-                    )),
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                  ),
+                  news.videoUrl != null
+                      ? isInView ?? false
+                          ? VideoWidget(url: news.videoUrl, play: true)
+                          : CachedNetworkImage(
+                              width: double.infinity,
+                              height: 260,
+                              imageUrl: news.imageUrl ?? '',
+                              errorWidget: (_, __, ___) => Center(
+                                  child: Icon(
+                                Icons.error,
+                                color: ColorTheme.orange,
+                              )),
+                              placeholder: (context, url) => Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                      : CachedNetworkImage(
+                          width: double.infinity,
+                          height: 260,
+                          imageUrl: news.imageUrl ?? '',
+                          errorWidget: (_, __, ___) => Center(
+                              child: Icon(
+                            Icons.error,
+                            color: ColorTheme.orange,
+                          )),
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -82,6 +101,16 @@ class NewsPost extends StatelessWidget {
                       ),
                     ),
                   ),
+                  news.videoUrl != null
+                      ? Align(
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white.withOpacity(0.7),
+                            size: 32,
+                          ),
+                        )
+                      : SizedBox.shrink()
                 ],
               ),
             ),

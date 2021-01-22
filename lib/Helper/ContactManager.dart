@@ -30,8 +30,8 @@ class ContactManager {
   static Future<void> uploadPhoneNumbers(List<String> numbers) async {
     try {
       print("UPLOADING");
-      await CloudFunctions.instance
-          .getHttpsCallable(functionName: "httpFunctions-findFriends")
+      await FirebaseFunctions.instance
+          .httpsCallable("httpFunctions-findFriends")
           .call(numbers.toList());
       print("FINISHED");
     } on PlatformException catch (e) {

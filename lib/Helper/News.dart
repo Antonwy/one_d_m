@@ -12,7 +12,8 @@ class News {
       CREATEDAT = "created_at",
       CAMPAIGNIMGURL = "campaign_img_url",
       IMAGEURL = "image_url",
-      SESSION_ID = "session_id";
+      SESSION_ID = "session_id",
+      VIDEO_URL = "video_url";
 
   String campaignId,
       userId,
@@ -23,6 +24,7 @@ class News {
       text,
       shortText,
       imageUrl,
+      videoUrl,
       id,
       sessionId;
   DateTime createdAt;
@@ -39,6 +41,7 @@ class News {
     this.createdAt,
     this.campaignName,
     this.imageUrl,
+    this.videoUrl,
     this.sessionId,
   });
 
@@ -51,6 +54,7 @@ class News {
       TEXT: text,
       SHORTTEXT: shortText,
       IMAGEURL: imageUrl,
+      VIDEO_URL: videoUrl,
       CAMPAIGNIMGURL: campaignImgUrl,
       CREATEDAT: Timestamp.now(),
       SESSION_ID: sessionId,
@@ -68,6 +72,7 @@ class News {
       campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
       sessionId: snapshot.data()[SESSION_ID],
       imageUrl: snapshot.data()[IMAGEURL],
+      videoUrl: snapshot.data()[VIDEO_URL],
       createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
     );
   }

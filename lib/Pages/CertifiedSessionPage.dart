@@ -2,12 +2,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -22,7 +22,6 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
@@ -469,6 +468,14 @@ class _CertifiedSessionInfoPage extends StatefulWidget {
 
 class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   bool isCreator = false;
+  @override
+  void initState() {
+    widget.controller = ScrollController()
+      ..addListener(() {
+        print("offset = ${widget.controller.offset}");
+      });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -676,9 +683,22 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 List<News> posts = snapshot.data;
                 if (posts.isNotEmpty) {
                   posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-                  return SliverList(
-                    delegate:
-                        SliverChildListDelegate(_getNewsWidget(context, posts)),
+                  return NotificationListener<ScrollUpdateNotification>(
+                    // ignore: missing_return
+                    onNotification: (notification) {
+                      var metrics = notification.metrics;
+                      print('At top');
+                      if (metrics.atEdge) {
+                        if (metrics.pixels == 0) print('At top');
+                        else print('At bottom');
+                      }
+                      return true;
+                    },
+                    child: SliverList(
+
+                      delegate:
+                          SliverChildListDelegate(_getNewsWidget(context, posts)),
+                    ),
                   );
                 } else {
                   return SliverToBoxAdapter(child: SizedBox.shrink());
@@ -715,6 +735,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         child: NewsPost(
           n,
           withCampaign: false,
+          isInView: false,
         ),
       ));
 
@@ -986,20 +1007,24 @@ class CreatePostButton extends StatelessWidget {
           initialData: false,
           stream: csm.isInSession,
           builder: (context, snapshot) {
-            return RaisedButton(
-                color: csm.session.primaryColor,
-                textColor: _theme.colors.textOnDark,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)),
-                child: AutoSizeText("Post erstellen", maxLines: 1),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (c) => CreatePostScreen(
-                                session: csm.session,
-                              )));
-                });
+            return CustomOpenContainer(
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6)),
+              closedElevation: 0,
+              openBuilder: (context, close, scrollController) =>
+                  CreatePostScreen(
+                session: csm.session,
+                controller: scrollController,
+              ),
+              closedColor: Colors.transparent,
+              closedBuilder: (context, open) => RaisedButton(
+                  color: csm.session.primaryColor,
+                  textColor: _theme.colors.textOnDark,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)),
+                  child: AutoSizeText("Post erstellen", maxLines: 1),
+                  onPressed: open),
+            );
           }),
     );
   }

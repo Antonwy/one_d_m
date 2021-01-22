@@ -367,9 +367,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<String> _uploadFile(filePath, folderName, isVideo) async {
     final file = new File(filePath);
     final basename = p.basename(filePath);
-    final dir = isVideo
-        ? 'news/news_$_newsId/videos'
-        : 'news/news_$_newsId';
+    final dir = isVideo ? 'news/news_$_newsId' : 'news/news_$_newsId';
 
     final Reference ref = FirebaseStorage.instance
         .ref()
@@ -423,7 +421,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         _progress = 0.0;
       });
 
-      final downloadUrl = await _uploadFile(file.path, videoName,true);
+      final downloadUrl = await _uploadFile(file.path, videoName, true);
 
       if (fileName == 'master.m3u8') {
         playlistUrl = downloadUrl;
@@ -467,8 +465,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       _processPhase = 'Processing video...';
       _progress = 0.0;
     });
-    final thumbUrl = await _uploadFile(thumbFilePath, 'video_thumbnail',false);
-    final videoUrl = await _uploadHLSFiles(encodedFilesDir, videoName);
+    final thumbUrl =
+        await _uploadFile(thumbFilePath, 'video_thumbnail_$_newsId', false);
+    ///encoding
+    // final videoUrl = await _uploadHLSFiles(encodedFilesDir, videoName);
+    final videoUrl = await _uploadFile(rawVideoPath, 'video_$_newsId', true);
 
     videoInfo = VideoInfo(
       videoUrl: videoUrl,
@@ -480,7 +481,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
 
     setState(() {
-      _processPhase = 'Processing video...';
+      _processPhase = 'Uploading video';
       _progress = 0.0;
     });
 

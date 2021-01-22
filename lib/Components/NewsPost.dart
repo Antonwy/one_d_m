@@ -8,124 +8,136 @@ import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'CampaignButton.dart';
 
-class NewsPost extends StatelessWidget {
+class NewsPost extends StatefulWidget {
   News news;
   bool withCampaign;
   bool isInView;
 
-  NewsPost(this.news, {this.withCampaign = true,this.isInView = false});
+  NewsPost(this.news, {this.withCampaign = true, this.isInView = false});
 
   @override
+  _NewsPostState createState() => _NewsPostState();
+}
+
+class _NewsPostState extends State<NewsPost> {
+  @override
   Widget build(BuildContext context) {
-    var shortText = news.shortText ?? '';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        color: Colors.white,
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          children: <Widget>[
-            withCampaign
-                ? CampaignButton(
-                    news.campaignId,
-                    borderRadius: 0,
-                    textStyle: TextStyle(),
-                    campaign: Campaign(
-                        imgUrl: news.campaignImgUrl,
-                        id: news.campaignId,
-                        name: news.campaignName),
-                  )
-                : Container(),
-            Container(
-              height: 260,
-              child: Stack(
-                children: <Widget>[
-                  news.videoUrl != null
-                      ? isInView ?? false
-                          ? VideoWidget(url: news.videoUrl, play: true)
-                          : CachedNetworkImage(
-                              width: double.infinity,
-                              height: 260,
-                              imageUrl: news.imageUrl ?? '',
-                              errorWidget: (_, __, ___) => Center(
-                                  child: Icon(
-                                Icons.error,
-                                color: ColorTheme.orange,
-                              )),
-                              placeholder: (context, url) => Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              fit: BoxFit.cover,
-                            )
-                      : CachedNetworkImage(
-                          width: double.infinity,
-                          height: 260,
-                          imageUrl: news.imageUrl ?? '',
-                          errorWidget: (_, __, ___) => Center(
-                              child: Icon(
-                            Icons.error,
-                            color: ColorTheme.orange,
-                          )),
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(),
+    var shortText = widget.news.shortText ?? '';
+    return VisibilityDetector(
+      key: Key(widget.news.id),
+      onVisibilityChanged: (VisibilityInfo info) {
+        var visiblePercentage = info.visibleFraction * 100;
+        if (visiblePercentage == 100) {
+          setState(() {
+            widget.isInView = true;
+          });
+        } else {
+          setState(() {
+            widget.isInView = false;
+          });
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          color: Colors.white,
+          elevation: 1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Column(
+            children: <Widget>[
+              widget.withCampaign
+                  ? CampaignButton(
+                      widget.news.campaignId,
+                      borderRadius: 0,
+                      textStyle: TextStyle(),
+                      campaign: Campaign(
+                          imgUrl: widget.news.campaignImgUrl,
+                          id: widget.news.campaignId,
+                          name: widget.news.campaignName),
+                    )
+                  : Container(),
+              Container(
+                height: 260,
+                child: Stack(
+                  children: <Widget>[
+                    widget.news.videoUrl != null
+                        ? widget.isInView ?? false
+                            ? VideoWidget(url: widget.news.videoUrl, play: true)
+                            : CachedNetworkImage(
+                                width: double.infinity,
+                                height: 260,
+                                imageUrl: widget.news.imageUrl ?? '',
+                                errorWidget: (_, __, ___) => Center(
+                                    child: Icon(
+                                  Icons.error,
+                                  color: ColorTheme.orange,
+                                )),
+                                placeholder: (context, url) => Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                fit: BoxFit.cover,
+                              )
+                        : CachedNetworkImage(
+                            width: double.infinity,
+                            height: 260,
+                            imageUrl: widget.news.imageUrl ?? '',
+                            errorWidget: (_, __, ___) => Center(
+                                child: Icon(
+                              Icons.error,
+                              color: ColorTheme.orange,
+                            )),
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            fit: BoxFit.cover,
                           ),
-                          fit: BoxFit.cover,
-                        ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      height: 50,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              colors: [
-                            Colors.black.withOpacity(.7),
-                            Colors.black.withOpacity(0)
-                          ],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter)),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        timeago.format(news.createdAt, locale: "de"),
-                        style: TextStyle(color: Colors.white),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [
+                              Colors.black.withOpacity(.7),
+                              Colors.black.withOpacity(0)
+                            ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter)),
                       ),
                     ),
-                  ),
-                  news.videoUrl != null
-                      ? Align(
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.play_arrow_rounded,
-                            color: Colors.white.withOpacity(0.7),
-                            size: 32,
-                          ),
-                        )
-                      : SizedBox.shrink()
-                ],
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          timeago.format(widget.news.createdAt, locale: "de"),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  news.text.isEmpty
-                      ? Container()
-                      : _buildExpandableContent(context, news.text)
-                ],
-              ),
-            )
-          ],
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    widget.news.text.isEmpty
+                        ? Container()
+                        : _buildExpandableContent(context, widget.news.text)
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

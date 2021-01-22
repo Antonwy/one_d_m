@@ -73,10 +73,10 @@ class HeadingItem implements PostItem {
                     const XMargin(8.0),
                     AutoSizeText(session.name ?? '',
                         maxLines: 1,
+
                         softWrap: true,
                         style: _theme.textTheme.dark.headline6
                             .copyWith(fontWeight: FontWeight.w600)),
-                    const XMargin(8.0),
                     Icon(
                       Icons.verified,
                       color: Helper.hexToColor("#71e34b"),

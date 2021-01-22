@@ -23,6 +23,7 @@ import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
 import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
   Session session;
@@ -683,22 +684,10 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 List<News> posts = snapshot.data;
                 if (posts.isNotEmpty) {
                   posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-                  return NotificationListener<ScrollUpdateNotification>(
-                    // ignore: missing_return
-                    onNotification: (notification) {
-                      var metrics = notification.metrics;
-                      print('At top');
-                      if (metrics.atEdge) {
-                        if (metrics.pixels == 0) print('At top');
-                        else print('At bottom');
-                      }
-                      return true;
-                    },
-                    child: SliverList(
+                  return SliverList(
 
-                      delegate:
-                          SliverChildListDelegate(_getNewsWidget(context, posts)),
-                    ),
+                    delegate:
+                        SliverChildListDelegate(_getNewsWidget(context, posts)),
                   );
                 } else {
                   return SliverToBoxAdapter(child: SizedBox.shrink());
@@ -716,6 +705,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
     List<Widget> widgets = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
+    bool _playVideo = false;
     Widget newsTitle = Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
       child: Text(

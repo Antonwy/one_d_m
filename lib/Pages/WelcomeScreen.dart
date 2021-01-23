@@ -63,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     maxLines: 2,
                   ),
                   description:
-                      "Wir möchten mit One Dollar Movement Spenden kostenlos, einfach und alltäglich machen. Wenn du ODM nutzt, bist du Teil unserer Community um die Welt ein kleines Stück besser zu machen!",
+                      "Wir möchten mit One Dollar Movement Spenden kostenlos, einfach und alltäglich machen.",
                   animatedValue: _getAnimatedValue(0, _page),
                   onPressed: () => _animateToPage(1),
                 ),
@@ -71,7 +71,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "img_session",
                     title: "Sessions",
                     description:
-                        "Sessions sind Bereiche von bekannten Menschen mit großer Reichweite in Sozialen Netwerken. Du kannst dich ihnen anschließen und das ausgewählte Projekt einer Sessions unterstützen!",
+                        "Sessions sind „Profile“ von bekannten Menschen mit großer Reichweite in Sozialen Netzwerken, die sich auf ein ausgewähltes Projekt fokussieren und dieses unterstützen.",
                     animatedValue: _getAnimatedValue(1, _page),
                     onPressed: () => _animateToPage(2)),
                 _WelcomePage(
@@ -113,9 +113,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 // ),
                 _WelcomePage(
                   svgName: "img_contact",
-                  title: "Kontaktbuch",
+                  title: "Finde Deine Freunde",
+                  index: 4,
                   description:
-                      "Damit wir dir eine angenehme User-Experience geben können, brauchen wir einige Berechtigungen von dir.",
+                      "Damit Du deine Freunde findest, benötigen wir deine Erlaubnis um auf das Kontaktbuch zuzugreifen. Deine Kontakte werden an niemanden weitergegeben und sind bei uns sicher.",
                   animatedValue: _getAnimatedValue(4, _page),
                   onPressed: () async {
                     await _getPermission();
@@ -212,6 +213,7 @@ class _WelcomePage extends StatelessWidget {
   double animatedValue;
   AutoSizeText titleText;
   VoidCallback onPressed;
+  int index;
   bool isPermission, loading, darkText;
 
   _WelcomePage(
@@ -222,6 +224,7 @@ class _WelcomePage extends StatelessWidget {
       this.description,
       this.animatedValue,
       this.onPressed,
+      this.index = -1,
       this.darkText = true,
       this.loading = false,
       this.isPermission = false});
@@ -285,7 +288,7 @@ class _WelcomePage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          "Erlauben",
+                          index == 4?'Weiter':"Erlauben",
                           style: Theme.of(context)
                               .accentTextTheme
                               .button

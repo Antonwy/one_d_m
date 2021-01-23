@@ -193,11 +193,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _getImage() async {
-    File _file = await ImagePicker.pickImage(source: ImageSource.gallery);
+    PickedFile _file = await ImagePicker().getImage(source: ImageSource.gallery);
     if (_file == null) return;
     setState(() {
       _isVideo = false;
-      _image = _file;
+      _image = File(_file.path);
     });
   }
 

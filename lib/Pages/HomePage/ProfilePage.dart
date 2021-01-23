@@ -233,10 +233,12 @@ class _ProfilePageState extends State<ProfilePage> {
         InfoFeed(),
 
         ///build the sessions that follow by user
-        mySessions.isNotEmpty
-            ? _buildMySessions(mySessions)
-            : _buildEmptySession(),
-
+        // mySessions.isNotEmpty
+        //     ? _buildMySessions(mySessions)
+        //     : _buildEmptySession(),
+        const SliverToBoxAdapter(
+          child: YMargin(12),
+        ),
         SessionPostFeed(
           userSessions: mySessions,
         ),

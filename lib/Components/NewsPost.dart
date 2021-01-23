@@ -174,23 +174,26 @@ class _NewsPostState extends State<NewsPost> {
                           Divider(
                             height: 1,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
-                            child: ExpandableButton(
-                                child: Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                              child: Text(
-                                'MEHR',
-                                textAlign: TextAlign.start,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1
-                                    .copyWith(
-                                        fontSize: 15,
-                                        color: _theme.colors.dark,
-                                        fontWeight: FontWeight.w700),
-                              ),
-                            )),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
+                              child: ExpandableButton(
+                                  child: Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                                child: Text(
+                                  'MEHR',
+                                  textAlign: TextAlign.start,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .copyWith(
+                                          fontSize: 15,
+                                          color: _theme.colors.dark,
+                                          fontWeight: FontWeight.w700),
+                                ),
+                              )),
+                            ),
                           ),
                         ],
                       )

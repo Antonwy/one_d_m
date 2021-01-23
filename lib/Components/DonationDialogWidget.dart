@@ -254,34 +254,23 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                 ))
                                           ],
                                         ),
+                                        const YMargin(20),
                                         Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            '${_selectedValue.toInt() * 5} Cent',
-                                            maxLines: 1,
+                                            'With ${_selectedValue.toInt() * 5} Cent you can support rangers one week to \nprotect elefants.',
+                                            textAlign: TextAlign.center,
                                             style: _theme.textTheme.subtitle1
                                                 .copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    color: _bTheme.dark,
-                                                    fontSize: 20),
-                                          ),
-                                        ),
-                                        const YMargin(5),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'entspricht dem Spendenbetrag',
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 12,
-                                                    color: Colors.black54),
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 15,
+                                                    color:
+                                                        ThemeManager.of(context)
+                                                            .colors
+                                                            .dark),
                                           ),
                                         ),
                                         const YMargin(20),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
                                         Align(
                                           alignment: Alignment.center,
                                           child: DonationButton(

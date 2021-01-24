@@ -1,14 +1,12 @@
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
-import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -18,8 +16,8 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
-import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
@@ -43,7 +41,6 @@ class _ProfilePageState extends State<ProfilePage> {
   ThemeManager _theme;
   List<Session> mySessions = [];
   List<String> mySessionIds = [];
-  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -103,152 +100,163 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
-    return CustomScrollView(
-      controller: widget.scrollController,
-      physics: CustomPageViewScrollPhysics(),
-      slivers: <Widget>[
-        Consumer<UserManager>(
-          builder: (context, um, child) => StreamBuilder<User>(
-              initialData: um.user,
-              stream: DatabaseService.getUserStream(um.uid),
-              builder: (context, snapshot) {
-                User user = snapshot.data;
-                return SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  actions: <Widget>[],
-                  bottom: PreferredSize(
-                    preferredSize: Size(MediaQuery.of(context).size.width, 100),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                      "Willkommen,",
-                                      style: _theme
-                                          .materialTheme.textTheme.headline5
-                                          .copyWith(
-                                              fontSize: 32,
-                                              color: _theme.colors.dark),
+    return Scaffold(
+      backgroundColor: ColorTheme.appBg,
+      body: CustomScrollView(
+        controller: widget.scrollController,
+        physics: CustomPageViewScrollPhysics(),
+        slivers: <Widget>[
+          Consumer<UserManager>(
+            builder: (context, um, child) => StreamBuilder<User>(
+                initialData: um.user,
+                stream: DatabaseService.getUserStream(um.uid),
+                builder: (context, snapshot) {
+                  User user = snapshot.data;
+                  return SliverAppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    automaticallyImplyLeading: false,
+                    actions: <Widget>[],
+                    bottom: PreferredSize(
+                      preferredSize:
+                          Size(MediaQuery.of(context).size.width, 100),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        "Gespendet: ",
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: _theme.colors.dark),
+                                      ),
+                                      Text(
+                                        "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            color: _theme.colors.dark),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(child: SizedBox()),
+                                  InkWell(
+                                    child: Image.asset(
+                                      'assets/icons/ic_envelop.png',
+                                      color:
+                                          ThemeManager.of(context).colors.dark,
+                                      height: 24,
+                                      width: 24,
                                     ),
-                                    Text(
-                                      "${user?.name}",
-                                      style: _theme
-                                          .materialTheme.textTheme.headline5
-                                          .copyWith(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                              color: _theme.colors.dark),
+                                    onTap: () {},
+                                  ),
+                                  const XMargin(8),
+                                  InkWell(
+                                    child: Icon(
+                                      Icons.notifications_none_rounded,
+                                      color:
+                                          ThemeManager.of(context).colors.dark,
+                                      size: 32,
                                     ),
-                                  ],
-                                ),
-                                Container(
-                                  child: CustomOpenContainer(
+                                    onTap: () {},
+                                  ),
+                                  const XMargin(8),
+                                  InkWell(
+                                    child: Icon(
+                                      Icons.settings_sharp,
+                                      color:
+                                          ThemeManager.of(context).colors.dark,
+                                      size: 32,
+                                    ),
+                                    onTap: () => BottomDialog(context)
+                                        .show(SettingsDialog()),
+                                  ),
+                                  const XMargin(8),
+                                  CustomOpenContainer(
                                     openBuilder: (context, close, controller) =>
                                         UserPage(user,
                                             scrollController: controller),
-                                    closedShape: CircleBorder(),
+                                    closedColor: ColorTheme.appBg,
+                                    closedShape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
                                     closedElevation: 0,
-                                    closedBuilder: (context, open) => Avatar(
-                                      user?.thumbnailUrl ?? user?.imgUrl,
-                                      onTap: open,
-                                    ),
-                                  ),
-                                  width: 60,
-                                  height: 60,
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      "Gespendet: ",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: _theme.colors.dark),
-                                    ),
-                                    Text(
-                                      "${Numeral(user?.donatedAmount ?? 0).value()} DV",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                          color: _theme.colors.dark),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    CustomOpenContainer(
-                                      openBuilder:
-                                          (context, close, controller) =>
-                                              RewardVideoPage(),
-                                      closedShape: CircleBorder(),
-                                      closedElevation: 0,
-                                      closedColor: _theme.colors.contrast,
-                                      closedBuilder: (context, open) =>
-                                          RoundButtonHomePage(
-                                        icon: Icons.play_arrow_rounded,
-                                        onTap: open,
+                                    closedBuilder: (context, open) => Material(
+                                      color:
+                                          ThemeManager.of(context).colors.dark,
+                                      borderRadius: BorderRadius.circular(10),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: CachedNetworkImage(
+                                        height: 32.0,
+                                        width: 32.0,
+                                        errorWidget: (_, __, ___) => Container(
+                                          color: ThemeManager.of(context)
+                                              .colors
+                                              .dark,
+                                          height: 32.0,
+                                          width: 32.0,
+                                          child: Icon(
+                                            Icons.error,
+                                            color: ThemeManager.of(context)
+                                                .colors
+                                                .contrast,
+                                          ),
+                                        ),
+                                        imageUrl:
+                                            user?.thumbnailUrl ?? user?.imgUrl,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    RoundButtonHomePage(
-                                      icon: Icons.settings_sharp,
-                                      onTap: () {
-                                        BottomDialog(context)
-                                            .show(SettingsDialog());
-                                      },
-                                    )
-                                  ],
-                                ),
-                              ],
-                            )
-                          ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }),
-        ),
-        InfoFeed(),
-
-        ///build the sessions that follow by user
-        // mySessions.isNotEmpty
-        //     ? _buildMySessions(mySessions)
-        //     : _buildEmptySession(),
-        const SliverToBoxAdapter(
-          child: YMargin(12),
-        ),
-        SessionPostFeed(
-          userSessions: mySessions,
-        ),
-        const SliverToBoxAdapter(
-          child: const SizedBox(
-            height: 120,
+                  );
+                }),
           ),
-        )
-        // _buildPostFeed(),
-      ],
+          InfoFeed(),
+
+          ///build the sessions that follow by user
+          // mySessions.isNotEmpty
+          //     ? _buildMySessions(mySessions)
+          //     : _buildEmptySession(),
+          const SliverToBoxAdapter(
+            child: YMargin(12),
+          ),
+          mySessions.isNotEmpty
+              ? SessionPostFeed(
+                  userSessions: mySessions,
+                )
+              : _buildEmptySession(),
+          mySessions.isEmpty
+              ? _buildRecomendedSession()
+              : SliverToBoxAdapter(
+                  child: SizedBox.shrink(),
+                ),
+          const SliverToBoxAdapter(
+            child: const SizedBox(
+              height: 120,
+            ),
+          )
+          // _buildPostFeed(),
+        ],
+      ),
     );
   }
 
@@ -257,35 +265,55 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              const YMargin(20),
-              SvgPicture.asset(
-                "assets/images/no-donations.svg",
-                height: 130,
-                width: 130,
+              Image.asset(
+                "assets/images/img_empty_session.png",
+                height: 143,
+                width: 206,
               ),
               SizedBox(
                 height: 20,
               ),
               Text(
-                "Du bist momentan kein Mitglied einer Session",
+                "Du bist momentan kein Mitglied einer Session.\nDu kannst auf der 'Entdecken' Seite \nInfluencer-Sessions und Projekten folgen.",
                 style: _theme.textTheme.dark.bodyText1,
                 textAlign: TextAlign.center,
               ),
-              const YMargin(20),
-              RaisedButton(
-                onPressed: widget.onExploreTapped,
-                child: AutoSizeText(
-                  'Entdecke Sessions',
-                  style: Theme.of(context).accentTextTheme.button,
-                ),
-                color: ThemeManager.of(context).colors.dark,
-              ),
+              const YMargin(12),
+              // RaisedButton(
+              //   onPressed: widget.onExploreTapped,
+              //   child: AutoSizeText(
+              //     'Entdecke Sessions',
+              //     style: Theme.of(context).accentTextTheme.button,
+              //   ),
+              //   color: ThemeManager.of(context).colors.dark,
+              // ),
             ],
           ),
         ),
       );
 
-  Widget _buildMySessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
+  Widget _buildRecomendedSession() => SliverToBoxAdapter(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  "Sessions die dich interessieren könnten:",
+                  style: _theme.textTheme.dark.bodyText1
+                      .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            const YMargin(12),
+            RecomendedSessions(),
+          ],
+        ),
+      );
+
+  Widget _buildSessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(
               left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),

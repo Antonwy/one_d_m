@@ -38,7 +38,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
-      color: _bTheme.dark,
+      color: _bTheme.contrast,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 120,
@@ -48,7 +48,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
               if (!snapshot.hasData)
                 return Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                    valueColor: AlwaysStoppedAnimation(_bTheme.dark),
                   ),
                 );
               Statistics statistics = snapshot.data;
@@ -108,9 +108,9 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                       gap: 8,
                       padding: 0,
                       shape: IndicatorShape.circle(4),
-                      inactiveColor: ColorTheme.white.withOpacity(.3),
-                      activeColor: ColorTheme.whiteBlue,
-                      inkColor: ColorTheme.whiteBlue,
+                      inactiveColor: ColorTheme.white,
+                      activeColor: ColorTheme.appDarkGrey,
+                      inkColor: ColorTheme.appDarkGrey,
                       controller: _pageController,
                     ),
                   ),
@@ -138,14 +138,14 @@ class _ColumnStats extends StatelessWidget {
         Text(
           Numeral(value).value(),
           style: TextStyle(
-              color: _bTheme.contrast,
+              color: _bTheme.dark,
               fontSize: 32,
               fontWeight: FontWeight.w600),
         ),
         Text(
           desc,
           style: TextStyle(
-              color: _bTheme.light, fontSize: 12, fontWeight: FontWeight.w600),
+              color: _bTheme.dark, fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -163,7 +163,7 @@ class _DCInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: TextStyle(color: ColorTheme.white),
+      style: TextStyle(color: ThemeManager.of(context).colors.dark),
       child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: 20.0,
@@ -192,7 +192,7 @@ class _DCInformation extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       color: ThemeManager.of(context)
                                           .colors
-                                          .contrast),
+                                          .dark),
                                 ),
                                 const XMargin(5),
                                 Text('Donation Votes'),
@@ -268,12 +268,12 @@ class _PercentCircle extends StatelessWidget {
       width: 2 * radius,
       child: CustomPaint(
         painter: _PercentCirclePainter(percent,
-            color: ThemeManager.of(context).colors.contrast),
+            color: ThemeManager.of(context).colors.dark),
         child: Center(
           child: Text(
             '${((percent * 100) % 100).round().toString()}%',
             style: TextStyle(
-              color: ColorTheme.white,
+              color: ColorTheme.appDarkGrey,
               fontWeight: FontWeight.w700,
               fontSize: 15.0,
             ),
@@ -295,7 +295,7 @@ class _PercentCirclePainter extends CustomPainter {
     final double strokeWidth = 5;
 
     final Paint backgroundPaint = Paint()
-      ..color = ColorTheme.white.withOpacity(0.05)
+      ..color = ColorTheme.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

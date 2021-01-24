@@ -27,81 +27,84 @@ class _ExplorePageState extends State<ExplorePage>
   Widget build(BuildContext context) {
     textTheme = Theme.of(context).textTheme;
 
-    return CustomScrollView(
-      controller: widget.scrollController,
-      physics: CustomPageViewScrollPhysics(),
-      slivers: <Widget>[
-        SliverAppBar(
-          backgroundColor: Colors.transparent,
-          centerTitle: false,
-          automaticallyImplyLeading: false,
-          bottom: PreferredSize(
-            preferredSize: Size(0, 80),
-            child: Container(),
-          ),
-          actions: [_buildLatestDonations()],
-          flexibleSpace: SafeArea(
-            child: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text("Entdecken", style: textTheme.headline6),
-                  ),
-                  SizedBox(
-                    height: 18,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SearchBar(
-                      categoryIndex: _categoryId,
-                      onCategoryChange: (index) {
-                        setState(() {
-                          _categoryId = index;
-                        });
-                      },
+    return Scaffold(
+      backgroundColor: ColorTheme.appBg,
+      body: CustomScrollView(
+        controller: widget.scrollController,
+        physics: CustomPageViewScrollPhysics(),
+        slivers: <Widget>[
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            centerTitle: false,
+            automaticallyImplyLeading: false,
+            bottom: PreferredSize(
+              preferredSize: Size(0, 80),
+              child: Container(),
+            ),
+            actions: [_buildLatestDonations()],
+            flexibleSpace: SafeArea(
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Text("Entdecken", style: textTheme.headline6),
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: 18,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: SearchBar(
+                        categoryIndex: _categoryId,
+                        onCategoryChange: (index) {
+                          setState(() {
+                            _categoryId = index;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        SliverPadding(
-            padding: const EdgeInsets.only(bottom: 6),
-            sliver: CertifiedSessionsList()),
-        StreamBuilder<List<Campaign>>(
-            stream: _categoryId == 100
-                ? DatabaseService.getTopCampaignsStream()
-                : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return CampaignList(
-                  campaigns: snapshot.data,
-                );
-              } else {
-                return SliverToBoxAdapter(
-                  child: Center(
-                      child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20,
-                      ),
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text("Lade Projekte")
-                    ],
-                  )),
-                );
-              }
-            })
-      ],
+          SliverPadding(
+              padding: const EdgeInsets.only(bottom: 6),
+              sliver: CertifiedSessionsList()),
+          StreamBuilder<List<Campaign>>(
+              stream: _categoryId == 100
+                  ? DatabaseService.getTopCampaignsStream()
+                  : DatabaseService.getCampaignsFromCategoryStream(_categoryId),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return CampaignList(
+                    campaigns: snapshot.data,
+                  );
+                } else {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 20,
+                            ),
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text("Lade Projekte")
+                          ],
+                        )),
+                  );
+                }
+              })
+        ],
+      ),
     );
   }
 

@@ -264,7 +264,7 @@ class RoundedAvatar extends StatelessWidget {
           child: Material(
             color:
                 color ?? (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
-            borderRadius: BorderRadius.circular(constraints.maxHeight * .3),
+            borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: imgUrl == null
                 ? loading

@@ -50,7 +50,7 @@ class _NewsPostState extends State<NewsPost> {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Material(
           clipBehavior: Clip.antiAlias,
-          color: Colors.white,
+          color: ColorTheme.appBg,
           elevation: 1,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

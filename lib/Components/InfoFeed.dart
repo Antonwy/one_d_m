@@ -108,9 +108,9 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                       gap: 8,
                       padding: 0,
                       shape: IndicatorShape.circle(4),
-                      inactiveColor: ColorTheme.white,
-                      activeColor: ColorTheme.appDarkGrey,
-                      inkColor: ColorTheme.appDarkGrey,
+                      inactiveColor: _bTheme.dark.withOpacity(.25),
+                      activeColor: _bTheme.dark,
+                      inkColor: _bTheme.dark,
                       controller: _pageController,
                     ),
                   ),
@@ -138,14 +138,12 @@ class _ColumnStats extends StatelessWidget {
         Text(
           Numeral(value).value(),
           style: TextStyle(
-              color: _bTheme.dark,
-              fontSize: 32,
-              fontWeight: FontWeight.w600),
+              color: _bTheme.dark, fontSize: 32, fontWeight: FontWeight.w600),
         ),
         Text(
           desc,
           style: TextStyle(
-              color: _bTheme.dark, fontSize: 12, fontWeight: FontWeight.w600),
+              color: _bTheme.dark, fontSize: 12, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -190,9 +188,8 @@ class _DCInformation extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 24.0,
                                       fontWeight: FontWeight.bold,
-                                      color: ThemeManager.of(context)
-                                          .colors
-                                          .dark),
+                                      color:
+                                          ThemeManager.of(context).colors.dark),
                                 ),
                                 const XMargin(5),
                                 Text('Donation Votes'),
@@ -273,7 +270,7 @@ class _PercentCircle extends StatelessWidget {
           child: Text(
             '${((percent * 100) % 100).round().toString()}%',
             style: TextStyle(
-              color: ColorTheme.appDarkGrey,
+              color: ThemeManager.of(context).colors.dark,
               fontWeight: FontWeight.w700,
               fontSize: 15.0,
             ),
@@ -295,7 +292,7 @@ class _PercentCirclePainter extends CustomPainter {
     final double strokeWidth = 5;
 
     final Paint backgroundPaint = Paint()
-      ..color = ColorTheme.white
+      ..color = color.withOpacity(.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

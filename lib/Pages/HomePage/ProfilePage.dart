@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
@@ -119,8 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     automaticallyImplyLeading: false,
                     actions: <Widget>[],
                     bottom: PreferredSize(
-                      preferredSize:
-                          Size(MediaQuery.of(context).size.width, 0),
+                      preferredSize: Size(MediaQuery.of(context).size.width, 0),
                       child: SafeArea(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -153,74 +153,52 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ],
                                   ),
                                   Expanded(child: SizedBox()),
-                                  InkWell(
-                                    child: Image.asset(
-                                      'assets/icons/ic_envelop.png',
-                                      color:
-                                          ThemeManager.of(context).colors.dark,
-                                      height: 24,
-                                      width: 24,
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
+                                      Icons.message_rounded,
+                                      size: 25,
+                                      color: _theme.colors.dark,
                                     ),
-                                    onTap: () {},
+                                    onPressed: () {},
                                   ),
-                                  const XMargin(8),
-                                  InkWell(
-                                    child: Icon(
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
                                       Icons.notifications_none_rounded,
-                                      color:
-                                          ThemeManager.of(context).colors.dark,
-                                      size: 32,
+                                      color: _theme.colors.dark,
+                                      size: 28,
                                     ),
-                                    onTap: () {},
+                                    onPressed: () {},
                                   ),
-                                  const XMargin(8),
-                                  InkWell(
-                                    child: Icon(
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
                                       Icons.settings_sharp,
-                                      color:
-                                          ThemeManager.of(context).colors.dark,
-                                      size: 32,
+                                      color: _theme.colors.dark,
+                                      size: 28,
                                     ),
-                                    onTap: () => BottomDialog(context)
+                                    onPressed: () => BottomDialog(context)
                                         .show(SettingsDialog()),
                                   ),
-                                  const XMargin(8),
                                   CustomOpenContainer(
-                                    openBuilder: (context, close, controller) =>
-                                        UserPage(user,
-                                            scrollController: controller),
-                                    closedColor: ColorTheme.appBg,
-                                    closedShape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    closedElevation: 0,
-                                    closedBuilder: (context, open) => Material(
-                                      color:
-                                          ThemeManager.of(context).colors.dark,
-                                      borderRadius: BorderRadius.circular(10),
-                                      clipBehavior: Clip.antiAlias,
-                                      child: CachedNetworkImage(
-                                        height: 32.0,
-                                        width: 32.0,
-                                        errorWidget: (_, __, ___) => Container(
-                                          color: ThemeManager.of(context)
-                                              .colors
-                                              .dark,
-                                          height: 32.0,
-                                          width: 32.0,
-                                          child: Icon(
-                                            Icons.error,
-                                            color: ThemeManager.of(context)
-                                                .colors
-                                                .contrast,
-                                          ),
-                                        ),
-                                        imageUrl:
-                                            user?.thumbnailUrl ?? user?.imgUrl??'',
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
+                                      openBuilder:
+                                          (context, close, controller) =>
+                                              UserPage(user,
+                                                  scrollController: controller),
+                                      closedColor: ColorTheme.appBg,
+                                      closedShape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      closedElevation: 0,
+                                      closedBuilder: (context, open) =>
+                                          Container(
+                                            height: 35,
+                                            child: RoundedAvatar(
+                                              user?.thumbnailUrl ??
+                                                  user?.imgUrl,
+                                            ),
+                                          )),
                                 ],
                               ),
                             ],
@@ -239,7 +217,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ///build the sessions that follow by user
           // mySessions.isNotEmpty
           //     ? _buildMySessions(mySessions)
-          //     : _buildEmptySession(),
+          //     : _buildEmptySession(),y
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),

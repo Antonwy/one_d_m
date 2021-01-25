@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -49,7 +50,7 @@ class ExploreNativeAd extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Material(
         clipBehavior: Clip.antiAlias,
-        color: Colors.white,
+        color: ColorTheme.appBg,
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Container(

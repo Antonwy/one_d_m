@@ -15,6 +15,7 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
+import 'package:one_d_m/Helper/latest_donaters_view.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
@@ -119,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     actions: <Widget>[],
                     bottom: PreferredSize(
                       preferredSize:
-                          Size(MediaQuery.of(context).size.width, 100),
+                          Size(MediaQuery.of(context).size.width, 0),
                       child: SafeArea(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -215,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           ),
                                         ),
                                         imageUrl:
-                                            user?.thumbnailUrl ?? user?.imgUrl,
+                                            user?.thumbnailUrl ?? user?.imgUrl??'',
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -230,12 +231,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   );
                 }),
           ),
+          const SliverToBoxAdapter(
+            child: YMargin(8),
+          ),
           InfoFeed(),
 
           ///build the sessions that follow by user
           // mySessions.isNotEmpty
           //     ? _buildMySessions(mySessions)
           //     : _buildEmptySession(),
+          const SliverToBoxAdapter(
+            child: YMargin(12),
+          ),
+          SliverToBoxAdapter(
+            child: LatestDonatorsView(),
+          ),
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
@@ -303,7 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   "Sessions die dich interessieren könnten:",
                   style: _theme.textTheme.dark.bodyText1
                       .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.start,
                 ),
               ),
             ),

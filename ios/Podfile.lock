@@ -465,6 +465,8 @@ PODS:
   - stripe_payment (1.0.0):
     - Flutter
     - Stripe (>= 19.0.1)
+  - thumbnails (0.0.1):
+    - Flutter
   - url_launcher (0.0.1):
     - Flutter
   - video_player (0.0.1):
@@ -495,6 +497,7 @@ DEPENDENCIES:
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - stripe_payment (from `.symlinks/plugins/stripe_payment/ios`)
+  - thumbnails (from `.symlinks/plugins/thumbnails/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - video_player (from `.symlinks/plugins/video_player/ios`)
 
@@ -582,6 +585,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
   stripe_payment:
     :path: ".symlinks/plugins/stripe_payment/ios"
+  thumbnails:
+    :path: ".symlinks/plugins/thumbnails/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
   video_player:
@@ -645,6 +650,7 @@ SPEC CHECKSUMS:
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   Stripe: 92f1c73a9dbd3c54277ed06a1fea6e08f20414c6
   stripe_payment: ad86f099179edb7b9fe12b9b62ac3746d5e56802
+  thumbnails: bb4f4e9bb4b51c8ae4e6ad9a2fa81373f9b634ad
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
 

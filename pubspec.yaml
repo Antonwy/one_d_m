@@ -71,6 +71,7 @@ dependencies:
   flutter_ffmpeg: ^0.2.10
   video_player: ^1.0.1
   visibility_detector: ^0.1.5
+  carousel_slider: ^2.3.1
 
 dev_dependencies:
 

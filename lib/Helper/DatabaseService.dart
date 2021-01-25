@@ -532,12 +532,18 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
-  static Stream<List<Donation>> getLatestDonations() {
-    return donationsCollection
-        .where(Donation.ISANONYM, isEqualTo: false)
-        .limit(3)
-        .snapshots()
-        .map((qs) => Donation.listFromSnapshots(qs.docs));
+  static Stream<List<Donation>> getLatestDonations({int limit}) {
+    return limit == null
+        ? donationsCollection
+            .where(Donation.ISANONYM, isEqualTo: false)
+            .limit(3)
+            .snapshots()
+            .map((qs) => Donation.listFromSnapshots(qs.docs))
+        : donationsCollection
+            .where(Donation.ISANONYM, isEqualTo: false)
+            .limit(limit)
+            .snapshots()
+            .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
   static Future<UserCharge> getUserCharge(String uid) async {

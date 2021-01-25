@@ -25,6 +25,11 @@ class NewsPost extends StatefulWidget {
 
 class _NewsPostState extends State<NewsPost> {
   @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var shortText = widget.news.shortText ?? '';
     return VisibilityDetector(
@@ -68,20 +73,15 @@ class _NewsPostState extends State<NewsPost> {
                   children: <Widget>[
                     widget.news.videoUrl != null
                         ? widget.isInView ?? false
-                            ? VideoWidget(url: widget.news.videoUrl, play: true)
-                            : CachedNetworkImage(
-                                width: double.infinity,
-                                height: 260,
-                                imageUrl: widget.news.imageUrl ?? '',
-                                errorWidget: (_, __, ___) => Center(
-                                    child: Icon(
-                                  Icons.error,
-                                  color: ColorTheme.orange,
-                                )),
-                                placeholder: (context, url) => Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                fit: BoxFit.cover,
+                            ? VideoWidget(
+                                url: widget.news.videoUrl,
+                                play: true,
+                                imageUrl: widget.news.videoUrl,
+                              )
+                            : VideoWidget(
+                                url: widget.news.videoUrl,
+                                play: false,
+                                imageUrl: widget.news.videoUrl,
                               )
                         : CachedNetworkImage(
                             width: double.infinity,
@@ -180,7 +180,8 @@ class _NewsPostState extends State<NewsPost> {
                               padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
                               child: ExpandableButton(
                                   child: Padding(
-                                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                                padding:
+                                    const EdgeInsets.fromLTRB(12, 6, 12, 6),
                                 child: Text(
                                   'MEHR',
                                   textAlign: TextAlign.start,

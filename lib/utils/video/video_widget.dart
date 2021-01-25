@@ -1,12 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoWidget extends StatefulWidget {
   final String url;
   final bool play;
+  final String imageUrl;
 
-  const VideoWidget({Key key, @required this.url, @required this.play})
+  const VideoWidget(
+      {Key key, @required this.url, @required this.play, this.imageUrl})
       : super(key: key);
+
   @override
   _VideoWidgetState createState() => _VideoWidgetState();
 }

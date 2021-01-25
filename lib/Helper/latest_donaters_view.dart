@@ -24,7 +24,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: context.screenHeight(percent: 0.12),
+      height: context.screenHeight(percent: 0.10),
       child: StreamBuilder(
         stream: DatabaseService.getLatestDonations(limit: 5),
         builder: (_, snapshot) {

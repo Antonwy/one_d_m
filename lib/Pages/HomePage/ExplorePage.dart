@@ -71,9 +71,21 @@ class _ExplorePageState extends State<ExplorePage>
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child:Padding(
+              padding: const EdgeInsets.only(left: 12.0,bottom: 12.0),
+              child: Text('Influencer-Sessions',style: Theme.of(context).textTheme.headline6,),
+            ),
+          ),
           SliverPadding(
               padding: const EdgeInsets.only(bottom: 6),
               sliver: CertifiedSessionsList()),
+          SliverToBoxAdapter(
+            child:Padding(
+              padding: const EdgeInsets.only(left: 12.0,bottom: 10.0,top: 8),
+              child: Text('Projects',style: Theme.of(context).textTheme.headline6,),
+            ),
+          ),
           StreamBuilder<List<Campaign>>(
               stream: _categoryId == 100
                   ? DatabaseService.getTopCampaignsStream()

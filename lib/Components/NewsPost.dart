@@ -72,17 +72,11 @@ class _NewsPostState extends State<NewsPost> {
                 child: Stack(
                   children: <Widget>[
                     widget.news.videoUrl != null
-                        ? widget.isInView ?? false
-                            ? VideoWidget(
-                                url: widget.news.videoUrl,
-                                play: true,
-                                imageUrl: widget.news.videoUrl,
-                              )
-                            : VideoWidget(
-                                url: widget.news.videoUrl,
-                                play: false,
-                                imageUrl: widget.news.videoUrl,
-                              )
+                        ? VideoWidget(
+                            url: widget.news.videoUrl,
+                            play: widget.isInView,
+                            imageUrl: widget.news.videoUrl,
+                          )
                         : CachedNetworkImage(
                             width: double.infinity,
                             height: 260,

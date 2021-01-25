@@ -409,13 +409,16 @@ class _RecommendationUser extends StatelessWidget {
                     ),
                     Container(
                       width: 76,
-                      child: AutoSizeText(
-                          deleted
-                              ? "Gelöschter Nutzer"
-                              : user?.name ?? "Laden...",
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          style: _theme.textTheme.dark.headline6),
+                      height: 20,
+                      child: Center(
+                        child: AutoSizeText(
+                            deleted
+                                ? "Gelöschter Nutzer"
+                                : user?.name ?? "Laden...",
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            style: _theme.textTheme.dark.headline6),
+                      ),
                     ),
                     YMargin(12),
                     UserFollowButton(followerId: user?.id),

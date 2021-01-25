@@ -2,7 +2,6 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Session.dart';
-import 'package:palette_generator/palette_generator.dart';
 
 abstract class BaseSessionManager {
   final BaseSession baseSession;
@@ -28,6 +27,65 @@ class SessionManager extends BaseSessionManager {
     membersStream = DatabaseService.getSessionMembers(baseSession.id);
     invitedMembersStream =
         DatabaseService.getInvitedSessionMembers(baseSession.id);
+  }
+}
+
+class UserSessionManager extends BaseSessionManager {
+  final String uid;
+  Session session;
+  List<Session> mySessions = [];
+  List<String> mySessionIds = [];
+
+  UserSessionManager({this.session, this.uid}) : super(session);
+
+  @override
+  void initStreams() {
+    ///listen events for user followed sessions
+    DatabaseService.getCertifiedSessions().listen((event) {
+      mySessions.clear();
+      event.forEach((element) {
+        DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
+          if (isExist) {
+            mySessions.add(element);
+          }
+        });
+      });
+    });
+
+    DatabaseService.getSessionPosts().listen((news) {
+      mySessionIds.clear();
+      news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+
+      List<String> sessionsWithPost = [];
+
+      news.forEach((element) {
+        sessionsWithPost.add(element.sessionId);
+      });
+
+      ///sort and add sessions with post to the begining of the list
+      ///
+      List<String> sessionIds = sessionsWithPost.toSet().toList();
+      DatabaseService.getCertifiedSessions().listen((sessions) {
+        List<String> allSessions = [];
+
+        sessions.forEach((element) {
+          allSessions.add(element.id);
+        });
+
+        ///add sessions that doesn't have posts
+
+        sessionIds = [...sessionIds, ...allSessions];
+
+        List<String> uniqueIds = sessionIds.toSet().toList();
+        uniqueIds.forEach((element) {
+          DatabaseService.userIsInSession(uid, element).listen((isExist) {
+            if (isExist) {
+              mySessionIds.add(element);
+            }
+          });
+        });
+      });
+    });
   }
 }
 

@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/CustomTextField.dart';
 import 'package:one_d_m/Components/ResetPasswordDialog.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
@@ -59,6 +58,14 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: ColorTheme.appGrey,
+      appBar: AppBar(
+        backgroundColor: ColorTheme.appGrey,
+        elevation: 0,
+        brightness: Brightness.dark,
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: CustomScrollView(slivers: [

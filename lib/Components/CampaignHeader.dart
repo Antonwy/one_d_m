@@ -19,12 +19,11 @@ class CampaignHeader extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
         child: CustomOpenContainer(
           closedShape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           closedElevation: 1,
-          openBuilder: (context, close, scrollController) => NewCampaignPage(
-              campaign,
-              scrollController: scrollController),
-          closedColor: ColorTheme.white,
+          openBuilder: (context, close, scrollController) =>
+              NewCampaignPage(campaign, scrollController: scrollController),
+          closedColor: ColorTheme.appBg,
           closedBuilder: (context, open) => InkWell(
             onTap: open,
             child: Column(
@@ -38,9 +37,9 @@ class CampaignHeader extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => Center(
                         child: Icon(
-                          Icons.error,
-                          color: ColorTheme.orange,
-                        )),
+                      Icons.error,
+                      color: ColorTheme.orange,
+                    )),
                     alignment: Alignment.center,
                   ),
                 ),
@@ -65,4 +64,3 @@ class CampaignHeader extends StatelessWidget {
         ));
   }
 }
-

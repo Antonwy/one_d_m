@@ -277,9 +277,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         campaign: c,
       ));
     }
-
-    list.add(SizedBox(height: mq.size.height * .5));
-
     return list;
   }
 }

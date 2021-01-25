@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Helper/CategoryDialog.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
@@ -20,6 +21,7 @@ class SearchBar extends StatelessWidget {
       height: 60,
       child: OpenContainer(
         openBuilder: (context, close) => SearchPage(),
+        closedColor: ColorTheme.appBg,
         closedBuilder: (context, open) => InkWell(
           child: Padding(
             padding: const EdgeInsets.only(left: 16, right: 6),
@@ -37,7 +39,7 @@ class SearchBar extends StatelessWidget {
                       closedElevation: 0,
                       openBuilder: (context, close, scrollController) =>
                           FindFriendsPage(scrollController: scrollController),
-                      closedColor: Colors.white,
+                      closedColor: ColorTheme.appBg,
                       closedBuilder: (context, open) => IconButton(
                         icon: Icon(Icons.person_add),
                         onPressed: open,

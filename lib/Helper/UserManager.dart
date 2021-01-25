@@ -276,4 +276,5 @@ class UserManager extends ChangeNotifier {
     print(_fireUser.email);
     return _auth.sendPasswordResetEmail(email: _fireUser.email);
   }
+
 }

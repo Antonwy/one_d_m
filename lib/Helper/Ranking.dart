@@ -21,7 +21,7 @@ class FriendsRanking extends Ranking {
 
   static FriendsRanking fromQuery(QuerySnapshot qs) {
     List<DonatedAmount> list = [];
-    qs.documents.forEach((doc) {
+    qs.docs.forEach((doc) {
       list.add(DonatedAmount.fromDocument(doc));
     });
     return FriendsRanking(list);
@@ -33,7 +33,7 @@ class CampaignsRanking extends Ranking {
 
   static CampaignsRanking fromQuery(QuerySnapshot qs) {
     List<DonatedAmount> list = [];
-    qs.documents.forEach((doc) {
+    qs.docs.forEach((doc) {
       list.add(DonatedAmount.fromDocument(doc));
     });
     return CampaignsRanking(list);
@@ -47,7 +47,7 @@ class DonatedAmount {
   DonatedAmount(this.amount, this.id);
 
   static DonatedAmount fromDocument(DocumentSnapshot doc) {
-    return DonatedAmount(doc[Ranking.AMOUNT], doc.documentID);
+    return DonatedAmount(doc[Ranking.AMOUNT], doc.id);
   }
 
   bool operator ==(element) {

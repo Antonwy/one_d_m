@@ -7,7 +7,6 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -22,8 +21,8 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
   Session session;
@@ -469,6 +468,14 @@ class _CertifiedSessionInfoPage extends StatefulWidget {
 
 class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   bool isCreator = false;
+  @override
+  void initState() {
+    widget.controller = ScrollController()
+      ..addListener(() {
+        print("offset = ${widget.controller.offset}");
+      });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -677,6 +684,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 if (posts.isNotEmpty) {
                   posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
                   return SliverList(
+
                     delegate:
                         SliverChildListDelegate(_getNewsWidget(context, posts)),
                   );
@@ -696,6 +704,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
     List<Widget> widgets = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
+    bool _playVideo = false;
     Widget newsTitle = Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
       child: Text(
@@ -715,6 +724,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         child: NewsPost(
           n,
           withCampaign: false,
+          isInView: false,
         ),
       ));
 
@@ -983,20 +993,24 @@ class CreatePostButton extends StatelessWidget {
           initialData: false,
           stream: csm.isInSession,
           builder: (context, snapshot) {
-            return RaisedButton(
-                color: csm.session.primaryColor,
-                textColor: _theme.colors.textOnDark,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)),
-                child: AutoSizeText("Post erstellen", maxLines: 1),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (c) => CreatePostScreen(
-                                session: csm.session,
-                              )));
-                });
+            return CustomOpenContainer(
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6)),
+              closedElevation: 0,
+              openBuilder: (context, close, scrollController) =>
+                  CreatePostScreen(
+                session: csm.session,
+                controller: scrollController,
+              ),
+              closedColor: Colors.transparent,
+              closedBuilder: (context, open) => RaisedButton(
+                  color: csm.session.primaryColor,
+                  textColor: _theme.colors.textOnDark,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)),
+                  child: AutoSizeText("Post erstellen", maxLines: 1),
+                  onPressed: open),
+            );
           }),
     );
   }

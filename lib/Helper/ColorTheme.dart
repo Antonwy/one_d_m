@@ -11,6 +11,8 @@ class ColorTheme {
   static const Color green = Color.fromARGB(255, 0, 191, 166);
   static const Color yellow = Color.fromARGB(255, 253, 205, 89);
   static Color appGrey = Helper.hexToColor('#d1d9d5');
+  static Color appDarkGrey = Helper.hexToColor('#2e313f');
+  static Color appBg = Helper.hexToColor('#f5f5f5');
 
   static const Color lightBlue = Color.fromARGB(255, 246, 245, 250);
   static const Color whiteBlue = Color.fromARGB(255, 246, 245, 250);

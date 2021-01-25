@@ -67,15 +67,29 @@ class HeadingItem implements PostItem {
                     ),
                   ),
                   const XMargin(8.0),
-                  AutoSizeText(session.name ?? '',
-                      maxLines: 1,
-                      softWrap: true,
-                      style: _theme.textTheme.dark.headline6
-                          .copyWith(fontWeight: FontWeight.w600)),
-                  const XMargin(8.0),
-                  Icon(
-                    Icons.verified,
-                    color: Helper.hexToColor("#71e34b"),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AutoSizeText(session.name ?? '',
+                          maxLines: 1,
+                          softWrap: true,
+                          style: _theme.textTheme.dark.headline6
+                              .copyWith(fontWeight: FontWeight.w600)),
+                      AutoSizeText('Unterstützt ${session.campaignName}',
+                          maxLines: 1,
+                          softWrap: true,
+                          style: _theme.textTheme.dark.bodyText1
+                              .copyWith(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
+                    child: Icon(
+                      Icons.verified,
+                      size: 32,
+                      color: Helper.hexToColor("#71e34b"),
+                    ),
                   )
                 ],
               ),

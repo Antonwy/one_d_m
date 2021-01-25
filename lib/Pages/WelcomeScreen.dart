@@ -192,6 +192,7 @@ class _WelcomePage extends StatelessWidget {
   double animatedValue;
   AutoSizeText titleText;
   VoidCallback onPressed;
+  int index;
   bool isPermission, loading, darkText;
 
   _WelcomePage(
@@ -202,6 +203,7 @@ class _WelcomePage extends StatelessWidget {
       this.description,
       this.animatedValue,
       this.onPressed,
+      this.index = -1,
       this.darkText = true,
       this.loading = false,
       this.isPermission = false});
@@ -266,7 +268,7 @@ class _WelcomePage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          "Erlauben",
+                          index == 4 ? 'Weiter' : "Erlauben",
                           style: Theme.of(context)
                               .accentTextTheme
                               .button

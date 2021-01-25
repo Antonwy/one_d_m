@@ -34,7 +34,7 @@ class DonationsGroup {
   static List<DonationsGroup> fromQuerySnapshot(QuerySnapshot qs) {
     Map<String, DonationsGroup> groups = {};
 
-    qs.documents.forEach((doc) {
+    qs.docs.forEach((doc) {
       Donation donation = Donation.fromSnapshot(doc);
 
       groups.update(donation.userId, (value) => value.add(donation),

@@ -79,15 +79,6 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
             elevation: 0,
             automaticallyImplyLeading: !widget.afterRegister,
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: SvgPicture.asset(
-                "assets/images/explore.svg",
-                height: MediaQuery.of(context).size.height * .25,
-              ),
-            ),
-          ),
           Consumer<UserManager>(
             builder: (context, um, child) {
               if (_contactsStream == null) {

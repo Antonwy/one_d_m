@@ -1,15 +1,17 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -20,11 +22,14 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
+import 'package:one_d_m/Helper/latest_donaters_view.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
-import 'package:one_d_m/Pages/RewardVideoPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
+
+import '../RewardVideoPage.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
@@ -46,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
   ThemeManager _theme;
   List<Session> mySessions = [];
   List<String> mySessionIds = [];
-  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -106,38 +110,149 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
-    return CustomScrollView(
-      controller: widget.scrollController,
-      physics: CustomPageViewScrollPhysics(),
-      slivers: <Widget>[
-        Consumer<UserManager>(
-          builder: (context, um, child) => StreamBuilder<User>(
-              initialData: um.user,
-              stream: DatabaseService.getUserStream(um.uid),
-              builder: (context, snapshot) {
-                User user = snapshot.data;
-                return SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _ProfileHeader(user),
-                );
-              }),
-        ),
-
-        ///build the sessions that follow by user
-        mySessions.isNotEmpty
-            ? _buildMySessions(mySessions)
-            : _buildEmptySession(),
-
-        SessionPostFeed(
-          userSessions: mySessions,
-        ),
-        const SliverToBoxAdapter(
-          child: const SizedBox(
-            height: 120,
+    return Scaffold(
+      backgroundColor: ColorTheme.appBg,
+      body: CustomScrollView(
+        controller: widget.scrollController,
+        physics: CustomPageViewScrollPhysics(),
+        slivers: <Widget>[
+          Consumer<UserManager>(
+            builder: (context, um, child) => StreamBuilder<User>(
+                initialData: um.user,
+                stream: DatabaseService.getUserStream(um.uid),
+                builder: (context, snapshot) {
+                  User user = snapshot.data;
+                  return SliverAppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    automaticallyImplyLeading: false,
+                    actions: <Widget>[],
+                    bottom: PreferredSize(
+                      preferredSize: Size(MediaQuery.of(context).size.width, 0),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        "Gespendet: ",
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: _theme.colors.dark),
+                                      ),
+                                      Text(
+                                        "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            color: _theme.colors.dark),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(child: SizedBox()),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
+                                      Icons.message_rounded,
+                                      size: 25,
+                                      color: _theme.colors.dark,
+                                    ),
+                                    onPressed: () {},
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
+                                      Icons.notifications_none_rounded,
+                                      color: _theme.colors.dark,
+                                      size: 28,
+                                    ),
+                                    onPressed: () {},
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(
+                                      Icons.settings_sharp,
+                                      color: _theme.colors.dark,
+                                      size: 28,
+                                    ),
+                                    onPressed: () => BottomDialog(context)
+                                        .show(SettingsDialog()),
+                                  ),
+                                  CustomOpenContainer(
+                                      openBuilder:
+                                          (context, close, controller) =>
+                                              UserPage(user,
+                                                  scrollController: controller),
+                                      closedColor: ColorTheme.appBg,
+                                      closedShape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      closedElevation: 0,
+                                      closedBuilder: (context, open) =>
+                                          Container(
+                                            height: 35,
+                                            child: RoundedAvatar(
+                                              user?.thumbnailUrl ??
+                                                  user?.imgUrl,
+                                            ),
+                                          )),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
           ),
-        )
-        // _buildPostFeed(),
-      ],
+          const SliverToBoxAdapter(
+            child: YMargin(8),
+          ),
+          InfoFeed(),
+
+          ///build the sessions that follow by user
+          // mySessions.isNotEmpty
+          //     ? _buildMySessions(mySessions)
+          //     : _buildEmptySession(),y
+          const SliverToBoxAdapter(
+            child: YMargin(12),
+          ),
+          SliverToBoxAdapter(
+            child: LatestDonatorsView(),
+          ),
+          const SliverToBoxAdapter(
+            child: YMargin(12),
+          ),
+          mySessions.isNotEmpty
+              ? SessionPostFeed(
+                  userSessions: mySessions,
+                )
+              : _buildEmptySession(),
+          mySessions.isEmpty
+              ? _buildRecomendedSession()
+              : SliverToBoxAdapter(
+                  child: SizedBox.shrink(),
+                ),
+          const SliverToBoxAdapter(
+            child: const SizedBox(
+              height: 120,
+            ),
+          )
+          // _buildPostFeed(),
+        ],
+      ),
     );
   }
 
@@ -146,35 +261,55 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              const YMargin(20),
-              SvgPicture.asset(
-                "assets/images/no-donations.svg",
-                height: 130,
-                width: 130,
+              Image.asset(
+                "assets/images/img_empty_session.png",
+                height: 143,
+                width: 206,
               ),
               SizedBox(
                 height: 20,
               ),
               Text(
-                "Du bist momentan kein Mitglied einer Session",
+                "Du bist momentan kein Mitglied einer Session.\nDu kannst auf der 'Entdecken' Seite \nInfluencer-Sessions und Projekten folgen.",
                 style: _theme.textTheme.dark.bodyText1,
                 textAlign: TextAlign.center,
               ),
-              const YMargin(20),
-              RaisedButton(
-                onPressed: widget.onExploreTapped,
-                child: AutoSizeText(
-                  'Entdecke Sessions',
-                  style: Theme.of(context).accentTextTheme.button,
-                ),
-                color: ThemeManager.of(context).colors.dark,
-              ),
+              const YMargin(12),
+              // RaisedButton(
+              //   onPressed: widget.onExploreTapped,
+              //   child: AutoSizeText(
+              //     'Entdecke Sessions',
+              //     style: Theme.of(context).accentTextTheme.button,
+              //   ),
+              //   color: ThemeManager.of(context).colors.dark,
+              // ),
             ],
           ),
         ),
       );
 
-  Widget _buildMySessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
+  Widget _buildRecomendedSession() => SliverToBoxAdapter(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  "Sessions die dich interessieren könnten:",
+                  style: _theme.textTheme.dark.bodyText1
+                      .copyWith(fontWeight: FontWeight.w700, fontSize: 18),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+            ),
+            const YMargin(12),
+            RecomendedSessions(),
+          ],
+        ),
+      );
+
+  Widget _buildSessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(
               left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),

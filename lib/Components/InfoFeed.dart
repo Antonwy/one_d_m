@@ -36,7 +36,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
-      color: _bTheme.dark,
+      color: _bTheme.contrast,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 120,
@@ -46,7 +46,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
               if (!snapshot.hasData)
                 return Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                    valueColor: AlwaysStoppedAnimation(_bTheme.dark),
                   ),
                 );
               Statistics statistics = snapshot.data;
@@ -106,9 +106,9 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                       gap: 8,
                       padding: 0,
                       shape: IndicatorShape.circle(4),
-                      inactiveColor: ColorTheme.white.withOpacity(.3),
-                      activeColor: ColorTheme.whiteBlue,
-                      inkColor: ColorTheme.whiteBlue,
+                      inactiveColor: _bTheme.dark.withOpacity(.25),
+                      activeColor: _bTheme.dark,
+                      inkColor: _bTheme.dark,
                       controller: _pageController,
                     ),
                   ),
@@ -136,14 +136,12 @@ class _ColumnStats extends StatelessWidget {
         Text(
           Numeral(value).value(),
           style: TextStyle(
-              color: _bTheme.contrast,
-              fontSize: 32,
-              fontWeight: FontWeight.w600),
+              color: _bTheme.dark, fontSize: 32, fontWeight: FontWeight.w600),
         ),
         Text(
           desc,
           style: TextStyle(
-              color: _bTheme.light, fontSize: 12, fontWeight: FontWeight.w600),
+              color: _bTheme.dark, fontSize: 12, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -161,7 +159,7 @@ class _DCInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: TextStyle(color: ColorTheme.white),
+      style: TextStyle(color: ThemeManager.of(context).colors.dark),
       child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: 20.0,
@@ -180,8 +178,24 @@ class _DCInformation extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           children: [
-                            Text(
-                              '${balance?.dcBalance ?? 0}',
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              children: [
+                                Text(
+                                  '${balance?.dcBalance ?? 0}',
+                                  style: TextStyle(
+                                      fontSize: 24.0,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          ThemeManager.of(context).colors.dark),
+                                ),
+                                const XMargin(5),
+                                Text('Donation Votes'),
+                              ],
+                            ),
+                            SizedBox(height: 5.0),
+                            AutoSizeText(
+                              'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
                               style: TextStyle(
                                   fontSize: 24.0,
                                   fontWeight: FontWeight.bold,

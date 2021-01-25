@@ -41,7 +41,7 @@ class _NavBarState extends State<NavBar> {
                     blurRadius: 30,
                     offset: Offset(0, -5)),
               ],
-              color: _bTheme.light,
+              color: ColorTheme.appBg,
               borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
           child: Padding(
             padding: EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
@@ -54,10 +54,10 @@ class _NavBarState extends State<NavBar> {
                       child: Consumer<NavBarManager>(
                           builder: (context, npm, child) {
                         return Align(
-                          alignment: AlignmentTween(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight)
-                              .transform(npm.position),
+                            alignment: AlignmentTween(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight)
+                                .transform(npm.position),
                             child: Container(
                               height: 40,
                               width: 40,

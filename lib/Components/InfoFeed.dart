@@ -193,17 +193,6 @@ class _DCInformation extends StatelessWidget {
                                 Text('Donation Votes'),
                               ],
                             ),
-                            SizedBox(height: 5.0),
-                            AutoSizeText(
-                              'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
-                              style: TextStyle(
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      ThemeManager.of(context).colors.contrast),
-                            ),
-                            const XMargin(5),
-                            Text('Donation Votes'),
                           ],
                         ),
                         SizedBox(height: 5.0),
@@ -219,6 +208,7 @@ class _DCInformation extends StatelessWidget {
                     PercentCircle(
                       percent: balance?.activityScore ?? 0,
                       radius: 30.0,
+                      dark: true,
                     ),
                   ],
                 );

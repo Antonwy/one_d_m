@@ -40,7 +40,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ThemeManager.of(context).colors.light,
+        backgroundColor: ColorTheme.appBg,
         body: Stack(
           children: <Widget>[
             PageView(

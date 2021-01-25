@@ -2,11 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/BottomDialog.dart';
+import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -113,12 +118,40 @@ class _NewsPostState extends State<NewsPost> {
                       ),
                     ),
                     Align(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.bottomLeft,
                       child: Padding(
                         padding: const EdgeInsets.all(10),
-                        child: Text(
-                          timeago.format(widget.news.createdAt, locale: "de"),
-                          style: TextStyle(color: Colors.white),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              timeago.format(widget.news.createdAt,
+                                  locale: "de"),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Material(
+                                borderRadius: BorderRadius.circular(20),
+                                clipBehavior: Clip.antiAlias,
+                                color: ThemeManager.of(context).colors.contrast,
+                                child: InkWell(
+                                  onTap: () async {
+                                    await _donate();
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12),
+                                    child: Text(
+                                      "Unterstützen",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12,
+                                          color: ThemeManager.of(context)
+                                              .colors
+                                              .dark),
+                                    ),
+                                  ),
+                                )),
+                          ],
                         ),
                       ),
                     ),
@@ -174,27 +207,16 @@ class _NewsPostState extends State<NewsPost> {
                           Divider(
                             height: 1,
                           ),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
-                              child: ExpandableButton(
-                                  child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                                child: Text(
-                                  'MEHR',
-                                  textAlign: TextAlign.start,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1
-                                      .copyWith(
-                                          fontSize: 15,
-                                          color: _theme.colors.dark,
-                                          fontWeight: FontWeight.w700),
-                                ),
-                              )),
-                            ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: ExpandableButton(
+                                child: Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                              child: Text('MEHR',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: _theme.colors.dark)),
+                            )),
                           ),
                         ],
                       )
@@ -228,26 +250,16 @@ class _NewsPostState extends State<NewsPost> {
                       Divider(
                         height: 1,
                       ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
-                          child: ExpandableButton(
-                              child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                            child: Text(
-                              'WENIGER',
-                              textAlign: TextAlign.start,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1
-                                  .copyWith(
-                                      fontSize: 15,
-                                      color: _theme.colors.dark,
-                                      fontWeight: FontWeight.w700),
-                            ),
-                          )),
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ExpandableButton(
+                            child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                          child: Text('WENIGER',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: _theme.colors.dark)),
+                        )),
                       ),
                     ],
                   )),
@@ -258,5 +270,18 @@ class _NewsPostState extends State<NewsPost> {
         ],
       ),
     );
+  }
+
+  Future<void> _donate() async {
+    BottomDialog bd = BottomDialog(context);
+    UserManager um = context.read<UserManager>();
+    bd.show(DonationDialogWidget(
+      campaign: await DatabaseService.getCampaign(widget.news.campaignId),
+      user: um.user,
+      context: context,
+      close: bd.close,
+      sessionId: widget.news.sessionId,
+      uid: um.uid,
+    ));
   }
 }

@@ -239,7 +239,7 @@ class RoundedAvatar extends StatelessWidget {
   final String imgUrl;
   final bool loading, backgroundLight;
   final double height;
-  final double defaultHeight = 20;
+  final double defaultHeight = 20, borderRadius;
   final Color iconColor, color;
 
   RoundedAvatar(this.imgUrl,
@@ -247,6 +247,7 @@ class RoundedAvatar extends StatelessWidget {
       this.backgroundLight = true,
       this.height,
       this.iconColor,
+      this.borderRadius = 12,
       this.color});
 
   @override
@@ -264,7 +265,7 @@ class RoundedAvatar extends StatelessWidget {
           child: Material(
             color:
                 color ?? (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(borderRadius),
             clipBehavior: Clip.antiAlias,
             child: imgUrl == null
                 ? loading

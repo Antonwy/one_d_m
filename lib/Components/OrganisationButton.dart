@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/Avatar.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -62,7 +62,10 @@ class OrganisationButton extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: <Widget>[
-                      Avatar(snapshot.data.imgUrl, color: color,),
+                      RoundedAvatar(
+                        snapshot.data.imgUrl,
+                        color: color,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(

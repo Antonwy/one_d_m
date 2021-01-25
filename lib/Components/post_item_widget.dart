@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -40,7 +41,7 @@ class HeadingItem implements PostItem {
             margin: const EdgeInsets.only(
                 bottom: 0.0, left: 12.0, right: 12.0, top: 0),
             child: CustomOpenContainer(
-              closedColor: Colors.white,
+              closedColor: ColorTheme.appBg,
               closedElevation: 0,
               openBuilder: (context, close, scrollController) =>
                   CertifiedSessionPage(

@@ -122,105 +122,108 @@ class _ProfilePageState extends State<ProfilePage> {
                 stream: DatabaseService.getUserStream(um.uid),
                 builder: (context, snapshot) {
                   User user = snapshot.data;
-                  return SliverAppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    automaticallyImplyLeading: false,
-                    actions: <Widget>[],
-                    bottom: PreferredSize(
-                      preferredSize: Size(MediaQuery.of(context).size.width, 0),
-                      child: SafeArea(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        "Gespendet: ",
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            color: _theme.colors.dark),
-                                      ),
-                                      Text(
-                                        "${Numeral(user?.donatedAmount ?? 0).value()} DV",
-                                        style: TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                            color: _theme.colors.dark),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(child: SizedBox()),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: Icon(
-                                      Icons.message_rounded,
-                                      size: 25,
-                                      color: _theme.colors.dark,
-                                    ),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: Icon(
-                                      Icons.notifications_none_rounded,
-                                      color: _theme.colors.dark,
-                                      size: 28,
-                                    ),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: Icon(
-                                      Icons.settings_sharp,
-                                      color: _theme.colors.dark,
-                                      size: 28,
-                                    ),
-                                    onPressed: () => BottomDialog(context)
-                                        .show(SettingsDialog()),
-                                  ),
-                                  CustomOpenContainer(
-                                      openBuilder:
-                                          (context, close, controller) =>
-                                              UserPage(user,
-                                                  scrollController: controller),
-                                      closedColor: ColorTheme.appBg,
-                                      closedShape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12)),
-                                      closedElevation: 0,
-                                      closedBuilder: (context, open) =>
-                                          Container(
-                                            height: 35,
-                                            child: RoundedAvatar(
-                                              user?.thumbnailUrl ??
-                                                  user?.imgUrl,
-                                            ),
-                                          )),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  return SliverPersistentHeader(
+                    delegate: _ProfileHeader(user),
+                    pinned: true,
                   );
+                  // return SliverAppBar(
+                  //   backgroundColor: Colors.transparent,
+                  //   elevation: 0,
+                  //   automaticallyImplyLeading: false,
+                  //   actions: <Widget>[],
+                  //   bottom: PreferredSize(
+                  //     preferredSize: Size(MediaQuery.of(context).size.width, 0),
+                  //     child: SafeArea(
+                  //       child: Padding(
+                  //         padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  //         child: Column(
+                  //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //           children: <Widget>[
+                  //             Row(
+                  //               mainAxisAlignment: MainAxisAlignment.start,
+                  //               crossAxisAlignment: CrossAxisAlignment.center,
+                  //               mainAxisSize: MainAxisSize.max,
+                  //               children: <Widget>[
+                  //                 Column(
+                  //                   crossAxisAlignment:
+                  //                       CrossAxisAlignment.start,
+                  //                   mainAxisAlignment: MainAxisAlignment.start,
+                  //                   children: <Widget>[
+                  //                     Text(
+                  //                       "Gespendet: ",
+                  //                       style: TextStyle(
+                  //                           fontSize: 15,
+                  //                           color: _theme.colors.dark),
+                  //                     ),
+                  //                     Text(
+                  //                       "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                  //                       style: TextStyle(
+                  //                           fontSize: 17,
+                  //                           fontWeight: FontWeight.bold,
+                  //                           color: _theme.colors.dark),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //                 Expanded(child: SizedBox()),
+                  //                 IconButton(
+                  //                   padding: EdgeInsets.zero,
+                  //                   icon: Icon(
+                  //                     Icons.message_rounded,
+                  //                     size: 25,
+                  //                     color: _theme.colors.dark,
+                  //                   ),
+                  //                   onPressed: () {},
+                  //                 ),
+                  //                 IconButton(
+                  //                   padding: EdgeInsets.zero,
+                  //                   icon: Icon(
+                  //                     Icons.notifications_none_rounded,
+                  //                     color: _theme.colors.dark,
+                  //                     size: 28,
+                  //                   ),
+                  //                   onPressed: () {},
+                  //                 ),
+                  //                 IconButton(
+                  //                   padding: EdgeInsets.zero,
+                  //                   icon: Icon(
+                  //                     Icons.settings_sharp,
+                  //                     color: _theme.colors.dark,
+                  //                     size: 28,
+                  //                   ),
+                  //                   onPressed: () => BottomDialog(context)
+                  //                       .show(SettingsDialog()),
+                  //                 ),
+                  //                 CustomOpenContainer(
+                  //                     openBuilder:
+                  //                         (context, close, controller) =>
+                  //                             UserPage(user,
+                  //                                 scrollController: controller),
+                  //                     closedColor: ColorTheme.appBg,
+                  //                     closedShape: RoundedRectangleBorder(
+                  //                         borderRadius:
+                  //                             BorderRadius.circular(12)),
+                  //                     closedElevation: 0,
+                  //                     closedBuilder: (context, open) =>
+                  //                         Container(
+                  //                           height: 35,
+                  //                           child: RoundedAvatar(
+                  //                             user?.thumbnailUrl ??
+                  //                                 user?.imgUrl,
+                  //                           ),
+                  //                         )),
+                  //               ],
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // );
                 }),
           ),
           const SliverToBoxAdapter(
             child: YMargin(8),
           ),
-          InfoFeed(),
 
           ///build the sessions that follow by user
           // mySessions.isNotEmpty
@@ -359,7 +362,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _ProfileHeader extends SliverPersistentHeaderDelegate {
   final User user;
-  double _minExtend = 80.0, _maxExtend = 336;
+  double _minExtend = 80.0, _maxExtend = 236;
   bool _fullVisible = true;
 
   _ProfileHeader(this.user);
@@ -377,7 +380,7 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
       return Container(
         height: constraints.maxHeight,
         child: Material(
-          color: Colors.white,
+          color: ColorTheme.appBg,
           elevation: Tween<double>(begin: 1.0, end: 0.0).transform(percentage),
           child: Wrap(
             alignment: WrapAlignment.center,
@@ -396,7 +399,7 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                               height: constraints.maxHeight,
                               width: constraints.maxWidth,
                               child: Material(
-                                  color: _theme.colors.light,
+                                  color: ColorTheme.appBg,
                                   child: SafeArea(
                                       bottom: false,
                                       child: Builder(builder: (context) {
@@ -500,57 +503,6 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text(
-                                            "Willkommen,",
-                                            style: _theme.materialTheme
-                                                .textTheme.headline5
-                                                .copyWith(
-                                                    fontSize: 32,
-                                                    color: _theme.colors.dark),
-                                          ),
-                                          Text(
-                                            "${user?.name}",
-                                            style: _theme.materialTheme
-                                                .textTheme.headline5
-                                                .copyWith(
-                                                    fontSize: 30,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: _theme.colors.dark),
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        child: CustomOpenContainer(
-                                          openBuilder: (context, close,
-                                                  controller) =>
-                                              UserPage(user,
-                                                  scrollController: controller),
-                                          closedShape: CircleBorder(),
-                                          closedElevation: 0,
-                                          closedBuilder: (context, open) =>
-                                              Avatar(
-                                            user?.thumbnailUrl ?? user?.imgUrl,
-                                            onTap: open,
-                                          ),
-                                        ),
-                                        width: 60,
-                                        height: 60,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
                                             "Gespendet: ",
@@ -569,29 +521,42 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                       ),
                                       Row(
                                         children: <Widget>[
-                                          CustomOpenContainer(
-                                            openBuilder:
-                                                (context, close, controller) =>
-                                                    RewardVideoPage(),
-                                            closedShape: CircleBorder(),
-                                            closedElevation: 0,
-                                            closedColor: _theme.colors.contrast,
-                                            closedBuilder: (context, open) =>
-                                                RoundButtonHomePage(
-                                              icon: Icons.play_arrow_rounded,
-                                              onTap: open,
+                                          _appBarButton(
+                                              icon: Icons.message_rounded,
+                                              onPressed: () {}),
+                                          _appBarButton(
+                                              icon: Icons
+                                                  .notifications_none_rounded,
+                                              onPressed: () {}),
+                                          _appBarButton(
+                                              icon: Icons.settings,
+                                              onPressed: () {
+                                                BottomDialog(context)
+                                                    .show(SettingsDialog());
+                                              }),
+                                          YMargin(6),
+                                          Container(
+                                            child: CustomOpenContainer(
+                                              openBuilder: (context, close,
+                                                      controller) =>
+                                                  UserPage(user,
+                                                      scrollController:
+                                                          controller),
+                                              closedShape:
+                                                  RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8)),
+                                              closedElevation: 0,
+                                              closedBuilder: (context, open) =>
+                                                  RoundedAvatar(
+                                                user?.thumbnailUrl ??
+                                                    user?.imgUrl,
+                                              ),
                                             ),
+                                            width: 40,
+                                            height: 40,
                                           ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          RoundButtonHomePage(
-                                            icon: Icons.settings,
-                                            onTap: () {
-                                              BottomDialog(context)
-                                                  .show(SettingsDialog());
-                                            },
-                                          )
                                         ],
                                       ),
                                     ],
@@ -612,6 +577,17 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
         ),
       );
     });
+  }
+
+  Widget _appBarButton({IconData icon, void Function() onPressed}) {
+    return Material(
+      color: ColorTheme.appBg,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+          onTap: onPressed,
+          child: Padding(padding: const EdgeInsets.all(8), child: Icon(icon))),
+    );
   }
 
   @override

@@ -83,7 +83,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
           },
           { merge: true }
         );
-  } else {
+  } else if (imageType === ImagePrefix.user) {
     if (resulution === ImageResolutions.high)
       await firestore
         .collection(DatabaseConstants.user)

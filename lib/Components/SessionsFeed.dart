@@ -492,6 +492,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                   snapshot.data,
                   scrollController: scrollController,
                 ),
+                tappable: user != null,
                 closedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 closedColor: color,

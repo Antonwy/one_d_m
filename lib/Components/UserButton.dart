@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -12,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'AnimatedFutureBuilder.dart';
 import 'Avatar.dart';
 import 'CustomOpenContainer.dart';
+import 'DonationWidget.dart';
 
 class UserButton extends StatelessWidget {
   String id;
@@ -61,9 +63,9 @@ class UserButton extends StatelessWidget {
                           Expanded(
                             child: Row(
                               children: <Widget>[
-                                Avatar(
+                                RoundedAvatar(
                                     snapshot.data?.thumbnailUrl ??
-                                        snapshot.data.imgUrl,
+                                        snapshot.data?.imgUrl,
                                     color: avatarColor),
                                 SizedBox(width: 10),
                                 Expanded(
@@ -84,27 +86,7 @@ class UserButton extends StatelessWidget {
                             ),
                           ),
                           withAddButton
-                              ? Consumer<UserManager>(
-                                  builder: (context, um, child) =>
-                                      StreamBuilder<bool>(
-                                          initialData: false,
-                                          stream:
-                                              DatabaseService.getFollowStream(
-                                                  um.uid, id),
-                                          builder: (context, snapshot) {
-                                            return TurningAddButton(
-                                              selected: snapshot.data,
-                                              onPressed: () {
-                                                if (snapshot.data)
-                                                  DatabaseService.deleteFollow(
-                                                      um.uid, id);
-                                                else
-                                                  DatabaseService.createFollow(
-                                                      um.uid, id);
-                                              },
-                                            );
-                                          }),
-                                )
+                              ? UserFollowButton(followerId: snapshot.data?.id)
                               : Container()
                         ],
                       ),

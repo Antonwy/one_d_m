@@ -631,6 +631,7 @@ class DatabaseService {
   }
 
   static Future<void> saveDeviceToken(String uid, String token) async {
+    if (!(await userCollection.doc(uid).get()).exists) return;
     return (await userCollection
         .doc(uid)
         .collection(PRIVATEDATA)

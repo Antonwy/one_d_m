@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
+import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -338,7 +339,7 @@ class __OtherUsersRecommendationsState
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Container(
-                            height: 125,
+                            height: 165,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) => Padding(
@@ -379,7 +380,6 @@ class _RecommendationUser extends StatelessWidget {
         bool deleted = snapshot.hasData && snapshot.data?.name == null;
 
         return Container(
-          height: 100,
           width: 108,
           child: Padding(
             padding: const EdgeInsets.all(4),
@@ -388,37 +388,37 @@ class _RecommendationUser extends StatelessWidget {
                 user,
                 scrollController: scrollController,
               ),
-              closedElevation: 1,
-              closedColor: Colors.white,
+              tappable: user != null,
+              closedElevation: 0,
+              closedColor: Colors.white.withOpacity(.45),
               closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
+                  borderRadius: BorderRadius.circular(12)),
               closedBuilder: (context, open) => Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
-                    Expanded(
-                        child: RoundedAvatar(
+                    RoundedAvatar(
                       user?.imgUrl,
                       loading: !snapshot.hasData,
                       color: _theme.colors.dark,
                       iconColor: _theme.colors.contrast,
-                    )),
+                      height: 30,
+                    ),
                     SizedBox(
                       height: 12,
                     ),
-                    Expanded(
-                      child: Container(
-                        width: 76,
-                        height: double.infinity,
-                        child: AutoSizeText(
-                            deleted
-                                ? "Gelöschter Nutzer"
-                                : user?.name ?? "Laden...",
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            style: _theme.textTheme.dark.headline6),
-                      ),
+                    Container(
+                      width: 76,
+                      child: AutoSizeText(
+                          deleted
+                              ? "Gelöschter Nutzer"
+                              : user?.name ?? "Laden...",
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          style: _theme.textTheme.dark.headline6),
                     ),
+                    YMargin(12),
+                    UserFollowButton(followerId: user?.id),
                   ],
                 ),
               ),
@@ -465,13 +465,22 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                           width: constraints.maxWidth,
                           child: SafeArea(
                               bottom: false,
-                              child: Builder(builder: (context) {
-                                return Row(
-                                  children: [
-                                    _buildUserImage(context, Size),
-                                  ],
-                                );
-                              }))),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildUserImage(context, size: Size(35, 35)),
+                                  XMargin(12),
+                                  Text(
+                                    "${user?.name ?? "Gelöschter Account"}",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  XMargin(12),
+                                  SizedBox(height: 35, child: _followButton())
+                                ],
+                              ))),
                     )),
                 IgnorePointer(
                   ignoring: _fullVisible,
@@ -653,6 +662,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         backgroundColor: ColorTheme.whiteBlue,
                       );
                     return RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)),
                       onPressed: () {
                         Navigator.push(
                             context,
@@ -663,8 +674,6 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         child: Text(
                           'Edit',
                           style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
                               color: ThemeManager.of(context).colors.dark),
                         ),
                       ),
@@ -678,6 +687,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                   bool _followed = snapshot.data;
 
                   return RaisedButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6)),
                     color: _theme.colors.contrast,
                     onPressed: () async {
                       await _toggleFollow(um.uid, _followed);
@@ -685,10 +696,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                     child: Center(
                       child: Text(
                         _followed ? 'Entfolgen' : 'Folgen',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: _theme.colors.textOnContrast),
+                        style: TextStyle(color: _theme.colors.textOnContrast),
                       ),
                     ),
                   );

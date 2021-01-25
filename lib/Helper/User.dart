@@ -48,7 +48,7 @@ class User {
         imgUrl: snapshot.data()[IMAGEURL],
         thumbnailUrl: snapshot.data().containsKey(THUMBNAILURL)
             ? snapshot[THUMBNAILURL]
-            : '');
+            : null);
   }
 
   static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {

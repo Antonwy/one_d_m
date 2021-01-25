@@ -31,23 +31,23 @@ class FollowersListPage extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: FutureBuilder(
-                  future: DatabaseService.getUser(userIDs[index]),
-                  builder: (context, snapshot) {
-                    if(snapshot.hasData) {
-                      User user = snapshot.data;
-                      return UserButton(
-                        userIDs[index],
-                        user: user,
-                        color: ColorTheme.whiteBlue,
-                        textStyle: TextStyle(color: ColorTheme.blue),
-                        elevation: 0,
-                        avatarColor: ColorTheme.blue,
-                      );
-                    }else{
-                      return SizedBox.shrink();
-                    }
-                  }
-                ),
+                    future: DatabaseService.getUser(userIDs[index]),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        User user = snapshot.data;
+                        return UserButton(
+                          userIDs[index],
+                          withAddButton: true,
+                          user: user,
+                          color: ColorTheme.whiteBlue,
+                          textStyle: TextStyle(color: ColorTheme.blue),
+                          elevation: 0,
+                          avatarColor: ColorTheme.blue,
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    }),
               );
             },
             itemCount: userIDs.length),

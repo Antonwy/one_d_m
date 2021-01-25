@@ -116,8 +116,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       BottomDialog bd = BottomDialog(context);
                                       bd.show(DonationDialogWidget(
                                         campaign: snapshot.data,
-                                        uid: null,
-                                        user: null,
+                                        uid: um.uid,
+                                        user: um.user,
                                         context: context,
                                         close: bd.close,
                                         controller: _scrollController,
@@ -201,13 +201,14 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Expanded(
-                                      flex: 4,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           SizedBox(height: 5),
                                           Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Column(
                                                 crossAxisAlignment:
@@ -279,7 +280,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                                       }),
                                                 ],
                                               ),
-                                              Expanded(child: SizedBox()),
                                               Consumer<UserManager>(builder:
                                                   (context, um, child) {
                                                 return StreamBuilder<bool>(
@@ -680,7 +680,7 @@ class _StatCollumn extends StatelessWidget {
               description,
               style: TextStyle(
                   color: isDark ? _bTheme.contrast : _bTheme.dark,
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600),
             ),
           ],

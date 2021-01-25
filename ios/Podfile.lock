@@ -223,6 +223,8 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.7):
     - BoringSSL-GRPC/Interface (= 0.0.7)
   - BoringSSL-GRPC/Interface (0.0.7)
+  - catcher (0.0.1):
+    - Flutter
   - cloud_firestore (0.14.4):
     - Firebase/CoreOnly (~> 6.33.0)
     - Firebase/Firestore (~> 6.33.0)
@@ -237,6 +239,8 @@ PODS:
     - Flutter
     - Reachability
   - contacts_service (0.2.2):
+    - Flutter
+  - device_info (0.0.1):
     - Flutter
   - Firebase/Auth (6.33.0):
     - Firebase/CoreOnly
@@ -358,6 +362,11 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
+  - flutter_mailer (0.0.1):
+    - Flutter
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -461,14 +470,17 @@ PODS:
   - stripe_payment (1.0.0):
     - Flutter
     - Stripe (>= 19.0.1)
+  - Toast (4.0.0)
   - url_launcher (0.0.1):
     - Flutter
 
 DEPENDENCIES:
+  - catcher (from `.symlinks/plugins/catcher/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - contacts_service (from `.symlinks/plugins/contacts_service/ios`)
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - firebase_admob (from `.symlinks/plugins/firebase_admob/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -477,6 +489,8 @@ DEPENDENCIES:
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_mailer (from `.symlinks/plugins/flutter_mailer/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - Google-Mobile-Ads-SDK
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
@@ -525,8 +539,11 @@ SPEC REPOS:
     - Protobuf
     - Reachability
     - Stripe
+    - Toast
 
 EXTERNAL SOURCES:
+  catcher:
+    :path: ".symlinks/plugins/catcher/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   cloud_functions:
@@ -535,6 +552,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity/ios"
   contacts_service:
     :path: ".symlinks/plugins/contacts_service/ios"
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   firebase_admob:
     :path: ".symlinks/plugins/firebase_admob/ios"
   firebase_auth:
@@ -551,6 +570,10 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_mailer:
+    :path: ".symlinks/plugins/flutter_mailer/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   google_sign_in:
     :path: ".symlinks/plugins/google_sign_in/ios"
   image_picker:
@@ -578,10 +601,12 @@ SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
+  catcher: e5585ed31458c849f4fd9c3719b2fcb0188b8918
   cloud_firestore: b8c0e15fa49dfff87c2817d288b577e5dca2df13
   cloud_functions: 322f7aacaf0d6736d4365a0d33eb93e74c0469a6
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   contacts_service: 849e1f84281804c8bfbec1b4c3eedcb23c5d3eca
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 8db6f2d1b2c5e2984efba4949a145875a8f65fe5
   firebase_admob: c3b3b8762181c9748d7e74595044641f0180816b
   firebase_auth: d5159db3873478d1ac839af7b10d2f831516136a
@@ -603,6 +628,8 @@ SPEC CHECKSUMS:
   FirebaseStorage: 15e0f15ef3c7fec3d1899d68623e47d4447066b4
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  flutter_mailer: 2ef5a67087bc8c6c4cefd04a178bf1ae2c94cd83
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   Google-Mobile-Ads-SDK: 8b58584890539de4527c47ef01e4da941a10bc8a
   google_sign_in: 6bd214b9c154f881422f5fe27b66aaa7bbd580cc
@@ -630,6 +657,7 @@ SPEC CHECKSUMS:
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   Stripe: 92f1c73a9dbd3c54277ed06a1fea6e08f20414c6
   stripe_payment: ad86f099179edb7b9fe12b9b62ac3746d5e56802
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
 PODFILE CHECKSUM: 1f1de7b3517194c85e88af55bce459f4b776b61b

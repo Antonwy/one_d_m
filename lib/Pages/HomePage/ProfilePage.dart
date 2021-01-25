@@ -224,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _ProfileHeader extends SliverPersistentHeaderDelegate {
   final User user;
-  double _minExtend = 80.0, _maxExtend = 330;
+  double _minExtend = 80.0, _maxExtend = 336;
   bool _fullVisible = true;
 
   _ProfileHeader(this.user);
@@ -242,6 +242,7 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
       return Container(
         height: constraints.maxHeight,
         child: Material(
+          color: Colors.white,
           elevation: Tween<double>(begin: 1.0, end: 0.0).transform(percentage),
           child: Wrap(
             alignment: WrapAlignment.center,
@@ -343,120 +344,126 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                         )),
                     Opacity(
                       opacity: percentage,
-                      child: IgnorePointer(
-                        ignoring: _fullVisible,
-                        child: SafeArea(
-                          bottom: false,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text(
-                                          "Willkommen,",
-                                          style: _theme
-                                              .materialTheme.textTheme.headline5
-                                              .copyWith(
-                                                  fontSize: 32,
-                                                  color: _theme.colors.dark),
-                                        ),
-                                        Text(
-                                          "${user?.name}",
-                                          style: _theme
-                                              .materialTheme.textTheme.headline5
-                                              .copyWith(
-                                                  fontSize: 30,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: _theme.colors.dark),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      child: CustomOpenContainer(
-                                        openBuilder: (context, close,
-                                                controller) =>
-                                            UserPage(user,
-                                                scrollController: controller),
-                                        closedShape: CircleBorder(),
-                                        closedElevation: 0,
-                                        closedBuilder: (context, open) =>
-                                            Avatar(
-                                          user?.thumbnailUrl ?? user?.imgUrl,
-                                          onTap: open,
-                                        ),
+                      child: Transform.translate(
+                        offset: Tween<Offset>(
+                                begin: Offset(0, _minExtend - maxExtent),
+                                end: Offset.zero)
+                            .transform(percentage),
+                        child: IgnorePointer(
+                          ignoring: _fullVisible,
+                          child: SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(12, 6, 12, 0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            "Willkommen,",
+                                            style: _theme.materialTheme
+                                                .textTheme.headline5
+                                                .copyWith(
+                                                    fontSize: 32,
+                                                    color: _theme.colors.dark),
+                                          ),
+                                          Text(
+                                            "${user?.name}",
+                                            style: _theme.materialTheme
+                                                .textTheme.headline5
+                                                .copyWith(
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: _theme.colors.dark),
+                                          ),
+                                        ],
                                       ),
-                                      width: 60,
-                                      height: 60,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          "Gespendet: ",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color: _theme.colors.dark),
-                                        ),
-                                        Text(
-                                          "${Numeral(user?.donatedAmount ?? 0).value()} DV",
-                                          style: TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold,
-                                              color: _theme.colors.dark),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: <Widget>[
-                                        CustomOpenContainer(
-                                          openBuilder:
-                                              (context, close, controller) =>
-                                                  RewardVideoPage(),
+                                      Container(
+                                        child: CustomOpenContainer(
+                                          openBuilder: (context, close,
+                                                  controller) =>
+                                              UserPage(user,
+                                                  scrollController: controller),
                                           closedShape: CircleBorder(),
                                           closedElevation: 0,
-                                          closedColor: _theme.colors.contrast,
                                           closedBuilder: (context, open) =>
-                                              RoundButtonHomePage(
-                                            icon: Icons.play_arrow_rounded,
+                                              Avatar(
+                                            user?.thumbnailUrl ?? user?.imgUrl,
                                             onTap: open,
                                           ),
                                         ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        RoundButtonHomePage(
-                                          icon: Icons.settings,
-                                          onTap: () {
-                                            BottomDialog(context)
-                                                .show(SettingsDialog());
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                InfoFeed(),
-                              ],
+                                        width: 60,
+                                        height: 60,
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            "Gespendet: ",
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                color: _theme.colors.dark),
+                                          ),
+                                          Text(
+                                            "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                                            style: TextStyle(
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold,
+                                                color: _theme.colors.dark),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: <Widget>[
+                                          CustomOpenContainer(
+                                            openBuilder:
+                                                (context, close, controller) =>
+                                                    RewardVideoPage(),
+                                            closedShape: CircleBorder(),
+                                            closedElevation: 0,
+                                            closedColor: _theme.colors.contrast,
+                                            closedBuilder: (context, open) =>
+                                                RoundButtonHomePage(
+                                              icon: Icons.play_arrow_rounded,
+                                              onTap: open,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          RoundButtonHomePage(
+                                            icon: Icons.settings,
+                                            onTap: () {
+                                              BottomDialog(context)
+                                                  .show(SettingsDialog());
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  InfoFeed(),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -111,6 +111,7 @@ class _ExplorePageState extends State<ExplorePage>
         child: StreamBuilder(
           stream: DatabaseService.getLatestDonations(),
           builder: (_, snapshot) {
+            print(snapshot);
             if (!snapshot.hasData) return SizedBox.shrink();
             List<Donation> d = snapshot.data;
             if (d.isEmpty) return SizedBox.shrink();
@@ -145,13 +146,13 @@ class _ExplorePageState extends State<ExplorePage>
         return RichText(
           text: TextSpan(
               style: TextStyle(
-                  fontWeight: FontWeight.w600, fontSize: 12, color: textColor),
+                  fontWeight: FontWeight.w400, fontSize: 12, color: textColor),
               children: [
                 TextSpan(text: '${u.name} spendete '),
                 TextSpan(
                     text: '$amount DV',
                     style: TextStyle(
-                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.bold,
                     ))
               ]),
         );

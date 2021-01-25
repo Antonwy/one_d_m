@@ -72,7 +72,6 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
   }
 
   // deletion of subscribed_campaigns and subcollections including documents
-
   await firestore
     .collection(DatabaseConstants.subscribed_campaigns)
     .doc(user.uid)

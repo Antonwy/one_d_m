@@ -442,97 +442,143 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     _theme = ThemeManager.of(context);
+    _minExtend = MediaQuery.of(context).padding.top + 56.0;
     return LayoutBuilder(builder: (context, constraints) {
-      _minExtend = MediaQuery.of(context).padding.top + 56.0;
       final double percentage =
           (constraints.maxHeight - minExtent) / (maxExtent - minExtent);
-
+      final bool _fullVisible = percentage < 0.5;
       return Container(
         height: constraints.maxHeight,
         child: Material(
           color: _theme.colors.dark,
-          elevation: 1,
+          elevation: Tween<double>(begin: 1.0, end: 0.0).transform(percentage),
           child: SafeArea(
             bottom: false,
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              runSpacing: 0,
-              children: <Widget>[
-                AppBar(
-                  leading: IconButton(
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 30,
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  brightness: Brightness.dark,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  iconTheme: IconThemeData(color: _theme.colors.textOnDark),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    _buildUserImage(context),
-                    const XMargin(15),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${user?.name ?? "Gelöschter Account"}",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700),
-                        ),
-                        const YMargin(10),
-                        _followButton()
-                      ],
-                    )
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: Stack(
+              children: [
+                Opacity(
+                    opacity: 1 - percentage,
+                    child: IgnorePointer(
+                      ignoring: !_fullVisible,
+                      child: Container(
+                          height: constraints.maxHeight,
+                          width: constraints.maxWidth,
+                          child: SafeArea(
+                              bottom: false,
+                              child: Builder(builder: (context) {
+                                return Row(
+                                  children: [
+                                    _buildUserImage(context, Size),
+                                  ],
+                                );
+                              }))),
+                    )),
+                IgnorePointer(
+                  ignoring: _fullVisible,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
                     children: <Widget>[
-                      _followersCollumn(
-                          text: "Abonnenten",
-                          stream:
-                              DatabaseService.getFollowedUsersStream(user.id)),
-                      Material(
-                        borderRadius: BorderRadius.circular(5),
-                        clipBehavior: Clip.antiAlias,
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: (user?.donatedAmount == null
-                                      ? 0
-                                      : user.donatedAmount) >
-                                  0
-                              ? () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (c) =>
-                                              UsersDonationsPage(user)));
-                                }
-                              : null,
-                          child: _textNumberColumn(
-                              text: "Unterstützt",
-                              number:
-                                  "${Numeral(user?.donatedAmount).value()} DV"),
+                      AppBar(
+                        leading: IconButton(
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 30,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        brightness: Brightness.dark,
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        iconTheme:
+                            IconThemeData(color: _theme.colors.textOnDark),
+                      ),
+                      Opacity(
+                        opacity: percentage,
+                        child: Transform.translate(
+                          offset: Tween<Offset>(
+                                  begin: Offset(0, _minExtend - maxExtent),
+                                  end: Offset.zero)
+                              .transform(percentage),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              _buildUserImage(context),
+                              const XMargin(15),
+                              Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${user?.name ?? "Gelöschter Account"}",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                  const YMargin(10),
+                                  _followButton()
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                      _followersCollumn(
-                          text: "Abonniert",
-                          stream:
-                              DatabaseService.getFollowingUsersStream(user.id)),
+                      Opacity(
+                        opacity: percentage,
+                        child: Transform.translate(
+                          offset: Tween<Offset>(
+                                  begin: Offset(0, _minExtend - maxExtent),
+                                  end: Offset.zero)
+                              .transform(percentage),
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                _followersCollumn(
+                                    text: "Abonnenten",
+                                    stream:
+                                        DatabaseService.getFollowedUsersStream(
+                                            user.id)),
+                                Material(
+                                  borderRadius: BorderRadius.circular(5),
+                                  clipBehavior: Clip.antiAlias,
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: (user?.donatedAmount == null
+                                                ? 0
+                                                : user.donatedAmount) >
+                                            0
+                                        ? () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (c) =>
+                                                        UsersDonationsPage(
+                                                            user)));
+                                          }
+                                        : null,
+                                    child: _textNumberColumn(
+                                        text: "Unterstützt",
+                                        number:
+                                            "${Numeral(user?.donatedAmount).value()} DV"),
+                                  ),
+                                ),
+                                _followersCollumn(
+                                    text: "Abonniert",
+                                    stream:
+                                        DatabaseService.getFollowingUsersStream(
+                                            user.id)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -541,11 +587,13 @@ class UserHeader extends SliverPersistentHeaderDelegate {
     });
   }
 
-  Widget _buildUserImage(BuildContext context) => CachedNetworkImage(
+  Widget _buildUserImage(BuildContext context,
+          {Size size = const Size(88, 88)}) =>
+      CachedNetworkImage(
         imageUrl: user.imgUrl ?? '',
         imageBuilder: (context, imageProvider) => Container(
-          height: 88.0,
-          width: 88.0,
+          height: size.height,
+          width: size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
@@ -555,8 +603,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           ),
         ),
         errorWidget: (_, __, ___) => Container(
-          height: 88,
-          width: 88,
+          height: size.height,
+          width: size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: ThemeManager.of(context).colors.contrast,
@@ -568,8 +616,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           )),
         ),
         placeholder: (_, __) => Container(
-          height: 88,
-          width: 88,
+          height: size.height,
+          width: size.width,
           child: Center(
             child: CircularProgressIndicator(),
           ),

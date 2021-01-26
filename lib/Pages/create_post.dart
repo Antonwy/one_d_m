@@ -14,8 +14,8 @@ import 'package:one_d_m/Helper/StorageService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/utils/video/encoding_provider.dart';
 import 'package:one_d_m/utils/video/video_info.dart';
+import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -73,19 +73,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   void initState() {
-    EncodingProvider.enableStatisticsCallback((int time,
-        int size,
-        double bitrate,
-        double speed,
-        int videoFrameNumber,
-        double videoQuality,
-        double videoFps) {
-      if (_canceled) return;
-
-      setState(() {
-        _progress = time / _videoDuration;
-      });
-    });
     super.initState();
   }
 
@@ -218,11 +205,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ? _getProgressBar()
                     : videoInfo == null
                         ? _buildPlaceholder()
-                        : Image.network(
-                            videoInfo.thumbUrl,
-                            width: _displaySize.width * 85,
-                            fit: BoxFit.cover,
-                          )
+                        : VideoWidget(url: videoInfo.videoUrl, play: true)
                 : _image == null
                     ? _buildPlaceholder()
                     : Image.file(
@@ -382,100 +365,31 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return videoUrl;
   }
 
-  String getFileExtension(String fileName) {
-    final exploded = fileName.split('.');
-    return exploded[exploded.length - 1];
-  }
-
-  void _updatePlaylistUrls(File file, String videoName) {
-    final lines = file.readAsLinesSync();
-    var updatedLines = List<String>();
-
-    for (final String line in lines) {
-      var updatedLine = line;
-      if (line.contains('.ts') || line.contains('.m3u8')) {
-        updatedLine = '$videoName%2F$line?alt=media';
-      }
-      updatedLines.add(updatedLine);
-    }
-    final updatedContents =
-        updatedLines.reduce((value, element) => value + '\n' + element);
-
-    file.writeAsStringSync(updatedContents);
-  }
-
-  Future<String> _uploadHLSFiles(dirPath, videoName) async {
-    final videosDir = Directory(dirPath);
-
-    var playlistUrl = '';
-
-    final files = videosDir.listSync();
-    int i = 1;
-    for (FileSystemEntity file in files) {
-      final fileName = p.basename(file.path);
-      final fileExtension = getFileExtension(fileName);
-      if (fileExtension == 'm3u8') _updatePlaylistUrls(file, videoName);
-
-      setState(() {
-        _processPhase = 'Uploading video';
-        _progress = 0.0;
-      });
-
-      final downloadUrl = await _uploadFile(file.path, videoName, true);
-
-      if (fileName == 'master.m3u8') {
-        playlistUrl = downloadUrl;
-      }
-      i++;
-    }
-
-    return playlistUrl;
-  }
 
   Future<void> _processVideo(File rawVideoFile) async {
-    final String rand = '${new Random().nextInt(10000)}';
-    final videoName = 'video$rand';
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final outDirPath = '${extDir.path}/Videos/$videoName';
-    final videosDir = new Directory(outDirPath);
-    videosDir.createSync(recursive: true);
-
+    final videoName = 'video_$_newsId';
     final rawVideoPath = rawVideoFile.path;
-    final info = await EncodingProvider.getMediaInformation(rawVideoPath);
-    final aspectRatio = EncodingProvider.getAspectRatio(info);
-
-    setState(() {
-      _processPhase = 'Processing video...';
-      _videoDuration = EncodingProvider.getDuration(info);
-      _progress = 0.0;
-    });
-
-    final thumbFilePath =
-        await EncodingProvider.getThumb(rawVideoPath, thumbWidth, thumbHeight);
 
     setState(() {
       _processPhase = 'Processing video...';
       _progress = 0.0;
     });
 
-    final encodedFilesDir =
-        await EncodingProvider.encodeHLS(rawVideoPath, outDirPath);
 
     setState(() {
       _processPhase = 'Processing video...';
       _progress = 0.0;
     });
-    final thumbUrl =
-        await _uploadFile(thumbFilePath, 'video_thumbnail_$_newsId', false);
-    ///encoding
-    // final videoUrl = await _uploadHLSFiles(encodedFilesDir, videoName);
+
+
+    setState(() {
+      _processPhase = 'Processing video...';
+      _progress = 0.0;
+    });
     final videoUrl = await _uploadFile(rawVideoPath, 'video_$_newsId', true);
 
     videoInfo = VideoInfo(
       videoUrl: videoUrl,
-      thumbUrl: thumbUrl,
-      coverUrl: thumbUrl,
-      aspectRatio: aspectRatio,
       uploadedAt: DateTime.now().millisecondsSinceEpoch,
       videoName: videoName,
     );

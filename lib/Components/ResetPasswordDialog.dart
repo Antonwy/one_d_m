@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/Validate.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,8 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
     _textTheme = Theme.of(context).textTheme;
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Constants.radius)),
       title: Text("Passwort zurücksetzen"),
       content: Column(
         mainAxisSize: MainAxisSize.min,

@@ -24,6 +24,15 @@ exports.onDeleteNews = functions.firestore
       .catch((e) => {
         functions.logger.info(e);
       });
+
+    await bucket
+      .deleteFiles({ prefix: `news/news_${newsId}/video_${newsId}` })
+      .then(() => {
+        functions.logger.info('Video deleted successfully');
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
   });
 
 exports.onUpdateNews = functions.firestore

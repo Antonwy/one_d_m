@@ -16,7 +16,8 @@ class NewsNativeAd extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         color: Colors.white,
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constants.radius)),
         child: Container(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -49,15 +50,16 @@ class ExploreNativeAd extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Material(
-        clipBehavior: Clip.antiAlias,
         color: ColorTheme.appBg,
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constants.radius)),
         child: Container(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(Constants.radius)),
               child: NativeAdView(
                 adUnitId: Constants.ADMOB_EXPLORE_ID,
                 layoutName: "ExploreAd",

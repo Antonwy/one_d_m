@@ -116,7 +116,7 @@ class CertifiedSessionView extends StatelessWidget {
       child: CustomOpenContainer(
         closedColor: Colors.grey[200],
         closedShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         closedElevation: 0,
         openBuilder: (context, close, scrollController) => CertifiedSessionPage(
           session: session,

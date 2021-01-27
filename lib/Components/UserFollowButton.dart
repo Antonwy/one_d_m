@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -6,8 +7,10 @@ import 'package:provider/provider.dart';
 
 class UserFollowButton extends StatefulWidget {
   final String followerId;
+  final Color color;
+  final double backOpacity;
 
-  UserFollowButton({this.followerId});
+  UserFollowButton({this.followerId, this.color, this.backOpacity = .5});
 
   @override
   _UserFollowButtonState createState() => _UserFollowButtonState();
@@ -24,7 +27,8 @@ class _UserFollowButtonState extends State<UserFollowButton> {
     if (_um.uid == widget.followerId)
       return Material(
           clipBehavior: Clip.antiAlias,
-          color: _theme.colors.contrast.withOpacity(.5),
+          color: (widget.color ?? _theme.colors.contrast)
+              .withOpacity(widget.backOpacity),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
@@ -42,7 +46,9 @@ class _UserFollowButtonState extends State<UserFollowButton> {
         builder: (context, snapshot) {
           return Material(
               clipBehavior: Clip.antiAlias,
-              color: _theme.colors.contrast.withOpacity(.5),
+              color: (widget.color ?? _theme.colors.contrast)
+                  .withOpacity(widget.backOpacity)
+                  .withOpacity(widget.backOpacity),
               borderRadius: BorderRadius.circular(20),
               child: InkWell(
                 onTap: widget.followerId == null && _loading

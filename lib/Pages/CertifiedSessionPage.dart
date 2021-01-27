@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -168,7 +169,7 @@ class __CertifiedSessionPageIndicatorState
           height: 45,
           child: Material(
             color: _theme.colors.contrast,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Constants.radius),
             child: Stack(
               children: [
                 Align(
@@ -487,7 +488,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
             child: Container(
-              height: 220,
+              height: 250,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -584,6 +585,8 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                           value: snapshot.data?.currentAmount ??
                               csm.session.currentAmount ??
                               0,
+                          color: snapshot?.data?.secondaryColor ??
+                              csm.session.secondaryColor,
                         ),
                       );
                     }),
@@ -595,28 +598,32 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                     builder: (context, snapshot) {
                       return Expanded(
                         flex: 6,
-                        child: CustomOpenContainer(
-                          closedShape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          closedElevation: 0,
-                          openBuilder: (context, close, scrollController) =>
-                              StreamBuilder(
-                                  stream: csm.campaign,
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData)
-                                      return SizedBox.shrink();
-                                    return NewCampaignPage(
-                                      snapshot.data,
-                                      scrollController: scrollController,
-                                    );
-                                  }),
-                          closedColor: csm.session.primaryColor,
-                          closedBuilder: (context, open) => _InfoView(
-                              imageUrl: snapshot.data?.campaignImgUrl ??
-                                  csm.session.campaignImgUrl,
-                              description: snapshot.data?.campaignName ??
-                                  csm.session.campaignName),
-                        ),
+                        child: StreamBuilder<Campaign>(
+                            stream: csm.campaign,
+                            builder: (context, cSnap) {
+                              return CustomOpenContainer(
+                                closedShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        Constants.radius)),
+                                closedElevation: 0,
+                                openBuilder:
+                                    (context, close, scrollController) =>
+                                        NewCampaignPage(
+                                  cSnap.data,
+                                  scrollController: scrollController,
+                                ),
+                                tappable: cSnap.hasData,
+                                closedColor: csm.session.primaryColor,
+                                closedBuilder: (context, open) => _InfoView(
+                                  imageUrl: snapshot.data?.campaignImgUrl ??
+                                      csm.session.campaignImgUrl,
+                                  description: snapshot.data?.campaignName ??
+                                      csm.session.campaignName,
+                                  color: snapshot?.data?.primaryColor ??
+                                      csm.session.primaryColor,
+                                ),
+                              );
+                            }),
                       );
                     }),
                 SizedBox(
@@ -628,9 +635,12 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                       return Expanded(
                         flex: 4,
                         child: _InfoView(
-                            description: "Mitglieder",
-                            value: (snapshot.data?.memberCount ??
-                                csm.session.memberCount)),
+                          description: "Mitglieder",
+                          value: (snapshot.data?.memberCount ??
+                              csm.session.memberCount),
+                          color: snapshot?.data?.secondaryColor ??
+                              csm.session.secondaryColor,
+                        ),
                       );
                     }),
               ],
@@ -648,7 +658,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                     List<SessionMember> members = snapshot.data ?? [];
                     if (members.isEmpty) return SizedBox.shrink();
                     return Text(
-                      'Donators',
+                      'Unterstützer',
                       style: Theme.of(context)
                           .textTheme
                           .headline6
@@ -684,7 +694,6 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 if (posts.isNotEmpty) {
                   posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
                   return SliverList(
-
                     delegate:
                         SliverChildListDelegate(_getNewsWidget(context, posts)),
                   );
@@ -745,20 +754,20 @@ class _InfoView extends StatelessWidget {
   final String description;
   final String imageUrl;
   final num value;
+  final Color color;
 
-  const _InfoView({Key key, this.description, this.value, this.imageUrl})
+  const _InfoView(
+      {Key key, this.description, this.value, this.imageUrl, this.color})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    Session _session = Provider.of<CertifiedSessionManager>(context).session;
     return Container(
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color:
-            imageUrl != null ? _session.primaryColor : _session.secondaryColor,
+        borderRadius: BorderRadius.circular(Constants.radius),
+        color: color,
       ),
       child: Padding(
         padding: EdgeInsets.all(imageUrl != null ? 2.0 : 8.0),
@@ -898,8 +907,9 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                                left: index <= uniqueAllMembers.length - 1
-                                    ? 12.0
+                                left: index == 0 ? 6.0 : 0.0,
+                                right: index == uniqueAllMembers.length - 1
+                                    ? 6.0
                                     : 0.0),
                             child: SessionMemberView<CertifiedSessionManager>(
                               member: uniqueAllMembers[index],

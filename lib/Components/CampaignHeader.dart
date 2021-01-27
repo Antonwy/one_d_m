@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 
 import 'CustomOpenContainer.dart';
@@ -18,8 +19,8 @@ class CampaignHeader extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
         child: CustomOpenContainer(
-          closedShape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          closedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Constants.radius)),
           closedElevation: 1,
           openBuilder: (context, close, scrollController) =>
               NewCampaignPage(campaign, scrollController: scrollController),
@@ -32,7 +33,7 @@ class CampaignHeader extends StatelessWidget {
                 RepaintBoundary(
                   child: CachedNetworkImage(
                     imageUrl: campaign.imgUrl,
-                    height: 230,
+                    height: 260,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => Center(
@@ -44,7 +45,7 @@ class CampaignHeader extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[

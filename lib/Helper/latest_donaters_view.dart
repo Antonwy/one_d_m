@@ -8,6 +8,7 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/margin.dart';
 
+import 'Constants.dart';
 import 'DatabaseService.dart';
 import 'Donation.dart';
 import 'ThemeManager.dart';
@@ -54,8 +55,8 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
   }
 
   Widget _buildDonator({String amount, String uid}) => Material(
-        borderRadius: BorderRadius.circular(15),
-        color: ThemeManager.of(context).colors.dark.withOpacity(.1),
+        borderRadius: BorderRadius.circular(Constants.radius + 2),
+        color: ThemeManager.of(context).colors.contrast.withOpacity(.6),
         clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
@@ -76,7 +77,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                 style: Theme.of(context).textTheme.bodyText1.copyWith(
                       fontWeight: FontWeight.w700,
                       color:
-                          ThemeManager.of(context).colors.dark.withOpacity(0.5),
+                          ThemeManager.of(context).colors.dark.withOpacity(0.7),
                     )),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -13,6 +14,7 @@ import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/DonationDialogManager.dart';
@@ -21,6 +23,7 @@ import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
@@ -129,9 +132,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                               Align(
                                 alignment: Alignment.bottomCenter,
                                 child: Material(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(30),
-                                      topRight: Radius.circular(30)),
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(18),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
@@ -154,7 +157,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                             height: 50,
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(8)),
+                                                    BorderRadius.circular(
+                                                        Constants.radius)),
                                             elevation: 0,
                                             color: _bTheme.dark,
                                             child: Column(
@@ -268,18 +272,31 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         const YMargin(20),
                                         Align(
                                           alignment: Alignment.center,
-                                          child: Text(
-                                            'With ${_selectedValue.toInt() * 5} Cent you can support rangers one week to \nprotect elefants.',
-                                            textAlign: TextAlign.center,
-                                            style: _theme.textTheme.subtitle1
-                                                .copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 15,
-                                                    color:
-                                                        ThemeManager.of(context)
-                                                            .colors
-                                                            .dark),
-                                          ),
+                                          child: Builder(builder: (context) {
+                                            List<String> dEffects =
+                                                widget.campaign.donationEffects;
+                                            String effect = dEffects[
+                                                new Random(42)
+                                                    .nextInt(dEffects.length)];
+                                            return Text(
+                                              effect.replaceFirst(
+                                                  '**',
+                                                  Currency((_selectedValue
+                                                              .toInt() *
+                                                          5))
+                                                      .value()),
+                                              textAlign: TextAlign.center,
+                                              style: _theme.textTheme.subtitle1
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 15,
+                                                      color: ThemeManager.of(
+                                                              context)
+                                                          .colors
+                                                          .dark),
+                                            );
+                                          }),
                                         ),
                                         const YMargin(20),
                                         Align(
@@ -332,7 +349,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Material(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Constants.radius),
               clipBehavior: Clip.antiAlias,
               child: CachedNetworkImage(
                 height: 58.0,
@@ -349,15 +366,15 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AutoSizeText(
                   title,
                   maxLines: 1,
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      color: _bTheme.dark),
                 ),
                 FutureBuilder<Organisation>(
                     future: DatabaseService.getOrganisation(authorId),
@@ -468,7 +485,7 @@ class DonationButton extends StatelessWidget {
               minWidth: 170,
               height: 50,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(Constants.radius)),
               elevation: 0,
               color: _bTheme.dark,
               disabledColor: Colors.grey,
@@ -510,8 +527,8 @@ class DonationButton extends StatelessWidget {
           title: Text("Zu wenig DVs"),
           content: Text(
               "Du hast zu wenig DVs um diese Spende durchzuführen! Füge eine Zahlungsmethode hinzu."),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Constants.radius)),
           actions: <Widget>[
             FlatButton(
                 onPressed: () {
@@ -542,7 +559,7 @@ class DonationButton extends StatelessWidget {
                 content: Text(
                     "Willst du wirklich ${ddm.amount} DV zum unterstützen ausgeben?"),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(Constants.radius)),
                 actions: <Widget>[
                   FlatButton(
                       onPressed: () {
@@ -598,7 +615,7 @@ class DonationAnimationWidget extends HookWidget {
             child: Material(
                 clipBehavior: Clip.antiAlias,
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
                 child: AnimatedSwitcher(
                   duration: Duration(seconds: 1),
                   child: !ddm.showThankYou
@@ -665,7 +682,7 @@ class DonationAnimationWidget extends HookWidget {
   Widget _buildInfoContent(BuildContext context) => Padding(
         padding: const EdgeInsets.all(12.0),
         child: Material(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Constants.radius),
           elevation: 1,
           color: Colors.white,
           child: Padding(
@@ -715,7 +732,8 @@ class DonationAnimationWidget extends HookWidget {
                 height: 120,
                 child: Material(
                   elevation: 1,
-                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(Constants.radius)),
                   color: _bTheme.dark,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -787,7 +805,7 @@ class DonationAnimationWidget extends HookWidget {
         child: Material(
           clipBehavior: Clip.antiAlias,
           color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+          borderRadius: BorderRadius.circular(Constants.radius),
           elevation: 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,11 +833,12 @@ class DonationAnimationWidget extends HookWidget {
               const SizedBox(
                 height: 10,
               ),
+              Divider(),
               Padding(
                 padding: const EdgeInsets.only(left: 0.0, bottom: 8),
                 child: FlatButton(
                     textColor: _bTheme.textOnContrast,
-                    child: Text('Mehr lesen'),
+                    child: Text('MEHR LESEN'),
                     onPressed: function),
               )
             ],
@@ -833,7 +852,7 @@ class DonationAnimationWidget extends HookWidget {
           height: 170,
           width: MediaQuery.of(context).size.width,
           child: Material(
-            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
             color: _bTheme.dark,
             elevation: 1,
             child: Padding(
@@ -891,7 +910,7 @@ class DonationAnimationWidget extends HookWidget {
   Widget _buildThanksContent(BuildContext context) => Padding(
         padding: const EdgeInsets.all(12.0),
         child: Material(
-          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+          borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
           color: Colors.white,
           elevation: 1,
           child: Padding(
@@ -939,7 +958,7 @@ class DonationAnimationWidget extends HookWidget {
           child: Material(
             clipBehavior: Clip.antiAlias,
             elevation: 1,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Constants.radius),
             color: _bTheme.dark,
             child: InkWell(
               onTap: function,

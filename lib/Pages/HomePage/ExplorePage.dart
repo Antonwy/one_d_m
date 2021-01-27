@@ -41,7 +41,6 @@ class _ExplorePageState extends State<ExplorePage>
               preferredSize: Size(0, 80),
               child: Container(),
             ),
-            actions: [_buildLatestDonations()],
             flexibleSpace: SafeArea(
               child: Container(
                 child: Column(
@@ -72,18 +71,24 @@ class _ExplorePageState extends State<ExplorePage>
             ),
           ),
           SliverToBoxAdapter(
-            child:Padding(
-              padding: const EdgeInsets.only(left: 12.0,bottom: 12.0),
-              child: Text('Influencer-Sessions',style: Theme.of(context).textTheme.headline6,),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
+              child: Text(
+                'Influencer-Sessions',
+                style: Theme.of(context).textTheme.headline6,
+              ),
             ),
           ),
           SliverPadding(
               padding: const EdgeInsets.only(bottom: 6),
               sliver: CertifiedSessionsList()),
           SliverToBoxAdapter(
-            child:Padding(
-              padding: const EdgeInsets.only(left: 12.0,bottom: 10.0,top: 8),
-              child: Text('Projects',style: Theme.of(context).textTheme.headline6,),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12.0, bottom: 10.0, top: 8),
+              child: Text(
+                'Projects',
+                style: Theme.of(context).textTheme.headline6,
+              ),
             ),
           ),
           StreamBuilder<List<Campaign>>(
@@ -99,19 +104,19 @@ class _ExplorePageState extends State<ExplorePage>
                   return SliverToBoxAdapter(
                     child: Center(
                         child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                              height: 20,
-                            ),
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text("Lade Projekte")
-                          ],
-                        )),
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text("Lade Projekte")
+                      ],
+                    )),
                   );
                 }
               })
@@ -126,7 +131,6 @@ class _ExplorePageState extends State<ExplorePage>
         child: StreamBuilder(
           stream: DatabaseService.getLatestDonations(),
           builder: (_, snapshot) {
-            print(snapshot);
             if (!snapshot.hasData) return SizedBox.shrink();
             List<Donation> d = snapshot.data;
             if (d.isEmpty) return SizedBox.shrink();

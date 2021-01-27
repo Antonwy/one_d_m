@@ -15,6 +15,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'DonationWidget.dart';
+
 class SettingsDialog extends StatelessWidget {
   UserManager um;
   TextTheme _textTheme;
@@ -42,7 +44,7 @@ class SettingsDialog extends StatelessWidget {
                     closedElevation: 0,
                     closedColor: ColorTheme.whiteBlue,
                     closedBuilder: (context, open) => Material(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(Constants.radius),
                       clipBehavior: Clip.antiAlias,
                       color: Colors.transparent,
                       child: InkWell(
@@ -55,14 +57,17 @@ class SettingsDialog extends StatelessWidget {
                                 child: Padding(
                                   padding: const EdgeInsets.all(5.0),
                                   child: Container(
-                                    child: Avatar(um.user?.thumbnailUrl ??
-                                        um.user?.imgUrl),
+                                    child: RoundedAvatar(
+                                        um.user?.thumbnailUrl ??
+                                            um.user?.imgUrl),
                                     width: 50,
                                     height: 50,
                                   ),
                                 ),
                                 color: ThemeManager.of(context).colors.contrast,
-                                shape: CircleBorder(),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        Constants.radius + 2)),
                               ),
                               SizedBox(width: 10),
                               Text(
@@ -130,7 +135,8 @@ class SettingsDialog extends StatelessWidget {
                                             clipBehavior: Clip.antiAlias,
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(6)),
+                                                    BorderRadius.circular(
+                                                        Constants.radius)),
                                             child: InkWell(
                                                 onTap: () async {
                                                   ThemeManager.of(context,
@@ -281,7 +287,7 @@ class SettingsDialog extends StatelessWidget {
         context: context,
         builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Constants.radius)),
               title: Text("Ghost Modus"),
               content: Text(
                   "Bist du dir sicher, dass du den Ghost Modus ${currentGhost ? "ausschalten" : "anschalten"} willst?\n\n${currentGhost ? "Wenn der Ghost Modus ausgeschaltet ist, kann dich jeder finden!" : "Wenn der Ghost modus eingeschaltet ist, kann dich niemand finden!"}"),

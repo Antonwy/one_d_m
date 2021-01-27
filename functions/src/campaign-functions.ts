@@ -34,12 +34,14 @@ exports.onDeleteCampaign = functions.firestore
       .doc(campaignId)
       .collection(DatabaseConstants.users)
       .get();
+
     functions.logger.info(
       campaignId +
         ' has :' +
         followedUsersQuery.docs.length +
         ' subscribed users'
     );
+
     followedUsersQuery.forEach(async (doc) => {
       await doc.ref
         .delete()

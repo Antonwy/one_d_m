@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/HomePage.dart';
@@ -41,10 +42,11 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
+    ThemeManager _theme = ThemeManager.of(context);
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ColorTheme.whiteBlue,
+      backgroundColor: ColorTheme.appBg,
       floatingActionButton: widget.afterRegister
           ? Consumer<UserManager>(
               builder: (context, um, child) => FloatingActionButton(
@@ -124,11 +126,11 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
                                   child: UserButton(
                                     element,
                                     withAddButton: true,
-                                    color: ColorTheme.whiteBlue,
+                                    color: ColorTheme.appBg,
                                     textStyle:
-                                        TextStyle(color: ColorTheme.blue),
+                                        TextStyle(color: _theme.colors.dark),
                                     elevation: 1,
-                                    avatarColor: ColorTheme.blue,
+                                    avatarColor: _theme.colors.dark,
                                   ),
                                 ),
                               ),

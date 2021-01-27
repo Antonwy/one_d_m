@@ -6,6 +6,8 @@ class Campaign {
   final int amount, subscribedCount, categoryId;
   final String authorId, id, imgUrl, thumbnailUrl;
   final List<String> moreImages;
+  final List<String> effects;
+  final List<String> donationEffects;
 
   static final String ID = "id",
       NAME = "title",
@@ -17,8 +19,10 @@ class Campaign {
       AUTHORID = "authorId",
       AMOUNT = "current_amount",
       IMAGEURL = "image_url",
-      MOREIMAGES = "more_images_urls",
+      MOREIMAGES = "more_image_urls",
       THUMBNAILURL = "thumbnail_url",
+      EFFECTS = "effects",
+      DONATION_EFFECTS = "donation_effects",
       FINALAMOUNT = "target_amount",
       CATEGORYID = "category_id";
 
@@ -35,25 +39,29 @@ class Campaign {
       this.imgUrl,
       this.moreImages,
       this.thumbnailUrl,
-      this.categoryId});
+      this.categoryId,
+      this.donationEffects,
+      this.effects});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
         id: snapshot.id,
-        name: snapshot.data()['title'],
-        amount: snapshot.data()['current_amount'],
-        description: snapshot.data()['description'],
-        city: snapshot.data()['city'],
-        shortDescription: snapshot.data()['short_description'],
-        subscribedCount: snapshot.data()['subscribed_count'],
-        createdAt: (snapshot.data()['created_at'] as Timestamp).toDate(),
-        imgUrl: snapshot.data()['image_url'],
-        thumbnailUrl: '',
-        authorId: snapshot.data()['authorId'],
-        categoryId: snapshot.data()['category_id'],
-        moreImages: snapshot.data()['more_images_url'] == null
+        name: snapshot[NAME],
+        amount: snapshot[AMOUNT],
+        description: snapshot[DESCRIPTION],
+        shortDescription: snapshot[SHORTDESCRIPTION],
+        subscribedCount: snapshot[SUBSCRIBEDCOUNT],
+        createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
+        imgUrl: snapshot[IMAGEURL],
+        thumbnailUrl: snapshot[THUMBNAILURL] ?? '',
+        authorId: snapshot[AUTHORID],
+        categoryId: snapshot[CATEGORYID],
+        moreImages:
+            snapshot[MOREIMAGES] == null ? [] : List.from(snapshot[MOREIMAGES]),
+        effects: snapshot[EFFECTS] == null ? [] : List.from(snapshot[EFFECTS]),
+        donationEffects: snapshot[DONATION_EFFECTS] == null
             ? []
-            : List.from(snapshot['more_images_url']));
+            : List.from(snapshot[DONATION_EFFECTS]));
   }
 
   static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {

@@ -18,11 +18,14 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'CampaignButton.dart';
 
 class NewsPost extends StatefulWidget {
-  News news;
-  bool withCampaign;
+  final News news;
+  final bool withCampaign, withDonationButton;
   bool isInView;
 
-  NewsPost(this.news, {this.withCampaign = true, this.isInView = false});
+  NewsPost(this.news,
+      {this.withCampaign = true,
+      this.isInView = false,
+      this.withDonationButton = false});
 
   @override
   _NewsPostState createState() => _NewsPostState();
@@ -57,8 +60,7 @@ class _NewsPostState extends State<NewsPost> {
           clipBehavior: Clip.antiAlias,
           color: ColorTheme.appBg,
           elevation: 1,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           child: Column(
             children: <Widget>[
               widget.withCampaign
@@ -122,35 +124,41 @@ class _NewsPostState extends State<NewsPost> {
                       child: Padding(
                         padding: const EdgeInsets.all(10),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: widget.withDonationButton
+                              ? MainAxisAlignment.spaceBetween
+                              : MainAxisAlignment.end,
                           children: [
                             Text(
                               timeago.format(widget.news.createdAt,
                                   locale: "de"),
                               style: TextStyle(color: Colors.white),
                             ),
-                            Material(
-                                borderRadius: BorderRadius.circular(20),
-                                clipBehavior: Clip.antiAlias,
-                                color: ThemeManager.of(context).colors.contrast,
-                                child: InkWell(
-                                  onTap: () async {
-                                    await _donate();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 12),
-                                    child: Text(
-                                      "Unterstützen",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12,
-                                          color: ThemeManager.of(context)
-                                              .colors
-                                              .dark),
-                                    ),
-                                  ),
-                                )),
+                            widget.withDonationButton
+                                ? Material(
+                                    borderRadius: BorderRadius.circular(20),
+                                    clipBehavior: Clip.antiAlias,
+                                    color: ThemeManager.of(context)
+                                        .colors
+                                        .contrast,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        await _donate();
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 12),
+                                        child: Text(
+                                          "Unterstützen",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12,
+                                              color: ThemeManager.of(context)
+                                                  .colors
+                                                  .dark),
+                                        ),
+                                      ),
+                                    ))
+                                : SizedBox.shrink(),
                           ],
                         ),
                       ),
@@ -179,72 +187,27 @@ class _NewsPostState extends State<NewsPost> {
   Widget _buildExpandableContent(BuildContext context, String post) {
     ThemeManager _theme = ThemeManager.of(context);
     return ExpandableNotifier(
-      child: Column(
-        children: [
-          Expandable(
-            collapsed: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    post,
-                    maxLines: 3,
-                    softWrap: true,
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-                post.length > 120
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Divider(
-                            height: 1,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: ExpandableButton(
-                                child: Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                              child: Text('MEHR',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: _theme.colors.dark)),
-                            )),
-                          ),
-                        ],
-                      )
-                    : SizedBox.shrink()
-              ],
+      child: Expandable(
+        collapsed: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                post,
+                maxLines: 3,
+                softWrap: true,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w400),
+              ),
             ),
-            expanded: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    post,
-                    maxLines: null,
-                    softWrap: true,
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: ExpandableButton(
-                      child: Column(
+            post.length > 120
+                ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Divider(
@@ -255,19 +218,60 @@ class _NewsPostState extends State<NewsPost> {
                         child: ExpandableButton(
                             child: Padding(
                           padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                          child: Text('WENIGER',
+                          child: Text('MEHR',
                               style: TextStyle(
                                   fontWeight: FontWeight.w500,
                                   color: _theme.colors.dark)),
                         )),
                       ),
                     ],
-                  )),
-                )
-              ],
+                  )
+                : SizedBox.shrink()
+          ],
+        ),
+        expanded: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                post,
+                maxLines: null,
+                softWrap: true,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w400),
+              ),
             ),
-          )
-        ],
+            Align(
+              alignment: Alignment.bottomRight,
+              child: ExpandableButton(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(
+                    height: 1,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ExpandableButton(
+                        child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                      child: Text('WENIGER',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: _theme.colors.dark)),
+                    )),
+                  ),
+                ],
+              )),
+            )
+          ],
+        ),
       ),
     );
   }

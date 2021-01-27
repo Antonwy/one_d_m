@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'Constants.dart';
+
 class Helper {
   static Color hexToColor(String hexCode) {
     hexCode = hexCode.toUpperCase().replaceAll("#", "");
@@ -56,7 +58,7 @@ class Helper {
         context: context,
         builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Constants.radius)),
               title: Text("Error", style: TextStyle(color: Colors.red)),
               content: Text(
                 message,

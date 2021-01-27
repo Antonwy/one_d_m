@@ -36,7 +36,7 @@ class UserButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
-    return AnimatedFutureBuilder<User>(
+    return FutureBuilder<User>(
         future: user == null ? DatabaseService.getUser(id) : Future.value(user),
         builder: (context, snapshot) {
           if (snapshot.hasData)
@@ -110,8 +110,9 @@ class UserButton extends StatelessWidget {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Avatar(
+                        RoundedAvatar(
                           null,
+                          loading: true,
                           color: avatarColor,
                         ),
                         SizedBox(width: 10),
@@ -123,16 +124,7 @@ class UserButton extends StatelessWidget {
                                 .copyWith(color: textStyle.color))
                       ],
                     ),
-                    withAddButton
-                        ? IconButton(
-                            icon: Material(
-                                shape: CircleBorder(),
-                                color: ColorTheme.whiteBlue,
-                                child: Center(
-                                    child: Icon(Icons.add,
-                                        color: ColorTheme.blue))),
-                            onPressed: null)
-                        : Container()
+                    withAddButton ? UserFollowButton() : Container()
                   ],
                 ),
               ),

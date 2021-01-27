@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
@@ -42,7 +43,7 @@ class _CategoriesListState extends State<CategoriesList> {
                     closedElevation: 0,
                     closedColor: ColorTheme.whiteBlue,
                     closedShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(Constants.radius),
                     ),
                     openBuilder: (context, close, scrollController) =>
                         FindFriendsPage(scrollController: scrollController),
@@ -99,7 +100,7 @@ class CategoryItem extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1,
           child: Material(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(Constants.radius + 2),
             color: ColorTheme.lightBlue,
             clipBehavior: Clip.antiAlias,
             child: Stack(
@@ -117,7 +118,8 @@ class CategoryItem extends StatelessWidget {
                                 color: isSelected
                                     ? _bTheme.contrast
                                     : ColorTheme.lightBlue,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius:
+                                    BorderRadius.circular(Constants.radius),
                                 boxShadow: [
                                   BoxShadow(
                                       color: _bTheme.contrast.withOpacity(.8),

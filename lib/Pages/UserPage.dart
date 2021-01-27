@@ -11,6 +11,7 @@ import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -336,7 +337,7 @@ class __OtherUsersRecommendationsState
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Container(
-                            height: 165,
+                            height: 150,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) => Padding(
@@ -389,7 +390,7 @@ class _RecommendationUser extends StatelessWidget {
               closedElevation: 0,
               closedColor: Colors.white.withOpacity(.45),
               closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Constants.radius)),
               closedBuilder: (context, open) => Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
@@ -401,9 +402,7 @@ class _RecommendationUser extends StatelessWidget {
                       iconColor: _theme.colors.contrast,
                       height: 30,
                     ),
-                    SizedBox(
-                      height: 12,
-                    ),
+                    YMargin(6),
                     Container(
                       width: 76,
                       height: 20,
@@ -414,10 +413,11 @@ class _RecommendationUser extends StatelessWidget {
                                 : user?.name ?? "Laden...",
                             textAlign: TextAlign.center,
                             maxLines: 1,
-                            style: _theme.textTheme.dark.headline6),
+                            style: _theme.textTheme.dark.headline6
+                                .copyWith(fontSize: 14)),
                       ),
                     ),
-                    YMargin(12),
+                    YMargin(6),
                     UserFollowButton(followerId: user?.id),
                   ],
                 ),
@@ -604,7 +604,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           height: size.height,
           width: size.width,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Constants.radius),
             image: DecorationImage(
               image: imageProvider,
               fit: BoxFit.cover,
@@ -615,7 +615,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           height: size.height,
           width: size.width,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Constants.radius),
             color: ThemeManager.of(context).colors.contrast,
           ),
           child: Center(

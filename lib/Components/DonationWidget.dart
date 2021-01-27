@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -109,13 +110,14 @@ class DonationWidget extends StatelessWidget {
               imgUrl: donation.campaignImgUrl),
           scrollController: controller,
         ),
+        tappable: !donation.campaignDeleted,
         closedElevation: 0,
         closedColor: Colors.transparent,
         closedBuilder: (context, open) => ListTile(
-          onTap: open,
           leading: RoundedAvatar(
             donation.campaignImgUrl,
             backgroundLight: backgroundLight,
+            deleted: donation.campaignDeleted,
           ),
           subtitle: Text(
             timeago.format(donation.createdAt),
@@ -237,18 +239,22 @@ class DonationWidget extends StatelessWidget {
 
 class RoundedAvatar extends StatelessWidget {
   final String imgUrl;
-  final bool loading, backgroundLight;
+  final bool loading, backgroundLight, deleted;
   final double height;
-  final double defaultHeight = 20, borderRadius;
+  final double defaultHeight = 20, borderRadius, elevation;
   final Color iconColor, color;
+  final BoxFit fit;
 
   RoundedAvatar(this.imgUrl,
       {this.loading = false,
       this.backgroundLight = true,
       this.height,
+      this.elevation = 0,
       this.iconColor,
-      this.borderRadius = 12,
-      this.color});
+      this.borderRadius = Constants.radius,
+      this.color,
+      this.deleted = false,
+      this.fit = BoxFit.cover});
 
   @override
   Widget build(BuildContext context) {
@@ -263,35 +269,49 @@ class RoundedAvatar extends StatelessWidget {
         return AspectRatio(
           aspectRatio: 1,
           child: Material(
-            color:
-                color ?? (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
-            borderRadius: BorderRadius.circular(borderRadius),
-            clipBehavior: Clip.antiAlias,
-            child: imgUrl == null
-                ? loading
-                    ? Center(
-                        child: Container(
-                            width: 25,
-                            height: 25,
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation(_bTheme.darkerLight),
-                            )))
-                    : Icon(
-                        Icons.person,
-                        color: iconColor ?? _bTheme.contrast,
-                      )
-                : CachedNetworkImage(
-                    imageUrl: imgUrl,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, error, obj) => Icon(
-                      Icons.error,
-                      color: iconColor ?? _bTheme.contrast,
-                    ),
-                  ),
-          ),
+              elevation: elevation,
+              color: color ??
+                  (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
+              borderRadius: BorderRadius.circular(borderRadius),
+              clipBehavior: Clip.antiAlias,
+              child: _buildImage(_bTheme)),
         );
       }),
     );
+  }
+
+  Widget _buildImage(BaseTheme _bTheme) {
+    if (deleted)
+      return Icon(
+        Icons.delete,
+        color: iconColor ?? _bTheme.contrast,
+      );
+
+    return imgUrl == null
+        ? loading
+            ? Center(
+                child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation(
+                        backgroundLight ? _bTheme.dark : _bTheme.contrast),
+                  ),
+                ),
+              ))
+            : Icon(
+                Icons.person,
+                color: iconColor ?? _bTheme.contrast,
+              )
+        : CachedNetworkImage(
+            imageUrl: imgUrl,
+            fit: fit,
+            errorWidget: (context, error, obj) => Icon(
+              Icons.error,
+              color: iconColor ?? _bTheme.contrast,
+            ),
+          );
   }
 }

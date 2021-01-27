@@ -4,6 +4,7 @@ import 'package:one_d_m/Components/AnimatedFutureBuilder.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -39,7 +40,8 @@ class DonationsGroupWidget extends StatelessWidget {
             closedElevation: 0,
             closedColor: _bTheme.darkerLight,
             closedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(Constants.radius))),
             closedBuilder: (context, open) => InkWell(
               onTap: open,
               child: Padding(

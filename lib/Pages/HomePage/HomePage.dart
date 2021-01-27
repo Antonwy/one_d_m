@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -133,8 +134,8 @@ class HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Constants.radius)),
           actions: <Widget>[
             FlatButton(
                 onPressed: () {

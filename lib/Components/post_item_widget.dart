@@ -59,7 +59,7 @@ class HeadingItem implements PostItem {
                       height: 58.0,
                       width: 88.0,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Constants.radius),
                         image: DecorationImage(
                           image: imageProvider,
                           fit: BoxFit.cover,
@@ -80,15 +80,17 @@ class HeadingItem implements PostItem {
                       AutoSizeText('Unterstützt ${session.campaignName}',
                           maxLines: 1,
                           softWrap: true,
-                          style: _theme.textTheme.dark.bodyText1
-                              .copyWith(fontWeight: FontWeight.w600)),
+                          style: _theme.textTheme.dark
+                              .withOpacity(.7)
+                              .bodyText1
+                              .copyWith(fontWeight: FontWeight.w400)),
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0),
+                    padding: const EdgeInsets.only(left: 12.0),
                     child: Icon(
                       Icons.verified,
-                      size: 32,
+                      size: 30,
                       color: Helper.hexToColor("#71e34b"),
                     ),
                   )
@@ -176,6 +178,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: NewsPost(
               post[i],
               withCampaign: false,
+              withDonationButton: true,
             ),
           ),
           Positioned.fill(
@@ -184,7 +187,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
-                lineColor: _theme.colors.dark.withOpacity(.3),
+                lineColor: _theme.colors.dark.withOpacity(.2),
                 indicatorColor: _theme.colors.dark,
                 indicatorSize: 8,
                 indicatorStyle: PaintingStyle.fill,

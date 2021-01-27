@@ -37,7 +37,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Material(
       color: _bTheme.contrast,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(6),
       child: Container(
         height: 120,
         child: StreamBuilder<Statistics>(
@@ -200,7 +200,7 @@ class _DCInformation extends StatelessWidget {
                           'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w200,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],

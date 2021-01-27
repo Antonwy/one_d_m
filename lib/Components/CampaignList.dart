@@ -17,16 +17,16 @@ class CampaignList extends StatefulWidget {
 }
 
 class _CampaignListState extends State<CampaignList> {
-  
   @override
   void initState() {
-
     super.initState();
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
+
   @override
   Widget build(BuildContext context) {
     if (widget.campaigns.isEmpty) {
@@ -68,7 +68,9 @@ class _CampaignListState extends State<CampaignList> {
     for (Campaign c in campaigns) {
       rateCount++;
 
-      list.add(CampaignHeader(campaign: c,));
+      list.add(CampaignHeader(
+        campaign: c,
+      ));
 
       if (rateCount >= adRate) {
         list.add(ExploreNativeAd());

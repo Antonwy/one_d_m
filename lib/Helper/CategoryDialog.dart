@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 
+import 'Constants.dart';
+
 class CategoryDialog {
   final BuildContext context;
   final int initialIndex;
@@ -77,7 +79,7 @@ class _CategoryDialogWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Material(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Constants.radius),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

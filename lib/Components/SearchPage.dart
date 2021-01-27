@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/Components/SearchResultsList.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -53,7 +54,7 @@ class SliverSearchBar extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: Material(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(Constants.radius),
               elevation: 2,
               color: Colors.white,
               child: Center(

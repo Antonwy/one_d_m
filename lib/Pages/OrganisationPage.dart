@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -39,27 +40,32 @@ class OrganisationPage extends StatelessWidget {
                   Container(
                     width: 150,
                     height: 150,
-                    child: CachedNetworkImage(imageUrl: organisation.imgUrl??''),
+                    child: RoundedAvatar(
+                      organisation?.imgUrl,
+                      elevation: 1,
+                    ),
                   ),
                   SizedBox(
                     height: 20,
                   ),
                   Text(
                     organisation.description ?? "",
-                    style: _theme.textTheme.bodyText2,
+                    style: _theme.textTheme.caption,
                     textAlign: TextAlign.center,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: OutlineButton(
-                      child: Text("Mehr Informationen"),
-                      onPressed: () async {
-                        if (await canLaunch(organisation.website)) {
-                          launch(organisation.website);
-                        }
-                      },
-                    ),
-                  ),
+                  organisation?.website == null
+                      ? SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: OutlineButton(
+                            child: Text("Mehr Informationen"),
+                            onPressed: () async {
+                              if (await canLaunch(organisation.website)) {
+                                launch(organisation.website);
+                              }
+                            },
+                          ),
+                        ),
                   Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
@@ -101,11 +107,15 @@ class OrganisationPage extends StatelessWidget {
                           Text("Diese Organisation hat noch keine Campagnen."),
                     )),
                   );
-                return SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
-                            CampaignHeader(campaign: snapshot.data[index],),
-                        childCount: snapshot.data.length));
+                return SliverPadding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                          (context, index) => CampaignHeader(
+                                campaign: snapshot.data[index],
+                              ),
+                          childCount: snapshot.data.length)),
+                );
               })
         ],
       ),

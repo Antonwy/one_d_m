@@ -5,12 +5,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
+import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -44,29 +47,32 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   BaseTheme _bTheme;
   bool _subscribed = false;
   Campaign campaign;
-  MediaQueryData _mq;
   ScrollController _scrollController;
-  ValueNotifier _scrollOffset;
+  TabController _tabController;
+  int _tabIndex;
 
   Stream<Campaign> _campaignStream;
-  Stream<List<Donation>> _donationStream;
-
-  bool _isAuthorOfCampaign = false;
+  Future<Organisation> _organizationFuture;
   bool _isLoading = false;
 
   @override
   void initState() {
     _scrollController = widget.scrollController ?? ScrollController();
-
-    _scrollOffset = ValueNotifier(0);
-
-    _scrollController.addListener(() {
-      _scrollOffset.value = _scrollController.offset;
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabIndex = _tabController.index;
+    _tabController.addListener(() {
+      setState(() {
+        _tabIndex = _tabController.index;
+      });
     });
 
-    _campaignStream = DatabaseService.getCampaignStream(widget.campaign.id);
-    _donationStream =
-        DatabaseService.getDonationFromCampaignStream(widget.campaign.id);
+    _organizationFuture = widget.campaign?.authorId == null
+        ? null
+        : DatabaseService.getOrganisation(widget.campaign?.authorId);
+
+    _campaignStream = widget.campaign?.id == null
+        ? null
+        : DatabaseService.getCampaignStream(widget.campaign?.id);
 
     super.initState();
   }
@@ -74,16 +80,15 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   @override
   void dispose() {
     _scrollController.dispose();
-    _scrollOffset.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    _mq = MediaQuery.of(context);
     _bTheme = ThemeManager.of(context).colors;
     return Scaffold(
+        backgroundColor: ColorTheme.appBg,
         floatingActionButton: OfflineBuilder(
             child: Container(),
             connectivityBuilder: (context, connection, child) {
@@ -93,36 +98,22 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     initialData: widget.campaign,
                     stream: _campaignStream,
                     builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data.authorId != null) {
-                        _isAuthorOfCampaign = snapshot.data.authorId == um.uid;
-                      }
-
                       return FloatingActionButton.extended(
                           backgroundColor:
                               activated ? _bTheme.dark : Colors.grey,
-                          label: _isAuthorOfCampaign
-                              ? Text("Post erstellen")
-                              : Text("Unterstützen"),
+                          label: Text("Unterstützen"),
                           onPressed: activated
-                              ? _isAuthorOfCampaign
-                                  ? () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (c) =>
-                                                  CreateNewsPage(campaign)));
-                                    }
-                                  : () {
-                                      BottomDialog bd = BottomDialog(context);
-                                      bd.show(DonationDialogWidget(
-                                        campaign: snapshot.data,
-                                        uid: um.uid,
-                                        user: um.user,
-                                        context: context,
-                                        close: bd.close,
-                                        controller: _scrollController,
-                                      ));
-                                    }
+                              ? () {
+                                  BottomDialog bd = BottomDialog(context);
+                                  bd.show(DonationDialogWidget(
+                                    campaign: snapshot.data,
+                                    uid: um.uid,
+                                    user: um.user,
+                                    context: context,
+                                    close: bd.close,
+                                    controller: _scrollController,
+                                  ));
+                                }
                               : () {
                                   Helper.showConnectionSnackBar(context);
                                 });
@@ -135,340 +126,281 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             builder: (context, snapshot) {
               campaign = snapshot.data;
 
-              return Stack(
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                      height: _mq.size.height * .3 + 30,
-                      width: _mq.size.width,
-                      child: CachedNetworkImage(
-                        imageUrl: widget.campaign.imgUrl,
-                        fit: BoxFit.cover,
+              print(snapshot);
+
+              return CustomScrollView(controller: _scrollController, slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  leading: IconButton(
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: _bTheme.dark,
+                        size: 30,
                       ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ValueListenableBuilder(
-                        valueListenable: _scrollOffset,
-                        builder: (context, value, child) {
+                      onPressed: () => Navigator.pop(context)),
+                  actions: [
+                    FutureBuilder<Organisation>(
+                        future: _organizationFuture == null &&
+                                campaign?.authorId != null
+                            ? DatabaseService.getOrganisation(
+                                campaign?.authorId)
+                            : _organizationFuture,
+                        builder: (context, snapshot) {
                           return Container(
-                              height: (_mq.size.height * .7 + value)
-                                  .clamp(0, _mq.size.height),
-                              width: double.infinity,
-                              child: Material(
-                                color: ColorTheme.white,
-                                elevation: 20,
-                                clipBehavior: Clip.antiAlias,
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(30)),
-                              ));
-                        }),
-                  ),
-                  MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: CustomScrollView(
-                        controller: _scrollController,
-                        slivers: [
-                          SliverToBoxAdapter(
+                            height: 30,
+                            width: 30,
+                            margin: const EdgeInsets.all(12),
                             child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => FullscreenImages([
-                                              campaign.imgUrl,
-                                              ...campaign.moreImages
-                                            ])));
-                              },
-                              child: SizedBox(
-                                height: _mq.size.height * .3,
-                                child: Container(
-                                  color: Colors.transparent,
-                                ),
+                              onTap: !snapshot.hasData
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  OrganisationPage(
+                                                      snapshot.data)));
+                                      ;
+                                    },
+                              child: RoundedAvatar(
+                                snapshot.data?.thumbnailUrl ??
+                                    snapshot.data?.imgUrl,
+                                elevation: 1,
+                                color: ColorTheme.appBg,
+                                backgroundLight: true,
+                                loading: !snapshot.hasData,
+                                fit: BoxFit.contain,
                               ),
                             ),
-                          ),
-                          SliverPadding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
-                            sliver: SliverList(
-                              delegate: SliverChildListDelegate([
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          SizedBox(height: 5),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                    width: 220,
-                                                    child: AutoSizeText(
-                                                      campaign.name,
-                                                      maxLines: 1,
-                                                      style: _textTheme
-                                                          .headline5
-                                                          .copyWith(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700),
-                                                    ),
-                                                  ),
-                                                  FutureBuilder<Organisation>(
-                                                      future: DatabaseService
-                                                          .getOrganisation(
-                                                              campaign
-                                                                  .authorId),
-                                                      builder:
-                                                          (context, snapshot) {
-                                                        Organisation
-                                                            organisation =
-                                                            snapshot.data;
-                                                        return InkWell(
-                                                          onTap:
-                                                              !snapshot.hasData
-                                                                  ? null
-                                                                  : () {
-                                                                      Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                              builder: (context) => OrganisationPage(organisation)));
-                                                                    },
-                                                          child: RichText(
-                                                            text: TextSpan(
-                                                              children: [
-                                                                TextSpan(
-                                                                    text:
-                                                                        'by '),
-                                                                TextSpan(
-                                                                    text:
-                                                                        '${organisation?.name ?? 'Laden...'}',
-                                                                    style: _textTheme.bodyText1.copyWith(
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w700,
-                                                                        decoration:
-                                                                            TextDecoration
-                                                                                .underline,
-                                                                        color: _bTheme
-                                                                            .dark)),
-                                                              ],
-                                                              style: _textTheme.bodyText1.copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400,
-                                                                  color: _bTheme
-                                                                      .dark
-                                                                      .withOpacity(
-                                                                          .54)),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }),
-                                                ],
-                                              ),
-                                              Consumer<UserManager>(builder:
-                                                  (context, um, child) {
-                                                return StreamBuilder<bool>(
-                                                    initialData: false,
-                                                    stream: DatabaseService
-                                                        .hasSubscribedCampaignStream(
-                                                            um.uid,
-                                                            campaign.id),
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      _subscribed =
-                                                          snapshot.data;
-                                                      return _buildFollowButton(
-                                                          context,
-                                                          () async =>
-                                                              _toggleSubscribed(
-                                                                  um.uid),
-                                                          _subscribed);
-                                                    });
-                                              }),
-                                            ],
-                                          ),
-                                          const YMargin(12),
-                                          Text(
-                                            "${campaign?.shortDescription}",
-                                            style: _textTheme.caption.copyWith(
-                                                fontWeight: FontWeight.w400,
-                                                color: _bTheme.dark
-                                                    .withOpacity(.7),
-                                                fontSize: 14),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const YMargin(12),
-                                  ],
-                                ),
-                                const YMargin(12),
-                                Container(
-                                  height: 100,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      _StatCollumn(
-                                          value: campaign.amount,
-                                          description: "Donation Votes"),
-                                      _StatCollumn(
-                                          value: campaign.subscribedCount,
-                                          description: "Abonnenten",
-                                          isDark: true),
-                                    ],
-                                  ),
-                                ),
-                                const YMargin(12),
-                                _buildExpandableContent(
-                                    context, campaign.description ?? ""),
-                              ]),
-                            ),
-                          ),
-                          _buildCampaignSessions(),
-                          StreamBuilder<List<News>>(
-                              stream: DatabaseService.getNewsFromCampaignStream(
-                                  campaign),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData ||
-                                    (snapshot.hasData && snapshot.data.isEmpty))
-                                  return SliverToBoxAdapter(
-                                    child: SizedBox(
-                                      height: 100,
-                                    ),
-                                  );
-                                List<News> n = snapshot.data;
-                                n.sort((a, b) =>
-                                    b.createdAt.compareTo(a.createdAt));
-
-                                return SliverPadding(
-                                  padding: EdgeInsets.fromLTRB(18, 0, 18, 80),
-                                  sliver: SliverList(
-                                      delegate: SliverChildListDelegate([
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 18.0),
-                                      child: Text("Neuigkeiten",
-                                          style: _textTheme.headline6),
-                                    ),
-                                    ListView.builder(
-                                      itemCount: n.length,
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemBuilder: (_, index) => NewsPost(
-                                        n[index],
-                                        withCampaign: false,
-                                      ),
-                                    )
-                                  ])),
-                                );
-                              }),
-                        ]),
-                  ),
-                  Positioned(
+                          );
+                        })
+                  ],
+                ),
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FullscreenImages(
+                                  [campaign.imgUrl, ...campaign.moreImages])));
+                    },
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 12.0),
-                      child: Material(
-                        clipBehavior: Clip.antiAlias,
-                        shape: CircleBorder(),
-                        elevation: 10,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: IconButton(
-                              icon: Icon(Icons.arrow_downward),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              }),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Container(
+                        height: 250,
+                        width: double.infinity,
+                        child: Material(
+                          clipBehavior: Clip.antiAlias,
+                          elevation: 10,
+                          borderRadius: BorderRadius.circular(6),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.campaign.imgUrl,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
-                    top: MediaQuery.of(context).padding.top,
-                    left: 0,
                   ),
-                  Consumer<UserManager>(
-                    builder: (context, um, child) => StreamBuilder<Campaign>(
-                        initialData: widget.campaign,
-                        stream: _campaignStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData &&
-                              snapshot.data.authorId != null &&
-                              snapshot.data.authorId != um.uid)
-                            return Container();
-
-                          if (!snapshot.hasData ||
-                              snapshot.data?.authorId == null ||
-                              snapshot.data?.authorId != null)
-                            return Container();
-
-                          return Positioned(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              child: Material(
-                                clipBehavior: Clip.antiAlias,
-                                shape: CircleBorder(),
-                                elevation: 10,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: IconButton(
-                                      icon: Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        DatabaseService.deleteCampaign(
-                                            campaign);
-                                      }),
-                                ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.all(12.0),
+                  sliver: SliverToBoxAdapter(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 220,
+                              child: AutoSizeText(
+                                campaign?.name ?? "Laden...",
+                                maxLines: 1,
+                                style: _textTheme.headline5
+                                    .copyWith(fontWeight: FontWeight.w700),
                               ),
                             ),
-                            top: MediaQuery.of(context).padding.top,
-                            right: 0,
-                          );
+                            FutureBuilder<Organisation>(
+                                future: _organizationFuture == null &&
+                                        campaign?.authorId != null
+                                    ? DatabaseService.getOrganisation(
+                                        campaign?.authorId)
+                                    : _organizationFuture,
+                                builder: (context, snapshot) {
+                                  Organisation organisation = snapshot.data;
+                                  return InkWell(
+                                    onTap: !snapshot.hasData
+                                        ? null
+                                        : () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        OrganisationPage(
+                                                            organisation)));
+                                          },
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(text: 'by '),
+                                          TextSpan(
+                                              text:
+                                                  '${organisation?.name ?? 'Laden...'}',
+                                              style: _textTheme.bodyText1
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      color: _bTheme.dark)),
+                                        ],
+                                        style: _textTheme.bodyText1.copyWith(
+                                            fontWeight: FontWeight.w400,
+                                            color:
+                                                _bTheme.dark.withOpacity(.54)),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          ],
+                        ),
+                        Consumer<UserManager>(builder: (context, um, child) {
+                          return StreamBuilder<bool>(
+                              initialData: false,
+                              stream: campaign?.id == null
+                                  ? null
+                                  : DatabaseService.hasSubscribedCampaignStream(
+                                      um.uid, campaign?.id),
+                              builder: (context, snapshot) {
+                                _subscribed = snapshot.data;
+                                return _buildFollowButton(
+                                    context,
+                                    () async => _toggleSubscribed(um.uid),
+                                    _subscribed);
+                              });
                         }),
+                      ],
+                    ),
                   ),
-                ],
-              );
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      height: 90,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          _StatCollumn(
+                              value: campaign?.amount ?? 0,
+                              description: "Donation Votes"),
+                          XMargin(6),
+                          _StatCollumn(
+                              value: campaign?.subscribedCount ?? 0,
+                              description: "Abonnenten",
+                              isDark: true),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Divider(),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: TabBar(
+                      controller: _tabController,
+                      indicatorColor: _bTheme.contrast,
+                      indicatorWeight: 3,
+                      labelColor: _bTheme.dark,
+                      unselectedLabelColor: _bTheme.dark.withOpacity(.5),
+                      unselectedLabelStyle:
+                          TextStyle(fontWeight: FontWeight.w500),
+                      labelStyle: TextStyle(fontWeight: FontWeight.w700),
+                      tabs: _buildTabs(),
+                    ),
+                  ),
+                ),
+                [
+                  _buildExpandableContent(context, campaign?.description ?? ""),
+                  _buildCampaignNews(),
+                  _buildCampaignSessions(),
+                ][_tabIndex],
+                SliverToBoxAdapter(
+                  child: YMargin(100),
+                )
+              ]);
             }));
   }
 
+  List<Widget> _buildTabs() => [
+        Tab(
+          text: "Infos",
+        ),
+        Tab(
+          text: "Neuigkeiten",
+        ),
+        Tab(
+          text: "Sessions",
+        ),
+      ];
+
+  Widget _buildCampaignNews() => StreamBuilder<List<News>>(
+      stream: campaign?.id == null
+          ? null
+          : DatabaseService.getNewsFromCampaignStream(campaign),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || (snapshot.hasData && snapshot.data.isEmpty))
+          return SliverToBoxAdapter(
+            child: _buildEmptyWidget("Neuigkeiten"),
+          );
+        List<News> n = snapshot.data;
+        n.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        return SliverPadding(
+          padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+                (context, i) => NewsPost(
+                      n[i],
+                      withCampaign: false,
+                    ),
+                childCount: n.length),
+          ),
+        );
+      });
+
+  Widget _buildEmptyWidget(String name) => Column(
+        children: [
+          SvgPicture.asset(
+            'assets/images/no-news.svg',
+            width: 200,
+          ),
+          YMargin(12),
+          Text("Für dieses Projekt existieren noch keine $name.")
+        ],
+      );
+
   Widget _buildCampaignSessions() => SliverToBoxAdapter(
         child: StreamBuilder(
-            stream: DatabaseService.getCertifiedSessionsFromCampaign(
-                widget.campaign.id),
+            stream: widget.campaign?.id == null
+                ? null
+                : DatabaseService.getCertifiedSessionsFromCampaign(
+                    widget.campaign?.id),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<Session> sessions = snapshot.data;
 
-                if (sessions.isEmpty) return SizedBox.shrink();
+                if (sessions.isEmpty) return _buildEmptyWidget("Sessions");
 
                 sessions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 14.0),
-                      child: Text("Sessions",
-                          style: _textTheme.headline6.copyWith(
-                            fontWeight: FontWeight.w600,
-                          )),
-                    ),
                     Padding(
                       padding: const EdgeInsets.only(left: 14),
                       child: Text(
@@ -501,106 +433,78 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 );
               } else {
                 return Center(
-                  child: SizedBox(
-                      height: 50,
-                      width: 50,
-                      child: CircularProgressIndicator()),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(_bTheme.dark),
+                        )),
+                  ),
                 );
               }
             }),
       );
 
   Widget _buildExpandableContent(BuildContext context, String text) =>
-      ExpandableNotifier(
-        child: Column(
-          children: [
-            Expandable(
-              collapsed: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    text,
-                    maxLines: 4,
-                    softWrap: true,
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        fontSize: 15,
-                        color: _bTheme.dark,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  text.length > 90
-                      ? Align(
-                          alignment: Alignment.bottomLeft,
-                          child: ExpandableButton(
-                              child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                                color: _bTheme.dark,
-                                size: 25,
-                              ),
-                              YMargin(4),
-                              Text(
-                                'MEHR',
-                                textAlign: TextAlign.start,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1
-                                    .copyWith(
-                                        fontSize: 14,
-                                        color: _bTheme.dark,
-                                        fontWeight: FontWeight.w700),
-                              ),
-                            ],
-                          )),
-                        )
-                      : SizedBox.shrink()
-                ],
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        sliver: SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${campaign?.shortDescription ?? ''}",
+                style: _textTheme.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: _bTheme.dark,
+                    fontSize: 14),
               ),
-              expanded: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    text,
-                    maxLines: null,
-                    softWrap: true,
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        fontSize: 15,
-                        color: _bTheme.dark,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  YMargin(4),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: ExpandableButton(
-                        child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              YMargin(6),
+              Text(
+                text,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: _bTheme.dark,
+                    fontWeight: FontWeight.w400),
+              ),
+              YMargin(6),
+              Text(
+                "Was dieses Project bewirkt:",
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: 15,
+                    color: _bTheme.dark,
+                    fontWeight: FontWeight.w700),
+              ),
+              YMargin(6),
+              for (String effect in campaign?.effects)
+                Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.keyboard_arrow_up_outlined,
-                            color: _bTheme.dark, size: 25),
-                        Text(
-                          'WENIGER',
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context).textTheme.bodyText1.copyWith(
-                              fontSize: 14,
-                              color: _bTheme.dark,
-                              fontWeight: FontWeight.w700),
+                        Text('•'),
+                        XMargin(6),
+                        Expanded(
+                          child: Text(
+                            '$effect',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(
+                                    fontSize: 15,
+                                    color: _bTheme.dark,
+                                    fontWeight: FontWeight.w400),
+                          ),
                         ),
                       ],
-                    )),
-                  )
-                ],
-              ),
-            )
-          ],
+                    ),
+                    YMargin(6),
+                  ],
+                ),
+            ],
+          ),
         ),
       );
 
@@ -661,9 +565,11 @@ class _StatCollumn extends StatelessWidget {
     BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Expanded(
       child: Card(
+        margin: EdgeInsets.zero,
         elevation: 0,
         color: isDark ? _bTheme.dark : _bTheme.contrast,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constants.radius)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

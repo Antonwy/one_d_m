@@ -7,6 +7,7 @@ import 'package:flutter_signin_button/button_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -159,8 +160,8 @@ class _RoundButton extends StatelessWidget {
     return Expanded(
       child: OpenContainer(
         openBuilder: (context, close) => toPage,
-        closedShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        closedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constants.radius)),
         openColor: pageColor,
         closedElevation: 0,
         closedColor: isRegister ? ColorTheme.blue : ColorTheme.appGrey,

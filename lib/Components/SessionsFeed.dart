@@ -12,6 +12,7 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
@@ -19,6 +20,8 @@ import 'package:provider/provider.dart';
 
 import 'BottomDialog.dart';
 import 'DonationDialogWidget.dart';
+import 'DonationWidget.dart';
+import 'UserFollowButton.dart';
 
 class SessionsFeed extends StatelessWidget {
   @override
@@ -487,6 +490,56 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
             future: DatabaseService.getUser(member.userId),
             builder: (context, snapshot) {
               User user = snapshot.data;
+
+              return Container(
+                width: 108,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: CustomOpenContainer(
+                    openBuilder: (context, close, scrollController) => UserPage(
+                      user,
+                      scrollController: scrollController,
+                    ),
+                    tappable: user != null,
+                    closedElevation: 0,
+                    closedColor: color.withOpacity(.45),
+                    closedShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    closedBuilder: (context, open) => Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          RoundedAvatar(
+                            user?.imgUrl,
+                            loading: !snapshot.hasData,
+                            color: _theme.colors.dark,
+                            iconColor: _theme.colors.contrast,
+                            height: 30,
+                          ),
+                          YMargin(6),
+                          Container(
+                            width: 76,
+                            height: 20,
+                            child: Center(
+                              child: AutoSizeText(
+                                  "${member?.donationAmount ?? 0} DV",
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  style: _theme.textTheme.dark.headline6),
+                            ),
+                          ),
+                          YMargin(6),
+                          UserFollowButton(
+                              followerId: user?.id,
+                              color: color,
+                              backOpacity: .5),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+
               return CustomOpenContainer(
                 openBuilder: (context, close, scrollController) => UserPage(
                   snapshot.data,

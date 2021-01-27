@@ -227,9 +227,9 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
-          mySessions.isNotEmpty
+          mySessionIds.isNotEmpty
               ? SessionPostFeed(
-                  userSessions: mySessions,
+                  userSessions: mySessionIds,
                 )
               : _buildEmptySession(),
           mySessions.isEmpty

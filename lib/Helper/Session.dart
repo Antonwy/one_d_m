@@ -51,7 +51,11 @@ class BaseSession {
 }
 
 class Session extends BaseSession {
-  final String campaignImgUrl, campaignName, campaignShortDescription, imgUrl;
+  final String campaignImgUrl,
+      campaignName,
+      campaignShortDescription,
+      imgUrl,
+      videoUrl;
   final int currentAmount, memberCount;
   final Color primaryColor, secondaryColor;
 
@@ -65,6 +69,7 @@ class Session extends BaseSession {
       String campaignId,
       String sessionDescription,
       this.imgUrl,
+      this.videoUrl,
       this.currentAmount,
       this.memberCount,
       this.campaignImgUrl,
@@ -101,6 +106,7 @@ class Session extends BaseSession {
       campaignShortDescription: doc.data()[CAMPAIGN_SHORT_DESCRIPTION],
       sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
       imgUrl: doc.data()[IMG_URL],
+      videoUrl: doc.data()[VIDEO_URL],
       primaryColor: doc.data()[PRIMARY_COLOR] != null
           ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
           : ColorTheme.wildGreen,
@@ -123,6 +129,7 @@ class Session extends BaseSession {
       CAMPAIGN_SHORT_DESCRIPTION = "campaign_short_description",
       PRIMARY_COLOR = "primary_color",
       SECONDARY_COLOR = "secondary_color",
+      VIDEO_URL = "video_url",
       IMG_URL = "img_url";
 }
 

@@ -21,6 +21,7 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
+import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -468,12 +469,11 @@ class _CertifiedSessionInfoPage extends StatefulWidget {
 
 class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   bool isCreator = false;
+  bool _isInView = false;
+
   @override
   void initState() {
-    widget.controller = ScrollController()
-      ..addListener(() {
-        print("offset = ${widget.controller.offset}");
-      });
+    widget.controller = ScrollController()..addListener(() {});
     super.initState();
   }
 
@@ -491,14 +491,34 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Material(
-                        elevation: 10,
-                        borderRadius: BorderRadius.circular(6),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image(
-                          image: widget.image,
-                          fit: BoxFit.cover,
-                        )),
+                    child: VisibilityDetector(
+                      key: Key(csm.session.id),
+                      onVisibilityChanged: (VisibilityInfo info) {
+                        var visiblePercentage = info.visibleFraction * 100;
+                        if (mounted) {
+                          if (visiblePercentage == 100) {
+                            setState(() {
+                              _isInView = true;
+                            });
+                          } else {
+                            setState(() {
+                              _isInView = false;
+                            });
+                          }
+                        }
+                      },
+                      child: Material(
+                          elevation: 10,
+                          borderRadius: BorderRadius.circular(6),
+                          clipBehavior: Clip.antiAlias,
+                          child: csm.session.videoUrl == null
+                              ? Image(
+                                  image: widget.image,
+                                  fit: BoxFit.cover,
+                                )
+                              : VideoWidget(
+                                  url: csm.session.videoUrl, play: _isInView)),
+                    ),
                   ),
                 ],
               ),
@@ -684,7 +704,6 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                 if (posts.isNotEmpty) {
                   posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
                   return SliverList(
-
                     delegate:
                         SliverChildListDelegate(_getNewsWidget(context, posts)),
                   );

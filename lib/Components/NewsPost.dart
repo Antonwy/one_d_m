@@ -36,14 +36,16 @@ class _NewsPostState extends State<NewsPost> {
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
         var visiblePercentage = info.visibleFraction * 100;
-        if (visiblePercentage == 100) {
-          setState(() {
-            widget.isInView = true;
-          });
-        } else {
-          setState(() {
-            widget.isInView = false;
-          });
+        if(mounted) {
+          if (visiblePercentage == 100) {
+            setState(() {
+              widget.isInView = true;
+            });
+          } else {
+            setState(() {
+              widget.isInView = false;
+            });
+          }
         }
       },
       child: Padding(

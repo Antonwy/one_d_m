@@ -72,6 +72,7 @@ dependencies:
   video_player: ^1.0.1
   visibility_detector: ^0.1.5
   carousel_slider: ^2.3.1
+  animated_stream_list: ^1.1.0
 
 dev_dependencies:
 

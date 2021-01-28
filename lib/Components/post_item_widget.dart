@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -13,6 +14,7 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/utils/timeline.dart';
 
 import 'NativeAd.dart';
@@ -25,17 +27,21 @@ abstract class PostItem {
 
 class HeadingItem implements PostItem {
   final Stream<Session> session;
+  final Stream<Campaign> campaign;
+  final bool isSession;
 
-  HeadingItem(this.session);
+  HeadingItem({this.isSession, this.session, this.campaign});
 
   @override
   Widget buildHeading(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return KeepAliveStreamBuilder(
-      stream: session,
+      stream: isSession ? session : campaign,
       builder: (_, snapshot) {
         if (snapshot.hasData) {
-          Session session = snapshot.data;
+          Session session;
+          Campaign campaign;
+          isSession ? session = snapshot.data : campaign = snapshot.data;
           return Container(
             margin: const EdgeInsets.only(
                 bottom: 0.0, left: 12.0, right: 12.0, top: 0),
@@ -44,9 +50,13 @@ class HeadingItem implements PostItem {
               closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
               closedElevation: 0,
-              openBuilder: (context, close, scrollController) =>
-                  CertifiedSessionPage(
+              openBuilder: (context, close, scrollController) => isSession
+                  ? CertifiedSessionPage(
                 session: snapshot.data,
+                scrollController: scrollController,
+              )
+                  : NewCampaignPage(
+                campaign,
                 scrollController: scrollController,
               ),
               closedBuilder: (_, open) => InkWell(
@@ -57,7 +67,9 @@ class HeadingItem implements PostItem {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CachedNetworkImage(
-                      imageUrl: session.imgUrl ?? '',
+                      imageUrl: isSession
+                          ? session.imgUrl ?? ''
+                          : campaign.imgUrl ?? '',
                       imageBuilder: (context, imageProvider) => Container(
                         height: 58.0,
                         width: 88.0,
@@ -75,26 +87,24 @@ class HeadingItem implements PostItem {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizeText(session.name ?? '',
+                        AutoSizeText(
+                            isSession
+                                ? session.name ?? ''
+                                : campaign.name ?? '',
                             maxLines: 1,
                             softWrap: true,
                             style: _theme.textTheme.dark.headline6
                                 .copyWith(fontWeight: FontWeight.w600)),
-                        AutoSizeText('Unterstützt ${session.campaignName}',
+                        isSession
+                            ? AutoSizeText(
+                            'Unterstützt ${session.campaignName}',
                             maxLines: 1,
                             softWrap: true,
                             style: _theme.textTheme.dark.bodyText1
-                                .copyWith(fontWeight: FontWeight.w600)),
+                                .copyWith(fontWeight: FontWeight.w600))
+                            : SizedBox.shrink(),
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4.0),
-                      child: Icon(
-                        Icons.verified,
-                        size: 32,
-                        color: Helper.hexToColor("#71e34b"),
-                      ),
-                    )
                   ],
                 ),
               ),
@@ -114,7 +124,7 @@ class HeadingItem implements PostItem {
 class PostContentItem extends StatefulWidget implements PostItem {
   final Stream<List<News>> post;
 
-  PostContentItem(this.post);
+  PostContentItem({this.post});
 
   @override
   Widget buildHeading(BuildContext context) => SizedBox.shrink();
@@ -253,13 +263,13 @@ class PostContentItem extends StatefulWidget implements PostItem {
           return CustomOpenContainer(
             closedColor: Colors.transparent,
             closedShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             closedElevation: 0,
             openBuilder: (context, close, scrollController) =>
                 CertifiedSessionPage(
-              session: snapshot.data,
-              scrollController: scrollController,
-            ),
+                  session: snapshot.data,
+                  scrollController: scrollController,
+                ),
             closedBuilder: (context, open) => Container(
               margin: const EdgeInsets.only(top: 0.0, bottom: 8),
               child: Row(

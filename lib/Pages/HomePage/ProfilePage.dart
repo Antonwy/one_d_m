@@ -230,6 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
           mySessionIds.isNotEmpty
               ? SessionPostFeed(
                   userSessions: mySessionIds,
+            userCampaigns: [],
                 )
               : _buildEmptySession(),
           mySessions.isEmpty

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
-import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 
 class SessionPostFeed extends StatefulWidget {
   final List<String> userSessions;
+  final List<String> userCampaigns;
 
-  const SessionPostFeed({Key key, this.userSessions}) : super(key: key);
+  const SessionPostFeed({Key key, this.userSessions, this.userCampaigns}) : super(key: key);
 
   @override
   _SessionPostFeedState createState() => _SessionPostFeedState();
@@ -20,11 +19,26 @@ class _SessionPostFeedState extends State<SessionPostFeed> {
 
   @override
   void initState() {
-    widget.userSessions.forEach((element) {
-      postItem.add(HeadingItem(DatabaseService.getSessionFuture(element)));
-      postItem
-          .add(PostContentItem(DatabaseService.getPostBySessionId(element)));
-    });
+    if(widget.userSessions.isNotEmpty) {
+      widget.userSessions.forEach((element) {
+        postItem.add(HeadingItem(
+            session: DatabaseService.getSessionFuture(element),
+            isSession: true));
+        postItem.add(PostContentItem(
+          post: DatabaseService.getPostBySessionId(element),
+        ));
+      });
+    }
+    if(widget.userCampaigns.isNotEmpty){
+      widget.userCampaigns.forEach((element) {
+        postItem.add(HeadingItem(
+            campaign: DatabaseService.getCampaignStream(element),
+            isSession: false));
+        postItem.add(PostContentItem(
+          post: DatabaseService.getNewsFromCampaignStream(element),
+        ));
+      });
+    }
     super.initState();
   }
 

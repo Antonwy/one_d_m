@@ -342,7 +342,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           _buildCampaignSessions(),
                           StreamBuilder<List<News>>(
                               stream: DatabaseService.getNewsFromCampaignStream(
-                                  campaign),
+                                  campaign.id),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData ||
                                     (snapshot.hasData && snapshot.data.isEmpty))

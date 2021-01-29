@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
@@ -6,6 +5,7 @@ import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -38,11 +38,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  GlobalKey<_ProfilePageState> _myKey = GlobalKey();
+  GlobalKey<SessionPostFeedState> _feedKey = GlobalKey();
 
   ThemeManager _theme;
   List<Session> mySessions = [];
-  List<String> mySessionIds = [];
+  List<Campaign> myCampaigns = [];
+  Widget _postFeedWidget;
 
   @override
   void initState() {
@@ -53,49 +54,30 @@ class _ProfilePageState extends State<ProfilePage> {
       mySessions.clear();
       event.forEach((element) {
         DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
-          if (isExist) {
+        }).onData((data) {
+          if (data) {
             mySessions.add(element);
           }
+          print('>>>>>${data}');
           setState(() {});
+          if(mounted) {
+            _feedKey.currentState.setState(() {});
+          }
         });
       });
     });
 
-    DatabaseService.getSessionPosts().listen((news) {
-      mySessionIds.clear();
-      news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
-
-      List<String> sessionsWithPost = [];
-
-      news.forEach((element) {
-        sessionsWithPost.add(element.sessionId);
-      });
-
-      ///sort and add sessions with post to the begining of the list
-      ///
-      List<String> sessionIds = sessionsWithPost.toSet().toList();
-      DatabaseService.getCertifiedSessions().listen((sessions) {
-        List<String> allSessions = [];
-
-        sessions.forEach((element) {
-          allSessions.add(element.id);
-        });
-
-        ///add sessions that doesn't have posts
-
-        sessionIds = [...sessionIds, ...allSessions];
-
-        List<String> uniqueIds = sessionIds.toSet().toList();
-        uniqueIds.forEach((element) {
-          DatabaseService.userIsInSession(uid, element).listen((isExist) {
-            if (isExist) {
-              mySessionIds.add(element);
-            }
-            setState(() {});
-          });
-        });
-      });
+    DatabaseService.getSubscribedCampaignsStream(uid).listen((event) {
+    }).onData((data) {
+      myCampaigns.clear();
+      myCampaigns.addAll(data);
+      print('>>>>>${myCampaigns.length}');
+      setState(() {});
+      if(mounted) {
+        _feedKey.currentState.setState(() {});
+      }
     });
+
     super.initState();
   }
 
@@ -114,6 +96,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 stream: DatabaseService.getUserStream(um.uid),
                 builder: (context, snapshot) {
                   User user = snapshot.data;
+                  _postFeedWidget = SessionPostFeed(
+                    key: _feedKey,
+                    uid: um.uid,
+                    userSessions: mySessions,
+                    userCampaigns: myCampaigns,
+                  );
                   return SliverAppBar(
                     backgroundColor: Colors.transparent,
                     elevation: 0,
@@ -213,11 +201,6 @@ class _ProfilePageState extends State<ProfilePage> {
             child: YMargin(8),
           ),
           InfoFeed(),
-
-          ///build the sessions that follow by user
-          // mySessions.isNotEmpty
-          //     ? _buildMySessions(mySessions)
-          //     : _buildEmptySession(),y
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
@@ -227,11 +210,9 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
-          mySessionIds.isNotEmpty
-              ? SessionPostFeed(
-                  userSessions: mySessionIds,
-            userCampaigns: [],
-                )
+          mySessions.isNotEmpty || myCampaigns.isNotEmpty
+              ? Consumer<UserManager>(
+                  builder: (context, um, child) => _postFeedWidget)
               : _buildEmptySession(),
           mySessions.isEmpty
               ? _buildRecomendedSession()

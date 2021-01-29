@@ -32,7 +32,9 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
       setState(() {
         _index++;
       });
-      _scrollToEnd();
+      if(_controller.hasClients) {
+        _scrollToEnd();
+      }
     });
     super.initState();
   }

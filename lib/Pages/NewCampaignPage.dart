@@ -170,6 +170,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                 backgroundLight: true,
                                 loading: !snapshot.hasData,
                                 fit: BoxFit.contain,
+                                borderRadius: 6,
                               ),
                             ),
                           );
@@ -404,11 +405,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     Padding(
                       padding: const EdgeInsets.only(left: 14),
                       child: Text(
-                          '${sessions.length} Influencer engagieren sich für dieses Projekt',
-                          style: _textTheme.headline6.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                              color: Colors.black.withOpacity(0.6))),
+                          '${sessions.length} Influencer engagieren sich für dieses Projekt.',
+                          style: _textTheme.bodyText1),
                     ),
                     const YMargin(8),
                     Container(

@@ -6,6 +6,7 @@ import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -504,7 +505,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                     closedElevation: 0,
                     closedColor: color.withOpacity(.45),
                     closedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(Constants.radius)),
                     closedBuilder: (context, open) => Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
@@ -525,13 +526,16 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                                   "${member?.donationAmount ?? 0} DV",
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
-                                  style: _theme.textTheme.dark.headline6),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
                             ),
                           ),
                           YMargin(6),
                           UserFollowButton(
                               followerId: user?.id,
                               color: color,
+                              textColor: Colors.white,
                               backOpacity: .5),
                         ],
                       ),

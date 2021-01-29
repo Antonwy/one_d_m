@@ -7,10 +7,11 @@ import 'package:provider/provider.dart';
 
 class UserFollowButton extends StatefulWidget {
   final String followerId;
-  final Color color;
+  final Color color, textColor;
   final double backOpacity;
 
-  UserFollowButton({this.followerId, this.color, this.backOpacity = .5});
+  UserFollowButton(
+      {this.followerId, this.color, this.textColor, this.backOpacity = .5});
 
   @override
   _UserFollowButtonState createState() => _UserFollowButtonState();
@@ -34,7 +35,8 @@ class _UserFollowButtonState extends State<UserFollowButton> {
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
             child: Text(
               "Ich",
-              style: _theme.textTheme.dark.bodyText1.copyWith(fontSize: 11),
+              style: _theme.textTheme.dark.bodyText1
+                  .copyWith(fontSize: 11, color: widget.textColor),
             ),
           ));
 
@@ -47,7 +49,6 @@ class _UserFollowButtonState extends State<UserFollowButton> {
           return Material(
               clipBehavior: Clip.antiAlias,
               color: (widget.color ?? _theme.colors.contrast)
-                  .withOpacity(widget.backOpacity)
                   .withOpacity(widget.backOpacity),
               borderRadius: BorderRadius.circular(20),
               child: InkWell(
@@ -84,7 +85,7 @@ class _UserFollowButtonState extends State<UserFollowButton> {
                       : Text(
                           snapshot.data ? "Entfolgen" : "Folgen",
                           style: _theme.textTheme.dark.bodyText1
-                              .copyWith(fontSize: 11),
+                              .copyWith(fontSize: 11, color: widget.textColor),
                         ),
                 ),
               ));

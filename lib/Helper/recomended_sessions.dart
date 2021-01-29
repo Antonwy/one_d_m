@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 
 import 'DatabaseService.dart';
@@ -17,7 +18,6 @@ class RecomendedSessions extends StatefulWidget {
 }
 
 class _RecomendedSessionsState extends State<RecomendedSessions> {
-
   @override
   void initState() {
     super.initState();
@@ -67,7 +67,7 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
               List<String> uniqueIds = sessionIds.toSet().toList();
 
               return Container(
-                height: 160,
+                height: 150,
                 child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     separatorBuilder: (context, index) => SizedBox(
@@ -97,7 +97,10 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
             mainAxisSize: MainAxisSize.max,
             children: [
               Expanded(child: CertifiedSessionView(s)),
-              _SessionJoinButton(session: s,)
+              YMargin(6),
+              _SessionJoinButton(
+                session: s,
+              )
             ],
           );
         },
@@ -116,12 +119,6 @@ class _SessionJoinButton extends StatefulWidget {
 class __SessionJoinButtonState extends State<_SessionJoinButton> {
   bool _loading = false;
 
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
@@ -134,7 +131,51 @@ class __SessionJoinButtonState extends State<_SessionJoinButton> {
                   initialData: false,
                   stream: csm.isInSession,
                   builder: (context, snapshot) {
-                    Color color =_theme.colors.textOnDark;
+                    Color color = _theme.colors.textOnDark;
+
+                    return Material(
+                        clipBehavior: Clip.antiAlias,
+                        color: _theme.colors.contrast.withOpacity(.5),
+                        borderRadius: BorderRadius.circular(20),
+                        child: InkWell(
+                          onTap: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+
+                            await (snapshot.data
+                                ? DatabaseService.leaveCertifiedSession(
+                                    csm.baseSession.id)
+                                : DatabaseService.joinCertifiedSession(
+                                    csm.baseSession.id));
+
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 12),
+                            child: _loading
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    child: Container(
+                                        width: 12,
+                                        height: 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation(
+                                              _theme.colors.dark),
+                                        )),
+                                  )
+                                : Text(
+                                    snapshot.data ? "Verlassen" : "Beitreten",
+                                    style: _theme.textTheme.dark.bodyText1
+                                        .copyWith(fontSize: 11),
+                                  ),
+                          ),
+                        ));
                     return MaterialButton(
                       minWidth: 133,
                       color: csm.session.secondaryColor,

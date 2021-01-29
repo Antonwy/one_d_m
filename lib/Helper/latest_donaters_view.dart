@@ -1,10 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:infinite_listview/infinite_listview.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/margin.dart';
 
@@ -19,34 +16,19 @@ class LatestDonatorsView extends StatefulWidget {
 }
 
 class _LatestDonatorsViewState extends State<LatestDonatorsView> {
-  final InfiniteScrollController _infiniteController = InfiniteScrollController(
-    initialScrollOffset: 0.0,
-  );
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: DatabaseService.getLatestDonations(limit: 5),
+      stream: DatabaseService.getLatestDonations(limit: 30),
       builder: (_, snapshot) {
         if (!snapshot.hasData) return SizedBox.shrink();
         List<Donation> d = snapshot.data;
-        List<Donation> ud = [];
-        List<String> userIds = [];
         if (d.isEmpty) return SizedBox.shrink();
 
         d.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        d.forEach((element) {
-          userIds.add(element.userId);
-        });
-        userIds = userIds.toSet().toList();
-
-        userIds.forEach((id) {
-          Donation dm = d.firstWhere((element) => element.userId == id);
-          ud.add(dm);
-        });
         List<Widget> don = [];
-        for (Donation d in ud) {
-          don.add(_buildDonator(amount: d.amount.toString(), uid: d.userId));
+        for (Donation dn in d) {
+          don.add(_buildDonator(amount: dn.amount.toString(), uid: dn.userId));
         }
 
         return _buildCarousel(don);
@@ -101,11 +83,4 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
         enlargeCenterPage: false,
         scrollDirection: Axis.horizontal,
       ));
-}
-
-class LatestDonator {
-  String amount;
-  String imgUrl;
-
-  LatestDonator({this.amount, this.imgUrl});
 }

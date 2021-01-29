@@ -151,7 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ? SessionPostFeed(
                   userSessions: mySessions,
                 )
-              : _buildEmptySession(),
+              : NoContentProfilePage(),
           const SliverToBoxAdapter(
             child: const SizedBox(
               height: 120,
@@ -162,42 +162,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  Widget _buildEmptySession() => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              SvgPicture.asset(
-                "assets/images/no-donations.svg",
-                width: 206,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                "Du bist momentan kein Mitglied einer Session.\nDu kannst auf der 'Entdecken' Seite \nInfluencer-Sessions und Projekten folgen.",
-                style: _theme.textTheme.dark.bodyText2,
-                textAlign: TextAlign.center,
-              ),
-              const YMargin(12),
-              Text(
-                "Sessions die dich interessieren könnten:",
-                style: _theme.textTheme.dark.bodyText1,
-                textAlign: TextAlign.center,
-              ),
-              // RaisedButton(
-              //   onPressed: widget.onExploreTapped,
-              //   child: AutoSizeText(
-              //     'Entdecke Sessions',
-              //     style: Theme.of(context).accentTextTheme.button,
-              //   ),
-              //   color: ThemeManager.of(context).colors.dark,
-              // ),
-            ],
-          ),
-        ),
-      );
 
   Widget _buildRecomendedSession() => SliverToBoxAdapter(
         child: Column(
@@ -265,6 +229,55 @@ class _ProfilePageState extends State<ProfilePage> {
           return CertifiedSessionView(s);
         },
       );
+}
+
+class NoContentProfilePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                "Sessions die dich interessieren könnten:",
+                style: _theme.textTheme.dark.headline6.copyWith(fontSize: 16),
+              ),
+            ),
+          ),
+          RecomendedSessions(),
+          YMargin(6),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Constants.radius)),
+              margin: EdgeInsets.zero,
+              color: _theme.colors.dark,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.new_releases, color: _theme.colors.textOnDark),
+                    XMargin(12),
+                    Expanded(
+                      child: Text(
+                        "Interessante Projekte und weitere Sessions findest du wenn du einmal nach rechts swipest.",
+                        style: _theme.textTheme.textOnDark.bodyText1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ProfileHeader extends SliverPersistentHeaderDelegate {

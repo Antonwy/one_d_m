@@ -9,6 +9,7 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 
+import 'Constants.dart';
 import 'Helper.dart';
 
 class CertifiedSessionsList extends StatefulWidget {
@@ -115,8 +116,8 @@ class CertifiedSessionView extends StatelessWidget {
       width: 220,
       child: CustomOpenContainer(
         closedColor: Colors.grey[200],
-        closedShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        closedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constants.radius)),
         closedElevation: 0,
         openBuilder: (context, close, scrollController) => CertifiedSessionPage(
           session: session,

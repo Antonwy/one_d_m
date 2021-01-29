@@ -5,6 +5,7 @@ import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 
 class SessionPostFeed extends StatefulWidget {
   final List<Session> userSessions;
@@ -26,7 +27,9 @@ class _SessionPostFeedState extends State<SessionPostFeed> {
           if (!snapshot.hasData)
             return SliverToBoxAdapter(
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(_theme.colors.dark),
+                ),
               ),
             );
           List<News> news = snapshot.data;
@@ -56,7 +59,7 @@ class _SessionPostFeedState extends State<SessionPostFeed> {
             return SliverList(
                 delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
           } else {
-            return SliverToBoxAdapter(child: SizedBox.shrink());
+            return NoContentProfilePage();
           }
         });
   }

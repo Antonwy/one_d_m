@@ -6,6 +6,7 @@ import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -60,7 +61,8 @@ class _NewsPostState extends State<NewsPost> {
           clipBehavior: Clip.antiAlias,
           color: ColorTheme.appBg,
           elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Constants.radius)),
           child: Column(
             children: <Widget>[
               widget.withCampaign
@@ -79,17 +81,11 @@ class _NewsPostState extends State<NewsPost> {
                 child: Stack(
                   children: <Widget>[
                     widget.news.videoUrl != null
-                        ? widget.isInView ?? false
-                            ? VideoWidget(
-                                url: widget.news.videoUrl,
-                                play: true,
-                                imageUrl: widget.news.videoUrl,
-                              )
-                            : VideoWidget(
-                                url: widget.news.videoUrl,
-                                play: false,
-                                imageUrl: widget.news.videoUrl,
-                              )
+                        ? VideoWidget(
+                            url: widget.news.videoUrl,
+                            play: widget.isInView,
+                            imageUrl: widget.news.videoUrl,
+                          )
                         : CachedNetworkImage(
                             width: double.infinity,
                             height: 260,

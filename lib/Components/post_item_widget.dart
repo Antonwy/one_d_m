@@ -186,7 +186,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
       widgets.add(Stack(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 32.0, right: 12.0, top: 0),
+            padding: const EdgeInsets.only(left: 28.0, right: 12.0, top: 0),
             child: NewsPost(
               post[i],
               withCampaign: false,

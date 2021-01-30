@@ -21,6 +21,7 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:one_d_m/Pages/notification_page.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -53,27 +54,27 @@ class _ProfilePageState extends State<ProfilePage> {
     DatabaseService.getCertifiedSessions().listen((event) {
       mySessions.clear();
       event.forEach((element) {
-        DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
-        }).onData((data) {
+        DatabaseService.userIsInSession(uid, element.id)
+            .listen((isExist) {})
+            .onData((data) {
           if (data) {
             mySessions.add(element);
           }
-          print('>>>>>${data}');
           setState(() {});
-          if(mounted) {
+          if (mounted) {
             _feedKey.currentState.setState(() {});
           }
         });
       });
     });
 
-    DatabaseService.getSubscribedCampaignsStream(uid).listen((event) {
-    }).onData((data) {
+    DatabaseService.getSubscribedCampaignsStream(uid)
+        .listen((event) {})
+        .onData((data) {
       myCampaigns.clear();
       myCampaigns.addAll(data);
-      print('>>>>>${myCampaigns.length}');
       setState(() {});
-      if(mounted) {
+      if (mounted) {
         _feedKey.currentState.setState(() {});
       }
     });
@@ -150,14 +151,26 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     onPressed: () {},
                                   ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: Icon(
-                                      Icons.notifications_none_rounded,
-                                      color: _theme.colors.dark,
-                                      size: 28,
+                                  CustomOpenContainer(
+                                    openBuilder: (context, close, controller) =>
+                                        NotificationPage(
+                                            user: user,
+                                            scrollController: controller),
+                                    closedColor: ColorTheme.appBg,
+                                    closedShape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    closedElevation: 0,
+                                    closedBuilder: (context, open) =>
+                                        IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(
+                                        Icons.notifications_none_rounded,
+                                        color: _theme.colors.dark,
+                                        size: 28,
+                                      ),
+                                      onPressed: open,
                                     ),
-                                    onPressed: () {},
                                   ),
                                   IconButton(
                                     padding: EdgeInsets.zero,

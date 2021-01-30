@@ -28,14 +28,14 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
       _onNewDonationController.add(d);
     });
 
-    _onNewDonationController.stream.listen((event) {
-      setState(() {
-        _index++;
-      });
-      if(_controller.hasClients) {
-        _scrollToEnd();
-      }
-    });
+    // _onNewDonationController.stream.listen((event) {
+    //   setState(() {
+    //     _index++;
+    //   });
+    //   if(_controller.hasClients) {
+    //     _scrollToEnd();
+    //   }
+    // });
     super.initState();
   }
 
@@ -58,7 +58,6 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
           if (!snapshot.hasData) return SizedBox.shrink();
           List<Donation> d = snapshot.data;
           if (d.isEmpty) return SizedBox.shrink();
-          d = d.reversed.toList();
           return ListView.separated(
             controller: _controller,
             scrollDirection: Axis.horizontal,
@@ -113,27 +112,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
           ),
         ),
       );
-
-  Widget _buildCarousel(List<Widget> donators) => CarouselSlider(
-      items: donators,
-      options: CarouselOptions(
-        height: context.screenHeight(percent: 0.2),
-        viewportFraction: 0.23,
-        initialPage: 0,
-        enableInfiniteScroll: false,
-        reverse: false,
-        autoPlay: false,
-        disableCenter: true,
-        pauseAutoPlayInFiniteScroll: false,
-        pauseAutoPlayOnTouch: false,
-        pauseAutoPlayOnManualNavigate: false,
-        autoPlayInterval: Duration(milliseconds: 9000),
-        autoPlayAnimationDuration: Duration(milliseconds: 9000),
-        autoPlayCurve: Curves.linear,
-        enlargeCenterPage: false,
-        scrollDirection: Axis.horizontal,
-      ));
-
+  
   _scrollToEnd() => _controller.animateTo(
       _index * context.screenWidth(percent: 0.02),
         curve: Curves.easeOut,

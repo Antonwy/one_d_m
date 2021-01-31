@@ -116,46 +116,12 @@ class _NewsPostState extends State<NewsPost> {
                       ),
                     ),
                     Align(
-                      alignment: Alignment.bottomLeft,
+                      alignment: Alignment.bottomRight,
                       child: Padding(
                         padding: const EdgeInsets.all(10),
-                        child: Row(
-                          mainAxisAlignment: widget.withDonationButton
-                              ? MainAxisAlignment.spaceBetween
-                              : MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              timeago.format(widget.news.createdAt,
-                                  locale: "de"),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            widget.withDonationButton
-                                ? Material(
-                                    borderRadius: BorderRadius.circular(20),
-                                    clipBehavior: Clip.antiAlias,
-                                    color: ThemeManager.of(context)
-                                        .colors
-                                        .contrast,
-                                    child: InkWell(
-                                      onTap: () async {
-                                        await _donate();
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 12),
-                                        child: Text(
-                                          "Unterstützen",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                              color: ThemeManager.of(context)
-                                                  .colors
-                                                  .dark),
-                                        ),
-                                      ),
-                                    ))
-                                : SizedBox.shrink(),
-                          ],
+                        child: Text(
+                          timeago.format(widget.news.createdAt, locale: "de"),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -202,27 +168,31 @@ class _NewsPostState extends State<NewsPost> {
                     fontWeight: FontWeight.w400),
               ),
             ),
-            post.length > 120
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Divider(
-                        height: 1,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: ExpandableButton(
-                            child: Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                          child: Text('MEHR',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: _theme.colors.dark)),
-                        )),
-                      ),
-                    ],
-                  )
-                : SizedBox.shrink()
+            Divider(
+              height: 1,
+            ),
+            Row(
+              children: [
+                widget.withDonationButton
+                    ? _postButton(
+                        onPressed: () async {
+                          await _donate();
+                        },
+                        text: "Unterstützen")
+                    : SizedBox.shrink(),
+                post.length > 120
+                    ? ExpandableButton(
+                        child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text('Mehr',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                                color: _theme.colors.dark)),
+                      ))
+                    : SizedBox.shrink()
+              ],
+            ),
           ],
         ),
         expanded: Column(
@@ -243,33 +213,48 @@ class _NewsPostState extends State<NewsPost> {
                     fontWeight: FontWeight.w400),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: ExpandableButton(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(
-                    height: 1,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ExpandableButton(
-                        child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                      child: Text('WENIGER',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: _theme.colors.dark)),
-                    )),
-                  ),
-                ],
-              )),
+            Divider(
+              height: 1,
+            ),
+            Row(
+              children: [
+                widget.withDonationButton
+                    ? _postButton(
+                        onPressed: () async {
+                          await _donate();
+                        },
+                        text: "Unterstützen")
+                    : SizedBox.shrink(),
+                ExpandableButton(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('Weniger',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: _theme.colors.dark)),
+                )),
+              ],
             )
           ],
         ),
       ),
     );
+  }
+
+  Widget _postButton({String text, void Function() onPressed}) {
+    return InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            text,
+            style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                color: ThemeManager.of(context).colors.dark),
+          ),
+        ));
   }
 
   Future<void> _donate() async {

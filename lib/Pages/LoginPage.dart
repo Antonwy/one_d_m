@@ -58,14 +58,6 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: ColorTheme.appGrey,
-      appBar: AppBar(
-        backgroundColor: ColorTheme.appGrey,
-        elevation: 0,
-        brightness: Brightness.dark,
-        iconTheme: IconThemeData(
-          color: Colors.black, //change your color here
-        ),
-      ),
       body: Form(
         key: _formKey,
         child: CustomScrollView(slivers: [
@@ -110,6 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                       textColor: ColorTheme.blue,
                       focusedColor: ColorTheme.blue,
                       activeColor: ColorTheme.blue,
+                      autoCorrect: false,
                       onChanged: (text) {
                         _email = text.trim().toLowerCase();
                       },
@@ -210,6 +203,8 @@ class _LoginPageState extends State<LoginPage> {
     if (res.hasError()) {
       _showSnackBar(res.message);
     }
+
+    await _um.afterAuthentication();
   }
 
   void _showSnackBar(String message) {

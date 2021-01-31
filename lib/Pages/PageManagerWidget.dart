@@ -9,7 +9,6 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
-import 'package:one_d_m/Helper/margin.dart';
 
 import 'HomePage/HomePage.dart';
 import 'VerifyEmailPage.dart';
@@ -25,17 +24,12 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   UserManager _um;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   StreamSubscription _fmStream;
-  bool _saveToken = false;
   HomePage _homePage;
 
   @override
   void initState() {
     super.initState();
     _homePage = HomePage();
-    _fmStream = _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-      print(data);
-      _saveToken = true;
-    });
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -52,11 +46,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
         // TODO optional
       },
     );
-  }
-
-  Future<void> _saveDeviceToken() async {
-    await DatabaseService.saveDeviceToken(
-        _um.uid, await _firebaseMessaging.getToken());
   }
 
   @override
@@ -93,10 +82,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     return FutureBuilder(
         future: Future.delayed(Duration(milliseconds: 2000)),
         builder: (context, snapshot) {
-          if (_saveToken && _um?.uid != null) {
-            _saveDeviceToken();
-          }
-
           return Stack(
             children: <Widget>[
               _um?.uid == null
@@ -195,7 +180,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                 child: AutoSizeText("One Dollar Movement",
                     maxLines: 1,
                     style: _theme.textTheme.dark.headline5
-                        .copyWith(fontWeight: FontWeight.w600,fontSize: 24)),
+                        .copyWith(fontWeight: FontWeight.w600, fontSize: 24)),
               ),
             ],
           ),

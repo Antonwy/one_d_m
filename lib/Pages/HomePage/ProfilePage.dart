@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
+import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
@@ -443,7 +444,13 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                         children: <Widget>[
                                           _appBarButton(
                                               icon: Icons.message_rounded,
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                PushNotification.of(context)
+                                                    .show(NotificationContent(
+                                                        title: "Test Titel",
+                                                        body:
+                                                            "Hier könnte die Beschreibung stehen."));
+                                              },
                                               context: context),
                                           _appBarButton(
                                               icon: Icons
@@ -472,10 +479,12 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                                               Constants
                                                                   .radius)),
                                               closedElevation: 0,
+                                              tappable: user != null,
                                               closedBuilder: (context, open) =>
                                                   RoundedAvatar(
                                                 user?.thumbnailUrl ??
                                                     user?.imgUrl,
+                                                name: user?.name,
                                               ),
                                             ),
                                             width: 40,

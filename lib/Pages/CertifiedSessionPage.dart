@@ -557,6 +557,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                   ],
                 ),
               ),
+              XMargin(12),
               Expanded(
                 flex: 3,
                 child: csm.session.creatorId?.isNotEmpty ?? true
@@ -893,13 +894,13 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
         builder: (context, sm, child) => SizedBox(
-            height: 150,
+            height: 155,
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
               slivers: [
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 130,
+                    height: 155,
                   ),
                 ),
                 uniqueAllMembers.isNotEmpty

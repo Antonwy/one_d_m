@@ -1,8 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -95,22 +97,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         .then((value) => _animateToPage(4));
                   },
                 ),
-
-                // _WelcomePage(
-                //     svgName: "contacts",
-                //     title: "Kontaktbuch",
-                //     description:
-                //         "Um dich direkt zu beginn mit deinen Freunden zu verknüpfen benötigen wir deine Zustimmung!",
-                //     animatedValue: _getAnimatedValue(4, _page),
-                //     onPressed: () => _animateToPage(5)),
-                // _WelcomePage(
-                //   svgName: "donation",
-                //   title: "Ablauf",
-                //   description:
-                //       "Durch jede Ad-Impression erhalten wir Geld von unseren Werbenetzwerken. Das eingenommene Geld wird prozentual, je nach Aktivität, auf die Nutzer verteilt und am Ende des Monats an die von den Nutzern ausgewählten Projekte/Organisationen überwiesen. Dabei befindet sich das Geld zu keinem Zeitpunkt auf dem Konto der Nutzer. Dadurch werden unnötigen Transaktionen zwischen den Nutzern und One Dollar Movement vermieden.",
-                //   animatedValue: _getAnimatedValue(5, _page),
-                //   onPressed: () => _animateToPage(6),
-                // ),
                 _WelcomePage(
                   svgName: "img_contact",
                   title: "Finde Deine Freunde",
@@ -166,6 +152,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (permission != PermissionStatus.granted) {
       final Map<Permission, PermissionStatus> permissionStatus =
           await [Permission.notification].request();
+
       return permissionStatus[Permission.notification] ??
           PermissionStatus.undetermined;
     } else {

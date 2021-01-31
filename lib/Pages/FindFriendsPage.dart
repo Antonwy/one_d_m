@@ -74,7 +74,12 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            title: widget.afterRegister ? Text("Finde Freunde") : null,
+            title: widget.afterRegister
+                ? Text(
+                    "Finde Freunde",
+                    style: TextStyle(color: ColorTheme.blue),
+                  )
+                : null,
             brightness: Brightness.dark,
             backgroundColor: ColorTheme.whiteBlue,
             iconTheme: IconThemeData(color: ColorTheme.blue),

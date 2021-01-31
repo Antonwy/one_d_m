@@ -52,6 +52,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                       u?.thumbnailUrl ?? u?.imgUrl,
                       height: 31,
                       loading: !snapshot.hasData,
+                      name: u?.name,
                     ),
                   );
                 }),

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
@@ -11,20 +12,28 @@ import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FaqPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'DonationWidget.dart';
 
-class SettingsDialog extends StatelessWidget {
+class SettingsDialog extends StatefulWidget {
+  @override
+  _SettingsDialogState createState() => _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<SettingsDialog> {
   UserManager um;
+
   TextTheme _textTheme;
 
   @override
   Widget build(BuildContext context) {
     um = Provider.of<UserManager>(context);
     _textTheme = Theme.of(context).accentTextTheme;
+    ThemeManager _theme = ThemeManager.of(context);
     return Material(
       color: ColorTheme.navBar,
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -64,7 +73,7 @@ class SettingsDialog extends StatelessWidget {
                                     height: 50,
                                   ),
                                 ),
-                                color: ThemeManager.of(context).colors.contrast,
+                                color: _theme.colors.contrast,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                         Constants.radius + 2)),
@@ -139,9 +148,7 @@ class SettingsDialog extends StatelessWidget {
                                                         Constants.radius)),
                                             child: InkWell(
                                                 onTap: () async {
-                                                  ThemeManager.of(context,
-                                                          listen: false)
-                                                      .colors = bTheme;
+                                                  _theme.colors = bTheme;
                                                   SharedPreferences prefs =
                                                       await SharedPreferences
                                                           .getInstance();
@@ -210,20 +217,6 @@ class SettingsDialog extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => FaqPage()));
                   },
                 ),
-                // ListTile(
-                //   title: Text("Meine Spenden"),
-                //   subtitle: Text("Alle deine Spenden aufgelistet."),
-                //   trailing: Icon(
-                //     Icons.arrow_forward_ios,
-                //     size: 18,
-                //   ),
-                //   onTap: () {
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => UsersDonationsPage(um.user)));
-                //   },
-                // ),
                 ListTile(
                   title: Text("Profil Einstellungen"),
                   subtitle: Text("${um.user?.name}"),
@@ -237,6 +230,17 @@ class SettingsDialog extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => editProfile));
                   },
                 ),
+                StreamBuilder<bool>(
+                    initialData: false,
+                    stream: DatabaseService.hasPushNotificationsTurnedOnStream(
+                        um.uid),
+                    builder: (context, snapshot) {
+                      return SwitchListTile(
+                          title: Text("Push Benachrichtigungen"),
+                          activeColor: _theme.colors.contrast,
+                          value: snapshot.data ?? false,
+                          onChanged: _togglePushNotifications);
+                    }),
                 ListTile(
                   title: Text("Datenschutzbedingungen"),
                   trailing: Icon(
@@ -312,5 +316,29 @@ class SettingsDialog extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(url);
     }
+  }
+
+  void _togglePushNotifications(bool val) async {
+    final PermissionStatus permission = await Permission.notification.status;
+
+    if (val) {
+      if (permission != PermissionStatus.granted) {
+        final Map<Permission, PermissionStatus> permissionStatus =
+            await [Permission.notification].request();
+        PermissionStatus status = permissionStatus[Permission.notification] ??
+            PermissionStatus.undetermined;
+
+        if (status == PermissionStatus.granted) await _saveToken();
+      } else
+        await _saveToken();
+    } else {
+      await DatabaseService.deleteDeviceToken(um.uid);
+    }
+  }
+
+  Future<void> _saveToken() async {
+    final FirebaseMessaging _fMessaging = FirebaseMessaging();
+    String token = await _fMessaging.getToken();
+    await DatabaseService.saveDeviceToken(um.uid, token);
   }
 }

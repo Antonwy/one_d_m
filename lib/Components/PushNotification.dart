@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 
 class PushNotification {
   BuildContext context;
@@ -56,6 +59,7 @@ class _PushWidgetState extends State<PushWidget>
   @override
   Widget build(BuildContext context) {
     _mq = MediaQuery.of(context);
+    ThemeManager _theme = ThemeManager.of(context);
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -73,33 +77,45 @@ class _PushWidgetState extends State<PushWidget>
                     Tween<double>(begin: 0.8, end: 1).animate(curvedAnim).value,
                 child: child));
       },
-      child: Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Material(
-          borderRadius: BorderRadius.circular(27),
-          color: ColorTheme.blue,
+          borderRadius: BorderRadius.circular(Constants.radius),
+          elevation: 1,
+          color: _theme.colors.dark,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  widget.content?.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .copyWith(color: ColorTheme.orange, fontSize: 15),
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.notification_important,
+                  color: _theme.colors.textOnDark,
                 ),
-                (widget.content.body == null || widget.content.body.isEmpty)
-                    ? Container(
-                        width: 0,
-                      )
-                    : Text(
-                        widget.content.body,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyText1
-                            .copyWith(color: ColorTheme.orange.withOpacity(.7)),
+                XMargin(12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        widget.content?.title,
+                        style: Theme.of(context).textTheme.headline6.copyWith(
+                            color: _theme.colors.textOnDark, fontSize: 15),
                       ),
+                      (widget.content.body == null ||
+                              widget.content.body.isEmpty)
+                          ? Container(
+                              width: 0,
+                            )
+                          : Text(
+                              widget.content.body,
+                              style: _theme.textTheme.textOnDark
+                                  .withOpacity(.7)
+                                  .bodyText1,
+                            ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

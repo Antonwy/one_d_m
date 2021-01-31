@@ -516,16 +516,17 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                             color: _theme.colors.dark,
                             iconColor: _theme.colors.contrast,
                             height: 30,
+                            name: user?.name,
                           ),
                           YMargin(6),
                           Container(
                             width: 76,
-                            height: 20,
+                            height: 25,
                             child: Center(
                               child: AutoSizeText(
-                                  "${member?.donationAmount ?? 0} DV",
+                                  "${user?.name ?? 'Laden...'}\n${member?.donationAmount ?? 0} DV",
                                   textAlign: TextAlign.center,
-                                  maxLines: 1,
+                                  maxLines: 2,
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold)),

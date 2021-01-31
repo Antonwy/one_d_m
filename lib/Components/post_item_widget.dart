@@ -68,23 +68,25 @@ class HeadingItem implements PostItem {
                     ),
                   ),
                   const XMargin(8.0),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AutoSizeText(session.name ?? '',
-                          maxLines: 1,
-                          softWrap: true,
-                          style: _theme.textTheme.dark.headline6
-                              .copyWith(fontWeight: FontWeight.w600)),
-                      AutoSizeText('Unterstützt ${session.campaignName}',
-                          maxLines: 1,
-                          softWrap: true,
-                          style: _theme.textTheme.dark
-                              .withOpacity(.7)
-                              .bodyText1
-                              .copyWith(fontWeight: FontWeight.w400)),
-                    ],
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizeText(session.name ?? '',
+                            maxLines: 1,
+                            softWrap: true,
+                            style: _theme.textTheme.dark.headline6
+                                .copyWith(fontWeight: FontWeight.w600)),
+                        AutoSizeText('Unterstützt ${session.campaignName}',
+                            maxLines: 1,
+                            softWrap: true,
+                            style: _theme.textTheme.dark
+                                .withOpacity(.7)
+                                .bodyText1
+                                .copyWith(fontWeight: FontWeight.w400)),
+                      ],
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 12.0),

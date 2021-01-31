@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,6 +8,7 @@ import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'StorageService.dart';
 import 'User.dart';
@@ -232,6 +234,33 @@ class UserManager extends ChangeNotifier {
     }
   }
 
+  Future<void> afterAuthentication() async {
+    print("After Authentication");
+    final PermissionStatus permission = await Permission.notification.status;
+
+    if (permission == PermissionStatus.granted) {
+      bool hasTurnedOn =
+          (await DatabaseService.hasPushNotificationsTurnedOn(uid)) ?? false;
+      print("User $uid has notifications turned on: $hasTurnedOn");
+      print(await DatabaseService.hasPushNotificationsTurnedOn(uid));
+      if (!hasTurnedOn) {
+        print("Calling SaveToken:");
+        _saveToken();
+      }
+    }
+  }
+
+  Future<void> _saveToken() async {
+    final FirebaseMessaging _fMessaging = FirebaseMessaging();
+    try {
+      String token = await _fMessaging.getToken();
+      print("Saving device token: $token");
+      await DatabaseService.saveDeviceToken(uid, token);
+    } catch (e) {
+      print('Something went wrong saving the token: $e');
+    }
+  }
+
   Future<ApiResult> updateUser(User updatedUser) async {
     if (updatedUser.name.trim() != user.name.trim() &&
         !await DatabaseService.checkUsernameAvailable(
@@ -276,5 +305,4 @@ class UserManager extends ChangeNotifier {
     print(_fireUser.email);
     return _auth.sendPasswordResetEmail(email: _fireUser.email);
   }
-
 }

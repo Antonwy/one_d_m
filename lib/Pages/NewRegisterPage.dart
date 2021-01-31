@@ -55,12 +55,6 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: ColorTheme.blue,
-      appBar: AppBar(
-        brightness: Brightness.dark,
-        backgroundColor: ColorTheme.blue,
-        elevation: 0,
-        title: Text(_socialSignIn ? "Weitere Daten" : "Registrieren"),
-      ),
       body: Form(
         key: _formKey,
         child: CustomScrollView(
@@ -146,6 +140,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                             hint: "test@gmail.com",
                             preficIcon: Icon(Icons.email),
                             textInputType: TextInputType.emailAddress,
+                            autoCorrect: false,
                             onChanged: (text) {
                               _email = text.trim().toLowerCase();
                             },
@@ -163,6 +158,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                       ),
                       textInputType: TextInputType.text,
                       autoCorrect: false,
+                      inputFormatter: [LowerCaseFormatter()],
                       onChanged: (text) {
                         _username = text.trim();
                       },
@@ -335,6 +331,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
       res = await _um.createSocialUserDocument(_username, _phone);
     } else {
       if (_password1 != _password2) {
+        _um.status = Status.Unauthenticated;
         _showSnackBar("Deine Passwörter stimmen nicht überein!");
         return;
       }
@@ -367,6 +364,8 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
     }
 
     _um.firstSignIn = true;
+
+    await _um.afterAuthentication();
 
     Navigator.push(
         context,

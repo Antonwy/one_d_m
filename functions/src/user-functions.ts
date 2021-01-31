@@ -139,7 +139,10 @@ exports.onDeleteAuthUser = functions.auth.user().onDelete(async (user) => {
         await firestore
           .collection(DatabaseConstants.sessions)
           .doc(session.id)
-          .update({ member_count: admin.firestore.FieldValue.increment(-1) });
+          .update({ member_count: admin.firestore.FieldValue.increment(-1) })
+          .catch((err) =>
+            functions.logger.error('Decrementing Session failed! ' + err)
+          );
       });
     });
 
@@ -249,7 +252,7 @@ exports.onDeleteUser = functions.firestore
       .auth()
       .deleteUser(userId)
       .then(() => functions.logger.info('Deleted User'))
-      .catch((e) => functions.logger.error(e));
+      .catch((e) => functions.logger.error('Auth user not found: ' + e));
   });
 
 exports.onAddCard = functions.firestore

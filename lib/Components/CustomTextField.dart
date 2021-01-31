@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -11,6 +12,7 @@ class CustomTextField extends StatelessWidget {
   final String Function(String) validator;
   final TextEditingController controller;
   final int maxLines, maxLength;
+  final List<TextInputFormatter> inputFormatter;
 
   CustomTextField(
       {this.controller,
@@ -26,7 +28,8 @@ class CustomTextField extends StatelessWidget {
       this.textColor = Colors.white,
       this.onChanged,
       this.autoCorrect = true,
-      this.validator});
+      this.validator,
+      this.inputFormatter});
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +47,7 @@ class CustomTextField extends StatelessWidget {
         cursorColor: focusedColor,
         onChanged: onChanged,
         validator: validator,
+        inputFormatters: inputFormatter ?? [],
         keyboardType: textInputType,
         obscureText: obscureText,
         style: TextStyle(color: textColor),
@@ -62,6 +66,17 @@ class CustomTextField extends StatelessWidget {
           labelText: label,
         ),
       ),
+    );
+  }
+}
+
+class LowerCaseFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text?.toLowerCase(),
+      selection: newValue.selection,
     );
   }
 }

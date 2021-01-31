@@ -243,7 +243,10 @@ class RoundedAvatar extends StatelessWidget {
   final double height;
   final double defaultHeight = 20, borderRadius, elevation;
   final Color iconColor, color;
+  final String name;
   final BoxFit fit;
+
+  ThemeManager _theme;
 
   RoundedAvatar(this.imgUrl,
       {this.loading = false,
@@ -254,11 +257,12 @@ class RoundedAvatar extends StatelessWidget {
       this.borderRadius = Constants.radius,
       this.color,
       this.deleted = false,
-      this.fit = BoxFit.cover});
+      this.fit = BoxFit.cover,
+      this.name});
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    _theme = ThemeManager.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints(
           minHeight: (height ?? defaultHeight),
@@ -271,46 +275,58 @@ class RoundedAvatar extends StatelessWidget {
           child: Material(
               elevation: elevation,
               color: color ??
-                  (backgroundLight ? _bTheme.dark : _bTheme.darkerLight),
+                  (backgroundLight
+                      ? _theme.colors.dark
+                      : _theme.colors.darkerLight),
               borderRadius: BorderRadius.circular(borderRadius),
               clipBehavior: Clip.antiAlias,
-              child: _buildImage(_bTheme)),
+              child: _buildImage()),
         );
       }),
     );
   }
 
-  Widget _buildImage(BaseTheme _bTheme) {
+  Widget _buildImage() {
     if (deleted)
       return Icon(
         Icons.delete,
-        color: iconColor ?? _bTheme.contrast,
+        color: iconColor ?? _theme.colors.contrast,
       );
 
     return imgUrl == null
-        ? loading
-            ? Center(
-                child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation(
-                        backgroundLight ? _bTheme.dark : _bTheme.contrast),
-                  ),
-                ),
-              ))
-            : Icon(
-                Icons.person,
-                color: iconColor ?? _bTheme.contrast,
-              )
+        ? Center(
+            child: loading
+                ? Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation(backgroundLight
+                            ? _theme.colors.dark
+                            : _theme.colors.contrast),
+                      ),
+                    ),
+                  )
+                : name != null
+                    ? Text(
+                        name[0].toUpperCase(),
+                        style: TextStyle(
+                            color: iconColor ?? _theme.colors.contrast,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20),
+                      )
+                    : Icon(
+                        Icons.person,
+                        color: iconColor ?? _theme.colors.contrast,
+                      ),
+          )
         : CachedNetworkImage(
             imageUrl: imgUrl,
             fit: fit,
             errorWidget: (context, error, obj) => Icon(
               Icons.error,
-              color: iconColor ?? _bTheme.contrast,
+              color: iconColor ?? _theme.colors.contrast,
             ),
           );
   }

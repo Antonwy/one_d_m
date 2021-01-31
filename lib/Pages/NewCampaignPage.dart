@@ -352,7 +352,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Widget _buildCampaignNews() => StreamBuilder<List<News>>(
       stream: campaign?.id == null
           ? null
-          : DatabaseService.getNewsFromCampaignStream(campaign),
+          : DatabaseService.getNewsFromCampaignStream(campaign?.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData || (snapshot.hasData && snapshot.data.isEmpty))
           return SliverToBoxAdapter(

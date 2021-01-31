@@ -158,10 +158,11 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
                       ),
                       textInputType: TextInputType.text,
                       autoCorrect: false,
-                      inputFormatter: [LowerCaseFormatter()],
+                      inputFormatter: [UserNameFormatter()],
                       onChanged: (text) {
                         _username = text.trim();
                       },
+                      maxLength: 15,
                       validator: Validate.username,
                       focusedColor: ColorTheme.appGrey,
                       activeColor: ColorTheme.white.withOpacity(.4),

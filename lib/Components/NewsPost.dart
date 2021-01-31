@@ -45,14 +45,16 @@ class _NewsPostState extends State<NewsPost> {
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
         var visiblePercentage = info.visibleFraction * 100;
-        if (visiblePercentage == 100) {
-          setState(() {
-            widget.isInView = true;
-          });
-        } else {
-          setState(() {
-            widget.isInView = false;
-          });
+        if(mounted) {
+          if (visiblePercentage == 100) {
+            setState(() {
+              widget.isInView = true;
+            });
+          } else {
+            setState(() {
+              widget.isInView = false;
+            });
+          }
         }
       },
       child: Padding(
@@ -77,7 +79,6 @@ class _NewsPostState extends State<NewsPost> {
                     )
                   : Container(),
               Container(
-                height: 260,
                 child: Stack(
                   children: <Widget>[
                     widget.news.videoUrl != null
@@ -90,38 +91,48 @@ class _NewsPostState extends State<NewsPost> {
                             width: double.infinity,
                             height: 260,
                             imageUrl: widget.news.imageUrl ?? '',
-                            errorWidget: (_, __, ___) => Center(
-                                child: Icon(
-                              Icons.error,
-                              color: ColorTheme.orange,
-                            )),
-                            placeholder: (context, url) => Center(
-                              child: CircularProgressIndicator(),
+                            errorWidget: (_, __, ___) => Container(
+                              height: 260,
+                              child: Center(
+                                  child: Icon(
+                                Icons.error,
+                                color: ColorTheme.orange,
+                              )),
+                            ),
+                            placeholder: (context, url) => Container(
+                              height: 260,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             ),
                             fit: BoxFit.cover,
                           ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                colors: [
-                              Colors.black.withOpacity(.7),
-                              Colors.black.withOpacity(0)
-                            ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter)),
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 50,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  colors: [
+                                Colors.black.withOpacity(.7),
+                                Colors.black.withOpacity(0)
+                              ],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter)),
+                        ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          timeago.format(widget.news.createdAt, locale: "de"),
-                          style: TextStyle(color: Colors.white),
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            timeago.format(widget.news.createdAt, locale: "de"),
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ),

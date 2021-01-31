@@ -22,6 +22,7 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
+import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -469,12 +470,11 @@ class _CertifiedSessionInfoPage extends StatefulWidget {
 
 class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   bool isCreator = false;
+  bool _isInView = false;
+
   @override
   void initState() {
-    widget.controller = ScrollController()
-      ..addListener(() {
-        print("offset = ${widget.controller.offset}");
-      });
+    widget.controller = ScrollController()..addListener(() {});
     super.initState();
   }
 
@@ -487,22 +487,36 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
-            child: Container(
-              height: 250,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Material(
-                        elevation: 10,
-                        borderRadius: BorderRadius.circular(6),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image(
+            child: VisibilityDetector(
+              key: Key(csm.session.id),
+              onVisibilityChanged: (VisibilityInfo info) {
+                var visiblePercentage = info.visibleFraction * 100;
+                if (mounted) {
+                  if (visiblePercentage == 100) {
+                    setState(() {
+                      _isInView = true;
+                    });
+                  } else {
+                    setState(() {
+                      _isInView = false;
+                    });
+                  }
+                }
+              },
+              child: Material(
+                  elevation: 10,
+                  borderRadius: BorderRadius.circular(6),
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: csm.session.videoUrl == null
+                      ? Image(
+                          height: 220,
                           image: widget.image,
                           fit: BoxFit.cover,
+                        )
+                      : Center(
+                          child: VideoWidget(
+                              url: csm.session.videoUrl, play: _isInView),
                         )),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

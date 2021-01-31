@@ -1,67 +1,47 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
+import 'package:provider/provider.dart';
 
 class SessionPostFeed extends StatefulWidget {
-  final List<Session> userSessions;
+  final List<Session> sessions;
+  final List<Campaign> campaigns;
 
-  const SessionPostFeed({Key key, this.userSessions}) : super(key: key);
+  const SessionPostFeed({Key key, this.sessions, this.campaigns})
+      : super(key: key);
+
   @override
-  _SessionPostFeedState createState() => _SessionPostFeedState();
+  SessionPostFeedState createState() => SessionPostFeedState();
 }
 
-class _SessionPostFeedState extends State<SessionPostFeed> {
-  ThemeManager _theme;
+class SessionPostFeedState extends State<SessionPostFeed> {
+  final StreamController _myPostController = StreamController.broadcast();
+  String uid;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _myPostController.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-    return StreamBuilder<List<News>>(
-        stream: DatabaseService.getSessionPosts(),
-        builder: (context, AsyncSnapshot<List<News>> snapshot) {
-          if (!snapshot.hasData)
-            return SliverToBoxAdapter(
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(_theme.colors.dark),
-                ),
-              ),
-            );
-          List<News> news = snapshot.data;
-
-          List<String> sessionsWithPost = [];
-          List<String> mySessionPosts = [];
-          List<PostItem> postItem = [];
-
-          news.forEach((element) {
-            sessionsWithPost.add(element.sessionId);
-          });
-          //filter user following session posts
-          for (Session s in widget.userSessions) {
-            if (sessionsWithPost.contains(s.id)) {
-              mySessionPosts.add(s.id);
-            }
-          }
-
-          ///remove duplicating ids
-          mySessionPosts.toSet().toList().forEach((element) {
-            postItem
-                .add(HeadingItem(DatabaseService.getSessionFuture(element)));
-            postItem.add(
-                PostContentItem(DatabaseService.getPostBySessionId(element)));
-          });
-          if (postItem.isNotEmpty) {
-            return SliverList(
-                delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
-          } else {
-            return NoContentProfilePage();
-          }
-        });
+    uid = context.watch<UserManager>().uid;
+    return _buildPostStream();
   }
 
   List<Widget> _buildPostWidgets(List<PostItem> post) {
@@ -78,12 +58,79 @@ class _SessionPostFeedState extends State<SessionPostFeed> {
     return widgets;
   }
 
+  Widget _buildPostStream() => StreamBuilder(
+        stream: DatabaseService.getAllPosts(),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData)
+            return SliverToBoxAdapter(child: SizedBox.shrink());
+          List<News> allNews = snapshot.data;
+          if (allNews.isEmpty)
+            return SliverToBoxAdapter(child: SizedBox.shrink());
+
+          List<News> myPosts = [];
+          List<UserPost> userPosts = [];
+          List<PostItem> postItem = [];
+
+          for (News n in allNews) {
+            for (Session s in widget.sessions) {
+              if (n.sessionId == s.id) {
+                myPosts.add(n);
+              }
+            }
+            if (n.sessionId == '') {
+              for (Campaign c in widget.campaigns) {
+                if (n.campaignId == c.id) {
+                  myPosts.add(n);
+                }
+              }
+            }
+          }
+
+          myPosts.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
+
+          for (News p in myPosts) {
+            UserPost up = UserPost(
+                id: p.sessionId != '' ? p.sessionId : p.campaignId,
+                isSession: p.sessionId != '');
+            userPosts.add(up);
+          }
+          List<UserPost> p = [];
+          p.addAll(userPosts.where((a) => p.every((b) => a.id != b.id)));
+          for (UserPost up in p) {
+            postItem.add(HeadingItem(
+                session: up.isSession
+                    ? DatabaseService.getSessionFuture(up.id)
+                    : null,
+                campaign: up.isSession
+                    ? null
+                    : DatabaseService.getCampaignStream(up.id),
+                isSession: up.isSession));
+            postItem.add(PostContentItem(
+              post: up.isSession
+                  ? DatabaseService.getPostBySessionId(up.id)
+                  : DatabaseService.getNewsFromCampaignStream(up.id),
+            ));
+          }
+          return SliverList(
+              delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
+        },
+      );
+
   Widget _buildNewsTitleWidget() => Padding(
         padding: const EdgeInsets.only(left: 12, bottom: 10),
         child: Text(
           "News",
-          style: _theme.textTheme.dark.headline6
-              .copyWith(fontWeight: FontWeight.w600),
+          style: ThemeManager.of(context).textTheme.dark.headline6.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
         ),
       );
+}
+
+class UserPost {
+  String id;
+  bool isSession;
+
+  UserPost({this.id, this.isSession});
 }

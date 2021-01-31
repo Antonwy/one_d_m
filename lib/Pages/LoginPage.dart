@@ -103,6 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                       focusedColor: ColorTheme.blue,
                       activeColor: ColorTheme.blue,
                       autoCorrect: false,
+                      inputFormatter: [UserNameFormatter()],
                       onChanged: (text) {
                         _email = text.trim().toLowerCase();
                       },

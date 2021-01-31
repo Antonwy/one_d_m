@@ -7,6 +7,7 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 
@@ -14,6 +15,7 @@ class ExplorePage extends StatefulWidget {
   final ScrollController scrollController;
 
   const ExplorePage({Key key, this.scrollController}) : super(key: key);
+
   @override
   _ExplorePageState createState() => _ExplorePageState();
 }
@@ -71,13 +73,20 @@ class _ExplorePageState extends State<ExplorePage>
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
-              child: Text(
-                'Influencer-Sessions',
-                style: Theme.of(context).textTheme.headline6,
-              ),
-            ),
+            child: StreamBuilder(
+                stream: DatabaseService.getCertifiedSessions(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return SizedBox.shrink();
+                  List<BaseSession> news = snapshot.data;
+                  if (news.isEmpty) return SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
+                    child: Text(
+                      'Influencer-Sessions',
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                  );
+                }),
           ),
           SliverPadding(
               padding: const EdgeInsets.only(bottom: 6),

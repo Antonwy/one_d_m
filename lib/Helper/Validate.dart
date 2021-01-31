@@ -3,7 +3,7 @@ class Validate {
     if (text.length < 3) {
       return "Bitte gib einen richtigen Namen ein!";
     }
-    if (text.length >= 15) return "Dieser Name ist zu lang!";
+    if (text.length > 15) return "Dieser Name ist zu lang!";
     return null;
   }
 

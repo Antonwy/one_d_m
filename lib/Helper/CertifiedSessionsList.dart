@@ -56,7 +56,6 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
         return StreamBuilder<List<Session>>(
             stream: DatabaseService.getCertifiedSessions(),
             builder: (context, snapshot) {
-              print(snapshot);
               List<BaseSession> sessions = snapshot.data ?? [];
 
               if (snapshot.connectionState == ConnectionState.active &&

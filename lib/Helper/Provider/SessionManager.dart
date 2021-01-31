@@ -8,6 +8,8 @@ abstract class BaseSessionManager {
   Stream<List<SessionMember>> membersStream;
   Stream<List<Donation>> donationStream;
   Stream<Session> sessionStream;
+  List<Session> mySessions = [];
+  List<String> mySessionIds = [];
 
   void initStreams();
 

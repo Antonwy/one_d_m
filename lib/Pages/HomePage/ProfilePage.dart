@@ -1,8 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -12,6 +9,7 @@ import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -30,6 +28,7 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:one_d_m/Pages/notification_page.dart';
 import 'package:provider/provider.dart';
 
 import '../RewardVideoPage.dart';
@@ -49,11 +48,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  GlobalKey<_ProfilePageState> _myKey = GlobalKey();
+  GlobalKey<SessionPostFeedState> _feedKey = GlobalKey();
 
   ThemeManager _theme;
   List<Session> mySessions = [];
-  List<String> mySessionIds = [];
+  List<Campaign> myCampaigns = [];
 
   @override
   void initState() {
@@ -63,8 +62,10 @@ class _ProfilePageState extends State<ProfilePage> {
     DatabaseService.getCertifiedSessions().listen((event) {
       mySessions.clear();
       event.forEach((element) {
-        DatabaseService.userIsInSession(uid, element.id).listen((isExist) {
-          if (isExist) {
+        DatabaseService.userIsInSession(uid, element.id)
+            .listen((isExist) {})
+            .onData((data) {
+          if (data) {
             mySessions.add(element);
           }
           setState(() {});
@@ -72,40 +73,12 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     });
 
-    DatabaseService.getSessionPosts().listen((news) {
-      mySessionIds.clear();
-      news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
-
-      List<String> sessionsWithPost = [];
-
-      news.forEach((element) {
-        sessionsWithPost.add(element.sessionId);
-      });
-
-      ///sort and add sessions with post to the begining of the list
-      ///
-      List<String> sessionIds = sessionsWithPost.toSet().toList();
-      DatabaseService.getCertifiedSessions().listen((sessions) {
-        List<String> allSessions = [];
-
-        sessions.forEach((element) {
-          allSessions.add(element.id);
-        });
-
-        ///add sessions that doesn't have posts
-
-        sessionIds = [...sessionIds, ...allSessions];
-
-        List<String> uniqueIds = sessionIds.toSet().toList();
-        uniqueIds.forEach((element) {
-          DatabaseService.userIsInSession(uid, element).listen((isExist) {
-            if (isExist) {
-              mySessionIds.add(element);
-            }
-            setState(() {});
-          });
-        });
-      });
+    DatabaseService.getSubscribedCampaignsStream(uid)
+        .listen((event) {})
+        .onData((data) {
+      myCampaigns.clear();
+      myCampaigns.addAll(data);
+      setState(() {});
     });
     super.initState();
   }
@@ -149,9 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: YMargin(12),
           ),
           mySessions.isNotEmpty
-              ? SessionPostFeed(
-                  userSessions: mySessions,
-                )
+              ? SessionPostFeed(sessions: mySessions, campaigns: myCampaigns)
               : NoContentProfilePage(),
           const SliverToBoxAdapter(
             child: const SizedBox(

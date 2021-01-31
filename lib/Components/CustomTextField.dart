@@ -70,12 +70,12 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
-class LowerCaseFormatter extends TextInputFormatter {
+class UserNameFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     return TextEditingValue(
-      text: newValue.text?.toLowerCase(),
+      text: newValue.text?.trim()?.toLowerCase(),
       selection: newValue.selection,
     );
   }

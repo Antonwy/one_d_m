@@ -44,7 +44,6 @@ class _ProfilePageState extends State<ProfilePage> {
   ThemeManager _theme;
   List<Session> mySessions = [];
   List<Campaign> myCampaigns = [];
-  Widget _postFeedWidget;
 
   @override
   void initState() {
@@ -61,9 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
             mySessions.add(element);
           }
           setState(() {});
-          if (mounted) {
-            _feedKey.currentState.setState(() {});
-          }
         });
       });
     });
@@ -74,11 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
       myCampaigns.clear();
       myCampaigns.addAll(data);
       setState(() {});
-      if (mounted) {
-        _feedKey.currentState.setState(() {});
-      }
     });
-
     super.initState();
   }
 
@@ -97,12 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 stream: DatabaseService.getUserStream(um.uid),
                 builder: (context, snapshot) {
                   User user = snapshot.data;
-                  _postFeedWidget = SessionPostFeed(
-                    key: _feedKey,
-                    uid: um.uid,
-                    userSessions: mySessions,
-                    userCampaigns: myCampaigns,
-                  );
                   return SliverAppBar(
                     backgroundColor: Colors.transparent,
                     elevation: 0,
@@ -225,7 +211,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           mySessions.isNotEmpty || myCampaigns.isNotEmpty
               ? Consumer<UserManager>(
-                  builder: (context, um, child) => _postFeedWidget)
+                  builder: (context, um, child) => SessionPostFeed(
+                        uid: um.uid,
+                      ))
               : _buildEmptySession(),
           mySessions.isEmpty
               ? _buildRecomendedSession()

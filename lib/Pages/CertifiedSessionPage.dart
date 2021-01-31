@@ -486,42 +486,36 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
-            child: Container(
-              height: 220,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: VisibilityDetector(
-                      key: Key(csm.session.id),
-                      onVisibilityChanged: (VisibilityInfo info) {
-                        var visiblePercentage = info.visibleFraction * 100;
-                        if (mounted) {
-                          if (visiblePercentage == 100) {
-                            setState(() {
-                              _isInView = true;
-                            });
-                          } else {
-                            setState(() {
-                              _isInView = false;
-                            });
-                          }
-                        }
-                      },
-                      child: Material(
-                          elevation: 10,
-                          borderRadius: BorderRadius.circular(6),
-                          clipBehavior: Clip.antiAlias,
-                          child: csm.session.videoUrl == null
-                              ? Image(
-                                  image: widget.image,
-                                  fit: BoxFit.cover,
-                                )
-                              : VideoWidget(
-                                  url: csm.session.videoUrl, play: _isInView)),
-                    ),
-                  ),
-                ],
-              ),
+            child: VisibilityDetector(
+              key: Key(csm.session.id),
+              onVisibilityChanged: (VisibilityInfo info) {
+                var visiblePercentage = info.visibleFraction * 100;
+                if (mounted) {
+                  if (visiblePercentage == 100) {
+                    setState(() {
+                      _isInView = true;
+                    });
+                  } else {
+                    setState(() {
+                      _isInView = false;
+                    });
+                  }
+                }
+              },
+              child: Material(
+                  elevation: 10,
+                  borderRadius: BorderRadius.circular(6),
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: csm.session.videoUrl == null
+                      ? Image(
+                          height: 220,
+                          image: widget.image,
+                          fit: BoxFit.cover,
+                        )
+                      : Center(
+                          child: VideoWidget(
+                              url: csm.session.videoUrl, play: _isInView),
+                        )),
             ),
           ),
         ),

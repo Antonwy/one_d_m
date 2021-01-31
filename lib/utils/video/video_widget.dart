@@ -26,6 +26,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     _mute = true;
     _controller = VideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+      print('>>>>${_controller.value.aspectRatio}');
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       setState(() {});
     });
@@ -66,7 +67,9 @@ class _VideoWidgetState extends State<VideoWidget> {
           return Stack(
             children: [
               AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
+                aspectRatio: _controller.value.aspectRatio < 1
+                    ? 0.8
+                    : _controller.value.aspectRatio,
                 child: InkWell(
                   onTap: _handleMute,
                   child: VideoPlayer(_controller),

@@ -65,16 +65,11 @@ class _VideoWidgetState extends State<VideoWidget> {
         if (snapshot.connectionState == ConnectionState.done) {
           return Stack(
             children: [
-              Positioned.fill(
+              AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
                 child: InkWell(
                   onTap: _handleMute,
-                  child: SizedBox.expand(
-                      child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                              width: _controller.value.size?.width ?? 0,
-                              height: _controller.value.size?.height ?? 0,
-                              child: VideoPlayer(_controller)))),
+                  child: VideoPlayer(_controller),
                 ),
               ),
               Positioned(
@@ -88,8 +83,11 @@ class _VideoWidgetState extends State<VideoWidget> {
             ],
           );
         } else {
-          return Center(
-            child: CircularProgressIndicator(),
+          return Container(
+            height: 260,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
       },

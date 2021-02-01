@@ -107,11 +107,6 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(8),
           ),
-
-          ///build the sessions that follow by user
-          // mySessions.isNotEmpty
-          //     ? _buildMySessions(mySessions)
-          //     : _buildEmptySession(),y
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
@@ -121,9 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
-          mySessions.isNotEmpty
-              ? SessionPostFeed(sessions: mySessions, campaigns: myCampaigns)
-              : NoContentProfilePage(),
+          SessionPostFeed(),
           const SliverToBoxAdapter(
             child: const SizedBox(
               height: 120,
@@ -134,73 +127,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  Widget _buildRecomendedSession() => SliverToBoxAdapter(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 12.0),
-                child: Text(
-                  "Sessions die dich interessieren könnten:",
-                  style: _theme.textTheme.dark.headline6,
-                  textAlign: TextAlign.start,
-                ),
-              ),
-            ),
-            const YMargin(12),
-            RecomendedSessions(),
-          ],
-        ),
-      );
-
-  Widget _buildSessions(List<BaseSession> sessionsIds) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 0.0, top: 10.0, bottom: 10.0, right: 0.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 12.0),
-                child: Text(
-                  "Deine Sessions",
-                  style: _theme.textTheme.dark.headline6
-                      .copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              Container(
-                height: 116,
-                child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    separatorBuilder: (context, index) => SizedBox(
-                          width: 8,
-                        ),
-                    itemBuilder: (context, index) => Padding(
-                        padding: EdgeInsets.only(
-                            left: index == 0 ? 12.0 : 0.0,
-                            right:
-                                index == sessionsIds.length - 1 ? 12.0 : 0.0),
-                        child: CertifiedSessionView(sessionsIds[index])),
-                    itemCount: sessionsIds.length),
-              ),
-            ],
-          ),
-        ),
-      );
-
-  Widget _buildSession(String sid) => KeepAliveStreamBuilder(
-        stream: DatabaseService.getSession(sid),
-        builder: (_, snapshot) {
-          if (!snapshot.hasData) return SizedBox.shrink();
-          Session s = snapshot.data;
-          return CertifiedSessionView(s);
-        },
-      );
 }
 
 class NoContentProfilePage extends StatelessWidget {

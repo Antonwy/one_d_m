@@ -8,7 +8,6 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -64,7 +63,7 @@ class HeadingItem implements PostItem {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CachedNetworkImage(
-                    imageUrl: session.imgUrl ?? '',
+                    imageUrl: isSession ? session.imgUrl : campaign.imgUrl,
                     imageBuilder: (context, imageProvider) => Container(
                       height: 58.0,
                       width: 88.0,

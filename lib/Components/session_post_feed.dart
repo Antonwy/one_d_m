@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -13,36 +12,45 @@ import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:provider/provider.dart';
 
 class SessionPostFeed extends StatefulWidget {
-  final List<Session> sessions;
-  final List<Campaign> campaigns;
-
-  const SessionPostFeed({Key key, this.sessions, this.campaigns})
-      : super(key: key);
+  const SessionPostFeed({Key key}) : super(key: key);
 
   @override
   SessionPostFeedState createState() => SessionPostFeedState();
 }
 
 class SessionPostFeedState extends State<SessionPostFeed> {
-  final StreamController _myPostController = StreamController.broadcast();
   String uid;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _myPostController.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     uid = context.watch<UserManager>().uid;
     return _buildPostStream();
   }
+
+  Widget _buildPostStream() => StreamBuilder(
+        stream: DatabaseService.getCertifiedSessions(),
+        builder: (_, allSessionsSnap) {
+          return StreamBuilder(
+            stream: DatabaseService.getSubscribedCampaignsStream(uid),
+            builder: (__, myCampaignSnap) {
+              List<Session> allSessions = allSessionsSnap?.data ?? [];
+              List<Session> userSessions = [];
+              List<Campaign> userCampaigns = myCampaignSnap?.data ?? [];
+
+              for (Session s in allSessions) {
+                Future<bool> isFollow =
+                    DatabaseService.userIsFollowSession(uid, s.id);
+                isFollow.then((follow) {
+                  if (follow) {
+                    userSessions.add(s);
+                  }
+                });
+              }
+              return _buildPost(userSessions, userCampaigns);
+            },
+          );
+        },
+      );
 
   List<Widget> _buildPostWidgets(List<PostItem> post) {
     List<Widget> widgets = [];
@@ -58,7 +66,8 @@ class SessionPostFeedState extends State<SessionPostFeed> {
     return widgets;
   }
 
-  Widget _buildPostStream() => StreamBuilder(
+  Widget _buildPost(List<Session> userSession, List<Campaign> userCampaigns) =>
+      StreamBuilder(
         stream: DatabaseService.getAllPosts(),
         builder: (_, snapshot) {
           if (!snapshot.hasData)
@@ -72,13 +81,13 @@ class SessionPostFeedState extends State<SessionPostFeed> {
           List<PostItem> postItem = [];
 
           for (News n in allNews) {
-            for (Session s in widget.sessions) {
+            for (Session s in userSession) {
               if (n.sessionId == s.id) {
                 myPosts.add(n);
               }
             }
             if (n.sessionId == '') {
-              for (Campaign c in widget.campaigns) {
+              for (Campaign c in userCampaigns) {
                 if (n.campaignId == c.id) {
                   myPosts.add(n);
                 }
@@ -111,8 +120,11 @@ class SessionPostFeedState extends State<SessionPostFeed> {
                   : DatabaseService.getNewsFromCampaignStream(up.id),
             ));
           }
-          return SliverList(
-              delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
+          return postItem.isEmpty
+              ? NoContentProfilePage()
+              : SliverList(
+                  delegate:
+                      SliverChildListDelegate(_buildPostWidgets(postItem)));
         },
       );
 

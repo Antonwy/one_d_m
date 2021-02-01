@@ -48,44 +48,16 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  GlobalKey<SessionPostFeedState> _feedKey = GlobalKey();
 
-  ThemeManager _theme;
-  List<Session> mySessions = [];
-  List<Campaign> myCampaigns = [];
+
 
   @override
   void initState() {
-    String uid = Provider.of<UserManager>(context, listen: false).uid;
-
-    ///listen events for user followed sessions
-    DatabaseService.getCertifiedSessions().listen((event) {
-      mySessions.clear();
-      event.forEach((element) {
-        DatabaseService.userIsInSession(uid, element.id)
-            .listen((isExist) {})
-            .onData((data) {
-          if (data) {
-            mySessions.add(element);
-          }
-          setState(() {});
-        });
-      });
-    });
-
-    DatabaseService.getSubscribedCampaignsStream(uid)
-        .listen((event) {})
-        .onData((data) {
-      myCampaigns.clear();
-      myCampaigns.addAll(data);
-      setState(() {});
-    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
     return Scaffold(
       backgroundColor: ColorTheme.appBg,
       body: CustomScrollView(

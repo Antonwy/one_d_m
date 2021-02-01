@@ -77,9 +77,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 }),
           ),
           const SliverToBoxAdapter(
-            child: YMargin(8),
-          ),
-          const SliverToBoxAdapter(
             child: YMargin(12),
           ),
           SliverToBoxAdapter(

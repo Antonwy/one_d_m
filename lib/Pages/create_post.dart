@@ -5,6 +5,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
@@ -182,10 +183,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _getImage() async {
     PickedFile _file = await ImagePicker().getImage(source: ImageSource.gallery);
     if (_file == null) return;
-    setState(() {
-      _isVideo = false;
-      _image = File(_file.path);
-    });
+    _cropImage(File(_file.path));
   }
 
   Widget _showImage() {
@@ -428,6 +426,43 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     } finally {
       setState(() {
         _processing = false;
+      });
+    }
+  }
+  Future<Null> _cropImage(File image) async {
+    File croppedFile = await ImageCropper.cropImage(
+        sourcePath: image.path,
+        aspectRatioPresets: Platform.isAndroid
+            ? [
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio16x9
+        ]
+            : [
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio5x3,
+          CropAspectRatioPreset.ratio5x4,
+          CropAspectRatioPreset.ratio7x5,
+          CropAspectRatioPreset.ratio16x9
+        ],
+        androidUiSettings: AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+        iosUiSettings: IOSUiSettings(
+          title: 'Cropper',
+        ));
+    if (croppedFile != null) {
+      setState(() {
+        _isVideo = false;
+        _image = croppedFile;
       });
     }
   }

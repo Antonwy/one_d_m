@@ -26,7 +26,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     _mute = true;
     _controller = VideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      print('>>>>${_controller.value.aspectRatio}');
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       setState(() {});
     });

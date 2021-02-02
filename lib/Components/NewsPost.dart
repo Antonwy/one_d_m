@@ -33,19 +33,15 @@ class NewsPost extends StatefulWidget {
 }
 
 class _NewsPostState extends State<NewsPost> {
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-  }
+  bool _muted = true;
 
   @override
   Widget build(BuildContext context) {
-    var shortText = widget.news.shortText ?? '';
     return VisibilityDetector(
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
         var visiblePercentage = info.visibleFraction * 100;
-        if(mounted) {
+        if (mounted) {
           if (visiblePercentage == 100) {
             setState(() {
               widget.isInView = true;
@@ -86,6 +82,8 @@ class _NewsPostState extends State<NewsPost> {
                             url: widget.news.videoUrl,
                             play: widget.isInView,
                             imageUrl: widget.news.videoUrl,
+                            muted: _muted,
+                            toggleMuted: _toggleMuted,
                           )
                         : CachedNetworkImage(
                             width: double.infinity,
@@ -124,15 +122,27 @@ class _NewsPostState extends State<NewsPost> {
                         ),
                       ),
                     ),
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            timeago.format(widget.news.createdAt, locale: "de"),
-                            style: TextStyle(color: Colors.white),
-                          ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            widget.news?.videoUrl != null
+                                ? MuteButton(
+                                    muted: _muted,
+                                    toggle: _toggleMuted,
+                                  )
+                                : SizedBox.shrink(),
+                            Text(
+                              timeago.format(widget.news.createdAt,
+                                  locale: "de"),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -155,6 +165,12 @@ class _NewsPostState extends State<NewsPost> {
         ),
       ),
     );
+  }
+
+  void _toggleMuted() {
+    setState(() {
+      _muted = !_muted;
+    });
   }
 
   Widget _buildExpandableContent(BuildContext context, String post) {

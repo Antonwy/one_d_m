@@ -80,7 +80,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     svgName: "img_project",
                     title: "Projekte",
                     description:
-                        "Jedes Projekt widmet sich einem Problem auf dieser Erde. Du kannst dabei Tiere, Menschen oder die Umwelt unterstützen. Miteinem Klick.",
+                        "Jedes Projekt widmet sich einem Problem auf dieser Erde. Du kannst dabei Tiere, Menschen oder die Umwelt unterstützen. Mit einem Klick.",
                     darkText: true,
                     animatedValue: _getAnimatedValue(2, _page),
                     onPressed: () => _animateToPage(3)),

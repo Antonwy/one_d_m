@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/post_item_widget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:provider/provider.dart';
 
 class SessionPostFeed extends StatefulWidget {

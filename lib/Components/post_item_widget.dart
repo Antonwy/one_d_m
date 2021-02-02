@@ -64,7 +64,8 @@ class HeadingItem implements PostItem {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CachedNetworkImage(
-                    imageUrl: session.imgUrl ?? '',
+                    imageUrl:
+                        !isSession ? campaign?.imgUrl : session?.imgUrl ?? '',
                     imageBuilder: (context, imageProvider) => Container(
                       height: 58.0,
                       width: 88.0,
@@ -155,7 +156,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
               ),
 
               ///show more button if limit exceeds 2
-              news.length > 5
+              news.length >= 5
                   ? _buildShowMore(context, news[0].sessionId)
                   : SizedBox.shrink(),
               Padding(
@@ -221,8 +222,11 @@ class PostContentItem extends StatefulWidget implements PostItem {
           widgets.add(Stack(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(left: 32.0, right: 12.0),
-                child: NewsNativeAd(),
+                padding: const EdgeInsets.only(
+                    left: 28.0, right: 12.0, top: 6, bottom: 6),
+                child: NewsNativeAd(
+                  id: Constants.ADMOB_NEWS_ID,
+                ),
               ),
               Positioned.fill(
                 top: 0,
@@ -258,37 +262,42 @@ class PostContentItem extends StatefulWidget implements PostItem {
   _buildShowMore(BuildContext context, String sessionId) => StreamBuilder(
       stream: DatabaseService.getSession(sessionId),
       builder: (context, snapshot) {
+        ThemeManager _theme = ThemeManager.of(context);
         if (snapshot.hasData) {
-          return CustomOpenContainer(
-            closedColor: Colors.white,
-            closedShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            closedElevation: 0,
-            openBuilder: (context, close, scrollController) =>
-                CertifiedSessionPage(
-              session: snapshot.data,
-              scrollController: scrollController,
-            ),
-            closedBuilder: (context, open) => Container(
-              margin: const EdgeInsets.only(top: 0.0, bottom: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  XMargin(context.screenWidth(percent: 0.1)),
-                  FlatButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(color: Colors.black)),
-                    onPressed: open,
-                    child: Text(
-                      'Zur Session',
-                      style: Theme.of(context).textTheme.headline6.copyWith(
-                          fontWeight: FontWeight.bold, fontSize: 18.0),
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CustomOpenContainer(
+                closedColor: _theme.colors.contrast,
+                closedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6)),
+                closedElevation: 0,
+                openBuilder: (context, close, scrollController) =>
+                    CertifiedSessionPage(
+                  session: snapshot.data,
+                  scrollController: scrollController,
+                ),
+                closedBuilder: (context, open) => Material(
+                  borderRadius: BorderRadius.circular(6),
+                  color: _theme.colors.contrast,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Zur Session',
+                            style:
+                                TextStyle(color: _theme.colors.textOnContrast)),
+                        XMargin(6),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: _theme.colors.textOnContrast,
+                          size: 18,
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           );

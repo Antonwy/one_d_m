@@ -8,35 +8,36 @@ import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
 class NewsNativeAd extends StatelessWidget {
+  final String id;
+
+  const NewsNativeAd({Key key, this.id}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        color: Colors.white,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(Constants.radius)),
-        child: Container(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: NativeAdView(
-              adUnitId: Constants.ADMOB_NEWS_ID,
-              layoutName: "NewsAd",
-              onAdImpression: () {
-                print("NEW IMPRESSION");
-                DatabaseService.addNativeAdImpression(
-                  Provider.of<UserManager>(
-                    context,
-                    listen: false,
-                  ).uid,
-                );
-              },
-              onAdClicked: () {},
-              onAdFailedToLoad: (Map<String, dynamic> error) =>
-                  print("Native ad failed load: $error"),
-            ),
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      color: ColorTheme.appBg,
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Constants.radius)),
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: NativeAdView(
+            adUnitId: id ?? Constants.ADMOB_NEWS_ID,
+            layoutName: "NewsAd",
+            onAdImpression: () {
+              print("NEW IMPRESSION");
+              DatabaseService.addNativeAdImpression(
+                Provider.of<UserManager>(
+                  context,
+                  listen: false,
+                ).uid,
+              );
+            },
+            onAdClicked: () {},
+            onAdFailedToLoad: (Map<String, dynamic> error) =>
+                print("Native ad failed load: $error"),
           ),
         ),
       ),

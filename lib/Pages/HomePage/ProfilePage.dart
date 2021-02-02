@@ -237,7 +237,7 @@ class NoContentProfilePage extends StatelessWidget {
                     XMargin(12),
                     Expanded(
                       child: Text(
-                        "Interessante Projekte und weitere Sessions findest du wenn du einmal nach rechts swipest.",
+                        "Interessante Projekte und weitere Sessions findest du, wenn du einmal nach rechts swipest.",
                         style: _theme.textTheme.textOnDark.bodyText1,
                       ),
                     ),
@@ -413,21 +413,21 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                       ),
                                       Row(
                                         children: <Widget>[
-                                          _appBarButton(
-                                              icon: Icons.message_rounded,
-                                              onPressed: () {
-                                                PushNotification.of(context)
-                                                    .show(NotificationContent(
-                                                        title: "Test Titel",
-                                                        body:
-                                                            "Hier könnte die Beschreibung stehen."));
-                                              },
-                                              context: context),
-                                          _appBarButton(
-                                              icon: Icons
-                                                  .notifications_none_rounded,
-                                              onPressed: () {},
-                                              context: context),
+                                          // _appBarButton(
+                                          //     icon: Icons.message_rounded,
+                                          //     onPressed: () {
+                                          //       PushNotification.of(context)
+                                          //           .show(NotificationContent(
+                                          //               title: "Test Titel",
+                                          //               body:
+                                          //                   "Hier könnte die Beschreibung stehen."));
+                                          //     },
+                                          //     context: context),
+                                          // _appBarButton(
+                                          //     icon: Icons
+                                          //         .notifications_none_rounded,
+                                          //     onPressed: () {},
+                                          //     context: context),
                                           _appBarButton(
                                               icon: Icons.settings,
                                               onPressed: () {

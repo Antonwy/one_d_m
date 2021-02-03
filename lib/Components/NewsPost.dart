@@ -105,7 +105,7 @@ class _NewsPostState extends State<NewsPost> {
                                 child: CircularProgressIndicator(),
                               ),
                             ),
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                     Positioned.fill(
                       child: Align(

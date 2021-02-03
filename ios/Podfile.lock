@@ -217,7 +217,6 @@ PODS:
     - AppAuth/ExternalUserAgent (= 1.4.0)
   - AppAuth/Core (1.4.0)
   - AppAuth/ExternalUserAgent (1.4.0)
-  - BIJKPlayer (0.7.8)
   - BoringSSL-GRPC (0.0.7):
     - BoringSSL-GRPC/Implementation (= 0.0.7)
     - BoringSSL-GRPC/Interface (= 0.0.7)
@@ -242,9 +241,6 @@ PODS:
   - contacts_service (0.2.2):
     - Flutter
   - device_info (0.0.1):
-    - Flutter
-  - fijkplayer (0.8.7):
-    - BIJKPlayer (~> 0.7.8)
     - Flutter
   - Firebase/Auth (6.33.0):
     - Firebase/CoreOnly
@@ -487,6 +483,8 @@ PODS:
     - Flutter
   - video_player (0.0.1):
     - Flutter
+  - wakelock (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - catcher (from `.symlinks/plugins/catcher/ios`)
@@ -495,7 +493,6 @@ DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - contacts_service (from `.symlinks/plugins/contacts_service/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
-  - fijkplayer (from `.symlinks/plugins/fijkplayer/ios`)
   - firebase_admob (from `.symlinks/plugins/firebase_admob/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -521,12 +518,12 @@ DEPENDENCIES:
   - stripe_payment (from `.symlinks/plugins/stripe_payment/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - video_player (from `.symlinks/plugins/video_player/ios`)
+  - wakelock (from `.symlinks/plugins/wakelock/ios`)
 
 SPEC REPOS:
   trunk:
     - abseil
     - AppAuth
-    - BIJKPlayer
     - BoringSSL-GRPC
     - Firebase
     - FirebaseABTesting
@@ -575,8 +572,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/contacts_service/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
-  fijkplayer:
-    :path: ".symlinks/plugins/fijkplayer/ios"
   firebase_admob:
     :path: ".symlinks/plugins/firebase_admob/ios"
   firebase_auth:
@@ -625,11 +620,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher/ios"
   video_player:
     :path: ".symlinks/plugins/video_player/ios"
+  wakelock:
+    :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
-  BIJKPlayer: 464bcb8d263331228758bfa34b45d00f399c9fb8
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
   catcher: e5585ed31458c849f4fd9c3719b2fcb0188b8918
   cloud_firestore: b8c0e15fa49dfff87c2817d288b577e5dca2df13
@@ -637,7 +633,6 @@ SPEC CHECKSUMS:
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   contacts_service: 849e1f84281804c8bfbec1b4c3eedcb23c5d3eca
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
-  fijkplayer: 0c8728bf3b222203e1fddb08f6899719d88b2b6d
   Firebase: 8db6f2d1b2c5e2984efba4949a145875a8f65fe5
   firebase_admob: c3b3b8762181c9748d7e74595044641f0180816b
   firebase_auth: d5159db3873478d1ac839af7b10d2f831516136a
@@ -695,6 +690,7 @@ SPEC CHECKSUMS:
   TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
+  wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
 
 PODFILE CHECKSUM: b64eb7e9eb6f2c11f5f34bd8cc6547cf1924169b
 

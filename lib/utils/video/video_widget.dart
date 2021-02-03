@@ -1,3 +1,4 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:video_player/video_player.dart';
@@ -17,6 +18,7 @@ class VideoWidget extends StatefulWidget {
 
 class _VideoWidgetState extends State<VideoWidget> {
   VideoPlayerController _controller;
+  ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _mute;
 
@@ -27,6 +29,11 @@ class _VideoWidgetState extends State<VideoWidget> {
     _controller = VideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+      _chewieController = ChewieController(
+        videoPlayerController: _controller,
+        autoInitialize: true,
+        showControls: false,
+      );
       setState(() {});
     });
 
@@ -54,6 +61,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void dispose() {
     _controller.dispose();
+    _chewieController.dispose();
     super.dispose();
   }
 
@@ -71,7 +79,12 @@ class _VideoWidgetState extends State<VideoWidget> {
                     : _controller.value.aspectRatio,
                 child: InkWell(
                   onTap: _handleMute,
-                  child: VideoPlayer(_controller),
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Chewie(
+                      controller: _chewieController,
+                    ),
+                  ),
                 ),
               ),
               Positioned(

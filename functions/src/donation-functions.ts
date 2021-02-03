@@ -20,7 +20,12 @@ exports.onCreateDonation = functions
       .doc(donation.user_id)
       .update({
         donated_amount: increment(donation.amount),
-      });
+      })
+      .catch((err) =>
+        functions.logger.info(
+          `Updating donated_amount of user ${donation.user_id} failed! Error: ${err}`
+        )
+      );
 
     // update the amounts of donations from the campaign
     await firestore
@@ -28,7 +33,12 @@ exports.onCreateDonation = functions
       .doc(donation.campaign_id)
       .update({
         current_amount: increment(donation.amount),
-      });
+      })
+      .catch((err) =>
+        functions.logger.info(
+          `Updating current_amount of campaign ${donation.campaign_id} failed! Error: ${err}`
+        )
+      );
 
     // update the daily/monthly/yearly donations
     await firestore
@@ -40,11 +50,20 @@ exports.onCreateDonation = functions
         yearly_amount: increment(donation.amount),
         donations_count: increment(1),
         all_donations: increment(donation.amount),
-      });
+      })
+      .catch((err) =>
+        functions.logger.info(
+          `Updating donated_amount of statistics failed! Error: ${err}`
+        )
+      );
 
     // update the donatedAmount in Session Members and session
-    if (donation.session_id !== null && donation.session_id !== undefined) {
-      let isSessionMember = (
+    if (
+      donation.session_id !== null &&
+      donation.session_id !== undefined &&
+      donation.session_id.length != 0
+    ) {
+      const isSessionMember = (
         await firestore
           .collection(DatabaseConstants.sessions)
           .doc(donation.session_id)
@@ -59,13 +78,23 @@ exports.onCreateDonation = functions
           .doc(donation.session_id)
           .collection(DatabaseConstants.session_members)
           .doc(donation.user_id)
-          .update({ donation_amount: increment(donation.amount) });
+          .update({ donation_amount: increment(donation.amount) })
+          .catch((err) =>
+            functions.logger.info(
+              `Updating donated_amount of session_member ${donation.user_id} failed! Error: ${err}`
+            )
+          );
       }
 
       await firestore
         .collection(DatabaseConstants.sessions)
         .doc(donation.session_id)
-        .update({ current_amount: increment(donation.amount) });
+        .update({ current_amount: increment(donation.amount) })
+        .catch((err) =>
+          functions.logger.info(
+            `Updating current_amount of session ${donation.session_id} failed! Error: ${err}`
+          )
+        );
     }
 
     let availableDCs: number = 0;
@@ -92,7 +121,12 @@ exports.onCreateDonation = functions
     await firestore
       .collection(DatabaseConstants.charges_campaigns)
       .doc(donation.campaign_id)
-      .set(campaignCharge, { merge: true });
+      .set(campaignCharge, { merge: true })
+      .catch((err) =>
+        functions.logger.info(
+          `Updating campaignCharge of charges_campaigns ${donation.campaign_id} failed! Error: ${err}`
+        )
+      );
 
     if (donation.useDCs) {
       await firestore
@@ -100,7 +134,12 @@ exports.onCreateDonation = functions
         .doc(donation.user_id)
         .collection(DatabaseConstants.advertising_data)
         .doc(DatabaseConstants.ad_balance)
-        .set({ dc_balance: increment(-maxDCsToUse) }, { merge: true });
+        .set({ dc_balance: increment(-maxDCsToUse) }, { merge: true })
+        .catch((err) =>
+          functions.logger.info(
+            `Updating dc_balance of user ${donation.user_id} failed! Error: ${err}`
+          )
+        );
       await snapshot.ref.set({ ad_dc_amount: maxDCsToUse }, { merge: true });
     }
   });

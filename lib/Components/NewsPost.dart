@@ -292,7 +292,7 @@ class _NewsPostState extends State<NewsPost> {
       user: um.user,
       context: context,
       close: bd.close,
-      sessionId: widget.news.sessionId,
+      sessionId: widget.news.sessionId.isEmpty ? null : widget.news.sessionId,
       uid: um.uid,
     ));
   }

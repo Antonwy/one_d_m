@@ -266,6 +266,8 @@ exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
     .collection(DatabaseConstants.sessions)
     .doc(sessionId);
 
+  const userRef = firestore.collection(DatabaseConstants.user).doc(userId);
+
   // add user as member in session
   await sessionRef
     .collection(DatabaseConstants.session_members)
@@ -274,6 +276,11 @@ exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {
       donation_amount: 0,
       id: userId,
     } as SessionMemberType);
+
+  // add session to user
+  await userRef.collection(DatabaseConstants.sessions).doc(sessionId).set({
+    id: sessionId,
+  });
 
   // increment member count
   await sessionRef.set(
@@ -292,11 +299,15 @@ exports.leaveCertifiedSession = functions.https.onCall(async (req, res) => {
     .collection(DatabaseConstants.sessions)
     .doc(sessionId);
 
+  const userRef = firestore.collection(DatabaseConstants.user).doc(userId);
+
   // remove user as member in session
   await sessionRef
     .collection(DatabaseConstants.session_members)
     .doc(userId)
     .delete();
+
+  await userRef.collection(DatabaseConstants.sessions).doc(sessionId).delete();
 
   // decrement member count
   await sessionRef.set(

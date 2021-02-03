@@ -332,8 +332,9 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
       res = await _um.createSocialUserDocument(_username, _phone);
     } else {
       if (_password1 != _password2) {
-        _um.status = Status.Unauthenticated;
         _showSnackBar("Deine Passwörter stimmen nicht überein!");
+        _um.status = Status.Unauthenticated;
+        setState(() {});
         return;
       }
 

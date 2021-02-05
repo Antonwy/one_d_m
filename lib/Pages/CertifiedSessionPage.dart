@@ -8,6 +8,7 @@ import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -99,7 +100,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
               ),
             ),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: ColorTheme.appBg,
           appBar: AppBar(
             leading: IconButton(
               icon: Icon(
@@ -108,7 +109,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: ColorTheme.appBg,
             elevation: 0,
             titleSpacing: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
@@ -507,16 +508,10 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                   elevation: 10,
                   borderRadius: BorderRadius.circular(6),
                   clipBehavior: Clip.antiAliasWithSaveLayer,
-                  child: csm.session.videoUrl == null
-                      ? Image(
-                          height: 220,
-                          image: widget.image,
-                          fit: BoxFit.cover,
-                        )
-                      : Center(
-                          child: VideoWidget(
-                              url: csm.session.videoUrl, play: _isInView),
-                        )),
+                  child: _CertifiedSessionTitle(
+                    isInView: _isInView,
+                    image: widget.image,
+                  )),
             ),
           ),
         ),
@@ -755,7 +750,9 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
       if (rateCount >= adRate) {
         widgets.add(Padding(
           padding: const EdgeInsets.all(10.0),
-          child: NewsNativeAd(),
+          child: NewsNativeAd(
+            id: Constants.ADMOB_SESSION_ID,
+          ),
         ));
         rateCount = 0;
       }
@@ -837,6 +834,59 @@ class _InfoView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CertifiedSessionTitle extends StatefulWidget {
+  final bool isInView;
+  final ImageProvider image;
+
+  const _CertifiedSessionTitle({Key key, this.isInView, this.image})
+      : super(key: key);
+
+  @override
+  __CertifiedSessionTitleState createState() => __CertifiedSessionTitleState();
+}
+
+class __CertifiedSessionTitleState extends State<_CertifiedSessionTitle> {
+  bool _muted = true;
+
+  void _toggleMuted() {
+    setState(() {
+      _muted = !_muted;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<CertifiedSessionManager>(
+      builder: (context, csm, child) => csm.session?.videoUrl == null
+          ? Image(
+              height: 220,
+              image: widget.image,
+              fit: BoxFit.cover,
+            )
+          : Stack(
+              children: [
+                Container(
+                    height: 220,
+                    child: VideoWidget(
+                      url: csm.session.videoUrl,
+                      play: widget.isInView,
+                      image: widget.image,
+                      muted: _muted,
+                      toggleMuted: _toggleMuted,
+                    )),
+                Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: MuteButton(
+                      muted: _muted,
+                      toggle: _toggleMuted,
+                    ))
+              ],
+            ),
     );
   }
 }

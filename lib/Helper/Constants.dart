@@ -13,12 +13,16 @@ class Constants {
       "pk_live_b82q59Wk8dCYMa2ruGWHPP27003iVVmsoY";
   static const String THEME_KEY = "theme_key";
   static const int DEFAULT_THEME_INDEX = 1;
-  static const String ADMOB_APP_ID = "ca-app-pub-1041685366730642~7462648359";
-  static const String ADMOB_NEWS_ID = "ca-app-pub-1041685366730642/4733080602";
+  static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~6152019777";
+  static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/6108621899";
   static const String ADMOB_REWARD_ID =
       "ca-app-pub-1041685366730642/4733080602";
   static const String ADMOB_EXPLORE_ID =
-      "ca-app-pub-1041685366730642/4733080602";
+      "ca-app-pub-6737404453820737/8020130056";
+  static const String ADMOB_SESSION_ID =
+      "ca-app-pub-6737404453820737/3464795611";
+  static const String ADMOB_CAMPAIGN_ID =
+      "ca-app-pub-6737404453820737/5899387264";
   static const int AD_NEWS_RATE = 3;
   static const int AD_CAMPAIGNS_RATE = 3;
 

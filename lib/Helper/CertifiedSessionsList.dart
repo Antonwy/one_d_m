@@ -7,6 +7,7 @@ import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/keep_alive_stream.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 
 import 'Constants.dart';
@@ -25,7 +26,6 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
   @override
   void initState() {
     super.initState();
-    DatabaseService.getNews().listen((news) {});
   }
 
   @override
@@ -82,14 +82,46 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
                     itemBuilder: (context, index) => Padding(
                           padding: EdgeInsets.only(
                               left: index == 0 ? 12.0 : 0.0,
-                              right:
-                                  index == uniqueIds.length - 1 ? 12.0 : 0.0),
-                          child: _buildSession(uniqueIds[index]),
+                              right: index == uniqueIds.length ? 12.0 : 0.0),
+                          child: uniqueIds.length == index
+                              ? _weAreWorking()
+                              : _buildSession(uniqueIds[index]),
                         ),
-                    itemCount: uniqueIds.length),
+                    itemCount: uniqueIds.length + 1),
               );
             });
       },
+    );
+  }
+
+  Widget _weAreWorking() {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Container(
+      width: 250,
+      child: Material(
+        borderRadius: BorderRadius.circular(Constants.radius),
+        color: _theme.colors.contrast,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Center(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.new_releases,
+                  color: _theme.colors.textOnContrast,
+                ),
+                XMargin(12),
+                Expanded(
+                  child: Text(
+                    "Wir arbeiten hart daran, neue Sessions zu erstellen um Euch mehr Inhalt zu bieten!",
+                    style: _theme.textTheme.textOnContrast.bodyText1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

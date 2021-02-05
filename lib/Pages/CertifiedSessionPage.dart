@@ -869,15 +869,13 @@ class __CertifiedSessionTitleState extends State<_CertifiedSessionTitle> {
             )
           : Stack(
               children: [
-                Container(
-                    height: 220,
-                    child: VideoWidget(
-                      url: csm.session.videoUrl,
-                      play: widget.isInView,
-                      image: widget.image,
-                      muted: _muted,
-                      toggleMuted: _toggleMuted,
-                    )),
+                VideoWidget(
+                  url: csm.session.videoUrl,
+                  play: widget.isInView,
+                  image: widget.image,
+                  muted: _muted,
+                  toggleMuted: _toggleMuted,
+                ),
                 Positioned(
                     bottom: 12,
                     left: 12,

@@ -178,6 +178,14 @@ class DatabaseService {
         .map((snapshot) => AdBalance.fromSnapshot(snapshot));
   }
 
+  static Future<void> incrementAdBalance(String uid) {
+    return userCollection
+        .doc(uid)
+        .collection(ADVERTISING_DATA)
+        .doc(ADVERTISING_BALANCE)
+        .update({AdBalance.DC_BALANCE:FieldValue.increment(1)});
+  }
+
   static Stream<String> getPhoneNumber(String uid) {
     return userCollection
         .doc(uid)

@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -31,12 +33,13 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
+    _everyFourMinutesPoints();
     if (Provider.of<UserManager>(context, listen: false).firstSignIn) {
       print("SHOW WELCOME");
       Future.delayed(Duration(seconds: 1)).then((v) => showWelcomeDialog());
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +164,13 @@ class HomePageState extends State<HomePage> {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 300),
     );
+  }
+  void _everyFourMinutesPoints(){
+    final cron = Cron();
+    cron.schedule(Schedule.parse('*/4 * * * *'), () async {
+      String uid = Provider.of<UserManager>(context, listen: false).uid;
+      DatabaseService.incrementAdBalance(uid);
+    });
   }
 
   @override

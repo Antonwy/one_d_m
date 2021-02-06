@@ -9,6 +9,9 @@ import Flutter
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     NativeAds.register(with: registrar(forPlugin: "Runner")!)
+    if #available(iOS 10.0, *) {
+    UNUserNotificationCenter.current().delegate = self as ? UNUserNotificationCenterDelegate
+    }
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

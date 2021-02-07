@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -18,15 +18,17 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/utils/video/video_info.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CreatePostScreen extends StatefulWidget {
+  final Campaign campaign;
+  final bool isSession;
   final Session session;
   final ScrollController controller;
 
-  const CreatePostScreen({Key key, this.session, this.controller})
+  const CreatePostScreen(
+      {Key key, this.session, this.controller, this.campaign, this.isSession})
       : super(key: key);
 
   @override
@@ -153,10 +155,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     News news = News(
         id: _newsId,
-        sessionId: widget.session.id,
-        campaignId: widget.session.campaignId,
-        campaignName: widget.session.campaignName,
-        campaignImgUrl: widget.session.campaignImgUrl,
+        sessionId: widget.isSession ? widget.session?.id : '',
+        campaignId:
+            widget.isSession ? widget.session?.campaignId : widget.campaign?.id,
+        campaignName: widget.isSession
+            ? widget.session?.campaignName
+            : widget.campaign?.name,
+        campaignImgUrl: widget.isSession
+            ? widget.session?.campaignImgUrl
+            : widget.campaign?.imgUrl,
         createdAt: DateTime.now(),
         userId: um.uid,
         title: '',
@@ -181,7 +188,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _getImage() async {
-    PickedFile _file = await ImagePicker().getImage(source: ImageSource.gallery);
+    PickedFile _file =
+        await ImagePicker().getImage(source: ImageSource.gallery);
     if (_file == null) return;
     _cropImage(File(_file.path));
   }
@@ -363,7 +371,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return videoUrl;
   }
 
-
   Future<void> _processVideo(File rawVideoFile) async {
     final videoName = 'video_$_newsId';
     final rawVideoPath = rawVideoFile.path;
@@ -373,12 +380,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       _progress = 0.0;
     });
 
-
     setState(() {
       _processPhase = 'Processing video...';
       _progress = 0.0;
     });
-
 
     setState(() {
       _processPhase = 'Processing video...';
@@ -429,27 +434,28 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       });
     }
   }
+
   Future<Null> _cropImage(File image) async {
     File croppedFile = await ImageCropper.cropImage(
         sourcePath: image.path,
         aspectRatioPresets: Platform.isAndroid
             ? [
-          CropAspectRatioPreset.square,
-          CropAspectRatioPreset.ratio3x2,
-          CropAspectRatioPreset.original,
-          CropAspectRatioPreset.ratio4x3,
-          CropAspectRatioPreset.ratio16x9
-        ]
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio16x9
+              ]
             : [
-          CropAspectRatioPreset.original,
-          CropAspectRatioPreset.square,
-          CropAspectRatioPreset.ratio3x2,
-          CropAspectRatioPreset.ratio4x3,
-          CropAspectRatioPreset.ratio5x3,
-          CropAspectRatioPreset.ratio5x4,
-          CropAspectRatioPreset.ratio7x5,
-          CropAspectRatioPreset.ratio16x9
-        ],
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio5x3,
+                CropAspectRatioPreset.ratio5x4,
+                CropAspectRatioPreset.ratio7x5,
+                CropAspectRatioPreset.ratio16x9
+              ],
         androidUiSettings: AndroidUiSettings(
             toolbarTitle: 'Cropper',
             toolbarColor: Colors.deepOrange,

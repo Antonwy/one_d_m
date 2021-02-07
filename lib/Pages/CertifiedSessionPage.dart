@@ -1072,6 +1072,7 @@ class CreatePostButton extends StatelessWidget {
               closedElevation: 0,
               openBuilder: (context, close, scrollController) =>
                   CreatePostScreen(
+                isSession: true,
                 session: csm.session,
                 controller: scrollController,
               ),

@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
+import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
@@ -15,19 +15,17 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/Pages/CreateNewsPage.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
+import 'package:one_d_m/Pages/create_post.dart';
 import 'package:provider/provider.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -267,19 +265,22 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           ],
                         ),
                         Consumer<UserManager>(builder: (context, um, child) {
-                          return StreamBuilder<bool>(
-                              initialData: false,
-                              stream: campaign?.id == null
-                                  ? null
-                                  : DatabaseService.hasSubscribedCampaignStream(
-                                      um.uid, campaign?.id),
-                              builder: (context, snapshot) {
-                                _subscribed = snapshot.data;
-                                return _buildFollowButton(
-                                    context,
-                                    () async => _toggleSubscribed(um.uid),
-                                    _subscribed);
-                              });
+                          return um.uid == widget.campaign.authorId
+                              ? _createPostButton()
+                              : StreamBuilder<bool>(
+                                  initialData: false,
+                                  stream: campaign?.id == null
+                                      ? null
+                                      : DatabaseService
+                                          .hasSubscribedCampaignStream(
+                                              um.uid, campaign?.id),
+                                  builder: (context, snapshot) {
+                                    _subscribed = snapshot.data;
+                                    return _buildFollowButton(
+                                        context,
+                                        () async => _toggleSubscribed(um.uid),
+                                        _subscribed);
+                                  });
                         }),
                       ],
                     ),
@@ -529,6 +530,25 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                   maxLines: 1,
                 ),
           onPressed: function);
+
+  Widget _createPostButton() => CustomOpenContainer(
+        closedShape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        closedElevation: 0,
+        openBuilder: (context, close, scrollController) => CreatePostScreen(
+          isSession: false,
+          campaign: widget.campaign,
+          controller: scrollController,
+        ),
+        closedColor: Colors.transparent,
+        closedBuilder: (context, open) => RaisedButton(
+            color: _bTheme.dark,
+            textColor: _bTheme.textOnDark,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            child: AutoSizeText("Post erstellen", maxLines: 1),
+            onPressed: open),
+      );
 
   Future<void> _toggleSubscribed(String uid) async {
     setState(() {

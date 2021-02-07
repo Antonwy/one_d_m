@@ -36,7 +36,7 @@ exports.monthly = functions.pubsub
   .schedule('0 0 1 * *')
   .onRun(async (context) => {
     await resetStatistics({ monthly_amount: 0 });
-    await chargeCustomers();
+    // await chargeCustomers();
   });
 
 exports.yearly = functions.pubsub

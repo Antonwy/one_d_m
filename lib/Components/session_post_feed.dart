@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:provider/provider.dart';
@@ -10,21 +11,15 @@ import 'package:provider/provider.dart';
 import 'NativeAd.dart';
 import 'NewsPost.dart';
 
-class SessionPostFeed extends StatefulWidget {
-  const SessionPostFeed({Key key}) : super(key: key);
+class PostFeed extends StatefulWidget {
+  const PostFeed({Key key}) : super(key: key);
 
   @override
-  SessionPostFeedState createState() => SessionPostFeedState();
+  PostFeedState createState() => PostFeedState();
 }
 
-class SessionPostFeedState extends State<SessionPostFeed> {
+class PostFeedState extends State<PostFeed> {
   String uid;
-  bool _hasMorePosts = true;
-  bool _isLoading = false;
-  DocumentSnapshot _lastDocument;
-  List<DocumentSnapshot> _posts = [];
-  int _limit = 5;
-  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -34,15 +29,27 @@ class SessionPostFeedState extends State<SessionPostFeed> {
   @override
   Widget build(BuildContext context) {
     uid = context.watch<UserManager>().uid;
-    // return _buildPostsStream();
     return StreamBuilder(
+        //todo add pagination
         stream: DatabaseService.getAllPosts(),
         builder: (_, snapshot) {
           if (!snapshot.hasData) {
             return SliverToBoxAdapter(
               child: Center(
-                child: CircularProgressIndicator(),
-              ),
+                  child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 20,
+                  ),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text("Lade News")
+                ],
+              )),
             );
           }
 
@@ -55,20 +62,35 @@ class SessionPostFeedState extends State<SessionPostFeed> {
         });
   }
 
-
   List<Widget> _buildPostWidgets(List<News> posts) {
     List<Widget> widgets = [];
+    List<News> postWithVideos = [];
+    List<News> postNoVideos = [];
+    List<News> orderedPosts = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
 
-    for (var i = 0; i < posts.length; i++) {
-      rateCount++;
+    if (posts.isNotEmpty) {
+      widgets.add(_buildNewsTitleWidget());
+    }
 
+    for (var i = 0; i < posts.length; i++) {
+      //display video post on top of the list
+      if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
+        postWithVideos.add(posts[i]);
+      } else {
+        postNoVideos.add(posts[i]);
+      }
+      orderedPosts = [...postWithVideos, ...postNoVideos];
+    }
+
+    for (var i = 0; i < orderedPosts.length; i++) {
+      rateCount++;
       widgets.add(
         Padding(
           padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: NewsPost(
-            posts[i],
+            orderedPosts[i],
             withCampaign: false,
             withDonationButton: true,
           ),
@@ -76,7 +98,7 @@ class SessionPostFeedState extends State<SessionPostFeed> {
       );
 
       ///add native add only if post length is higher than adrate
-      if (_posts.length > adRate) {
+      if (orderedPosts.length > adRate) {
         if (rateCount >= adRate) {
           widgets.add(
             Padding(
@@ -93,4 +115,15 @@ class SessionPostFeedState extends State<SessionPostFeed> {
 
     return widgets;
   }
+
+  Widget _buildNewsTitleWidget() => Padding(
+        padding: const EdgeInsets.only(left: 12, bottom: 10),
+        child: Text(
+          "News",
+          style: ThemeManager.of(context).textTheme.dark.headline6.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+        ),
+      );
 }

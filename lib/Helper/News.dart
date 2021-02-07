@@ -58,6 +58,7 @@ class News {
       CAMPAIGNIMGURL: campaignImgUrl,
       CREATEDAT: Timestamp.now(),
       SESSION_ID: sessionId,
+      USERID:userId
     };
   }
 
@@ -73,6 +74,7 @@ class News {
       sessionId: snapshot.data()[SESSION_ID],
       imageUrl: snapshot.data()[IMAGEURL],
       videoUrl: snapshot.data()[VIDEO_URL],
+      userId: snapshot.data()[USERID],
       createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
     );
   }

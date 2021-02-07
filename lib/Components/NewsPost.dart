@@ -10,6 +10,7 @@ import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
@@ -154,6 +155,9 @@ class _NewsPostState extends State<NewsPost> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    widget.news.userId?.isNotEmpty ?? false
+                        ? _buildCreatorTitle(widget.news.userId)
+                        : const SizedBox.shrink(),
                     widget.news.text.isEmpty
                         ? Container()
                         : _buildExpandableContent(context, widget.news.text)
@@ -296,4 +300,18 @@ class _NewsPostState extends State<NewsPost> {
       uid: um.uid,
     ));
   }
+
+  Widget _buildCreatorTitle(String uid) => StreamBuilder(
+        stream: DatabaseService.getUserStream(uid),
+        builder: (context, AsyncSnapshot<User> snapshot) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12,0, 0),
+            child: Text('@${snapshot.data?.name ?? 'Laden...'}',
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: ThemeManager.of(context).colors.dark)),
+          );
+        },
+      );
 }

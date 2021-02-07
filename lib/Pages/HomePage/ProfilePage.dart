@@ -9,29 +9,21 @@ import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
-import 'package:one_d_m/Helper/Session.dart';
-import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/currency.dart';
-import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/latest_donaters_view.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
-import 'package:one_d_m/Pages/notification_page.dart';
 import 'package:provider/provider.dart';
 
-import '../RewardVideoPage.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
@@ -85,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
-          SessionPostFeed(),
+          PostFeed(),
           const SliverToBoxAdapter(
             child: const SizedBox(
               height: 120,

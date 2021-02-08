@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 
@@ -21,7 +22,7 @@ class CampaignButton extends StatelessWidget {
 
   CampaignButton(this.id,
       {this.campaign,
-      this.color = Colors.white,
+      this.color,
       this.textStyle = const TextStyle(color: Colors.black),
       this.onPressed,
       this.elevation = 1,
@@ -45,7 +46,7 @@ class CampaignButton extends StatelessWidget {
                     : snapshot.data,
                 scrollController: scrollController,
               ),
-              closedColor: color,
+              closedColor: color ?? ColorTheme.appBg,
               closedElevation: elevation,
               closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(borderRadius)),

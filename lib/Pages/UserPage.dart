@@ -157,62 +157,60 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                       : SliverToBoxAdapter(
                           child: SizedBox.shrink(),
                         ),
-                  Consumer<UserManager>(builder: (context, um, child) {
-                    return StreamBuilder<List<Campaign>>(
-                        stream: DatabaseService.getSubscribedCampaignsStream(
-                            um.uid),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData)
-                            return SliverToBoxAdapter(
-                              child: Center(
-                                  child: Column(
-                                children: <Widget>[
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation(
-                                          ColorTheme.blue)),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text("Laden...")
-                                ],
-                              )),
-                            );
-
-                          campaigns = snapshot.data;
-
-                          if (campaigns.isEmpty)
-                            return SliverToBoxAdapter(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  SizedBox(
-                                    height: 25,
-                                  ),
-                                  SvgPicture.asset(
-                                    "assets/images/no-news.svg",
-                                    height: 200,
-                                  ),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Text(
-                                      "${um.uid == user.id ? "Du" : "${user.name ?? "Gelöschter Account"}"} ${um.uid == user.id ? "hast" : "hat"} noch keine Projekte abonniert!"),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                ],
-                              ),
-                            );
-
-                          return SliverList(
-                            delegate:
-                                SliverChildListDelegate(_generateChildren()),
+                  StreamBuilder<List<Campaign>>(
+                      stream: DatabaseService.getSubscribedCampaignsStream(
+                          widget.user.id),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData)
+                          return SliverToBoxAdapter(
+                            child: Center(
+                                child: Column(
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation(
+                                        ColorTheme.blue)),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text("Laden...")
+                              ],
+                            )),
                           );
-                        });
-                  }),
+
+                        campaigns = snapshot.data;
+
+                        if (campaigns.isEmpty)
+                          return SliverToBoxAdapter(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 25,
+                                ),
+                                SvgPicture.asset(
+                                  "assets/images/no-news.svg",
+                                  height: 200,
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Text(
+                                    "${um.uid == user.id ? "Du" : "${user.name ?? "Gelöschter Account"}"} ${um.uid == user.id ? "hast" : "hat"} noch keine Projekte abonniert!"),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                              ],
+                            ),
+                          );
+
+                        return SliverList(
+                          delegate:
+                              SliverChildListDelegate(_generateChildren()),
+                        );
+                      }),
                 ],
               );
             }),

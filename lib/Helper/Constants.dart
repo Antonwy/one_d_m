@@ -28,6 +28,9 @@ class Constants {
 
   static const double radius = 12;
 
+  static const int SCHEDULE_NOTI_HOUR = 12;
+  static const int SCHEDULE_NOTI_MINUTE = 27;
+
   //SkSl WarmUp file
   ///Users/niroshana/Documents/FIVERR/one-d-m/flutter_01.sksl.json.
 }

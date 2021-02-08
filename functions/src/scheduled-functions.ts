@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import FieldValue = admin.firestore.FieldValue;
 import {
   DatabaseConstants,
   ChargesFields,
@@ -21,6 +22,65 @@ exports.daily = functions.pubsub
     await resetStatistics({ daily_amount: 0 });
     await deleteOutdatedSessions();
   });
+
+exports.dailyPoints = functions.pubsub
+  .schedule('0 8 * * *')
+  .onRun(async (context) => {
+    await sendDailyPoints();
+  });
+
+async function sendDailyPoints() {
+  await firestore
+    .collection(DatabaseConstants.user)
+    .get()
+    .then(async (userList) => {
+      functions.logger.info('users length:' + userList.docs.length);
+      userList.docs.forEach(async (user) => {
+        // increment dv points
+        const userDoc = firestore
+          .collection(DatabaseConstants.user)
+          .doc(user.id);
+
+        await userDoc
+          .collection(DatabaseConstants.advertising_data)
+          .doc(DatabaseConstants.ad_balance)
+          .set(
+            {
+              dc_balance: FieldValue.increment(1),
+            },
+            { merge: true }
+          );
+        // send push notification
+        const privData: PrivateUserDataType = (
+          await userDoc
+            .collection(DatabaseConstants.private_data)
+            .doc(DatabaseConstants.data)
+            .get()
+        ).data() as PrivateUserDataType;
+
+        console.log('Sending Pushmessages for daily points');
+
+        if (
+          privData?.device_token !== null &&
+          privData?.device_token !== undefined &&
+          privData?.device_token.length != 0
+        ) {
+          const payload = {
+            notification: {
+              title: 'Neuer Donation Vote!',
+              body: `Hurra! Du hast einen neuen Donation Vote bekommen!`,
+            },
+          };
+
+          const pushRes = await admin
+            .messaging()
+            .sendToDevice(privData.device_token, payload)
+            .catch((err) => functions.logger.info(err));
+          console.log(pushRes);
+        }
+      });
+    });
+}
 
 async function deleteOutdatedSessions() {
   const nowDate = admin.firestore.Timestamp.now();

@@ -8,7 +8,6 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -188,7 +187,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
             padding: const EdgeInsets.only(left: 28.0, right: 12.0, top: 0),
             child: NewsPost(
               post[i],
-              withCampaign: false,
+              withHeader: false,
               withDonationButton: true,
             ),
           ),

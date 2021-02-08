@@ -2,18 +2,13 @@ import 'dart:io';
 
 import 'package:catcher/core/catcher.dart';
 import 'package:catcher/handlers/console_handler.dart';
-import 'package:catcher/handlers/email_manual_handler.dart';
 import 'package:catcher/handlers/sentry_handler.dart';
-import 'package:catcher/mode/dialog_report_mode.dart';
 import 'package:catcher/mode/silent_report_mode.dart';
 import 'package:catcher/model/catcher_options.dart';
-import 'package:catcher/model/localization_options.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CustomReportMode.dart';
 import 'package:one_d_m/Helper/NativeAds.dart';
-import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';

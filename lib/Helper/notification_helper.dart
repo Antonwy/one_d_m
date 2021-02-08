@@ -1,8 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
 
 class NotificationPlugin {
 //
@@ -11,10 +12,12 @@ class NotificationPlugin {
       didReceivedLocalNotificationSubject =
       BehaviorSubject<ReceivedNotification>();
   var initializationSettings;
+  tz.Location location;
 
   NotificationPlugin._() {
     init();
   }
+
 
   init() async {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -38,7 +41,16 @@ class NotificationPlugin {
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
   }
 
-
+  void requestIOSPermissions(FlutterLocalNotificationsPlugin notifsPlugin) {
+    notifsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+  }
 
   setListenerForLowerVersions(Function onNotificationInLowerVersions) {
     didReceivedLocalNotificationSubject.listen((receivedNotification) {
@@ -55,16 +67,13 @@ class NotificationPlugin {
 
   Future<void> showNotification(String title, String body) async {
     var androidChannelSpecifics = AndroidNotificationDetails(
-      '1000',
-      'ONE_D_M_CHANNEL',
-      "ONE_D_M_NOTIFICATION",
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      timeoutAfter: 5000,
-      styleInformation: DefaultStyleInformation(true, true),
-      icon: 'ic_notif'
-    );
+        '1000', 'ONE_D_M_CHANNEL', "ONE_D_M_NOTIFICATION",
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        timeoutAfter: 5000,
+        styleInformation: DefaultStyleInformation(true, true),
+        icon: 'ic_notif');
     var iosChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         android: androidChannelSpecifics, iOS: iosChannelSpecifics);
@@ -94,6 +103,8 @@ class NotificationPlugin {
 
 NotificationPlugin notificationPlugin = NotificationPlugin._();
 
+
+
 class ReceivedNotification {
   final int id;
   final String title;
@@ -107,3 +118,5 @@ class ReceivedNotification {
     @required this.payload,
   });
 }
+
+

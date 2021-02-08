@@ -1,28 +1,24 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/post_item_widget.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:provider/provider.dart';
 
-class SessionPostFeed extends StatefulWidget {
-  final List<Session> sessions;
-  final List<Campaign> campaigns;
+import 'NativeAd.dart';
+import 'NewsPost.dart';
 
-  const SessionPostFeed({Key key, this.sessions, this.campaigns})
-      : super(key: key);
+class PostFeed extends StatefulWidget {
+  const PostFeed({Key key}) : super(key: key);
 
   @override
-  SessionPostFeedState createState() => SessionPostFeedState();
+  PostFeedState createState() => PostFeedState();
 }
 
-class SessionPostFeedState extends State<SessionPostFeed> {
-  final StreamController _myPostController = StreamController.broadcast();
+class PostFeedState extends State<PostFeed> {
   String uid;
 
   @override
@@ -31,88 +27,91 @@ class SessionPostFeedState extends State<SessionPostFeed> {
   }
 
   @override
-  void dispose() {
-    _myPostController.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     uid = context.watch<UserManager>().uid;
-    return _buildPostStream();
-  }
-
-  List<Widget> _buildPostWidgets(List<PostItem> post) {
-    List<Widget> widgets = [];
-    widgets.add(_buildNewsTitleWidget());
-    for (PostItem p in post) {
-      widgets.add(Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [p.buildHeading(context), p.buildPosts(context)],
-      ));
-    }
-    return widgets;
-  }
-
-  Widget _buildPostStream() => StreamBuilder(
+    return StreamBuilder(
+        //todo add pagination
         stream: DatabaseService.getAllPosts(),
         builder: (_, snapshot) {
-          if (!snapshot.hasData)
-            return SliverToBoxAdapter(child: SizedBox.shrink());
-          List<News> allNews = snapshot.data;
-          if (allNews.isEmpty)
-            return SliverToBoxAdapter(child: SizedBox.shrink());
-
-          List<News> myPosts = [];
-          List<UserPost> userPosts = [];
-          List<PostItem> postItem = [];
-
-          for (News n in allNews) {
-            for (Session s in widget.sessions) {
-              if (n.sessionId == s.id) {
-                myPosts.add(n);
-              }
-            }
-            if (n.sessionId == '') {
-              for (Campaign c in widget.campaigns) {
-                if (n.campaignId == c.id) {
-                  myPosts.add(n);
-                }
-              }
-            }
+          if (!snapshot.hasData) {
+            return SliverToBoxAdapter(
+              child: Center(
+                  child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 20,
+                  ),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text("Lade News")
+                ],
+              )),
+            );
           }
 
-          myPosts.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
-
-          for (News p in myPosts) {
-            UserPost up = UserPost(
-                id: p.sessionId != '' ? p.sessionId : p.campaignId,
-                isSession: p.sessionId != '');
-            userPosts.add(up);
-          }
-          List<UserPost> p = [];
-          p.addAll(userPosts.where((a) => p.every((b) => a.id != b.id)));
-          for (UserPost up in p) {
-            postItem.add(HeadingItem(
-                session: up.isSession
-                    ? DatabaseService.getSessionFuture(up.id)
-                    : null,
-                campaign: up.isSession
-                    ? null
-                    : DatabaseService.getCampaignStream(up.id),
-                isSession: up.isSession));
-            postItem.add(PostContentItem(
-              post: up.isSession
-                  ? DatabaseService.getPostBySessionId(up.id)
-                  : DatabaseService.getNewsFromCampaignStream(up.id),
-            ));
+          List<News> post = snapshot.data;
+          if (post.isEmpty) {
+            return NoContentProfilePage();
           }
           return SliverList(
-              delegate: SliverChildListDelegate(_buildPostWidgets(postItem)));
-        },
+              delegate: SliverChildListDelegate(_buildPostWidgets(post)));
+        });
+  }
+
+  List<Widget> _buildPostWidgets(List<News> posts) {
+    List<Widget> widgets = [];
+    int adRate = Constants.AD_NEWS_RATE;
+    int rateCount = 0;
+
+    if (posts.isNotEmpty) {
+      widgets.add(_buildNewsTitleWidget());
+    }
+
+    // for (var i = 0; i < posts.length; i++) {
+    //   //display video post on top of the list
+    //   if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
+    //     postWithVideos.add(posts[i]);
+    //   } else {
+    //     postNoVideos.add(posts[i]);
+    //   }
+    //   orderedPosts = [...postWithVideos, ...postNoVideos];
+    // }
+
+    for (News n in posts) {
+      rateCount++;
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+          child: NewsPost(
+            n,
+            withHeader: n.sessionId?.isEmpty ?? true,
+            withDonationButton: true,
+          ),
+        ),
       );
+
+      ///add native add only if post length is higher than adrate
+      if (posts.length > adRate) {
+        if (rateCount >= adRate) {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+              child: NewsNativeAd(
+                id: Constants.ADMOB_NEWS_ID,
+              ),
+            ),
+          );
+          rateCount = 0;
+        }
+      }
+    }
+
+    return widgets;
+  }
 
   Widget _buildNewsTitleWidget() => Padding(
         padding: const EdgeInsets.only(left: 12, bottom: 10),
@@ -124,11 +123,4 @@ class SessionPostFeedState extends State<SessionPostFeed> {
               ),
         ),
       );
-}
-
-class UserPost {
-  String id;
-  bool isSession;
-
-  UserPost({this.id, this.isSession});
 }

@@ -6,12 +6,7 @@ import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
-import 'package:provider/provider.dart';
-
-import 'AnimatedFutureBuilder.dart';
-import 'Avatar.dart';
 import 'CustomOpenContainer.dart';
 import 'DonationWidget.dart';
 

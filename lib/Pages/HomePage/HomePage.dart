@@ -4,6 +4,7 @@ import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
+import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -39,7 +40,6 @@ class HomePageState extends State<HomePage> {
       Future.delayed(Duration(seconds: 1)).then((v) => showWelcomeDialog());
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -165,11 +165,15 @@ class HomePageState extends State<HomePage> {
       duration: const Duration(milliseconds: 300),
     );
   }
-  void _everyFourMinutesPoints(){
+
+  void _everyFourMinutesPoints() {
     final cron = Cron();
     cron.schedule(Schedule.parse('*/4 * * * *'), () async {
-      String uid = Provider.of<UserManager>(context, listen: false).uid;
-      DatabaseService.incrementAdBalance(uid);
+      print("New DV");
+      String uid = context.read<UserManager>().uid;
+      await DatabaseService.incrementAdBalance(uid);
+      PushNotification.of(context).show(NotificationContent(
+          title: "Neuer DV", body: "Du hast einen neuen DV!"));
     });
   }
 

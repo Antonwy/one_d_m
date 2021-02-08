@@ -273,10 +273,13 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         Align(
                                           alignment: Alignment.center,
                                           child: Builder(builder: (context) {
-                                            List<String> dEffects =
-                                                widget.campaign.donationEffects;
-                                            String effect = dEffects[
-                                                new Random(42)
+                                            List<String> dEffects = widget
+                                                    .campaign
+                                                    ?.donationEffects ??
+                                                [];
+                                            String effect = dEffects.isEmpty
+                                                ? ""
+                                                : dEffects[new Random(42)
                                                     .nextInt(dEffects.length)];
                                             return Text(
                                               effect.replaceFirst(

@@ -183,7 +183,7 @@ class DatabaseService {
         .doc(uid)
         .collection(ADVERTISING_DATA)
         .doc(ADVERTISING_BALANCE)
-        .update({AdBalance.DC_BALANCE:FieldValue.increment(1)});
+        .update({AdBalance.DC_BALANCE: FieldValue.increment(1)});
   }
 
   static Stream<String> getPhoneNumber(String uid) {
@@ -397,6 +397,7 @@ class DatabaseService {
 
   static Stream<List<News>> getAllPosts() {
     return newsCollection
+        .orderBy(News.CREATEDAT, descending: true)
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
@@ -547,12 +548,11 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
-  static Stream<List<Donation>> getLatestDonations({int limit = 3,bool isDescending = true}) {
+  static Stream<List<Donation>> getLatestDonations(
+      {int limit = 3, bool isDescending = true}) {
     return donationsCollection
         .where(Donation.ISANONYM, isEqualTo: false)
-        .orderBy(
-          Donation.CREATEDAT,descending: isDescending
-        )
+        .orderBy(Donation.CREATEDAT, descending: isDescending)
         .limit(limit)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
@@ -838,10 +838,8 @@ class DatabaseService {
     });
   }
 
-  static Stream<Session> getSessionFuture(String sid) {
-    return sessionsCollection.doc(sid).snapshots().map((qs) {
-      return Session.fromDoc(qs);
-    });
+  static Future<Session> getSessionFuture(String sid) async {
+    return Session.fromDoc(await sessionsCollection.doc(sid).get());
   }
 
   static Stream<List<SessionMember>> getSessionMembers(String sid,
@@ -952,7 +950,6 @@ class DatabaseService {
     try {
       DocumentSnapshot doc =
           await userCollection.doc(uid).collection(PRIVATEDATA).doc(DATA).get();
-      print(doc.data());
       if (!doc.exists) return false;
       if (doc.data() == null) return false;
       if (doc.data().containsKey(DEVICE_TOKEN)) {

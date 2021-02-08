@@ -124,8 +124,6 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             builder: (context, snapshot) {
               campaign = snapshot.data;
 
-              print(snapshot);
-
               return CustomScrollView(controller: _scrollController, slivers: [
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
@@ -368,7 +366,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             delegate: SliverChildBuilderDelegate(
                 (context, i) => NewsPost(
                       n[i],
-                      withCampaign: false,
+                      withHeader: false,
                     ),
                 childCount: n.length),
           ),

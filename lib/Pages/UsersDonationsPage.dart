@@ -31,7 +31,8 @@ class UsersDonationsPage extends StatelessWidget {
           stream: DatabaseService.getDonationsFromUser(user.id),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              print(snapshot.data.toString());
+              snapshot.data.sort(
+                  (d1, d2) => d1.createdAt.isAfter(d2.createdAt) ? -1 : 1);
               return ListView.builder(
                 itemBuilder: (context, index) {
                   print(snapshot.data[index].userId);

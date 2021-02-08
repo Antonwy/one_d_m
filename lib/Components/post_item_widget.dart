@@ -187,7 +187,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
             padding: const EdgeInsets.only(left: 28.0, right: 12.0, top: 0),
             child: NewsPost(
               post[i],
-              withCampaign: false,
+              withHeader: false,
               withDonationButton: true,
             ),
           ),

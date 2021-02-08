@@ -1,10 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -12,20 +12,24 @@ import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
+import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:visibility_detector/visibility_detector.dart';
 
-import 'CampaignButton.dart';
+import 'AnimatedFutureBuilder.dart';
+import 'CustomOpenContainer.dart';
+import 'DonationWidget.dart';
 
 class NewsPost extends StatefulWidget {
   final News news;
-  final bool withCampaign, withDonationButton;
+  final bool withHeader, withDonationButton;
   bool isInView;
 
   NewsPost(this.news,
-      {this.withCampaign = true,
+      {this.withHeader = true,
       this.isInView = false,
       this.withDonationButton = false});
 
@@ -35,9 +39,11 @@ class NewsPost extends StatefulWidget {
 
 class _NewsPostState extends State<NewsPost> {
   bool _muted = true;
+  bool _isSessionPost;
 
   @override
   Widget build(BuildContext context) {
+    _isSessionPost = !(widget.news.sessionId?.isEmpty ?? true);
     return VisibilityDetector(
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
@@ -64,15 +70,11 @@ class _NewsPostState extends State<NewsPost> {
               borderRadius: BorderRadius.circular(Constants.radius)),
           child: Column(
             children: <Widget>[
-              widget.withCampaign
-                  ? CampaignButton(
-                      widget.news.campaignId,
-                      borderRadius: 0,
-                      textStyle: TextStyle(),
-                      campaign: Campaign(
-                          imgUrl: widget.news.campaignImgUrl,
-                          id: widget.news.campaignId,
-                          name: widget.news.campaignName),
+              widget.withHeader
+                  ? _NewsHeader(
+                      campaignId:
+                          _isSessionPost ? null : widget.news.campaignId,
+                      sessionId: _isSessionPost ? widget.news.sessionId : null,
                     )
                   : Container(),
               Container(
@@ -305,7 +307,7 @@ class _NewsPostState extends State<NewsPost> {
         stream: DatabaseService.getUserStream(uid),
         builder: (context, AsyncSnapshot<User> snapshot) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12,0, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
             child: Text('@${snapshot.data?.name ?? 'Laden...'}',
                 style: TextStyle(
                     fontWeight: FontWeight.w700,
@@ -314,4 +316,60 @@ class _NewsPostState extends State<NewsPost> {
           );
         },
       );
+}
+
+class _NewsHeader extends StatelessWidget {
+  final String sessionId, campaignId;
+
+  const _NewsHeader({Key key, this.campaignId, this.sessionId})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedFutureBuilder(
+        future: campaignId != null
+            ? DatabaseService.getCampaign(campaignId)
+            : DatabaseService.getSessionFuture(sessionId),
+        builder: (context, snapshot) {
+          if (snapshot.hasData)
+            return CustomOpenContainer(
+              openBuilder: (context, open, scrollController) =>
+                  campaignId != null
+                      ? NewCampaignPage(
+                          snapshot.data,
+                          scrollController: scrollController,
+                        )
+                      : SessionPage(
+                          baseSession: snapshot.data,
+                          scrollController: scrollController,
+                        ),
+              closedColor: ColorTheme.appBg,
+              closedElevation: 0,
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Constants.radius)),
+              tappable: snapshot.hasData,
+              closedBuilder: (context, open) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: <Widget>[
+                    RoundedAvatar(snapshot.data.imgUrl ?? ''),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: AutoSizeText(
+                        "${snapshot.data.name}",
+                        maxLines: 1,
+                        style: ThemeManager.of(context)
+                            .textTheme
+                            .dark
+                            .bodyText1
+                            .copyWith(fontSize: 16),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          return Container(height: 20);
+        });
+  }
 }

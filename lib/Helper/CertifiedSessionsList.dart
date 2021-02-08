@@ -39,7 +39,8 @@ class _CertifiedSessionsListState extends State<CertifiedSessionsList> {
     return StreamBuilder(
       stream: DatabaseService.getSessionPosts(),
       builder: (_, snapshot) {
-        if (!snapshot.hasData) return CircularProgressIndicator();
+        if (!snapshot.hasData)
+          return Center(child: CircularProgressIndicator());
         List<News> news = snapshot.data;
         news.sort((a, b) => b.createdAt?.compareTo(a.createdAt));
 

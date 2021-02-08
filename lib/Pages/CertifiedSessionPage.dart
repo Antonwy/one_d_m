@@ -742,7 +742,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: NewsPost(
           n,
-          withCampaign: false,
+          withHeader: false,
           isInView: false,
         ),
       ));

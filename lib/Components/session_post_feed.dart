@@ -64,9 +64,6 @@ class PostFeedState extends State<PostFeed> {
 
   List<Widget> _buildPostWidgets(List<News> posts) {
     List<Widget> widgets = [];
-    List<News> postWithVideos = [];
-    List<News> postNoVideos = [];
-    List<News> orderedPosts = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
 
@@ -74,31 +71,31 @@ class PostFeedState extends State<PostFeed> {
       widgets.add(_buildNewsTitleWidget());
     }
 
-    for (var i = 0; i < posts.length; i++) {
-      //display video post on top of the list
-      if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
-        postWithVideos.add(posts[i]);
-      } else {
-        postNoVideos.add(posts[i]);
-      }
-      orderedPosts = [...postWithVideos, ...postNoVideos];
-    }
+    // for (var i = 0; i < posts.length; i++) {
+    //   //display video post on top of the list
+    //   if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
+    //     postWithVideos.add(posts[i]);
+    //   } else {
+    //     postNoVideos.add(posts[i]);
+    //   }
+    //   orderedPosts = [...postWithVideos, ...postNoVideos];
+    // }
 
-    for (var i = 0; i < orderedPosts.length; i++) {
+    for (News n in posts) {
       rateCount++;
       widgets.add(
         Padding(
           padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: NewsPost(
-            orderedPosts[i],
-            withCampaign: false,
+            n,
+            withHeader: n.sessionId?.isEmpty ?? true,
             withDonationButton: true,
           ),
         ),
       );
 
       ///add native add only if post length is higher than adrate
-      if (orderedPosts.length > adRate) {
+      if (posts.length > adRate) {
         if (rateCount >= adRate) {
           widgets.add(
             Padding(

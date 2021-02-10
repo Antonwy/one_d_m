@@ -183,7 +183,7 @@ class DatabaseService {
         .doc(uid)
         .collection(ADVERTISING_DATA)
         .doc(ADVERTISING_BALANCE)
-        .update({AdBalance.DC_BALANCE:FieldValue.increment(1)});
+        .update({AdBalance.DC_BALANCE: FieldValue.increment(1)});
   }
 
   static Stream<String> getPhoneNumber(String uid) {
@@ -401,9 +401,11 @@ class DatabaseService {
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
 
+
   static Stream<List<News>> getPostBySessionId(String sessionId) {
     return newsCollection
         .where('session_id', isEqualTo: sessionId)
+        .orderBy('seen_at')
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
@@ -547,12 +549,11 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
-  static Stream<List<Donation>> getLatestDonations({int limit = 3,bool isDescending = true}) {
+  static Stream<List<Donation>> getLatestDonations(
+      {int limit = 3, bool isDescending = true}) {
     return donationsCollection
         .where(Donation.ISANONYM, isEqualTo: false)
-        .orderBy(
-          Donation.CREATEDAT,descending: isDescending
-        )
+        .orderBy(Donation.CREATEDAT, descending: isDescending)
         .limit(limit)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));

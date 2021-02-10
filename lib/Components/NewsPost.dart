@@ -23,11 +23,13 @@ class NewsPost extends StatefulWidget {
   final News news;
   final bool withCampaign, withDonationButton;
   bool isInView;
+  final VoidCallback onPostSeen;
 
   NewsPost(this.news,
       {this.withCampaign = true,
       this.isInView = false,
-      this.withDonationButton = false});
+      this.withDonationButton = false,
+      this.onPostSeen});
 
   @override
   _NewsPostState createState() => _NewsPostState();
@@ -44,6 +46,7 @@ class _NewsPostState extends State<NewsPost> {
         var visiblePercentage = info.visibleFraction * 100;
         if (mounted) {
           if (visiblePercentage == 100) {
+            widget.onPostSeen();
             setState(() {
               widget.isInView = true;
             });
@@ -305,7 +308,7 @@ class _NewsPostState extends State<NewsPost> {
         stream: DatabaseService.getUserStream(uid),
         builder: (context, AsyncSnapshot<User> snapshot) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12,0, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
             child: Text('@${snapshot.data?.name ?? 'Laden...'}',
                 style: TextStyle(
                     fontWeight: FontWeight.w700,

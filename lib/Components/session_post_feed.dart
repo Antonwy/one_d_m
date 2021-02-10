@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'NativeAd.dart';
 import 'NewsPost.dart';
 
+List<News> seenPosts = [];
+
 class PostFeed extends StatefulWidget {
   const PostFeed({Key key}) : super(key: key);
 
@@ -20,10 +22,23 @@ class PostFeed extends StatefulWidget {
 
 class PostFeedState extends State<PostFeed> {
   String uid;
+  List<News> _orderedPosts = [];
 
   @override
   void initState() {
+    _reOrderPost();
     super.initState();
+  }
+
+  void _reOrderPost() {
+    for (News sp in seenPosts) {
+      for (int i = 0; i < _orderedPosts.length; i++) {
+        if (sp.id == _orderedPosts[i].id) {
+          _orderedPosts.removeAt(i);
+          _orderedPosts.add(sp);
+        }
+      }
+    }
   }
 
   @override
@@ -35,21 +50,7 @@ class PostFeedState extends State<PostFeed> {
         builder: (_, snapshot) {
           if (!snapshot.hasData) {
             return SliverToBoxAdapter(
-              child: Center(
-                  child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 20,
-                  ),
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text("Lade News")
-                ],
-              )),
+              child: _LoadingIndicator(),
             );
           }
 
@@ -64,24 +65,27 @@ class PostFeedState extends State<PostFeed> {
 
   List<Widget> _buildPostWidgets(List<News> posts) {
     List<Widget> widgets = [];
+    List<News> postWithVideos = [];
+    List<News> postNoVideos = [];
     int adRate = Constants.AD_NEWS_RATE;
     int rateCount = 0;
 
-    if (posts.isNotEmpty) {
-      widgets.add(_buildNewsTitleWidget());
+    for (var i = 0; i < posts.length; i++) {
+      //display video post on top of the list
+      if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
+        postWithVideos.add(posts[i]);
+      } else {
+        postNoVideos.add(posts[i]);
+      }
     }
 
-    // for (var i = 0; i < posts.length; i++) {
-    //   //display video post on top of the list
-    //   if (posts[i]?.videoUrl?.isNotEmpty ?? false) {
-    //     postWithVideos.add(posts[i]);
-    //   } else {
-    //     postNoVideos.add(posts[i]);
-    //   }
-    //   orderedPosts = [...postWithVideos, ...postNoVideos];
-    // }
+    for (News sp in seenPosts) {
+      postNoVideos.removeWhere((p) => p.id == sp.id);
+      postNoVideos.add(sp);
+    }
+    _orderedPosts = [...postWithVideos, ...postNoVideos];
 
-    for (News n in posts) {
+    for (News n in _orderedPosts) {
       rateCount++;
       widgets.add(
         Padding(
@@ -90,6 +94,9 @@ class PostFeedState extends State<PostFeed> {
             n,
             withHeader: n.sessionId?.isEmpty ?? true,
             withDonationButton: true,
+            onPostSeen: () {
+              seenPosts.add(n);
+            },
           ),
         ),
       );
@@ -123,4 +130,25 @@ class PostFeedState extends State<PostFeed> {
               ),
         ),
       );
+}
+
+class _LoadingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+      children: <Widget>[
+        SizedBox(
+          height: 20,
+        ),
+        CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(ColorTheme.blue),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Text("Lade News")
+      ],
+    ));
+  }
 }

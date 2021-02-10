@@ -402,9 +402,11 @@ class DatabaseService {
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
 
+
   static Stream<List<News>> getPostBySessionId(String sessionId) {
     return newsCollection
         .where('session_id', isEqualTo: sessionId)
+        .orderBy('seen_at')
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }

@@ -34,7 +34,6 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _everyFourMinutesPoints();
     if (Provider.of<UserManager>(context, listen: false).firstSignIn) {
       print("SHOW WELCOME");
       Future.delayed(Duration(seconds: 1)).then((v) => showWelcomeDialog());
@@ -50,6 +49,7 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
+                setState(() {});
                 _resetPageScroll();
               },
               children: <Widget>[
@@ -164,17 +164,6 @@ class HomePageState extends State<HomePage> {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 300),
     );
-  }
-
-  void _everyFourMinutesPoints() {
-    final cron = Cron();
-    cron.schedule(Schedule.parse('*/4 * * * *'), () async {
-      print("New DV");
-      String uid = context.read<UserManager>().uid;
-      await DatabaseService.incrementAdBalance(uid);
-      PushNotification.of(context).show(NotificationContent(
-          title: "Neuer DV", body: "Du hast einen neuen DV!"));
-    });
   }
 
   @override

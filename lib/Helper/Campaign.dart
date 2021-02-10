@@ -4,7 +4,7 @@ class Campaign {
   final String name, description, shortDescription, city;
   final DateTime createdAt;
   final int amount, subscribedCount, categoryId;
-  final String authorId, id, imgUrl, thumbnailUrl;
+  final String authorId, id, imgUrl, thumbnailUrl, adminId;
   final List<String> moreImages;
   final List<String> effects;
   final List<String> donationEffects;
@@ -17,6 +17,7 @@ class Campaign {
       CITY = "city",
       CREATEDAT = "created_at",
       AUTHORID = "authorId",
+      ADMINID = "adminId",
       AMOUNT = "current_amount",
       IMAGEURL = "image_url",
       MOREIMAGES = "more_image_urls",
@@ -34,6 +35,7 @@ class Campaign {
       this.city,
       this.createdAt,
       this.authorId,
+      this.adminId,
       this.subscribedCount,
       this.amount,
       this.imgUrl,
@@ -46,30 +48,34 @@ class Campaign {
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
         id: snapshot.id,
-        name: snapshot[NAME],
-        amount: snapshot[AMOUNT],
-        description: snapshot[DESCRIPTION],
-        shortDescription: snapshot[SHORTDESCRIPTION],
-        subscribedCount: snapshot[SUBSCRIBEDCOUNT],
-        createdAt: (snapshot[CREATEDAT] as Timestamp).toDate(),
-        imgUrl: snapshot[IMAGEURL],
-        thumbnailUrl: snapshot[THUMBNAILURL] ?? '',
-        authorId: snapshot[AUTHORID],
-        categoryId: snapshot[CATEGORYID],
-        moreImages:
-            snapshot[MOREIMAGES] == null ? [] : List.from(snapshot[MOREIMAGES]),
-        effects: snapshot[EFFECTS] == null ? [] : List.from(snapshot[EFFECTS]),
-        donationEffects: snapshot[DONATION_EFFECTS] == null
+        name: snapshot.data()[NAME],
+        amount: snapshot.data()[AMOUNT],
+        description: snapshot.data()[DESCRIPTION],
+        shortDescription: snapshot.data()[SHORTDESCRIPTION],
+        subscribedCount: snapshot.data()[SUBSCRIBEDCOUNT],
+        createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
+        imgUrl: snapshot.data()[IMAGEURL],
+        thumbnailUrl: snapshot.data()[THUMBNAILURL] ?? '',
+        authorId: snapshot.data()[AUTHORID],
+        adminId: snapshot.data()[ADMINID],
+        categoryId: snapshot.data()[CATEGORYID],
+        moreImages: snapshot.data()[MOREIMAGES] == null
             ? []
-            : List.from(snapshot[DONATION_EFFECTS]));
+            : List.from(snapshot.data()[MOREIMAGES]),
+        effects: snapshot.data()[EFFECTS] == null
+            ? []
+            : List.from(snapshot.data()[EFFECTS]),
+        donationEffects: snapshot.data()[DONATION_EFFECTS] == null
+            ? []
+            : List.from(snapshot.data()[DONATION_EFFECTS]));
   }
 
   static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
       id: snapshot.id,
-      name: snapshot[NAME],
-      shortDescription: snapshot[SHORTDESCRIPTION],
-      imgUrl: snapshot[IMAGEURL],
+      name: snapshot.data()[NAME],
+      shortDescription: snapshot.data()[SHORTDESCRIPTION],
+      imgUrl: snapshot.data()[IMAGEURL],
     );
   }
 

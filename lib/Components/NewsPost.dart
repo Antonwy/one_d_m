@@ -27,11 +27,13 @@ class NewsPost extends StatefulWidget {
   final News news;
   final bool withHeader, withDonationButton;
   bool isInView;
+  final VoidCallback onPostSeen;
 
   NewsPost(this.news,
       {this.withHeader = true,
       this.isInView = false,
-      this.withDonationButton = false});
+      this.withDonationButton = false,
+      this.onPostSeen});
 
   @override
   _NewsPostState createState() => _NewsPostState();
@@ -50,6 +52,7 @@ class _NewsPostState extends State<NewsPost> {
         var visiblePercentage = info.visibleFraction * 100;
         if (mounted) {
           if (visiblePercentage == 100) {
+            widget.onPostSeen();
             setState(() {
               widget.isInView = true;
             });

@@ -4,7 +4,6 @@ import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
-import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
@@ -24,7 +23,6 @@ import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
-
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
   final ScrollController scrollController;
@@ -39,10 +37,8 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-
-
-
+class _ProfilePageState extends State<ProfilePage>
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -88,6 +84,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class NoContentProfilePage extends StatelessWidget {
@@ -234,14 +233,14 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                               ),
                                               Row(
                                                 children: [
-                                                  PercentCircle(
-                                                    percent: balance
-                                                            ?.activityScore ??
-                                                        0,
-                                                    radius: 25.0,
-                                                    fontSize: 12,
-                                                    dark: true,
-                                                  ),
+                                                  // PercentCircle(
+                                                  //   percent: balance
+                                                  //           ?.activityScore ??
+                                                  //       0,
+                                                  //   radius: 25.0,
+                                                  //   fontSize: 12,
+                                                  //   dark: true,
+                                                  // ),
                                                   XMargin(8),
                                                   RoundButtonHomePage(
                                                     dark: true,

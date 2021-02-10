@@ -263,7 +263,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           ],
                         ),
                         Consumer<UserManager>(builder: (context, um, child) {
-                          return um.uid == widget.campaign.authorId
+                          return um.uid == widget.campaign?.adminId &&
+                                  widget.campaign?.adminId != null &&
+                                  widget.campaign.adminId.isNotEmpty
                               ? _createPostButton()
                               : StreamBuilder<bool>(
                                   initialData: false,

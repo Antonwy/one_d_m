@@ -87,12 +87,13 @@ class _VideoWidgetState extends State<VideoWidget> {
                 ? 0.8
                 : _controller.value.aspectRatio,
             child: GestureDetector(
-                onTap: widget?.toggleMuted, child: FittedBox(
-              fit: BoxFit.cover,
-              child: Chewie(
-                controller: _chewieController,
-              ),
-            )),
+                onTap: widget?.toggleMuted,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: Chewie(
+                    controller: _chewieController,
+                  ),
+                )),
           );
         } else {
           return Container(

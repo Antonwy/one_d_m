@@ -1,10 +1,12 @@
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
@@ -13,6 +15,10 @@ import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
+import 'package:should_rebuild/should_rebuild.dart' as rebuild;
+
+import 'PushNotification.dart';
+import 'circular_countdown_timer.dart';
 
 class InfoFeed extends StatelessWidget {
   @override
@@ -29,7 +35,8 @@ class _ChartsPageView extends StatefulWidget {
   _ChartsPageViewState createState() => _ChartsPageViewState();
 }
 
-class _ChartsPageViewState extends State<_ChartsPageView> {
+class _ChartsPageViewState extends State<_ChartsPageView>
+    with AutomaticKeepAliveClientMixin {
   PageIndicatorController _pageController = PageIndicatorController();
 
   @override
@@ -118,6 +125,9 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class _ColumnStats extends StatelessWidget {
@@ -148,7 +158,7 @@ class _ColumnStats extends StatelessWidget {
   }
 }
 
-class _DCInformation extends StatelessWidget {
+class _DCInformation extends StatefulWidget {
   const _DCInformation({
     Key key,
     @required this.statistics,
@@ -156,6 +166,12 @@ class _DCInformation extends StatelessWidget {
 
   final Statistics statistics;
 
+  @override
+  __DCInformationState createState() => __DCInformationState();
+}
+
+class __DCInformationState extends State<_DCInformation>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
@@ -205,11 +221,10 @@ class _DCInformation extends StatelessWidget {
                         ),
                       ],
                     ),
-                    PercentCircle(
-                      percent: balance?.activityScore ?? 0,
-                      radius: 30.0,
-                      dark: true,
-                    ),
+                    CountDownPointer(
+                      size: 60,
+                      showLabel: true,
+                    )
                   ],
                 );
               }),
@@ -217,6 +232,95 @@ class _DCInformation extends StatelessWidget {
           )),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class CountDownPointer extends StatefulWidget {
+  final double size;
+  final bool showLabel;
+
+  const CountDownPointer({
+    Key key,
+    this.size,
+    this.showLabel,
+  }) : super(key: key);
+  @override
+  _CountDownPointerState createState() => _CountDownPointerState();
+}
+
+class _CountDownPointerState extends State<CountDownPointer>
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+  CountDownController _countDownController;
+  int _collectedDVs = 0;
+  final int _maxToCollectDVs = 5;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed)
+      _countDownController.pause();
+    else
+      _countDownController.resume();
+  }
+
+  @override
+  void initState() {
+    _countDownController = CountDownController();
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return rebuild.ShouldRebuild(
+      shouldRebuild: (oldWidget, newWidget) => false,
+      child: CircularCountDownTimer(
+        key: UniqueKey(),
+        controller: _countDownController,
+        duration: Constants.USEAGE_POINT_DURATION,
+        width: widget.size,
+        height: widget.size,
+        showLabel: false,
+        color: ThemeManager.of(context).colors.dark.withOpacity(0.05),
+        fillColor: ThemeManager.of(context).colors.dark,
+        strokeWidth: 5.0,
+        strokeCap: StrokeCap.round,
+        isTimerTextShown: true,
+        isReverse: true,
+        textFormat: CountdownTextFormat.MM_SS,
+        textStyle: TextStyle(
+          color: ColorTheme.blue,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+        onComplete: () async {
+          print("New DV");
+          String uid = context.read<UserManager>().uid;
+          await DatabaseService.incrementAdBalance(uid);
+          PushNotification.of(context).show(NotificationContent(
+              title: "Neuer DV!", body: "Viel Spaß beim Spenden!"));
+
+          _collectedDVs++;
+
+          if (_collectedDVs < _maxToCollectDVs) {
+            _countDownController.restart(
+                duration: Constants.USEAGE_POINT_DURATION);
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class _GoalWidget extends StatelessWidget {

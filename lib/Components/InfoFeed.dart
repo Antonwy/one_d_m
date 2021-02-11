@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
@@ -221,10 +220,11 @@ class __DCInformationState extends State<_DCInformation>
                         ),
                       ],
                     ),
-                    CountDownPointer(
-                      size: 60,
-                      showLabel: true,
-                    )
+                    PercentCircle(
+                      percent: balance?.activityScore ?? 0,
+                      radius: 30.0,
+                      dark: true,
+                    ),
                   ],
                 );
               }),

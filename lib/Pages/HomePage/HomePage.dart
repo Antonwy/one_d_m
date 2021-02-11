@@ -1,13 +1,10 @@
 import 'dart:async';
 
-import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
-import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -49,7 +46,10 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
-                setState(() {});
+                if(page == 0){
+                  setState(() {
+
+                  });}
                 _resetPageScroll();
               },
               children: <Widget>[
@@ -154,7 +154,10 @@ class HomePageState extends State<HomePage> {
 
   void _changePage(int page) {
     _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
+        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn).then((value){
+
+
+    });
     _resetPageScroll();
   }
 

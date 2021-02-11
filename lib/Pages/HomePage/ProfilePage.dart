@@ -37,8 +37,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with AutomaticKeepAliveClientMixin {
+class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
@@ -85,8 +84,6 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class NoContentProfilePage extends StatelessWidget {
@@ -233,14 +230,14 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                               ),
                                               Row(
                                                 children: [
-                                                  // PercentCircle(
-                                                  //   percent: balance
-                                                  //           ?.activityScore ??
-                                                  //       0,
-                                                  //   radius: 25.0,
-                                                  //   fontSize: 12,
-                                                  //   dark: true,
-                                                  // ),
+                                                  PercentCircle(
+                                                    percent: balance
+                                                            ?.activityScore ??
+                                                        0,
+                                                    radius: 25.0,
+                                                    fontSize: 12,
+                                                    dark: true,
+                                                  ),
                                                   XMargin(8),
                                                   RoundButtonHomePage(
                                                     dark: true,

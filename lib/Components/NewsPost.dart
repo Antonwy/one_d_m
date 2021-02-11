@@ -28,12 +28,14 @@ class NewsPost extends StatefulWidget {
   final bool withHeader, withDonationButton;
   bool isInView;
   final VoidCallback onPostSeen;
+  final bool showAnimate;
 
   NewsPost(this.news,
       {this.withHeader = true,
       this.isInView = false,
       this.withDonationButton = false,
-      this.onPostSeen});
+      this.onPostSeen,
+      this.showAnimate = false});
 
   @override
   _NewsPostState createState() => _NewsPostState();
@@ -43,13 +45,20 @@ class _NewsPostState extends State<NewsPost> {
   bool _muted = true;
   bool _isSessionPost;
 
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     _isSessionPost = !(widget.news.sessionId?.isEmpty ?? true);
     return VisibilityDetector(
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
-        var visiblePercentage = info.visibleFraction * 100;
+        var visiblePercentage = (info.visibleFraction) * 100;
+        print(visiblePercentage);
         if (mounted) {
           if (visiblePercentage == 100) {
             widget.onPostSeen();
@@ -355,7 +364,7 @@ class _NewsHeader extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: <Widget>[
-                    RoundedAvatar(snapshot.data.imgUrl ?? ''),
+                    RoundedAvatar(snapshot.data?.imgUrl ?? ''),
                     SizedBox(width: 10),
                     Expanded(
                       child: AutoSizeText(
@@ -372,7 +381,7 @@ class _NewsHeader extends StatelessWidget {
                 ),
               ),
             );
-          return Container(height: 20);
+          return Container(height: 60);
         });
   }
 }

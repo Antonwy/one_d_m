@@ -22,6 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  static final GlobalKey<ProfilePageState> profileGlobalKey =
+  new GlobalKey<ProfilePageState>();
   PageController _pageController = PageController(
     initialPage: 0,
     keepPage: false,
@@ -47,13 +49,14 @@ class HomePageState extends State<HomePage> {
               controller: _pageController,
               onPageChanged: (page) {
                 if(page == 0){
-                  setState(() {
-
-                  });}
+                  setState(() {});
+                  profileGlobalKey.currentState.toggleVisible();
+                }
                 _resetPageScroll();
               },
               children: <Widget>[
                 ProfilePage(
+                  key: profileGlobalKey,
                   scrollController: _scrollController,
                   onExploreTapped: () => _changePage(1),
                 ),

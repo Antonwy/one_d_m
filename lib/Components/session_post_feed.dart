@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -20,11 +22,11 @@ class PostFeed extends StatefulWidget {
   PostFeedState createState() => PostFeedState();
 }
 
-class PostFeedState extends State<PostFeed> {
-  final GlobalKey<SliverAnimatedListState> _listKey =
-      GlobalKey<SliverAnimatedListState>();
+class PostFeedState extends State<PostFeed>{
   String uid;
   List<News> _orderedPosts = [];
+
+
 
   @override
   void initState() {
@@ -32,12 +34,13 @@ class PostFeedState extends State<PostFeed> {
     super.initState();
   }
 
+
+
   void _reOrderPost() {
     for (News sp in seenPosts) {
       for (int i = 0; i < _orderedPosts.length; i++) {
         if (sp.id == _orderedPosts[i].id) {
           _orderedPosts.removeAt(i);
-          _removePost(i, sp);
           _orderedPosts.add(sp);
         }
 
@@ -64,11 +67,12 @@ class PostFeedState extends State<PostFeed> {
             return NoContentProfilePage();
           }
 
-          return _buildAnimatedPost(post);
+         return SliverList(
+             delegate: SliverChildListDelegate(_buildPostWidgets(post)));
         });
   }
 
-  Widget _buildAnimatedPost(List<News> posts) {
+  List<Widget> _buildPostWidgets(List<News> posts) {
     List<Widget> widgets = [];
     List<News> postWithVideos = [];
     List<News> postNoVideos = [];
@@ -122,41 +126,8 @@ class PostFeedState extends State<PostFeed> {
       }
     }
 
-
-    return SliverAnimatedList(
-      key: _listKey,
-      initialItemCount:widgets.length,
-      itemBuilder: (BuildContext context, int index, Animation animation) {
-        return widgets[index];
-      },
-    );
+    return widgets;
   }
-  void _removePost(int index,News n){
-    _listKey.currentState.removeItem(
-      index,
-          (BuildContext context, Animation<double> animation) {
-        return FadeTransition(
-          opacity:
-          CurvedAnimation(parent: animation, curve: Interval(0.5, 1.0)),
-          child: SizeTransition(
-            sizeFactor:
-            CurvedAnimation(parent: animation, curve: Interval(0.0, 1.0)),
-            axisAlignment: 0.0,
-            child:  NewsPost(
-              n,
-              withHeader: n.sessionId?.isEmpty ?? true,
-              withDonationButton: true,
-              onPostSeen: () {
-
-              },
-            ),
-          ),
-        );
-      },
-      duration: Duration(milliseconds: 600),
-    );
-  }
-
 
   Widget _buildNewsTitleWidget() => Padding(
         padding: const EdgeInsets.only(left: 12, bottom: 10),

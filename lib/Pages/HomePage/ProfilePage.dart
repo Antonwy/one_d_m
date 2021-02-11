@@ -34,13 +34,21 @@ class ProfilePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  ProfilePageState createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+  }
+
+  bool _visible = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -70,9 +78,14 @@ class _ProfilePageState extends State<ProfilePage> {
             child: LatestDonatorsView(),
           ),
           const SliverToBoxAdapter(
-            child: YMargin(12),
+              child: SizedBox(
+            height: 12,
+          )),
+          SliverAnimatedOpacity(
+            opacity: _visible ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 500),
+            sliver: PostFeed(),
           ),
-          PostFeed(),
           const SliverToBoxAdapter(
             child: const SizedBox(
               height: 120,
@@ -82,6 +95,19 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
+  }
+
+  toggleVisible() {
+    if(_visible){
+      setState(() {
+        _visible = false;
+      });
+    }
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
+        _visible = !_visible;
+      });
+    });
   }
 
 }

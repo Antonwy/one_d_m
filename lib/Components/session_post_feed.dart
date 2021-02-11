@@ -30,7 +30,6 @@ class PostFeedState extends State<PostFeed>{
 
   @override
   void initState() {
-    _reOrderPost();
     super.initState();
   }
 
@@ -93,6 +92,7 @@ class PostFeedState extends State<PostFeed>{
       postNoVideos.add(sp);
     }
     _orderedPosts = [...postWithVideos, ...postNoVideos];
+    _reOrderPost();
 
     for (News n in _orderedPosts) {
       rateCount++;
@@ -101,7 +101,7 @@ class PostFeedState extends State<PostFeed>{
           padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: NewsPost(
             n,
-            withHeader: n.sessionId?.isEmpty ?? true,
+            withHeader: false,
             withDonationButton: true,
             onPostSeen: () {
               seenPosts.add(n);

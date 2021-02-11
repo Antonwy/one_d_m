@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -58,7 +59,6 @@ class _NewsPostState extends State<NewsPost> {
       key: Key(widget.news.id),
       onVisibilityChanged: (VisibilityInfo info) {
         var visiblePercentage = (info.visibleFraction) * 100;
-        print(visiblePercentage);
         if (mounted) {
           if (visiblePercentage == 100) {
             widget.onPostSeen();
@@ -169,8 +169,8 @@ class _NewsPostState extends State<NewsPost> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    widget.news.userId?.isNotEmpty ?? false
-                        ? _buildCreatorTitle(widget.news.userId)
+                    widget.news.campaignId?.isNotEmpty ?? false
+                        ? _buildCampaignTitle(widget.news.campaignId)
                         : const SizedBox.shrink(),
                     widget.news.text.isEmpty
                         ? Container()
@@ -315,9 +315,9 @@ class _NewsPostState extends State<NewsPost> {
     ));
   }
 
-  Widget _buildCreatorTitle(String uid) => StreamBuilder(
-        stream: DatabaseService.getUserStream(uid),
-        builder: (context, AsyncSnapshot<User> snapshot) {
+  Widget _buildCampaignTitle(String id) => StreamBuilder(
+        stream: DatabaseService.getCampaignStream(id),
+        builder: (context, AsyncSnapshot<Campaign> snapshot) {
           return Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
             child: Text('@${snapshot.data?.name ?? 'Laden...'}',

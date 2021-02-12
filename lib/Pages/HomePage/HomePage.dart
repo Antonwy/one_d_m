@@ -22,7 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  static final GlobalKey<ProfilePageState> profileGlobalKey =
+  final GlobalKey<ProfilePageState> profileGlobalKey =
   new GlobalKey<ProfilePageState>();
   PageController _pageController = PageController(
     initialPage: 0,

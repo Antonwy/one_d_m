@@ -38,12 +38,10 @@ class _VideoWidgetState extends State<VideoWidget> {
     _controller = pVideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-      _chewieController = ChewieController(
-        videoPlayerController: _controller,
-        autoInitialize: true,
-        showControls: false,
-      );
+
       setState(() {});
+    }).catchError((e){
+      print(e);
     });
 
     if (widget.play) {
@@ -82,6 +80,11 @@ class _VideoWidgetState extends State<VideoWidget> {
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          _chewieController = ChewieController(
+            videoPlayerController: _controller,
+            autoInitialize: true,
+            showControls: false,
+          );
           return AspectRatio(
             aspectRatio: _controller.value.aspectRatio < 1
                 ? 0.8

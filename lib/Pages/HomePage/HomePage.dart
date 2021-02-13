@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
@@ -34,7 +32,6 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _everyFourMinutesPoints();
     if (Provider.of<UserManager>(context, listen: false).firstSignIn) {
       print("SHOW WELCOME");
       Future.delayed(Duration(seconds: 1)).then((v) => showWelcomeDialog());
@@ -50,6 +47,7 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
+                setState(() {});
                 _resetPageScroll();
               },
               children: <Widget>[
@@ -99,7 +97,7 @@ class HomePageState extends State<HomePage> {
                         ),
                         YMargin(6),
                         Text(
-                          "Für jede Werbung die zwischen den Inhalten positioniert ist, erhältst Du ein paar Prozentpunkte. Jedes Mal wenn du 100% erreichst, bekommst du einen Donation Vote.",
+                          "Alle 4 Minuten erhälst du ein Donation Vote, den du dann spenden kannst. Du kannst maximal 6 Donation Votes pro Tag erhalten.",
                           style: _theme.textTheme.dark.bodyText2,
                         ),
                       ],
@@ -164,17 +162,6 @@ class HomePageState extends State<HomePage> {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 300),
     );
-  }
-
-  void _everyFourMinutesPoints() {
-    final cron = Cron();
-    cron.schedule(Schedule.parse('*/4 * * * *'), () async {
-      print("New DV");
-      String uid = context.read<UserManager>().uid;
-      await DatabaseService.incrementAdBalance(uid);
-      PushNotification.of(context).show(NotificationContent(
-          title: "Neuer DV", body: "Du hast einen neuen DV!"));
-    });
   }
 
   @override

@@ -1,4 +1,5 @@
 import "package:charcode/charcode.dart";
+
 class Currency {
   final num _number;
 
@@ -45,9 +46,9 @@ class Currency {
       abbr = ' ${String.fromCharCode($euro)}';
 
       // If number > 1 billion.
-    }  else if (absolute < 100) {
+    } else if (absolute < 100) {
       value = number;
-      abbr = ' Cents';
+      abbr = ' Cent';
     }
 
     return _removeEndsZore(value.toStringAsFixed(1)) + abbr;

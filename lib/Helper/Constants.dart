@@ -16,7 +16,7 @@ class Constants {
   static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~6152019777";
   static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/6108621899";
   static const String ADMOB_REWARD_ID =
-      "ca-app-pub-1041685366730642/4733080602";
+      "ca-app-pub-6737404453820737/5453368975";
   static const String ADMOB_EXPLORE_ID =
       "ca-app-pub-6737404453820737/8020130056";
   static const String ADMOB_SESSION_ID =
@@ -28,8 +28,13 @@ class Constants {
 
   static const double radius = 12;
 
-  static const int SCHEDULE_NOTI_HOUR = 12;
-  static const int SCHEDULE_NOTI_MINUTE = 27;
+  static const int USEAGE_POINT_DURATION = 10;
+  static const int DVS_PER_DAY = 6;
+
+  static const String TIME_REMAINING_KEY = "time_remaining_key";
+  static const String COllECTED_COINS_KEY = "collected_coins_key";
+  static const String COllECTED_COINS_DAY_KEY = "collected_coins_day_key";
+  static const String LAST_TIME_RESETTED_COINS = "last_time_resetted_coins";
 
   //SkSl WarmUp file
   ///Users/niroshana/Documents/FIVERR/one-d-m/flutter_01.sksl.json.

@@ -26,16 +26,6 @@ class NewsNativeAd extends StatelessWidget {
           child: NativeAdView(
             adUnitId: id ?? Constants.ADMOB_NEWS_ID,
             layoutName: "NewsAd",
-            onAdImpression: () {
-              print("NEW IMPRESSION");
-              DatabaseService.addNativeAdImpression(
-                Provider.of<UserManager>(
-                  context,
-                  listen: false,
-                ).uid,
-              );
-            },
-            onAdClicked: () {},
             onAdFailedToLoad: (Map<String, dynamic> error) =>
                 print("Native ad failed load: $error"),
           ),

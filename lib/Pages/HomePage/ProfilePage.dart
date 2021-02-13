@@ -22,8 +22,9 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
+import 'package:one_d_m/Pages/notification_page.dart';
 import 'package:provider/provider.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
@@ -39,10 +40,8 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-
-
-
+class _ProfilePageState extends State<ProfilePage>
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -77,6 +76,12 @@ class _ProfilePageState extends State<ProfilePage> {
           const SliverToBoxAdapter(
             child: YMargin(12),
           ),
+          const SliverToBoxAdapter(
+            child: _GiftAvailable(),
+          ),
+          const SliverToBoxAdapter(
+            child: YMargin(6),
+          ),
           PostFeed(),
           const SliverToBoxAdapter(
             child: const SizedBox(
@@ -86,6 +91,64 @@ class _ProfilePageState extends State<ProfilePage> {
           // _buildPostFeed(),
         ],
       ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class _GiftAvailable extends StatelessWidget {
+  const _GiftAvailable();
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return StreamBuilder<AdBalance>(
+      initialData: AdBalance.zero(),
+      stream: DatabaseService.getAdBalance(context.read<UserManager>().uid),
+      builder: (context, snapshot) => snapshot.data.gift > 0
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(Constants.radius)),
+                margin: EdgeInsets.zero,
+                color: _theme.colors.dark,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: AutoSizeText(
+                          "Du hast ${snapshot.data.gift} DV bekommen!",
+                          style: _theme.textTheme.textOnDark.bodyText1,
+                        ),
+                      ),
+                      FlatButton.icon(
+                        color: _theme.colors.contrast,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)),
+                        onPressed: () async {
+                          print("GIFT");
+                          await DatabaseService.getGift(
+                              context.read<UserManager>().uid,
+                              gift: snapshot.data.gift);
+                          await PushNotification.of(context).show(
+                              NotificationContent(
+                                  title:
+                                      "${snapshot.data.gift} DV eingesammelt"));
+                        },
+                        icon: Icon(Icons.redeem),
+                        label: Text("Einsammeln"),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : SizedBox.shrink(),
     );
   }
 }
@@ -234,14 +297,14 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                               ),
                                               Row(
                                                 children: [
-                                                  PercentCircle(
-                                                    percent: balance
-                                                            ?.activityScore ??
-                                                        0,
-                                                    radius: 25.0,
-                                                    fontSize: 12,
-                                                    dark: true,
-                                                  ),
+                                                  // PercentCircle(
+                                                  //   percent: balance
+                                                  //           ?.activityScore ??
+                                                  //       0,
+                                                  //   radius: 25.0,
+                                                  //   fontSize: 12,
+                                                  //   dark: true,
+                                                  // ),
                                                   XMargin(8),
                                                   RoundButtonHomePage(
                                                     dark: true,
@@ -310,11 +373,21 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                           //                   "Hier könnte die Beschreibung stehen."));
                                           //     },
                                           //     context: context),
-                                          // _appBarButton(
-                                          //     icon: Icons
-                                          //         .notifications_none_rounded,
-                                          //     onPressed: () {},
-                                          //     context: context),
+                                          _appBarButton(
+                                              icon: Icons.feedback,
+                                              onPressed: give_feedback,
+                                              context: context),
+                                          _appBarButton(
+                                              icon: Icons
+                                                  .notifications_none_rounded,
+                                              onPressed: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            NotificationPage()));
+                                              },
+                                              context: context),
                                           _appBarButton(
                                               icon: Icons.settings,
                                               onPressed: () {
@@ -368,6 +441,14 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
         ),
       );
     });
+  }
+
+  Future<void> give_feedback() async {
+    String url = await DatabaseService.getFeedbackUrl();
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 
   Widget _appBarButton(

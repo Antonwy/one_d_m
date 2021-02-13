@@ -5,13 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
+import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
+import 'package:one_d_m/Helper/Provider/SessionManager.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
@@ -27,11 +31,13 @@ class NewsPost extends StatefulWidget {
   final News news;
   final bool withHeader, withDonationButton;
   bool isInView;
+  final VoidCallback onPostSeen;
 
   NewsPost(this.news,
       {this.withHeader = true,
       this.isInView = false,
-      this.withDonationButton = false});
+      this.withDonationButton = false,
+      this.onPostSeen});
 
   @override
   _NewsPostState createState() => _NewsPostState();
@@ -50,6 +56,7 @@ class _NewsPostState extends State<NewsPost> {
         var visiblePercentage = info.visibleFraction * 100;
         if (mounted) {
           if (visiblePercentage == 100) {
+            widget.onPostSeen();
             setState(() {
               widget.isInView = true;
             });
@@ -70,13 +77,6 @@ class _NewsPostState extends State<NewsPost> {
               borderRadius: BorderRadius.circular(Constants.radius)),
           child: Column(
             children: <Widget>[
-              widget.withHeader
-                  ? _NewsHeader(
-                      campaignId:
-                          _isSessionPost ? null : widget.news.campaignId,
-                      sessionId: _isSessionPost ? widget.news.sessionId : null,
-                    )
-                  : Container(),
               Container(
                 child: Stack(
                   children: <Widget>[
@@ -157,9 +157,9 @@ class _NewsPostState extends State<NewsPost> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    widget.news.userId?.isNotEmpty ?? false
-                        ? _buildCreatorTitle(widget.news.userId)
-                        : const SizedBox.shrink(),
+                    widget.withHeader
+                        ? _buildCreatorTitle(widget.news)
+                        : SizedBox.shrink(),
                     widget.news.text.isEmpty
                         ? Container()
                         : _buildExpandableContent(context, widget.news.text)
@@ -303,19 +303,59 @@ class _NewsPostState extends State<NewsPost> {
     ));
   }
 
-  Widget _buildCreatorTitle(String uid) => StreamBuilder(
-        stream: DatabaseService.getUserStream(uid),
-        builder: (context, AsyncSnapshot<User> snapshot) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
-            child: Text('@${snapshot.data?.name ?? 'Laden...'}',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: ThemeManager.of(context).colors.dark)),
+  Widget _buildCreatorTitle(News news) {
+    bool _isSessionNews = news.sessionId?.isNotEmpty ?? false;
+
+    return _isSessionNews
+        ? FutureBuilder<Session>(
+            future: DatabaseService.getSessionFuture(news.sessionId),
+            builder: (context, snapshot) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
+                child: GestureDetector(
+                  onTap: snapshot.hasData
+                      ? () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CertifiedSessionPage(
+                                      session: snapshot.data)));
+                        }
+                      : null,
+                  child: Text('@${snapshot.data?.name ?? 'Laden...'}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: ThemeManager.of(context).colors.dark)),
+                ),
+              );
+            },
+          )
+        : FutureBuilder<Campaign>(
+            future: DatabaseService.getCampaign(news.campaignId),
+            builder: (context, snapshot) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
+                child: GestureDetector(
+                  onTap: snapshot.hasData
+                      ? () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      NewCampaignPage(snapshot.data)));
+                        }
+                      : null,
+                  child: Text('@${snapshot.data?.name ?? 'Laden...'}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: ThemeManager.of(context).colors.dark)),
+                ),
+              );
+            },
           );
-        },
-      );
+  }
 }
 
 class _NewsHeader extends StatelessWidget {

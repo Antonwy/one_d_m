@@ -59,6 +59,8 @@ class DatabaseService {
       JOIN_CERTIFIED_SESSION = "session-joinCertifiedSession",
       LEAVE_CERTIFIED_SESSION = "session-leaveCertifiedSession",
       DEVICE_TOKEN = "device_token",
+      FEEDBACK = "feedback",
+      URL = "url",
       MESSAGES = "messages";
 
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -178,12 +180,21 @@ class DatabaseService {
         .map((snapshot) => AdBalance.fromSnapshot(snapshot));
   }
 
-  static Future<void> incrementAdBalance(String uid) {
+  static Future<void> incrementAdBalance(String uid, {int amount = 1}) {
     return userCollection
         .doc(uid)
         .collection(ADVERTISING_DATA)
         .doc(ADVERTISING_BALANCE)
-        .update({AdBalance.DC_BALANCE: FieldValue.increment(1)});
+        .update({AdBalance.DC_BALANCE: FieldValue.increment(amount)});
+  }
+
+  static Future<void> getGift(String uid, {int gift = 1}) async {
+    await incrementAdBalance(uid, amount: gift);
+    await userCollection
+        .doc(uid)
+        .collection(ADVERTISING_DATA)
+        .doc(ADVERTISING_BALANCE)
+        .update({AdBalance.GIFT: 0});
   }
 
   static Stream<String> getPhoneNumber(String uid) {
@@ -405,6 +416,7 @@ class DatabaseService {
   static Stream<List<News>> getPostBySessionId(String sessionId) {
     return newsCollection
         .where('session_id', isEqualTo: sessionId)
+        .orderBy('seen_at')
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
   }
@@ -962,5 +974,9 @@ class DatabaseService {
       print(e);
       return false;
     }
+  }
+
+  static Future<String> getFeedbackUrl() async {
+    return (await statisticsCollection.doc(FEEDBACK).get()).data()[URL];
   }
 }

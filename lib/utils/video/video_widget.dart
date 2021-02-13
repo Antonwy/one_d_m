@@ -84,6 +84,7 @@ class _VideoWidgetState extends State<VideoWidget> {
             videoPlayerController: _controller,
             autoInitialize: true,
             showControls: false,
+            looping: true
           );
           return AspectRatio(
             aspectRatio: _controller.value.aspectRatio < 1

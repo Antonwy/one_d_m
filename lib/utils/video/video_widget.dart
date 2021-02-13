@@ -26,7 +26,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  pVideoPlayerController _controller;
+  VideoPlayerController _controller;
   ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _muted;
@@ -35,12 +35,12 @@ class _VideoWidgetState extends State<VideoWidget> {
   void initState() {
     super.initState();
     _muted = widget.muted;
-    _controller = pVideoPlayerController.network(widget.url);
+    _controller = VideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
 
       setState(() {});
-    }).catchError((e){
+    }).catchError((e) {
       print(e);
     });
 
@@ -81,11 +81,10 @@ class _VideoWidgetState extends State<VideoWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           _chewieController = ChewieController(
-            videoPlayerController: _controller,
-            autoInitialize: true,
-            showControls: false,
-            looping: true
-          );
+              videoPlayerController: _controller,
+              autoInitialize: true,
+              showControls: false,
+              looping: true);
           return AspectRatio(
             aspectRatio: _controller.value.aspectRatio < 1
                 ? 0.8

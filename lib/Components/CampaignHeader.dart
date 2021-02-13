@@ -30,18 +30,18 @@ class CampaignHeader extends StatefulWidget {
   _CampaignHeaderState createState() => _CampaignHeaderState();
 }
 
-class _CampaignHeaderState extends State<CampaignHeader>{
+class _CampaignHeaderState extends State<CampaignHeader> {
   bool _muted = true;
 
   @override
   void initState() {
     super.initState();
   }
+
   @override
   void dispose() {
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +55,8 @@ class _CampaignHeaderState extends State<CampaignHeader>{
               borderRadius: BorderRadius.circular(Constants.radius)),
           closedElevation: 1,
           openBuilder: (context, close, scrollController) {
-              widget.isInView = false;
-            return NewCampaignPage(
-                widget.campaign,
+            widget.isInView = false;
+            return NewCampaignPage(widget.campaign,
                 scrollController: scrollController);
           },
           closedColor: ColorTheme.appBg,
@@ -86,24 +85,24 @@ class _CampaignHeaderState extends State<CampaignHeader>{
                     children: [
                       widget.campaign.shortVideoUrl != null
                           ? VideoWidget(
-                        url: widget.campaign.shortVideoUrl,
-                        play: widget.isInView,
-                        imageUrl: widget.campaign.shortVideoUrl,
-                        muted: _muted,
-                        toggleMuted: _toggleMuted,
-                      )
+                              url: widget.campaign.shortVideoUrl,
+                              play: widget.isInView,
+                              imageUrl: widget.campaign.shortVideoUrl,
+                              muted: _muted,
+                              toggleMuted: _toggleMuted,
+                            )
                           : CachedNetworkImage(
-                        imageUrl: widget.campaign.imgUrl,
-                        height: 260,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => Center(
-                            child: Icon(
-                              Icons.error,
-                              color: ColorTheme.orange,
-                            )),
-                        alignment: Alignment.center,
-                      ),
+                              imageUrl: widget.campaign.imgUrl,
+                              height: 260,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => Center(
+                                  child: Icon(
+                                Icons.error,
+                                color: ColorTheme.orange,
+                              )),
+                              alignment: Alignment.center,
+                            ),
                       Positioned(
                         left: 0,
                         right: 0,
@@ -115,9 +114,9 @@ class _CampaignHeaderState extends State<CampaignHeader>{
                             children: [
                               widget.campaign?.shortVideoUrl != null
                                   ? MuteButton(
-                                muted: _muted,
-                                toggle: _toggleMuted,
-                              )
+                                      muted: _muted,
+                                      toggle: _toggleMuted,
+                                    )
                                   : SizedBox.shrink(),
                               SizedBox.shrink(),
                             ],

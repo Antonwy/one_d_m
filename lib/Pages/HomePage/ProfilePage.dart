@@ -37,14 +37,21 @@ class ProfilePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  ProfilePageState createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with AutomaticKeepAliveClientMixin {
+class ProfilePageState extends State<ProfilePage>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+  }
+
+  bool _visible = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -74,15 +81,20 @@ class _ProfilePageState extends State<ProfilePage>
             child: LatestDonatorsView(),
           ),
           const SliverToBoxAdapter(
-            child: YMargin(12),
-          ),
+              child: SizedBox(
+            height: 12,
+          )),
           const SliverToBoxAdapter(
             child: _GiftAvailable(),
           ),
           const SliverToBoxAdapter(
             child: YMargin(6),
           ),
-          PostFeed(),
+          SliverAnimatedOpacity(
+            opacity: _visible ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 500),
+            sliver: PostFeed(),
+          ),
           const SliverToBoxAdapter(
             child: const SizedBox(
               height: 120,
@@ -94,8 +106,18 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  @override
-  bool get wantKeepAlive => true;
+  toggleVisible() {
+    if (_visible) {
+      setState(() {
+        _visible = false;
+      });
+    }
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
+        _visible = !_visible;
+      });
+    });
+  }
 }
 
 class _GiftAvailable extends StatelessWidget {
@@ -295,27 +317,13 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                                   ),
                                                 ],
                                               ),
-                                              Row(
-                                                children: [
-                                                  // PercentCircle(
-                                                  //   percent: balance
-                                                  //           ?.activityScore ??
-                                                  //       0,
-                                                  //   radius: 25.0,
-                                                  //   fontSize: 12,
-                                                  //   dark: true,
-                                                  // ),
-                                                  XMargin(8),
-                                                  RoundButtonHomePage(
-                                                    dark: true,
-                                                    icon: Icons.settings,
-                                                    onTap: () {
-                                                      BottomDialog(context)
-                                                          .show(
-                                                              SettingsDialog());
-                                                    },
-                                                  )
-                                                ],
+                                              RoundButtonHomePage(
+                                                dark: true,
+                                                icon: Icons.settings,
+                                                onTap: () {
+                                                  BottomDialog(context)
+                                                      .show(SettingsDialog());
+                                                },
                                               )
                                             ],
                                           ),

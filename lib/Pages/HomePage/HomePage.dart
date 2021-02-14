@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
-import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -23,6 +21,8 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final GlobalKey<ProfilePageState> profileGlobalKey =
+      new GlobalKey<ProfilePageState>();
   PageController _pageController = PageController(
     initialPage: 0,
     keepPage: false,
@@ -47,11 +47,15 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
-                setState(() {});
+                if (page == 0) {
+                  setState(() {});
+                  profileGlobalKey.currentState.toggleVisible();
+                }
                 _resetPageScroll();
               },
               children: <Widget>[
                 ProfilePage(
+                  key: profileGlobalKey,
                   scrollController: _scrollController,
                   onExploreTapped: () => _changePage(1),
                 ),
@@ -151,8 +155,10 @@ class HomePageState extends State<HomePage> {
   }
 
   void _changePage(int page) {
-    _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
+    _pageController
+        .animateToPage(page,
+            duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn)
+        .then((value) {});
     _resetPageScroll();
   }
 

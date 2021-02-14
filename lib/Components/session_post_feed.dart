@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -26,7 +28,6 @@ class PostFeedState extends State<PostFeed> {
 
   @override
   void initState() {
-    _reOrderPost();
     super.initState();
   }
 
@@ -58,6 +59,7 @@ class PostFeedState extends State<PostFeed> {
           if (post.isEmpty) {
             return NoContentProfilePage();
           }
+
           return SliverList(
               delegate: SliverChildListDelegate(_buildPostWidgets(post)));
         });
@@ -84,6 +86,7 @@ class PostFeedState extends State<PostFeed> {
       postNoVideos.add(sp);
     }
     _orderedPosts = [...postWithVideos, ...postNoVideos];
+    _reOrderPost();
 
     for (News n in _orderedPosts) {
       rateCount++;
@@ -92,7 +95,7 @@ class PostFeedState extends State<PostFeed> {
           padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: NewsPost(
             n,
-            withHeader: n.sessionId?.isEmpty ?? true,
+            withHeader: true,
             withDonationButton: true,
             onPostSeen: () {
               seenPosts.add(n);

@@ -26,7 +26,9 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/FullscreenImages.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
+import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class NewCampaignPage extends StatefulWidget {
   Campaign campaign;
@@ -52,6 +54,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Stream<Campaign> _campaignStream;
   Future<Organisation> _organizationFuture;
   bool _isLoading = false;
+  bool isInView = false;
+  bool _muted = true;
 
   @override
   void initState() {
@@ -184,16 +188,77 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Container(
-                        height: 250,
-                        width: double.infinity,
+                      child: VisibilityDetector(
+                        key: Key(widget.campaign.id),
+                        onVisibilityChanged: (VisibilityInfo info) {
+                          var visiblePercentage = (info.visibleFraction) * 100;
+                          if (mounted) {
+                            if (visiblePercentage == 100) {
+                              setState(() {
+                                isInView = true;
+                              });
+                            } else {
+                              setState(() {
+                                isInView = false;
+                              });
+                            }
+                          }
+                        },
                         child: Material(
                           clipBehavior: Clip.antiAlias,
                           elevation: 10,
                           borderRadius: BorderRadius.circular(6),
-                          child: CachedNetworkImage(
-                            imageUrl: widget.campaign.imgUrl,
-                            fit: BoxFit.cover,
+                          child: Stack(
+                            children: [
+                              widget.campaign.longVideoUrl != null?
+                              VideoWidget(
+                                url: widget.campaign.longVideoUrl,
+                                play: isInView,
+                                imageUrl: widget.campaign.longVideoUrl,
+                                muted: _muted,
+                                toggleMuted: _toggleMuted,
+                              ):
+                              CachedNetworkImage(
+                                width: double.infinity,
+                                height: 260,
+                                imageUrl: widget.campaign.imgUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => Container(
+                                  height: 260,
+                                  child: Center(
+                                      child: Icon(
+                                        Icons.error,
+                                        color: ColorTheme.orange,
+                                      )),
+                                ),
+                                placeholder: (context, url) => Container(
+                                  height: 260,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      widget.campaign?.longVideoUrl != null
+                                          ? MuteButton(
+                                        muted: _muted,
+                                        toggle: _toggleMuted,
+                                      )
+                                          : SizedBox.shrink(),
+                                      SizedBox.shrink(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -336,6 +401,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 )
               ]);
             }));
+  }
+  void _toggleMuted() {
+    setState(() {
+      _muted = !_muted;
+    });
   }
 
   List<Widget> _buildTabs() => [

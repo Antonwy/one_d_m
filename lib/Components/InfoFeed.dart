@@ -226,7 +226,6 @@ class __DCInformationState extends State<_DCInformation>
                     ),
                     CountDownPointer(
                       size: 60,
-                      showLabel: true,
                     )
                   ],
                 );
@@ -279,6 +278,10 @@ class _CountDownPointerState extends State<CountDownPointer>
     _countDownController = CountDownController();
     WidgetsBinding.instance.addObserver(this);
 
+    _initAds();
+  }
+
+  void _initAds() {
     RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event,
         {String rewardType, int rewardAmount}) async {
       if (event == RewardedVideoAdEvent.loaded) {
@@ -326,7 +329,15 @@ class _CountDownPointerState extends State<CountDownPointer>
     DateFormat format = DateFormat.yMd();
     String today = format.format(DateTime.now());
     String _lastTimeResetted =
-        _prefs.getString(Constants.LAST_TIME_RESETTED_COINS) ?? today;
+        _prefs.getString(Constants.LAST_TIME_RESETTED_COINS);
+
+    if (_lastTimeResetted == null) {
+      print('_lastTimeResetted was null');
+      _lastTimeResetted = today;
+      await _prefs.setString(_lastTimeResetted, today);
+    }
+
+    print("LastTimeResetted: $_lastTimeResetted");
 
     if (_lastTimeResetted != today) {
       _prefs.setInt(Constants.COllECTED_COINS_KEY, 0);
@@ -467,9 +478,9 @@ class _CountDownPointerState extends State<CountDownPointer>
     return IconButton(
         icon: Icon(Icons.play_arrow_rounded),
         onPressed: () async {
-          // await _loadAd(show: true);
-          // await _showIfAlreadyAvailable();
-          _adViewed();
+          await _loadAd(show: true);
+          await _showIfAlreadyAvailable();
+          // _adViewed();
         });
   }
 

@@ -16,7 +16,7 @@ class Constants {
   static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~6152019777";
   static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/6108621899";
   static const String ADMOB_REWARD_ID =
-      "ca-app-pub-6737404453820737/5453368975";
+      "ca-app-pub-6737404453820737/6200394305";
   static const String ADMOB_EXPLORE_ID =
       "ca-app-pub-6737404453820737/8020130056";
   static const String ADMOB_SESSION_ID =
@@ -33,7 +33,6 @@ class Constants {
 
   static const String TIME_REMAINING_KEY = "time_remaining_key";
   static const String COllECTED_COINS_KEY = "collected_coins_key";
-  static const String COllECTED_COINS_DAY_KEY = "collected_coins_day_key";
   static const String LAST_TIME_RESETTED_COINS = "last_time_resetted_coins";
 
   //SkSl WarmUp file

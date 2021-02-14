@@ -28,7 +28,7 @@ class Constants {
 
   static const double radius = 12;
 
-  static const int USEAGE_POINT_DURATION = 10;
+  static const int USEAGE_POINT_DURATION = 60 * 4;
   static const int DVS_PER_DAY = 6;
 
   static const String TIME_REMAINING_KEY = "time_remaining_key";

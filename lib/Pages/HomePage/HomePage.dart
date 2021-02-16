@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
@@ -23,7 +22,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final GlobalKey<ProfilePageState> profileGlobalKey =
-  new GlobalKey<ProfilePageState>();
+      new GlobalKey<ProfilePageState>();
   PageController _pageController = PageController(
     initialPage: 0,
     keepPage: false,
@@ -48,7 +47,7 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
-                if(page == 0){
+                if (page == 0) {
                   setState(() {});
                   profileGlobalKey.currentState.toggleVisible();
                 }
@@ -102,7 +101,7 @@ class HomePageState extends State<HomePage> {
                         ),
                         YMargin(6),
                         Text(
-                          "Für jede Werbung die zwischen den Inhalten positioniert ist, erhältst Du ein paar Prozentpunkte. Jedes Mal wenn du 100% erreichst, bekommst du einen Donation Vote.",
+                          "Alle 4 Minuten erhälst du ein Donation Vote, den du dann spenden kannst. Du kannst maximal 6 Donation Votes pro Tag erhalten.",
                           style: _theme.textTheme.dark.bodyText2,
                         ),
                       ],
@@ -156,11 +155,10 @@ class HomePageState extends State<HomePage> {
   }
 
   void _changePage(int page) {
-    _pageController.animateToPage(page,
-        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn).then((value){
-
-
-    });
+    _pageController
+        .animateToPage(page,
+            duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn)
+        .then((value) {});
     _resetPageScroll();
   }
 

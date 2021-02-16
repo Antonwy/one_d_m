@@ -540,7 +540,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
               ),
               YMargin(6),
               Text(
-                "Was dieses Project bewirkt:",
+                "Was dieses Projekt bewirkt:",
                 style: Theme.of(context).textTheme.bodyText1.copyWith(
                     fontSize: 15,
                     color: _bTheme.dark,

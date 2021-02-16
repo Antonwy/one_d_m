@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 
 import 'Constants.dart';
 
@@ -53,16 +54,26 @@ class Helper {
     return "${date.day < 10 ? "0${date.day}" : date.day}.${date.month < 10 ? "0${date.month}" : date.month}.${date.year}";
   }
 
-  static showAlert(BuildContext context, String message) {
+  static showAlert(BuildContext context, String message,
+      {String title = "Error"}) {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(Constants.radius)),
-              title: Text("Error", style: TextStyle(color: Colors.red)),
+              title: Text(title),
               content: Text(
                 message,
               ),
+              actions: [
+                FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "OKAY",
+                      style: TextStyle(
+                          color: ThemeManager.of(context).colors.dark),
+                    ))
+              ],
             ));
   }
 

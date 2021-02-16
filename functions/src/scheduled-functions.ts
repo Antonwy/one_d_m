@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import FieldValue = admin.firestore.FieldValue;
 import {
   DatabaseConstants,
   ChargesFields,
@@ -25,6 +24,7 @@ exports.daily = functions.pubsub
 
 exports.dailyPoints = functions.pubsub
   .schedule('0 8 * * *')
+  .timeZone('Europe/Berlin')
   .onRun(async (context) => {
     await sendDailyPoints();
   });
@@ -46,7 +46,7 @@ async function sendDailyPoints() {
           .doc(DatabaseConstants.ad_balance)
           .set(
             {
-              dc_balance: FieldValue.increment(1),
+              gift: 1,
             },
             { merge: true }
           );
@@ -68,7 +68,7 @@ async function sendDailyPoints() {
           const payload = {
             notification: {
               title: 'Neuer Donation Vote!',
-              body: `Hurra! Du hast einen neuen Donation Vote bekommen!`,
+              body: `Öffne jetzt die App, um dir deinen DV einzusammeln!`,
             },
           };
 
@@ -96,7 +96,7 @@ exports.monthly = functions.pubsub
   .schedule('0 0 1 * *')
   .onRun(async (context) => {
     await resetStatistics({ monthly_amount: 0 });
-    await chargeCustomers();
+    // await chargeCustomers();
   });
 
 exports.yearly = functions.pubsub

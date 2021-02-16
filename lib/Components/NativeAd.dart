@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:provider/provider.dart';
 
 class NewsNativeAd extends StatelessWidget {
   final String id;
@@ -54,15 +51,6 @@ class ExploreNativeAd extends StatelessWidget {
               child: NativeAdView(
                 adUnitId: Constants.ADMOB_EXPLORE_ID,
                 layoutName: "ExploreAd",
-                onAdImpression: () {
-                  print("NEW IMPRESSION");
-                  DatabaseService.addNativeAdImpression(
-                    Provider.of<UserManager>(
-                      context,
-                      listen: false,
-                    ).uid,
-                  );
-                },
                 onAdClicked: () {},
                 onAdFailedToLoad: (Map<String, dynamic> error) =>
                     print("onAdFailedToLoad: $error"),

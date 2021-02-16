@@ -11,22 +11,21 @@ import 'CustomOpenContainer.dart';
 import 'DonationWidget.dart';
 
 class UserButton extends StatelessWidget {
-  String id;
-  User user;
-  Color color, avatarColor;
-  TextStyle textStyle;
-  double elevation;
-  bool withAddButton;
+  final String id, additionalText;
+  final User user;
+  final Color color, avatarColor;
+  final TextStyle textStyle;
+  final double elevation;
+  final bool withAddButton;
 
-  UserButton(
-    this.id, {
-    this.user,
-    this.color = Colors.white,
-    this.avatarColor = ColorTheme.blue,
-    this.textStyle = const TextStyle(color: Colors.black),
-    this.elevation = 1,
-    this.withAddButton = false,
-  });
+  UserButton(this.id,
+      {this.user,
+      this.color,
+      this.avatarColor = ColorTheme.blue,
+      this.textStyle = const TextStyle(color: Colors.black),
+      this.elevation = 1,
+      this.withAddButton = false,
+      this.additionalText});
 
   @override
   Widget build(BuildContext context) {
@@ -45,46 +44,56 @@ class UserButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 closedElevation: elevation,
-                closedColor: color,
-                closedBuilder: (context, open) => Material(
-                  color: color,
-                  child: InkWell(
-                    onTap: open,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Expanded(
-                            child: Row(
-                              children: <Widget>[
-                                RoundedAvatar(
-                                    snapshot.data?.thumbnailUrl ??
-                                        snapshot.data?.imgUrl,
-                                    color: avatarColor),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Container(
-                                    height: double.infinity,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: AutoSizeText(
-                                          "${snapshot.data.name ?? "Gelöschter Account"}",
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                              color: textStyle.color,
-                                              fontWeight: FontWeight.w500)),
-                                    ),
+                closedColor: color ?? ColorTheme.appBg,
+                closedBuilder: (context, open) => InkWell(
+                  onTap: open,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Expanded(
+                          child: Row(
+                            children: <Widget>[
+                              RoundedAvatar(
+                                  snapshot.data?.thumbnailUrl ??
+                                      snapshot.data?.imgUrl,
+                                  color: avatarColor),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  height: double.infinity,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: additionalText != null
+                                        ? AutoSizeText.rich(
+                                            TextSpan(children: [
+                                              TextSpan(
+                                                  text:
+                                                      "${snapshot.data.name ?? "Gelöschter Account"} ",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              TextSpan(text: additionalText)
+                                            ]),
+                                            maxLines: 1,
+                                          )
+                                        : AutoSizeText(
+                                            "${snapshot.data.name ?? "Gelöschter Account"}",
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                color: textStyle.color,
+                                                fontWeight: FontWeight.w500)),
                                   ),
-                                )
-                              ],
-                            ),
+                                ),
+                              )
+                            ],
                           ),
-                          withAddButton
-                              ? UserFollowButton(followerId: snapshot.data?.id)
-                              : Container()
-                        ],
-                      ),
+                        ),
+                        withAddButton
+                            ? UserFollowButton(followerId: snapshot.data?.id)
+                            : Container()
+                      ],
                     ),
                   ),
                 ),

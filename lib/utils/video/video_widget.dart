@@ -1,6 +1,9 @@
-import 'package:chewie/chewie.dart';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:video_player/video_player.dart';
 
@@ -26,40 +29,53 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  VideoPlayerController _controller;
+  pVideoPlayerController _controller;
   ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _muted;
+  bool _isVideoLoaded = false;
 
   @override
   void initState() {
     super.initState();
     _muted = widget.muted;
-    _controller = VideoPlayerController.network(widget.url);
-    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-
-      setState(() {});
-    }).catchError((e) {
-      print(e);
-    });
-
-    if (widget.play) {
-      _controller.play();
-      _controller.setLooping(true);
-      _controller.setVolume(_muted ? 0 : 1);
+    if (!_isVideoLoaded) {
+      setState(() => _isVideoLoaded = true);
+      _downloadAndCacheVideo().then((file) {
+        if (file != null) {
+          _controller = pVideoPlayerController.file(file);
+          _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+            // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+            setState(() {});
+          });
+        }
+      });
+    }
+    // _controller = pVideoPlayerController.network(widget.url);
+    // _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+    //   // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+    //   setState(() {});
+    // });
+    if (_controller?.value?.initialized == true) {
+      if (widget.play) {
+        _controller.play();
+        _controller.setLooping(true);
+        _controller.setVolume(_muted ? 0 : 1);
+      }
     }
   }
 
   @override
   void didUpdateWidget(VideoWidget oldWidget) {
-    if (oldWidget.play != widget.play) {
-      if (widget.play) {
-        _controller.play();
-        _controller.setLooping(true);
-        _controller.setVolume(_muted ? 0 : 1);
-      } else {
-        _controller.pause();
+    if (_controller?.value?.initialized == true) {
+      if (oldWidget.play != widget.play) {
+        if (widget.play) {
+          _controller.play();
+          _controller.setLooping(true);
+          _controller.setVolume(_muted ? 0 : 1);
+        } else {
+          _controller.pause();
+        }
       }
     }
     super.didUpdateWidget(oldWidget);
@@ -75,11 +91,11 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   Widget build(BuildContext context) {
     _muted = widget.muted;
-    _controller.setVolume(_muted ? 0 : 1);
     return FutureBuilder(
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          _controller.setVolume(_muted ? 0 : 1);
           _chewieController = ChewieController(
               videoPlayerController: _controller,
               autoInitialize: true,
@@ -125,6 +141,26 @@ class _VideoWidgetState extends State<VideoWidget> {
     return CircularProgressIndicator(
         valueColor:
             AlwaysStoppedAnimation(ThemeManager.of(context).colors.dark));
+  }
+
+  Future<File> _downloadAndCacheVideo() async {
+    try {
+      final cacheManager = DefaultCacheManager();
+
+      FileInfo fileInfo;
+
+      fileInfo = await cacheManager
+          .getFileFromCache(widget.url); // Get video from cache first
+
+      if (fileInfo?.file == null) {
+        fileInfo = await cacheManager
+            .downloadFile(widget.url); // Download video if not cached yet
+      }
+
+      return fileInfo?.file;
+    } catch (e) {
+      throw (e);
+    }
   }
 }
 

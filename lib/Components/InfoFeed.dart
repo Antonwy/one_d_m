@@ -334,12 +334,13 @@ class _CountDownPointerState extends State<CountDownPointer>
     if (_lastTimeResetted == null) {
       print('_lastTimeResetted was null');
       _lastTimeResetted = today;
-      await _prefs.setString(_lastTimeResetted, today);
+      await _prefs.setString(Constants.LAST_TIME_RESETTED_COINS, today);
     }
 
     print("LastTimeResetted: $_lastTimeResetted");
 
     if (_lastTimeResetted != today) {
+      print('LastTimeResetted != Today => resetting coins');
       _prefs.setInt(Constants.COllECTED_COINS_KEY, 0);
       await _prefs.setString(Constants.LAST_TIME_RESETTED_COINS, today);
     }
@@ -350,6 +351,8 @@ class _CountDownPointerState extends State<CountDownPointer>
     _countDownController.restartFromValue(_timeRemaining);
     int _collCoins = _prefs.getInt(Constants.COllECTED_COINS_KEY) ?? 0;
     _alreadyCollectedCoins = _collCoins;
+
+    print('Collected Coins: $_collCoins');
 
     if (_collCoins > 0) {
       print('INIT COINS: $_collCoins');

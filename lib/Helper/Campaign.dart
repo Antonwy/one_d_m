@@ -4,8 +4,15 @@ class Campaign {
   final String name, description, shortDescription, city;
   final DateTime createdAt;
   final int amount, subscribedCount, categoryId;
-  final String authorId, id, imgUrl, thumbnailUrl, adminId, shortVideoUrl,longVideoUrl;
+  final String authorId,
+      id,
+      imgUrl,
+      thumbnailUrl,
+      adminId,
+      shortVideoUrl,
+      longVideoUrl;
   final List<String> moreImages;
+  final List<String> donationImages;
   final List<String> effects;
   final List<String> donationEffects;
 
@@ -21,6 +28,7 @@ class Campaign {
       AMOUNT = "current_amount",
       IMAGEURL = "image_url",
       MOREIMAGES = "more_image_urls",
+      DONATIONIMAGES = "donation_images",
       THUMBNAILURL = "thumbnail_url",
       EFFECTS = "effects",
       DONATION_EFFECTS = "donation_effects",
@@ -42,6 +50,7 @@ class Campaign {
       this.amount,
       this.imgUrl,
       this.moreImages,
+      this.donationImages,
       this.thumbnailUrl,
       this.categoryId,
       this.shortVideoUrl,
@@ -65,6 +74,9 @@ class Campaign {
       longVideoUrl: snapshot.data()[LONGVIDEOURL],
       adminId: snapshot.data()[ADMINID],
       categoryId: snapshot.data()[CATEGORYID],
+      donationImages: snapshot.data()[DONATIONIMAGES] == null
+          ? []
+          : List.from(snapshot.data()[DONATIONIMAGES]),
       moreImages: snapshot.data()[MOREIMAGES] == null
           ? []
           : List.from(snapshot.data()[MOREIMAGES]),
@@ -103,8 +115,8 @@ class Campaign {
       SHORTDESCRIPTION: shortDescription,
       AUTHORID: authorId,
       IMAGEURL: imgUrl,
-      SHORTVIDEOURL :shortVideoUrl,
-      LONGVIDEOURL :longVideoUrl,
+      SHORTVIDEOURL: shortVideoUrl,
+      LONGVIDEOURL: longVideoUrl,
     };
   }
 
@@ -113,8 +125,8 @@ class Campaign {
       NAME: name,
       SHORTDESCRIPTION: shortDescription,
       IMAGEURL: imgUrl,
-      SHORTVIDEOURL:shortVideoUrl,
-      LONGVIDEOURL:longVideoUrl,
+      SHORTVIDEOURL: shortVideoUrl,
+      LONGVIDEOURL: longVideoUrl,
     };
   }
 

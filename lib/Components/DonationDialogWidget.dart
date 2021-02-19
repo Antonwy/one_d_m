@@ -29,6 +29,7 @@ import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/chart/circle_painter.dart';
 import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -62,6 +63,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   double _selectedValue = 0;
   ScrollController _scrollController;
   bool _shouldScroll = true;
+  int _imageIndex = 0;
 
   Stream<AdBalance> _adbalanceStream;
 
@@ -91,6 +93,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }
       }
     });
+
     super.initState();
   }
 
@@ -98,6 +101,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     _bTheme = ThemeManager.of(context).colors;
+    for (String url in widget.campaign.donationImages) {
+      precacheImage(NetworkImage(url), context);
+    }
 
     return ChangeNotifierProvider<DonationDialogManager>(
         create: (context) => DonationDialogManager(
@@ -142,39 +148,34 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
-                                        _buildheading(
-                                            widget.campaign?.imgUrl ?? "",
-                                            widget.campaign?.name ??
-                                                "Not found",
-                                            widget.campaign?.authorId ?? ""),
+                                        widget.campaign.donationImages.isEmpty
+                                            ? _buildheading(
+                                                widget.campaign?.imgUrl ?? "",
+                                                widget.campaign?.name ??
+                                                    "Not found",
+                                                widget.campaign?.authorId ?? "")
+                                            : _buildHeadingImage(),
                                         SizedBox(
                                           height: 20,
                                         ),
                                         Align(
                                           alignment: Alignment.center,
-                                          child: MaterialButton(
-                                            minWidth: 118,
-                                            height: 50,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        Constants.radius)),
-                                            elevation: 0,
-                                            color: _bTheme.dark,
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  '${_selectedValue.toInt().toString()} DV',
-                                                  style: _theme
-                                                      .accentTextTheme.button
-                                                      .copyWith(
-                                                          fontSize: 21,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                ),
-                                              ],
+                                          child: AnimatedSwitcher(
+                                            duration:
+                                                const Duration(milliseconds: 500),
+                                               
+                                            child: Text(
+                                            
+                                              '${_selectedValue.toInt().toString()} DV',
+                                              style: _theme
+                                                  .accentTextTheme.button
+                                                  .copyWith(
+                                                      fontSize: 21,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: _bTheme.dark),
+                                                       key: ValueKey(_selectedValue),
                                             ),
-                                            onPressed: () {},
                                           ),
                                         ),
                                         const YMargin(5),
@@ -218,6 +219,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                               ddm.amount =
                                                                   _selectedValue
                                                                       .toInt();
+                                                              _switchHeadingImage(
+                                                                  _selectedValue);
                                                             });
                                                           }
                                                         }),
@@ -262,6 +265,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                               ddm.amount =
                                                                   _selectedValue
                                                                       .toInt();
+                                                              _switchHeadingImage(
+                                                                  _selectedValue);
                                                             });
                                                           }
                                                         }),
@@ -344,6 +349,28 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   );
                 }))));
   }
+
+  void _switchHeadingImage(double selectedDv) {
+    int index = _selectedValue ~/ Constants.IMG_CHANGE_POINT;
+    _imageIndex = index < widget.campaign.donationImages.length - 1
+        ? index
+        : widget.campaign.donationImages.length - 1;
+    CachedNetworkImage.evictFromCache(
+        widget.campaign.donationImages[_imageIndex]);
+  }
+
+  Widget _buildHeadingImage() => Center(
+        child: Container(
+          width: double.infinity,
+          height: 100,
+          child: CachedNetworkImage(
+            imageUrl: widget.campaign.donationImages[_imageIndex],
+            useOldImageOnUrlChange: true,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.low,
+          ),
+        ),
+      );
 
   Widget _buildheading(String url, String title, String authorId) => Row(
         mainAxisAlignment: MainAxisAlignment.start,

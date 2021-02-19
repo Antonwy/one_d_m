@@ -35,6 +35,7 @@ class Constants {
   static const String COllECTED_COINS_KEY = "collected_coins_key";
   static const String LAST_TIME_RESETTED_COINS = "last_time_resetted_coins";
 
+  static const int IMG_CHANGE_POINT = 3;
   //SkSl WarmUp file
   ///Users/niroshana/Documents/FIVERR/one-d-m/flutter_01.sksl.json.
 }

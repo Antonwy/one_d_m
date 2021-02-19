@@ -1,13 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Campaign {
-  final String name, description, shortDescription, city;
   final DateTime createdAt;
   final int amount, subscribedCount, categoryId;
-  final String authorId, id, imgUrl, thumbnailUrl, adminId, shortVideoUrl,longVideoUrl;
-  final List<String> moreImages;
-  final List<String> effects;
-  final List<String> donationEffects;
+  final String authorId,
+      id,
+      imgUrl,
+      thumbnailUrl,
+      adminId,
+      shortVideoUrl,
+      longVideoUrl,
+      name,
+      description,
+      shortDescription,
+      city;
+  final List<String> moreImages, donationEffects, effects, tags;
 
   static final String ID = "id",
       NAME = "title",
@@ -27,7 +34,8 @@ class Campaign {
       FINALAMOUNT = "target_amount",
       CATEGORYID = "category_id",
       SHORTVIDEOURL = "short_video_url",
-      LONGVIDEOURL = "long_video_url";
+      LONGVIDEOURL = "long_video_url",
+      TAGS = "tags";
 
   Campaign(
       {this.id,
@@ -47,7 +55,8 @@ class Campaign {
       this.shortVideoUrl,
       this.longVideoUrl,
       this.donationEffects,
-      this.effects});
+      this.effects,
+      this.tags});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -74,6 +83,8 @@ class Campaign {
       donationEffects: snapshot.data()[DONATION_EFFECTS] == null
           ? []
           : List.from(snapshot.data()[DONATION_EFFECTS]),
+      tags:
+          snapshot.data()[TAGS] == null ? [] : List.from(snapshot.data()[TAGS]),
     );
   }
 
@@ -103,8 +114,8 @@ class Campaign {
       SHORTDESCRIPTION: shortDescription,
       AUTHORID: authorId,
       IMAGEURL: imgUrl,
-      SHORTVIDEOURL :shortVideoUrl,
-      LONGVIDEOURL :longVideoUrl,
+      SHORTVIDEOURL: shortVideoUrl,
+      LONGVIDEOURL: longVideoUrl,
     };
   }
 
@@ -113,8 +124,8 @@ class Campaign {
       NAME: name,
       SHORTDESCRIPTION: shortDescription,
       IMAGEURL: imgUrl,
-      SHORTVIDEOURL:shortVideoUrl,
-      LONGVIDEOURL:longVideoUrl,
+      SHORTVIDEOURL: shortVideoUrl,
+      LONGVIDEOURL: longVideoUrl,
     };
   }
 

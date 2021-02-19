@@ -1,9 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
@@ -83,7 +86,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                       ? VideoWidget(
                           url: widget.campaign.shortVideoUrl,
                           play: widget.isInView,
-                          imageUrl: widget.campaign.shortVideoUrl,
+                          imageUrl: widget.campaign.imgUrl,
                           muted: true,
                         )
                       : CachedNetworkImage(
@@ -115,7 +118,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                             XMargin(12),
                             Material(
                                 clipBehavior: Clip.antiAlias,
-                                color: _theme.colors.contrast.withOpacity(0.5),
+                                color: _theme.colors.dark,
                                 borderRadius: BorderRadius.circular(20),
                                 child: InkWell(
                                   onTap: () async {
@@ -126,7 +129,8 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                                         vertical: 8.0, horizontal: 12),
                                     child: Text(
                                       "Unterstützen",
-                                      style: _theme.textTheme.dark.bodyText1
+                                      style: _theme
+                                          .textTheme.textOnDark.bodyText1
                                           .copyWith(
                                         fontSize: 11,
                                       ),
@@ -136,9 +140,39 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                           ],
                         ),
                         YMargin(8),
-                        widget.campaign.shortDescription == null
-                            ? Container()
-                            : Text(widget.campaign.shortDescription),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            _campaignTag(
+                                text: "${widget.campaign.amount} DV gesammelt",
+                                color: _theme.colors.dark,
+                                textColor: _theme.colors.textOnDark,
+                                icon: Icons.info,
+                                bold: true),
+                            _campaignTag(
+                                text: Category
+                                    .categories[
+                                        widget.campaign?.categoryId ?? 0]
+                                    .name,
+                                icon: Icons.filter_alt),
+                            FutureBuilder<Organisation>(
+                                future: DatabaseService.getOrganisation(
+                                    widget.campaign.authorId),
+                                builder: (context, snapshot) {
+                                  return snapshot.hasData
+                                      ? _campaignTag(
+                                          text: snapshot.data?.name,
+                                        )
+                                      : SizedBox.shrink();
+                                }),
+                            for (String tag in widget.campaign.tags)
+                              if (tag.isNotEmpty) _campaignTag(text: tag)
+                          ],
+                        ),
+                        // widget.campaign.shortDescription == null
+                        //     ? Container()
+                        //     : Text(widget.campaign.shortDescription),
                       ],
                     ),
                   )
@@ -147,6 +181,46 @@ class _CampaignHeaderState extends State<CampaignHeader> {
             ),
           ),
         ));
+  }
+
+  Widget _campaignTag(
+      {String text,
+      IconData icon,
+      Color color,
+      Color textColor,
+      bool bold = false}) {
+    return Material(
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+        child: icon != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    color: textColor,
+                    size: 18,
+                  ),
+                  XMargin(6),
+                  Text(
+                    text,
+                    style: TextStyle(
+                        color:
+                            textColor ?? ThemeManager.of(context).colors.dark,
+                        fontWeight: bold ? FontWeight.w600 : FontWeight.normal),
+                  )
+                ],
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                    color: textColor ?? ThemeManager.of(context).colors.dark,
+                    fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+              ),
+      ),
+      color: color ?? ThemeManager.of(context).colors.contrast.withOpacity(.5),
+    );
   }
 
   Future<void> _donate(BuildContext context, Campaign campaign) async {

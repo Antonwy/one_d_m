@@ -210,34 +210,34 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           borderRadius: BorderRadius.circular(6),
                           child: Stack(
                             children: [
-                              widget.campaign.longVideoUrl != null?
-                              VideoWidget(
-                                url: widget.campaign.longVideoUrl,
-                                play: isInView,
-                                imageUrl: widget.campaign.longVideoUrl,
-                                muted: _muted,
-                                toggleMuted: _toggleMuted,
-                              ):
-                              CachedNetworkImage(
-                                width: double.infinity,
-                                height: 260,
-                                imageUrl: widget.campaign.imgUrl,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => Container(
-                                  height: 260,
-                                  child: Center(
-                                      child: Icon(
-                                        Icons.error,
-                                        color: ColorTheme.orange,
-                                      )),
-                                ),
-                                placeholder: (context, url) => Container(
-                                  height: 260,
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              ),
+                              widget.campaign.longVideoUrl != null
+                                  ? VideoWidget(
+                                      url: widget.campaign.longVideoUrl,
+                                      play: isInView,
+                                      imageUrl: widget.campaign.longVideoUrl,
+                                      muted: _muted,
+                                      toggleMuted: _toggleMuted,
+                                    )
+                                  : CachedNetworkImage(
+                                      width: double.infinity,
+                                      height: 260,
+                                      imageUrl: widget.campaign.imgUrl,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, __, ___) => Container(
+                                        height: 260,
+                                        child: Center(
+                                            child: Icon(
+                                          Icons.error,
+                                          color: ColorTheme.orange,
+                                        )),
+                                      ),
+                                      placeholder: (context, url) => Container(
+                                        height: 260,
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    ),
                               Positioned(
                                 left: 0,
                                 right: 0,
@@ -245,13 +245,14 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                 child: Padding(
                                   padding: const EdgeInsets.all(12),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       widget.campaign?.longVideoUrl != null
                                           ? MuteButton(
-                                        muted: _muted,
-                                        toggle: _toggleMuted,
-                                      )
+                                              muted: _muted,
+                                              toggle: _toggleMuted,
+                                            )
                                           : SizedBox.shrink(),
                                       SizedBox.shrink(),
                                     ],
@@ -402,6 +403,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
               ]);
             }));
   }
+
   void _toggleMuted() {
     setState(() {
       _muted = !_muted;
@@ -539,39 +541,44 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     fontWeight: FontWeight.w400),
               ),
               YMargin(6),
-              Text(
-                "Was dieses Projekt bewirkt:",
-                style: Theme.of(context).textTheme.bodyText1.copyWith(
-                    fontSize: 15,
-                    color: _bTheme.dark,
-                    fontWeight: FontWeight.w700),
-              ),
+              campaign?.effects != null &&
+                      campaign.effects.isNotEmpty &&
+                      campaign.effects.where((el) => el.isNotEmpty).length > 0
+                  ? Text(
+                      "Was dieses Projekt bewirkt:",
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          fontSize: 15,
+                          color: _bTheme.dark,
+                          fontWeight: FontWeight.w700),
+                    )
+                  : SizedBox.shrink(),
               YMargin(6),
               for (String effect in campaign?.effects)
-                Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('•'),
-                        XMargin(6),
-                        Expanded(
-                          child: Text(
-                            '$effect',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .copyWith(
-                                    fontSize: 15,
-                                    color: _bTheme.dark,
-                                    fontWeight: FontWeight.w400),
+                if (effect.isNotEmpty)
+                  Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('•'),
+                          XMargin(6),
+                          Expanded(
+                            child: Text(
+                              '$effect',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(
+                                      fontSize: 15,
+                                      color: _bTheme.dark,
+                                      fontWeight: FontWeight.w400),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    YMargin(6),
-                  ],
-                ),
+                        ],
+                      ),
+                      YMargin(6),
+                    ],
+                  ),
             ],
           ),
         ),

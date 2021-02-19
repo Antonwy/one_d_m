@@ -87,8 +87,12 @@ class ProfilePageState extends State<ProfilePage>
           const SliverToBoxAdapter(
             child: _GiftAvailable(),
           ),
-          const SliverToBoxAdapter(
-            child: YMargin(6),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Text("News",
+                  style: ThemeManager.of(context).textTheme.dark.headline6),
+            ),
           ),
           SliverAnimatedOpacity(
             opacity: _visible ? 1.0 : 0.0,

@@ -407,8 +407,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   }
 
   Widget _buildHeadingAnimation() => ClipRRect(
-        borderRadius: BorderRadius.only(
-            topRight: Radius.circular(18.0), topLeft: Radius.circular(18.0)),
+        borderRadius: BorderRadius.circular(18.0),
         child: Container(
             width: double.infinity,
             height: 180,

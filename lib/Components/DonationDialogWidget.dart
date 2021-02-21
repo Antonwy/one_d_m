@@ -66,7 +66,6 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   int _imageIndex = 0;
 
   ///dv animation variables
-  int _maxAnimations = 3;
   double _dv = 0;
   int _currentIndex = 0;
   String _currentAnimation = '0';
@@ -108,14 +107,16 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
 
   _loadRive() {
     if (widget.campaign.dvAnimation != null) {
-      NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation)).load('').then((data)async{
+      NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation))
+          .load('')
+          .then((data) async {
         final file = RiveFile();
 
         if (file.import(data)) {
           final artboard = file.mainArtboard;
 
-          artboard.addController(
-              _controller = SimpleAnimation(_currentAnimation));
+          artboard
+              .addController(_controller = SimpleAnimation(_currentAnimation));
           setState(() => _riveArtboard = artboard);
         }
       });
@@ -229,7 +230,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                           HapticFeedback
                                                               .heavyImpact();
                                                           setState(() {
-                                                            _selectedValue--;
+                                                            _selectedValue -=
+                                                                widget.campaign
+                                                                    .dvController;
                                                             ddm.amount =
                                                                 _selectedValue
                                                                     .toInt();
@@ -269,12 +272,14 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                       onPressed: () {
                                                         if ((ddm?.adBalance
                                                                     ?.dcBalance ??
-                                                                0) >
-                                                            _selectedValue) {
+                                                                0) >=
+                                                            _selectedValue+widget.campaign.dvController) {
                                                           HapticFeedback
                                                               .heavyImpact();
                                                           setState(() {
-                                                            _selectedValue++;
+                                                            _selectedValue +=
+                                                                widget.campaign
+                                                                    .dvController;
                                                             ddm.amount =
                                                                 _selectedValue
                                                                     .toInt();
@@ -366,29 +371,38 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   }
 
   void _switchRiveAnimation(double selectedDv) {
-    int index = _selectedValue ~/ Constants.IMG_CHANGE_POINT;
-    var direction = _dv < selectedDv ? '+' : '-';
-    //prevent playing same animation again
-    if (_currentIndex == index || index > _maxAnimations) return;
+    if(widget.campaign.dvAnimation !=null){
+      int index = _selectedValue ~/ widget.campaign.dvController;
+      var direction = _dv < selectedDv ? '+' : '-';
+      //prevent playing same animation again
+      if (_currentIndex == index || index > widget.campaign.maxAnimCount)
+        return;
 
-    _dv = selectedDv;
-    _currentIndex = index;
-    _currentAnimation = '$direction$index';
-    //change animation name
-    print('Current animation:$_currentAnimation');
-    _riveArtboard.removeController(_controller);
-    _riveArtboard.addController(
-        _controller = SimpleAnimation(_currentAnimation));
+      _dv = selectedDv;
+      _currentIndex = index;
+      _currentAnimation = '$direction$index';
+      //change animation name
+      print('Current animation:$_currentAnimation');
+      _riveArtboard.removeController(_controller);
+      _riveArtboard
+          .addController(_controller = SimpleAnimation(_currentAnimation));
+    }
   }
 
-  Widget _buildHeadingAnimation() => Container(
-      width: double.infinity,
-      height: 180,
-      child: _riveArtboard == null
-          ? SizedBox.shrink()
-          : Rive(
-              artboard: _riveArtboard,
-            ));
+  Widget _buildHeadingAnimation() => Material(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(18),
+        ),
+        child: Container(
+            width: double.infinity,
+            height: 180,
+            child: _riveArtboard == null
+                ? SizedBox.shrink()
+                : Rive(
+                    fit: BoxFit.contain,
+                    artboard: _riveArtboard,
+                  )),
+      );
 
   Widget _buildheading(String url, String title, String authorId) => Row(
         mainAxisAlignment: MainAxisAlignment.start,

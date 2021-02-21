@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Campaign {
-  final String name, description, shortDescription, city, unit,dvAnimation;
+  final String name, description, shortDescription, city, unit, dvAnimation;
   final DateTime createdAt;
-  final int amount, subscribedCount, categoryId;
+  final int amount, subscribedCount, categoryId, dvController, maxAnimCount;
   final String authorId,
       id,
       imgUrl,
@@ -35,7 +35,9 @@ class Campaign {
       CATEGORYID = "category_id",
       SHORTVIDEOURL = "short_video_url",
       LONGVIDEOURL = "long_video_url",
-      DV_ANIMATION="dv_animation",
+      DV_ANIMATION = "dv_animation",
+      MAX_ANIM_COUNT = "max_anim_count",
+      DV_CONTROLLER = "dv_controller",
       UNIT = "donation_unit";
 
   Campaign(
@@ -54,6 +56,8 @@ class Campaign {
       this.moreImages,
       this.dvAnimation,
       this.thumbnailUrl,
+      this.maxAnimCount,
+      this.dvController,
       this.categoryId,
       this.shortVideoUrl,
       this.longVideoUrl,
@@ -76,8 +80,10 @@ class Campaign {
       longVideoUrl: snapshot.data()[LONGVIDEOURL],
       adminId: snapshot.data()[ADMINID],
       unit: snapshot.data()[UNIT],
+      dvController: snapshot.data()[DV_CONTROLLER] ?? 1,
+      maxAnimCount: snapshot.data()[MAX_ANIM_COUNT] ?? 3,
       categoryId: snapshot.data()[CATEGORYID],
-      dvAnimation: snapshot.data()[DV_ANIMATION]??'',
+      dvAnimation: snapshot.data()[DV_ANIMATION] ?? '',
       moreImages: snapshot.data()[MOREIMAGES] == null
           ? []
           : List.from(snapshot.data()[MOREIMAGES]),

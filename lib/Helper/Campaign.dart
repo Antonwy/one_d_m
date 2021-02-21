@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Campaign {
-  final String name, description, shortDescription, city;
+  final String name, description, shortDescription, city, unit,dvAnimation;
   final DateTime createdAt;
   final int amount, subscribedCount, categoryId;
   final String authorId,
@@ -12,7 +12,6 @@ class Campaign {
       shortVideoUrl,
       longVideoUrl;
   final List<String> moreImages;
-  final List<String> donationImages;
   final List<String> effects;
   final List<String> donationEffects;
 
@@ -35,10 +34,13 @@ class Campaign {
       FINALAMOUNT = "target_amount",
       CATEGORYID = "category_id",
       SHORTVIDEOURL = "short_video_url",
-      LONGVIDEOURL = "long_video_url";
+      LONGVIDEOURL = "long_video_url",
+      DV_ANIMATION="dv_animation",
+      UNIT = "donation_unit";
 
   Campaign(
       {this.id,
+      this.unit,
       this.name,
       this.description,
       this.shortDescription,
@@ -50,7 +52,7 @@ class Campaign {
       this.amount,
       this.imgUrl,
       this.moreImages,
-      this.donationImages,
+      this.dvAnimation,
       this.thumbnailUrl,
       this.categoryId,
       this.shortVideoUrl,
@@ -73,10 +75,9 @@ class Campaign {
       shortVideoUrl: snapshot.data()[SHORTVIDEOURL],
       longVideoUrl: snapshot.data()[LONGVIDEOURL],
       adminId: snapshot.data()[ADMINID],
+      unit: snapshot.data()[UNIT],
       categoryId: snapshot.data()[CATEGORYID],
-      donationImages: snapshot.data()[DONATIONIMAGES] == null
-          ? []
-          : List.from(snapshot.data()[DONATIONIMAGES]),
+      dvAnimation: snapshot.data()[DV_ANIMATION]??'',
       moreImages: snapshot.data()[MOREIMAGES] == null
           ? []
           : List.from(snapshot.data()[MOREIMAGES]),

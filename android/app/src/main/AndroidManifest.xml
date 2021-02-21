@@ -2,6 +2,8 @@
     package="com.example.one_d_m">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:label="one_d_m"
         android:icon="@mipmap/ic_launcher">

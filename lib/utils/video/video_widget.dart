@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -126,21 +125,25 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _buildImage() {
-    if (widget.image != null)
-      return Image(
-        image: widget.image,
-        fit: BoxFit.cover,
-      );
+    // if (widget.image != null)
+    //   return Image(
+    //     image: widget.image,
+    //     fit: BoxFit.cover,
+    //   );
+    //
+    // if (widget.imageUrl != null && widget.imageUrl.isNotEmpty)
+    //   return CachedNetworkImage(
+    //     imageUrl: widget.imageUrl,
+    //     fit: BoxFit.cover,
+    //   );
 
-    if (widget.imageUrl != null && widget.imageUrl.isNotEmpty)
-      return CachedNetworkImage(
-        imageUrl: widget.imageUrl,
-        fit: BoxFit.cover,
-      );
-
-    return CircularProgressIndicator(
-        valueColor:
-            AlwaysStoppedAnimation(ThemeManager.of(context).colors.dark));
+    return Container(
+      height: 64,
+      width: 64,
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 
   Future<File> _downloadAndCacheVideo() async {

@@ -89,6 +89,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
       if (_isAnim) {
         if (event.dcBalance >= widget.campaign.dvController) {
           _selectedValue = widget.campaign.dvController.toDouble();
+        }else{
+          _currentAnimation='-0';
         }
       }
     });

@@ -40,4 +40,14 @@ class DonationInfo {
         donationsCount: ds[DONATIONSCOUNT],
         allDonations: ds[ALLDONATIONS]);
   }
+
+  factory DonationInfo.zero() => DonationInfo(
+      dailyAmount: 0,
+      dailyAmountTarget: 1000,
+      monthlyAmount: 0,
+      monthlyAmountTarget: 100000,
+      yearlyAmount: 0,
+      yearlyAmountTarget: 10000000,
+      donationsCount: 0,
+      allDonations: 0);
 }

@@ -140,36 +140,24 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                           ],
                         ),
                         YMargin(8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            _campaignTag(
-                                text: "${widget.campaign.amount} DV gesammelt",
-                                color: _theme.colors.dark,
-                                textColor: _theme.colors.textOnDark,
-                                icon: Icons.info,
-                                bold: true),
-                            _campaignTag(
-                                text: Category
-                                    .categories[
-                                        widget.campaign?.categoryId ?? 0]
-                                    .name,
-                                icon: Icons.filter_alt),
-                            FutureBuilder<Organisation>(
-                                future: DatabaseService.getOrganisation(
-                                    widget.campaign.authorId),
-                                builder: (context, snapshot) {
-                                  return snapshot.hasData
-                                      ? _campaignTag(
-                                          text: snapshot.data?.name,
-                                        )
-                                      : SizedBox.shrink();
-                                }),
-                            for (String tag in widget.campaign.tags)
-                              if (tag.isNotEmpty) _campaignTag(text: tag)
-                          ],
-                        ),
+                        widget.campaign.tags == null
+                            ? Text("${widget.campaign?.shortDescription ?? ""}")
+                            : Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  _campaignTag(
+                                      text:
+                                          "${widget.campaign?.amount ?? 0} DV gesammelt",
+                                      color: _theme.colors.dark,
+                                      textColor: _theme.colors.textOnDark,
+                                      icon: Icons.info,
+                                      bold: true),
+                                  for (String tag
+                                      in widget.campaign?.tags ?? [])
+                                    if (tag.isNotEmpty) _campaignTag(text: tag)
+                                ],
+                              ),
                         // widget.campaign.shortDescription == null
                         //     ? Container()
                         //     : Text(widget.campaign.shortDescription),
@@ -208,7 +196,8 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                     style: TextStyle(
                         color:
                             textColor ?? ThemeManager.of(context).colors.dark,
-                        fontWeight: bold ? FontWeight.w600 : FontWeight.normal),
+                        fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
+                        fontSize: 12),
                   )
                 ],
               )
@@ -216,7 +205,8 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                 text,
                 style: TextStyle(
                     color: textColor ?? ThemeManager.of(context).colors.dark,
-                    fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+                    fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 12),
               ),
       ),
       color: color ?? ThemeManager.of(context).colors.contrast.withOpacity(.5),

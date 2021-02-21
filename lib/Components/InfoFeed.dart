@@ -256,7 +256,6 @@ class _CountDownPointerState extends State<CountDownPointer>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   CountDownController _countDownController;
   int _collectedDVs = 0;
-  final int _maxToCollectDVs = 2;
   int _alreadyCollectedCoins = 0;
   bool _viewAd = false, _loadingAd = true;
 
@@ -440,12 +439,8 @@ class _CountDownPointerState extends State<CountDownPointer>
         PushNotification.of(context).show(
             NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
 
-        if (_collectedDVs < _maxToCollectDVs) {
-          _countDownController.restart();
-        } else {
-          _viewAd = true;
-          _countDownController.complete();
-        }
+        _viewAd = true;
+        _countDownController.complete();
       },
     );
   }
@@ -454,8 +449,6 @@ class _CountDownPointerState extends State<CountDownPointer>
     if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
       return "Das wars für heute. Vielen Dank für deine Aktivität!";
 
-    if (_collectedDVs >= _maxToCollectDVs)
-      return "Werbung schauen für mehr DVs!";
     return "Viel Spaß beim Spenden!";
   }
 
@@ -491,8 +484,8 @@ class _CountDownPointerState extends State<CountDownPointer>
   bool get wantKeepAlive => true;
 }
 
-class _GoalWidget extends StatelessWidget {
-  const _GoalWidget({
+class GoalWidget extends StatelessWidget {
+  const GoalWidget({
     Key key,
     @required this.title,
     @required this.percent,
@@ -507,13 +500,15 @@ class _GoalWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
+          AutoSizeText(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            maxLines: 1,
           ),
-          SizedBox(height: 14.0),
+          YMargin(6),
           _PercentLine(percent: percent),
         ],
       ),
@@ -628,7 +623,7 @@ class _PercentLine extends StatelessWidget {
         painter: _PercentLinePainter(
             percent: percent,
             height: height,
-            color: ThemeManager.of(context).colors.contrast),
+            color: ThemeManager.of(context).colors.dark),
       ),
     );
   }
@@ -645,7 +640,7 @@ class _PercentLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint backgroundPaint = Paint()
-      ..color = ColorTheme.white.withOpacity(0.05)
+      ..color = color.withOpacity(0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = height
       ..strokeCap = StrokeCap.round;

@@ -19,7 +19,7 @@ exports.daily = functions.pubsub
   .schedule('0 0 * * *')
   .onRun(async (context) => {
     await resetStatistics({ daily_amount: 0 });
-    await deleteOutdatedSessions();
+    // await deleteOutdatedSessions();
   });
 
 exports.dailyPoints = functions.pubsub

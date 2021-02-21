@@ -17,11 +17,16 @@ class Statistics {
         donationStatistics: DonationInfo.fromSnapshot(qs.docs
             .where((doc) => doc.id == DatabaseService.DONATIONINFO)
             .first),
-        userCount: qs.docs
-            .where((doc) => doc.id == USERINFO)
-            .first[USERCOUNT],
+        userCount: qs.docs.where((doc) => doc.id == USERINFO).first[USERCOUNT],
         campaignCount: qs.docs
             .where((doc) => doc.id == CAMPAIGNINFO)
             .first[CAMPAIGNCOUNT]);
+  }
+
+  factory Statistics.zero() {
+    return Statistics(
+        donationStatistics: DonationInfo.zero(),
+        userCount: 0,
+        campaignCount: 0);
   }
 }

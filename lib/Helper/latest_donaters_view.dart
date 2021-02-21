@@ -1,17 +1,20 @@
-import 'dart:async';
+import 'package:one_d_m/Helper/DonationInfo.dart';
 
+import '../Components/InfoFeed.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 
 import 'DatabaseService.dart';
 import 'Donation.dart';
+import 'Numeral.dart';
 import 'ThemeManager.dart';
 
 class LatestDonatorsView extends StatefulWidget {
@@ -47,6 +50,64 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
             ),
             itemCount: d.length,
             itemBuilder: (_, index) {
+              if (index == 0)
+                return Padding(
+                  padding: EdgeInsets.only(
+                      left: index == 0 ? 12.0 : 0.0,
+                      right: index == d.length - 1 ? 12.0 : 0.0),
+                  child: Row(
+                    children: [
+                      StreamBuilder<Statistics>(
+                          stream: DatabaseService.getStatistics(),
+                          initialData: Statistics.zero(),
+                          builder: (context, snapshot) {
+                            DonationInfo info =
+                                snapshot.data.donationStatistics;
+                            bool dailyTargetDone =
+                                info.dailyAmount >= info.dailyAmountTarget;
+                            return Container(
+                              height: double.infinity,
+                              width: 100,
+                              child: Material(
+                                borderRadius:
+                                    BorderRadius.circular(Constants.radius + 2),
+                                color: ThemeManager.of(context)
+                                    .colors
+                                    .contrast
+                                    .withOpacity(.6),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Tagesziel:",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12),
+                                      ),
+                                      YMargin(6),
+                                      dailyTargetDone
+                                          ? Icon(Icons.done)
+                                          : GoalWidget(
+                                              title:
+                                                  "${info.dailyAmount}/${Numeral(info.dailyAmountTarget).value()} DV",
+                                              percent: info.dailyAmount /
+                                                  info.dailyAmountTarget,
+                                            ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                      XMargin(8.0),
+                      _buildDonator(
+                          amount: d[index].amount.toString(),
+                          uid: d[index].userId),
+                    ],
+                  ),
+                );
               return Padding(
                 padding: EdgeInsets.only(
                     left: index == 0 ? 12.0 : 0.0,

@@ -29,6 +29,7 @@ import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/chart/circle_painter.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -62,18 +63,35 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   double _selectedValue = 0;
   ScrollController _scrollController;
   bool _shouldScroll = true;
+  int _imageIndex = 0;
+
+  ///dv animation variables
+  bool _isAnim = false;
+  double _dv = 0;
+  int _currentIndex = 0;
+  String _currentAnimation = '+1';
+  Artboard _riveArtboard;
+  RiveAnimationController _controller;
 
   Stream<AdBalance> _adbalanceStream;
 
   @override
   void initState() {
     _selectedValue = widget.defaultSelectedAmount.toDouble();
+    _isAnim = widget.campaign.dvAnimation.isNotEmpty;
     _adbalanceStream =
         DatabaseService.getAdBalance(widget.user?.id ?? widget.uid);
 
     _adbalanceStream.listen((event) {
       if (event.dcBalance < _selectedValue) {
         _selectedValue = 0;
+      }
+      if (_isAnim) {
+        if (event.dcBalance >= widget.campaign.dvController) {
+          _selectedValue = widget.campaign.dvController.toDouble();
+        }else{
+          _currentAnimation='-0';
+        }
       }
     });
 
@@ -91,14 +109,32 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }
       }
     });
+    if (_isAnim) {
+      _loadRive();
+    }
     super.initState();
+  }
+
+  _loadRive() {
+    NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation))
+        .load('')
+        .then((data) async {
+      final file = RiveFile();
+
+      if (file.import(data)) {
+        final artboard = file.mainArtboard;
+
+        artboard
+            .addController(_controller = SimpleAnimation(_currentAnimation));
+        setState(() => _riveArtboard = artboard);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     _bTheme = ThemeManager.of(context).colors;
-
     return ChangeNotifierProvider<DonationDialogManager>(
         create: (context) => DonationDialogManager(
               adBalanceStream: _adbalanceStream,
@@ -135,153 +171,159 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(18),
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        _buildheading(
-                                            widget.campaign?.imgUrl ?? "",
-                                            widget.campaign?.name ??
-                                                "Not found",
-                                            widget.campaign?.authorId ?? ""),
-                                        SizedBox(
-                                          height: 20,
-                                        ),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: MaterialButton(
-                                            minWidth: 118,
-                                            height: 50,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        Constants.radius)),
-                                            elevation: 0,
-                                            color: _bTheme.dark,
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  '${_selectedValue.toInt().toString()} DV',
-                                                  style: _theme
-                                                      .accentTextTheme.button
-                                                      .copyWith(
-                                                          fontSize: 21,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                ),
-                                              ],
-                                            ),
-                                            onPressed: () {},
-                                          ),
-                                        ),
-                                        const YMargin(5),
-                                        Align(
-                                          alignment: Alignment.center,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      !_isAnim
+                                          ? _buildheading(
+                                              widget.campaign?.imgUrl ?? "",
+                                              widget.campaign?.name ??
+                                                  "Not found",
+                                              widget.campaign?.authorId ?? "")
+                                          : _buildHeadingAnimation(),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: AnimatedSwitcher(
+                                          duration:
+                                              const Duration(milliseconds: 0),
                                           child: Text(
-                                            'von ${ddm?.adBalance?.dcBalance ?? 0} DV',
-                                            style: _theme.textTheme.subtitle1
+                                            !_isAnim
+                                                ? '${_selectedValue.toInt().toString()} DV'
+                                                : '${(_selectedValue ~/ widget.campaign.dvController)} ${widget.campaign.unit ?? 'DV'}',
+                                            style: _theme.accentTextTheme.button
                                                 .copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 12,
-                                                    color: Colors.black54),
+                                                    fontSize: 21,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: _bTheme.dark),
+                                            key: ValueKey(_selectedValue),
                                           ),
                                         ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                                flex: 1,
-                                                child: MaterialButton(
-                                                  clipBehavior: Clip.antiAlias,
-                                                  shape: CircleBorder(),
-                                                  elevation: 0,
-                                                  onPressed: () {},
-                                                  color: Helper.hexToColor(
-                                                      '#e2e2e2'),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            2.0),
-                                                    child: IconButton(
-                                                        icon: Icon(
-                                                            LineIcons.minus),
-                                                        color: _bTheme.dark,
-                                                        onPressed: () {
-                                                          if (_selectedValue >
-                                                              0) {
-                                                            HapticFeedback
-                                                                .heavyImpact();
-                                                            setState(() {
-                                                              _selectedValue--;
-                                                              ddm.amount =
-                                                                  _selectedValue
-                                                                      .toInt();
-                                                            });
-                                                          }
-                                                        }),
-                                                  ),
-                                                )),
-                                            Expanded(
-                                                flex: 2,
-                                                child: Column(
-                                                  children: [
-                                                    Container(
-                                                      color: _bTheme.dark
-                                                          .withOpacity(.1),
-                                                      height: 1,
-                                                    ),
-                                                  ],
-                                                )),
-                                            Expanded(
-                                                flex: 1,
-                                                child: MaterialButton(
-                                                  clipBehavior: Clip.antiAlias,
-                                                  shape: CircleBorder(),
-                                                  color: _bTheme.dark,
-                                                  elevation: 0,
-                                                  onPressed: () {},
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            2.0),
-                                                    child: IconButton(
-                                                        icon: Icon(
-                                                            LineIcons.plus),
-                                                        color: _bTheme.light,
-                                                        onPressed: () {
-                                                          if ((ddm?.adBalance
-                                                                      ?.dcBalance ??
-                                                                  0) >
-                                                              _selectedValue) {
-                                                            HapticFeedback
-                                                                .heavyImpact();
-                                                            setState(() {
-                                                              _selectedValue++;
-                                                              ddm.amount =
-                                                                  _selectedValue
-                                                                      .toInt();
-                                                            });
-                                                          }
-                                                        }),
-                                                  ),
-                                                ))
-                                          ],
+                                      ),
+                                      const YMargin(5),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          !_isAnim
+                                              ? 'von ${ddm?.adBalance?.dcBalance ?? 0} DV'
+                                              : '${_selectedValue.toInt().toString()} DV',
+                                          style: _theme.textTheme.subtitle1
+                                              .copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                  color: Colors.black54),
                                         ),
-                                        const YMargin(20),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: Builder(builder: (context) {
-                                            List<String> dEffects = widget
-                                                    .campaign
-                                                    ?.donationEffects ??
-                                                [];
-                                            String effect = dEffects.isEmpty
-                                                ? ""
-                                                : dEffects[new Random(42)
-                                                    .nextInt(dEffects.length)];
-                                            return Text(
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              flex: 1,
+                                              child: MaterialButton(
+                                                clipBehavior: Clip.antiAlias,
+                                                shape: CircleBorder(),
+                                                elevation: 0,
+                                                onPressed: () {},
+                                                color: Helper.hexToColor(
+                                                    '#e2e2e2'),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(2.0),
+                                                  child: IconButton(
+                                                      icon:
+                                                          Icon(LineIcons.minus),
+                                                      color: _bTheme.dark,
+                                                      onPressed: () {
+                                                        if (_selectedValue >
+                                                                0 &&
+                                                            _selectedValue >
+                                                                widget.campaign
+                                                                    .dvController) {
+                                                          HapticFeedback
+                                                              .heavyImpact();
+                                                          setState(() {
+                                                            _selectedValue -=
+                                                                widget.campaign
+                                                                    .dvController;
+                                                            ddm.amount =
+                                                                _selectedValue
+                                                                    .toInt();
+                                                            _switchRiveAnimation(
+                                                                _selectedValue);
+                                                          });
+                                                        }
+                                                      }),
+                                                ),
+                                              )),
+                                          Expanded(
+                                              flex: 2,
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    color: _bTheme.dark
+                                                        .withOpacity(.1),
+                                                    height: 1,
+                                                  ),
+                                                ],
+                                              )),
+                                          Expanded(
+                                              flex: 1,
+                                              child: MaterialButton(
+                                                clipBehavior: Clip.antiAlias,
+                                                shape: CircleBorder(),
+                                                color: _bTheme.dark,
+                                                elevation: 0,
+                                                onPressed: () {},
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(2.0),
+                                                  child: IconButton(
+                                                      icon:
+                                                          Icon(LineIcons.plus),
+                                                      color: _bTheme.light,
+                                                      onPressed: () {
+                                                        if ((ddm?.adBalance
+                                                                    ?.dcBalance ??
+                                                                0) >=
+                                                            _selectedValue +
+                                                                widget.campaign
+                                                                    .dvController) {
+                                                          HapticFeedback
+                                                              .heavyImpact();
+                                                          setState(() {
+                                                            _selectedValue +=
+                                                                widget.campaign
+                                                                    .dvController;
+                                                            ddm.amount =
+                                                                _selectedValue
+                                                                    .toInt();
+                                                            _switchRiveAnimation(
+                                                                _selectedValue);
+                                                          });
+                                                        }
+                                                      }),
+                                                ),
+                                              ))
+                                        ],
+                                      ),
+                                      const YMargin(20),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Builder(builder: (context) {
+                                          List<String> dEffects = widget
+                                                  .campaign?.donationEffects ??
+                                              [];
+                                          String effect = dEffects.isEmpty
+                                              ? ""
+                                              : dEffects[new Random(42)
+                                                  .nextInt(dEffects.length)];
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 0.0, horizontal: 8.0),
+                                            child: Text(
                                               effect.replaceFirst(
                                                   '**',
                                                   Currency((_selectedValue
@@ -298,29 +340,29 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                               context)
                                                           .colors
                                                           .dark),
-                                            );
-                                          }),
-                                        ),
-                                        const YMargin(20),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: DonationButton(
-                                              keyboardFocus: _keyboardFocus,
-                                              campaign: widget.campaign,
-                                              user: widget.user,
-                                              uid: widget.uid),
-                                        ),
-                                        AnimatedContainer(
-                                          curve: Curves.fastOutSlowIn,
-                                          duration: Duration(milliseconds: 350),
-                                          height: ddm.showAnimation
-                                              ? context.screenHeight(
-                                                  percent: 0.45)
-                                              : context.screenHeight(
-                                                  percent: .05),
-                                        ),
-                                      ],
-                                    ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                      const YMargin(20),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: DonationButton(
+                                            keyboardFocus: _keyboardFocus,
+                                            campaign: widget.campaign,
+                                            user: widget.user,
+                                            uid: widget.uid),
+                                      ),
+                                      AnimatedContainer(
+                                        curve: Curves.fastOutSlowIn,
+                                        duration: Duration(milliseconds: 350),
+                                        height: ddm.showAnimation
+                                            ? context.screenHeight(
+                                                percent: 0.45)
+                                            : context.screenHeight(
+                                                percent: .05),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -344,6 +386,38 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   );
                 }))));
   }
+
+  void _switchRiveAnimation(double selectedDv) {
+    if (_isAnim) {
+      int index = _selectedValue ~/ widget.campaign.dvController;
+      var direction = _dv < selectedDv ? '+' : '-';
+      //prevent playing same animation again
+      if (_currentIndex == index || index > widget.campaign.maxAnimCount)
+        return;
+
+      _dv = selectedDv;
+      _currentIndex = index;
+      _currentAnimation = '$direction$index';
+      //change animation name
+      print('Current animation:$_currentAnimation');
+      _riveArtboard.removeController(_controller);
+      _riveArtboard
+          .addController(_controller = SimpleAnimation(_currentAnimation));
+    }
+  }
+
+  Widget _buildHeadingAnimation() => ClipRRect(
+        borderRadius: BorderRadius.circular(18.0),
+        child: Container(
+            width: double.infinity,
+            height: 180,
+            child: _riveArtboard == null
+                ? SizedBox.shrink()
+                : Rive(
+                    fit: BoxFit.fitWidth,
+                    artboard: _riveArtboard,
+                  )),
+      );
 
   Widget _buildheading(String url, String title, String authorId) => Row(
         mainAxisAlignment: MainAxisAlignment.start,

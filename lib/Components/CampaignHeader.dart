@@ -34,6 +34,8 @@ class CampaignHeader extends StatefulWidget {
 }
 
 class _CampaignHeaderState extends State<CampaignHeader> {
+  bool _muted = true;
+
   @override
   void initState() {
     super.initState();

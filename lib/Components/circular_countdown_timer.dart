@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'custom_timer_painter.dart';
 
 /// Create a Circular Countdown Timer.
@@ -60,26 +61,29 @@ class CircularCountDownTimer extends StatefulWidget {
 
   final bool showLabel;
 
+  final Widget Function() childBuilder;
+
   CircularCountDownTimer(
       {@required this.width,
-        @required this.height,
-        @required this.duration,
-        @required this.fillColor,
-        @required this.color,
-
-        this.backgroundColor,
-        this.isReverse = false,
-        this.isReverseAnimation = false,
-        this.onComplete,
-        this.onStart,
-        this.strokeWidth,
-        this.strokeCap,
-        this.textStyle,
-        this.key,
-        this.isTimerTextShown = true,
-        this.autoStart = true,
-        this.textFormat,
-        this.controller, this.showLabel})
+      @required this.height,
+      @required this.duration,
+      @required this.fillColor,
+      @required this.color,
+      @required this.childBuilder,
+      this.backgroundColor,
+      this.isReverse = false,
+      this.isReverseAnimation = false,
+      this.onComplete,
+      this.onStart,
+      this.strokeWidth,
+      this.strokeCap,
+      this.textStyle,
+      this.key,
+      this.isTimerTextShown = true,
+      this.autoStart = true,
+      this.textFormat,
+      this.controller,
+      this.showLabel})
       : assert(width != null),
         assert(height != null),
         assert(duration != null),
@@ -170,7 +174,6 @@ class CircularCountDownTimerState extends State<CircularCountDownTimer>
     if (widget.onComplete != null) widget.onComplete();
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -194,8 +197,8 @@ class CircularCountDownTimerState extends State<CircularCountDownTimer>
           break;
         case AnimationStatus.completed:
 
-        /// [AnimationController]'s value is manually set to [1.0] that's why [AnimationStatus.completed] is invoked here this animation is [isReverse]
-        /// Only call the [_onComplete] block when the animation is not reversed.
+          /// [AnimationController]'s value is manually set to [1.0] that's why [AnimationStatus.completed] is invoked here this animation is [isReverse]
+          /// Only call the [_onComplete] block when the animation is not reversed.
           if (!widget.isReverse) _onComplete();
           break;
         default:
@@ -234,31 +237,8 @@ class CircularCountDownTimerState extends State<CircularCountDownTimer>
                     ),
                     widget.isTimerTextShown
                         ? Align(
-                      alignment: FractionalOffset.center,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            time,
-                            style: widget.textStyle ??
-                                TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.black,
-                                ),
-                          ),
-                          widget.showLabel?Text(
-                            'nächster DV',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 10.0,
-                              color: ColorTheme.blue
-                            ),
-                          ):SizedBox.shrink()
-                        ],
-                      ),
-                    )
+                            alignment: FractionalOffset.center,
+                            child: widget.childBuilder())
                         : Container(),
                   ],
                 ),
@@ -316,12 +296,28 @@ class CountDownController {
     }
   }
 
+  void restartFromDuration(int value) {
+    double v = Helper.mapValue(
+        value, 0, _state._controller?.duration?.inSeconds ?? 400, 0, 1);
+    print(_state._controller.duration.inSeconds);
+    _state._controller?.reverse(from: 1 - v);
+  }
+
+  void restartFromValue(double value) {
+    _state._controller?.reverse(from: value);
+  }
+
+  void complete() => _state._controller.value = 1.0;
+
   /// This Method returns the **Current Time** of Countdown Timer i.e
   /// Time Used in terms of **Forward Countdown** and Time Left in terms of **Reverse Countdown**
   String getTime() {
     return _state
         ._getTime(_state._controller.duration * _state._controller?.value);
   }
+
+  AnimationStatus get status => _state._controller?.status;
+  double get value => _state._controller?.value;
 }
 
 class CountdownTextFormat {

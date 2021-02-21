@@ -95,7 +95,7 @@ class _ExplorePageState extends State<ExplorePage>
             child: Padding(
               padding: const EdgeInsets.only(left: 12.0, bottom: 10.0, top: 8),
               child: Text(
-                'Projects',
+                'Projekte',
                 style: Theme.of(context).textTheme.headline6,
               ),
             ),

@@ -22,18 +22,14 @@ class PostFeed extends StatefulWidget {
   PostFeedState createState() => PostFeedState();
 }
 
-class PostFeedState extends State<PostFeed>{
+class PostFeedState extends State<PostFeed> {
   String uid;
   List<News> _orderedPosts = [];
-
-
 
   @override
   void initState() {
     super.initState();
   }
-
-
 
   void _reOrderPost() {
     for (News sp in seenPosts) {
@@ -42,10 +38,8 @@ class PostFeedState extends State<PostFeed>{
           _orderedPosts.removeAt(i);
           _orderedPosts.add(sp);
         }
-
       }
     }
-
   }
 
   @override
@@ -66,8 +60,8 @@ class PostFeedState extends State<PostFeed>{
             return NoContentProfilePage();
           }
 
-         return SliverList(
-             delegate: SliverChildListDelegate(_buildPostWidgets(post)));
+          return SliverList(
+              delegate: SliverChildListDelegate(_buildPostWidgets(post)));
         });
   }
 
@@ -101,7 +95,7 @@ class PostFeedState extends State<PostFeed>{
           padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: NewsPost(
             n,
-            withHeader: false,
+            withHeader: true,
             withDonationButton: true,
             onPostSeen: () {
               seenPosts.add(n);

@@ -66,9 +66,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   int _imageIndex = 0;
 
   ///dv animation variables
+  bool _isAnim = false;
   double _dv = 0;
   int _currentIndex = 0;
-  String _currentAnimation = '0';
+  String _currentAnimation = '+1';
   Artboard _riveArtboard;
   RiveAnimationController _controller;
 
@@ -77,12 +78,18 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   @override
   void initState() {
     _selectedValue = widget.defaultSelectedAmount.toDouble();
+    _isAnim = widget.campaign.dvAnimation.isNotEmpty;
     _adbalanceStream =
         DatabaseService.getAdBalance(widget.user?.id ?? widget.uid);
 
     _adbalanceStream.listen((event) {
       if (event.dcBalance < _selectedValue) {
         _selectedValue = 0;
+      }
+      if (_isAnim) {
+        if (event.dcBalance >= widget.campaign.dvController) {
+          _selectedValue = widget.campaign.dvController.toDouble();
+        }
       }
     });
 
@@ -100,27 +107,26 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }
       }
     });
-
-    _loadRive();
+    if (_isAnim) {
+      _loadRive();
+    }
     super.initState();
   }
 
   _loadRive() {
-    if (widget.campaign.dvAnimation != null) {
-      NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation))
-          .load('')
-          .then((data) async {
-        final file = RiveFile();
+    NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation))
+        .load('')
+        .then((data) async {
+      final file = RiveFile();
 
-        if (file.import(data)) {
-          final artboard = file.mainArtboard;
+      if (file.import(data)) {
+        final artboard = file.mainArtboard;
 
-          artboard
-              .addController(_controller = SimpleAnimation(_currentAnimation));
-          setState(() => _riveArtboard = artboard);
-        }
-      });
-    }
+        artboard
+            .addController(_controller = SimpleAnimation(_currentAnimation));
+        setState(() => _riveArtboard = artboard);
+      }
+    });
   }
 
   @override
@@ -168,7 +174,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
-                                      widget.campaign.dvAnimation.isEmpty
+                                      !_isAnim
                                           ? _buildheading(
                                               widget.campaign?.imgUrl ?? "",
                                               widget.campaign?.name ??
@@ -184,7 +190,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           duration:
                                               const Duration(milliseconds: 0),
                                           child: Text(
-                                            '${_selectedValue.toInt().toString()} ${widget.campaign.unit ?? 'DV'}',
+                                            !_isAnim
+                                                ? '${_selectedValue.toInt().toString()} DV'
+                                                : '${(_selectedValue ~/ widget.campaign.dvController)} ${widget.campaign.unit ?? 'DV'}',
                                             style: _theme.accentTextTheme.button
                                                 .copyWith(
                                                     fontSize: 21,
@@ -198,7 +206,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                       Align(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          'von ${ddm?.adBalance?.dcBalance ?? 0} DV',
+                                          !_isAnim
+                                              ? 'von ${ddm?.adBalance?.dcBalance ?? 0} DV'
+                                              : '${_selectedValue.toInt().toString()} DV',
                                           style: _theme.textTheme.subtitle1
                                               .copyWith(
                                                   fontWeight: FontWeight.w700,
@@ -226,7 +236,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                       color: _bTheme.dark,
                                                       onPressed: () {
                                                         if (_selectedValue >
-                                                            0) {
+                                                                0 &&
+                                                            _selectedValue >
+                                                                widget.campaign
+                                                                    .dvController) {
                                                           HapticFeedback
                                                               .heavyImpact();
                                                           setState(() {
@@ -273,7 +286,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                         if ((ddm?.adBalance
                                                                     ?.dcBalance ??
                                                                 0) >=
-                                                            _selectedValue+widget.campaign.dvController) {
+                                                            _selectedValue +
+                                                                widget.campaign
+                                                                    .dvController) {
                                                           HapticFeedback
                                                               .heavyImpact();
                                                           setState(() {
@@ -371,7 +386,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   }
 
   void _switchRiveAnimation(double selectedDv) {
-    if(widget.campaign.dvAnimation !=null){
+    if (_isAnim) {
       int index = _selectedValue ~/ widget.campaign.dvController;
       var direction = _dv < selectedDv ? '+' : '-';
       //prevent playing same animation again
@@ -389,17 +404,16 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
     }
   }
 
-  Widget _buildHeadingAnimation() => Material(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(18),
-        ),
+  Widget _buildHeadingAnimation() => ClipRRect(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(18.0), topLeft: Radius.circular(18.0)),
         child: Container(
             width: double.infinity,
             height: 180,
             child: _riveArtboard == null
                 ? SizedBox.shrink()
                 : Rive(
-                    fit: BoxFit.contain,
+                    fit: BoxFit.fitWidth,
                     artboard: _riveArtboard,
                   )),
       );

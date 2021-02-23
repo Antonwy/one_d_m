@@ -509,7 +509,7 @@ class GoalWidget extends StatelessWidget {
             maxLines: 1,
           ),
           YMargin(6),
-          _PercentLine(percent: percent),
+          PercentLine(percent: percent),
         ],
       ),
     );
@@ -608,12 +608,13 @@ class _PercentCirclePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-class _PercentLine extends StatelessWidget {
-  const _PercentLine({Key key, @required this.percent, this.height = 6.0})
+class PercentLine extends StatelessWidget {
+  const PercentLine(
+      {Key key, @required this.percent, this.height = 6.0, this.color})
       : super(key: key);
 
-  final double percent;
-  final double height;
+  final double percent, height;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -623,7 +624,7 @@ class _PercentLine extends StatelessWidget {
         painter: _PercentLinePainter(
             percent: percent,
             height: height,
-            color: ThemeManager.of(context).colors.dark),
+            color: color ?? ThemeManager.of(context).colors.dark),
       ),
     );
   }

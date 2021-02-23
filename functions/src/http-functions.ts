@@ -29,7 +29,7 @@ exports.cleanFollowing = functions.https.onRequest(async (req, res) => {
           .collection(DatabaseConstants.users)
           .get()
           .then((followingUsers) => {
-            let allUserIds = allUsers.docs.map((u) => u.id);
+            const allUserIds = allUsers.docs.map((u) => u.id);
 
             followingUsers.forEach(async (fUser) => {
               if (!allUserIds.includes(fUser.id))

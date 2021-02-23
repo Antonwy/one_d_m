@@ -55,8 +55,10 @@ class Session extends BaseSession {
       campaignName,
       campaignShortDescription,
       imgUrl,
-      videoUrl;
-  final int currentAmount, memberCount;
+      videoUrl,
+      donationUnit,
+      donationUnitEffect;
+  final int currentAmount, memberCount, donationGoal, donationGoalCurrent;
   final Color primaryColor, secondaryColor;
 
   Session(
@@ -76,6 +78,10 @@ class Session extends BaseSession {
       this.campaignName,
       this.campaignShortDescription,
       this.primaryColor,
+      this.donationGoal,
+      this.donationGoalCurrent,
+      this.donationUnit,
+      this.donationUnitEffect,
       this.secondaryColor})
       : super(
             id: id,
@@ -107,6 +113,10 @@ class Session extends BaseSession {
       sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
       imgUrl: doc.data()[IMG_URL],
       videoUrl: doc.data()[VIDEO_URL],
+      donationGoal: doc.data()[DONATION_GOAL] ?? 0,
+      donationGoalCurrent: doc.data()[DONATION_GOAL_CURRENT] ?? 0,
+      donationUnit: doc.data()[DONATION_UNIT],
+      donationUnitEffect: doc.data()[DONATION_UNIT_EFFECT],
       primaryColor: doc.data()[PRIMARY_COLOR] != null
           ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
           : ColorTheme.wildGreen,
@@ -130,6 +140,10 @@ class Session extends BaseSession {
       PRIMARY_COLOR = "primary_color",
       SECONDARY_COLOR = "secondary_color",
       VIDEO_URL = "video_url",
+      DONATION_GOAL = "donation_goal",
+      DONATION_GOAL_CURRENT = "donation_goal_current",
+      DONATION_UNIT = "donation_unit",
+      DONATION_UNIT_EFFECT = "donation_unit_effect",
       IMG_URL = "img_url";
 }
 

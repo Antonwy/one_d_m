@@ -1,10 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import {
-  DatabaseConstants,
-  ChargesFields,
-  SessionFields,
-} from './database-constants';
+import { DatabaseConstants, ChargesFields } from './database-constants';
 import { StatisticType, PrivateUserDataType } from './types';
 import { _namespaceWithOptions } from 'firebase-functions/lib/providers/firestore';
 import Stripe from 'stripe';
@@ -17,6 +13,7 @@ const firestore = admin.firestore();
 
 exports.daily = functions.pubsub
   .schedule('0 0 * * *')
+  .timeZone('Europe/Berlin')
   .onRun(async (context) => {
     await resetStatistics({ daily_amount: 0 });
     // await deleteOutdatedSessions();
@@ -63,7 +60,7 @@ async function sendDailyPoints() {
         if (
           privData?.device_token !== null &&
           privData?.device_token !== undefined &&
-          privData?.device_token.length != 0
+          privData?.device_token.length !== 0
         ) {
           const payload = {
             notification: {
@@ -82,15 +79,15 @@ async function sendDailyPoints() {
     });
 }
 
-async function deleteOutdatedSessions() {
-  const nowDate = admin.firestore.Timestamp.now();
-  const outdatedSessions = await firestore
-    .collection(DatabaseConstants.sessions)
-    .where(SessionFields.end_date, '<', nowDate)
-    .get();
+// async function deleteOutdatedSessions() {
+//   const nowDate = admin.firestore.Timestamp.now();
+//   const outdatedSessions = await firestore
+//     .collection(DatabaseConstants.sessions)
+//     .where(SessionFields.end_date, '<', nowDate)
+//     .get();
 
-  outdatedSessions.forEach(async (session) => await session.ref.delete());
-}
+//   outdatedSessions.forEach(async (session) => await session.ref.delete());
+// }
 
 exports.monthly = functions.pubsub
   .schedule('0 0 1 * *')

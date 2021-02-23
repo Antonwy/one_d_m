@@ -10,6 +10,7 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
+import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -373,6 +374,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     ),
                   ),
                 ),
+                SliverToBoxAdapter(child: _buildTags()),
                 SliverToBoxAdapter(
                   child: Divider(),
                 ),
@@ -402,6 +404,23 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 )
               ]);
             }));
+  }
+
+  Widget _buildTags() {
+    return campaign.tags.isNotEmpty &&
+            campaign.tags.where((el) => el.isNotEmpty).isNotEmpty
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (String tag in widget.campaign?.tags ?? [])
+                  if (tag.isNotEmpty) CampaignTag(text: tag)
+              ],
+            ),
+          )
+        : SizedBox.shrink();
   }
 
   void _toggleMuted() {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/SessionsFeed.dart';
@@ -657,8 +658,9 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
             ),
           ),
         ),
+        SliverToBoxAdapter(child: _buildSessionGoal(csm, _theme)),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12.0),
           sliver: SliverToBoxAdapter(
             child: Consumer<CertifiedSessionManager>(
               builder: (context, sm, child) => StreamBuilder(
@@ -669,10 +671,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                     if (members.isEmpty) return SizedBox.shrink();
                     return Text(
                       'Unterstützer',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(fontWeight: FontWeight.bold),
+                      style: _theme.textTheme.dark.headline6,
                     );
                   }),
             ),
@@ -695,8 +694,81 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
     );
   }
 
+  Widget _buildSessionGoal(CertifiedSessionManager csm, ThemeManager _theme) {
+    return StreamBuilder<Session>(
+        stream: csm.sessionStream,
+        builder: (context, snapshot) {
+          Session session = snapshot.data;
+          return (session?.donationGoal ?? 0) > 0 &&
+                  session?.donationUnit != null &&
+                  session?.donationUnitEffect != null
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 6.0),
+                  child: Material(
+                    color: session.secondaryColor,
+                    borderRadius: BorderRadius.circular(Constants.radius),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.flag_outlined,
+                                size: 18,
+                                color: _theme.colors.light,
+                              ),
+                              XMargin(6.0),
+                              Text(
+                                "Session Ziel:",
+                                style: _theme.textTheme.light.headline6,
+                              ),
+                            ],
+                          ),
+                          YMargin(6.0),
+                          Container(
+                              width: double.infinity,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6.0),
+                                child: PercentLine(
+                                  percent: session.donationGoalCurrent /
+                                      session.donationGoal,
+                                  height: 8.0,
+                                  color: _theme.colors.light,
+                                ),
+                              )),
+                          YMargin(6.0),
+                          RichText(
+                              text: TextSpan(
+                                  style: _theme.textTheme.light.bodyText1
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                  children: [
+                                TextSpan(
+                                    text:
+                                        "${session.donationGoalCurrent} ${session.donationUnit} "),
+                                TextSpan(
+                                    text:
+                                        "${session.donationUnitEffect}. Das Ziel sind: ",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w400)),
+                                TextSpan(
+                                    text:
+                                        "${session.donationGoal} ${session.donationUnit}."),
+                              ]))
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : SizedBox.shrink();
+        });
+  }
+
   Widget _buildPostFeed() => Consumer<CertifiedSessionManager>(
-      builder: (context, sm, child) => StreamBuilder(
+      builder: (context, sm, child) => StreamBuilder<List<News>>(
             stream: DatabaseService.getPostBySessionId(sm.session.id),
             builder: (_, snapshot) {
               if (snapshot.hasData) {

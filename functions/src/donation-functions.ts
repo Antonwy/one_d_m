@@ -86,9 +86,28 @@ exports.onCreateDonation = functions
           );
       }
 
-      await firestore
+      const sessionRef = firestore
         .collection(DatabaseConstants.sessions)
-        .doc(donation.session_id)
+        .doc(donation.session_id);
+      await sessionRef
+        .get()
+        .then(async (sess) => {
+          if (
+            sess.data() !== undefined &&
+            (sess.data()?.donation_goal ?? 0) > 0
+          ) {
+            await sess.ref.update({
+              donation_goal_current: increment(donation.amount),
+            });
+          }
+        })
+        .catch((err) =>
+          functions.logger.info(
+            `Error getting session ${donation.session_id}! Error: ${err}`
+          )
+        );
+
+      await sessionRef
         .update({ current_amount: increment(donation.amount) })
         .catch((err) =>
           functions.logger.info(

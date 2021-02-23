@@ -148,7 +148,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                                 spacing: 6,
                                 runSpacing: 6,
                                 children: [
-                                  _campaignTag(
+                                  CampaignTag(
                                       text:
                                           "${widget.campaign?.amount ?? 0} DV gesammelt",
                                       color: _theme.colors.dark,
@@ -157,7 +157,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                                       bold: true),
                                   for (String tag
                                       in widget.campaign?.tags ?? [])
-                                    if (tag.isNotEmpty) _campaignTag(text: tag)
+                                    if (tag.isNotEmpty) CampaignTag(text: tag)
                                 ],
                               ),
                         // widget.campaign.shortDescription == null
@@ -173,12 +173,36 @@ class _CampaignHeaderState extends State<CampaignHeader> {
         ));
   }
 
-  Widget _campaignTag(
-      {String text,
-      IconData icon,
-      Color color,
-      Color textColor,
-      bool bold = false}) {
+  Future<void> _donate(BuildContext context, Campaign campaign) async {
+    BottomDialog bd = BottomDialog(context);
+    UserManager um = context.read<UserManager>();
+    return bd.show(DonationDialogWidget(
+      campaign: campaign,
+      user: um.user,
+      context: context,
+      close: bd.close,
+      uid: um.uid,
+    ));
+  }
+}
+
+class CampaignTag extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final Color color, textColor;
+  final bool bold;
+
+  const CampaignTag(
+      {Key key,
+      this.text,
+      this.icon,
+      this.color,
+      this.textColor,
+      this.bold = false})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       borderRadius: BorderRadius.circular(20),
       child: Padding(
@@ -190,7 +214,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                   Icon(
                     icon,
                     color: textColor,
-                    size: 18,
+                    size: 14,
                   ),
                   XMargin(6),
                   Text(
@@ -213,17 +237,5 @@ class _CampaignHeaderState extends State<CampaignHeader> {
       ),
       color: color ?? ThemeManager.of(context).colors.contrast.withOpacity(.5),
     );
-  }
-
-  Future<void> _donate(BuildContext context, Campaign campaign) async {
-    BottomDialog bd = BottomDialog(context);
-    UserManager um = context.read<UserManager>();
-    return bd.show(DonationDialogWidget(
-      campaign: campaign,
-      user: um.user,
-      context: context,
-      close: bd.close,
-      uid: um.uid,
-    ));
   }
 }

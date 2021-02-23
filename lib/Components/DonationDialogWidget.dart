@@ -89,8 +89,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
       if (_isAnim) {
         if (event.dcBalance >= widget.campaign.dvController) {
           _selectedValue = widget.campaign.dvController.toDouble();
-        }else{
-          _currentAnimation='-0';
+        } else {
+          _currentAnimation = '-0';
         }
       }
     });
@@ -138,7 +138,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
     return ChangeNotifierProvider<DonationDialogManager>(
         create: (context) => DonationDialogManager(
               adBalanceStream: _adbalanceStream,
-              defaultSelectedAmount: widget.defaultSelectedAmount,
+              defaultSelectedAmount: _selectedValue.toInt(),
               sessionId: widget.sessionId,
               campaign: widget.campaign,
             ),
@@ -151,6 +151,12 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 width: MediaQuery.of(context).size.width,
                 child: Consumer2<DonationDialogManager, UserManager>(
                     builder: (context, ddm, um, child) {
+                  if (_isAnim && mounted) {
+                    if (ddm.adBalance.dcBalance >=
+                        widget.campaign.dvController) {
+                      ddm.setAmountWithoutRebuild(_selectedValue.toInt());
+                    }
+                  }
                   if (um.user.ghost) ddm.setAnonymWithoutRebuild(true);
                   return Container(
                     child: Stack(

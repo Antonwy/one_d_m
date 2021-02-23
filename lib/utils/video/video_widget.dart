@@ -28,7 +28,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  VideoPlayerController _controller;
+  pVideoPlayerController _controller;
   ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _muted;
@@ -42,7 +42,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       setState(() => _isVideoLoaded = true);
       _downloadAndCacheVideo().then((file) {
         if (file != null) {
-          _controller = VideoPlayerController.file(file);
+          _controller = pVideoPlayerController.file(file);
           _initializeVideoPlayerFuture = _controller.initialize().then((_) {
             // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
             setState(() {});

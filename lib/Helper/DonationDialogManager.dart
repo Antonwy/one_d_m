@@ -62,6 +62,10 @@ class DonationDialogManager extends ChangeNotifier {
     _amount = a;
     notifyListeners();
   }
+  void setAmountWithoutRebuild(int amount) {
+   _amount = amount;
+  }
+
 
   bool get customAmount => _customAmount;
 

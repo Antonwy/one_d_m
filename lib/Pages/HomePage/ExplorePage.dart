@@ -1,15 +1,20 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/SearchBar.dart';
+import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/CategoryDialog.dart';
 import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
+import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
 class ExplorePage extends StatefulWidget {
   final ScrollController scrollController;
@@ -23,11 +28,13 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage>
     with AutomaticKeepAliveClientMixin {
   TextTheme textTheme;
+  ThemeManager _theme;
   int _categoryId = 100;
 
   @override
   Widget build(BuildContext context) {
     textTheme = Theme.of(context).textTheme;
+    _theme = ThemeManager.of(context);
 
     return Scaffold(
       backgroundColor: ColorTheme.appBg,
@@ -39,10 +46,6 @@ class _ExplorePageState extends State<ExplorePage>
             backgroundColor: Colors.transparent,
             centerTitle: false,
             automaticallyImplyLeading: false,
-            bottom: PreferredSize(
-              preferredSize: Size(0, 80),
-              child: Container(),
-            ),
             flexibleSpace: SafeArea(
               child: Container(
                 child: Column(
@@ -50,21 +53,73 @@ class _ExplorePageState extends State<ExplorePage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text("Entdecken", style: textTheme.headline6),
-                    ),
-                    SizedBox(
-                      height: 18,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: SearchBar(
-                        categoryIndex: _categoryId,
-                        onCategoryChange: (index) {
-                          setState(() {
-                            _categoryId = index;
-                          });
-                        },
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AutoSizeText("Entdecken",
+                                style: textTheme.headline6),
+                          ),
+                          IconButton(
+                              icon: Icon(
+                                Icons.search,
+                                color: _theme.colors.dark,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SearchPage()));
+                              }),
+                          IconButton(
+                              icon: Icon(
+                                Icons.person_add,
+                                color: _theme.colors.dark,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FindFriendsPage()));
+                              }),
+                          IconButton(
+                            icon: Stack(
+                              overflow: Overflow.visible,
+                              children: [
+                                Center(child: Icon(Icons.filter_alt)),
+                                _categoryId != 100
+                                    ? Positioned(
+                                        right: 0,
+                                        top: -5,
+                                        child: Material(
+                                          shape: CircleBorder(),
+                                          color: Colors.red,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(5.0),
+                                            child: Text(
+                                              "1",
+                                              style: _theme
+                                                  .textTheme.light.bodyText2
+                                                  .copyWith(fontSize: 10),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container()
+                              ],
+                            ),
+                            onPressed: () async {
+                              int resIndex = await CategoryDialog.of(context,
+                                      initialIndex: _categoryId)
+                                  .show();
+                              setState(() {
+                                _categoryId = resIndex;
+                              });
+                            },
+                            color: _theme.colors.dark,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -72,24 +127,8 @@ class _ExplorePageState extends State<ExplorePage>
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: StreamBuilder(
-                stream: DatabaseService.getCertifiedSessions(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return SizedBox.shrink();
-                  List<BaseSession> news = snapshot.data;
-                  if (news.isEmpty) return SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
-                    child: Text(
-                      'Influencer-Sessions',
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                  );
-                }),
-          ),
           SliverPadding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 6, top: 6),
               sliver: CertifiedSessionsList()),
           SliverToBoxAdapter(
             child: Padding(

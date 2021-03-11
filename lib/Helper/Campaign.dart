@@ -8,6 +8,7 @@ class Campaign {
       shortDescription,
       city,
       unit,
+      singularUnit,
       dvAnimation,
       authorId,
       id,
@@ -42,7 +43,8 @@ class Campaign {
       DV_ANIMATION = "dv_animation",
       MAX_ANIM_COUNT = "max_anim_count",
       DV_CONTROLLER = "dv_controller",
-      UNIT = "donation_unit";
+      UNIT = "donation_unit",
+      SINGULAR_UNIT = "donation_unit_singular";
 
   Campaign(
       {this.id,
@@ -67,7 +69,8 @@ class Campaign {
       this.longVideoUrl,
       this.donationEffects,
       this.effects,
-      this.tags});
+      this.tags,
+      this.singularUnit});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -84,9 +87,10 @@ class Campaign {
       shortVideoUrl: snapshot.data()[SHORTVIDEOURL],
       longVideoUrl: snapshot.data()[LONGVIDEOURL],
       adminId: snapshot.data()[ADMINID],
-      unit: snapshot.data()[UNIT],
       dvController: snapshot.data()[DV_CONTROLLER] ?? 1,
       maxAnimCount: snapshot.data()[MAX_ANIM_COUNT] ?? 3,
+      unit: snapshot.data()[UNIT],
+      singularUnit: snapshot.data()[SINGULAR_UNIT] ?? snapshot.data()[UNIT],
       categoryId: snapshot.data()[CATEGORYID],
       dvAnimation: snapshot.data()[DV_ANIMATION] ?? '',
       moreImages: snapshot.data()[MOREIMAGES] == null

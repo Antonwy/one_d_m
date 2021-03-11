@@ -198,9 +198,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                           duration:
                                               const Duration(milliseconds: 0),
                                           child: Text(
-                                            !_isAnim
-                                                ? '${_selectedValue.toInt().toString()} DV'
-                                                : '${(_selectedValue ~/ widget.campaign.dvController)} ${widget.campaign.unit ?? 'DV'}',
+                                            _buildAmountText(),
                                             style: _theme.accentTextTheme.button
                                                 .copyWith(
                                                     fontSize: 21,
@@ -216,10 +214,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         child: Text(
                                           !_isAnim
                                               ? 'von ${ddm?.adBalance?.dcBalance ?? 0} DV'
-                                              : '${_selectedValue.toInt().toString()} DV',
+                                              : 'mit ${_selectedValue.toInt()} von ${ddm.adBalance?.dcBalance ?? 0} DVs unterstützen',
                                           style: _theme.textTheme.subtitle1
                                               .copyWith(
-                                                  fontWeight: FontWeight.w700,
                                                   fontSize: 12,
                                                   color: Colors.black54),
                                         ),
@@ -309,6 +306,12 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                             _switchRiveAnimation(
                                                                 _selectedValue);
                                                           });
+                                                        } else {
+                                                          Helper.showAlert(
+                                                              context,
+                                                              "Du musst mehr DVs sammeln um weiter spenden zu können.",
+                                                              title:
+                                                                  "Zu wenig DVs!");
                                                         }
                                                       }),
                                                 ),
@@ -391,6 +394,16 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                     ),
                   );
                 }))));
+  }
+
+  String _buildAmountText() {
+    int amount = !_isAnim
+        ? _selectedValue.toInt()
+        : _selectedValue ~/ widget.campaign.dvController;
+
+    return !_isAnim
+        ? '$amount DV'
+        : '$amount ${(amount == 1 ? widget.campaign.singularUnit : widget.campaign.unit) ?? 'DV'}';
   }
 
   void _switchRiveAnimation(double selectedDv) {

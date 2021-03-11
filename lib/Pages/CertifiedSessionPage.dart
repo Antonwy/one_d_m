@@ -103,13 +103,6 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
           ),
           backgroundColor: ColorTheme.appBg,
           appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                size: 30,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
             backgroundColor: ColorTheme.appBg,
             elevation: 0,
             titleSpacing: 0,

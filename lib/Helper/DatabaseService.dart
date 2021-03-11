@@ -180,6 +180,14 @@ class DatabaseService {
         .map((snapshot) => AdBalance.fromSnapshot(snapshot));
   }
 
+  static Future<AdBalance> getAdBalanceFuture(String uid) async {
+    return AdBalance.fromSnapshot(await userCollection
+        .doc(uid)
+        .collection(ADVERTISING_DATA)
+        .doc(ADVERTISING_BALANCE)
+        .get());
+  }
+
   static Future<void> incrementAdBalance(String uid, {int amount = 1}) {
     return userCollection
         .doc(uid)

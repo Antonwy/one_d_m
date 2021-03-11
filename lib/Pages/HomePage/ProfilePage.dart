@@ -124,8 +124,15 @@ class ProfilePageState extends State<ProfilePage>
   }
 }
 
-class _GiftAvailable extends StatelessWidget {
+class _GiftAvailable extends StatefulWidget {
   const _GiftAvailable();
+
+  @override
+  __GiftAvailableState createState() => __GiftAvailableState();
+}
+
+class __GiftAvailableState extends State<_GiftAvailable> {
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -153,19 +160,31 @@ class _GiftAvailable extends StatelessWidget {
                       ),
                       FlatButton.icon(
                         color: _theme.colors.contrast,
+                        disabledColor: _theme.colors.contrast.withOpacity(.8),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6)),
-                        onPressed: () async {
-                          print("GIFT");
-                          await DatabaseService.getGift(
-                              context.read<UserManager>().uid,
-                              gift: snapshot.data.gift);
-                          await PushNotification.of(context).show(
-                              NotificationContent(
-                                  title:
-                                      "${snapshot.data.gift} DV eingesammelt"));
-                        },
-                        icon: Icon(Icons.redeem),
+                        onPressed: _loading
+                            ? null
+                            : () async {
+                                print("GIFT");
+                                await DatabaseService.getGift(
+                                    context.read<UserManager>().uid,
+                                    gift: snapshot.data.gift);
+                                await PushNotification.of(context).show(
+                                    NotificationContent(
+                                        title:
+                                            "${snapshot.data.gift} DV eingesammelt"));
+                              },
+                        icon: _loading
+                            ? Container(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation(
+                                      _theme.colors.textOnContrast),
+                                ))
+                            : Icon(Icons.redeem),
                         label: Text("Einsammeln"),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       )

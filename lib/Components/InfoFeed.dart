@@ -340,8 +340,9 @@ class _CountDownPointerState extends State<CountDownPointer>
 
     if (_lastTimeResetted != today) {
       print('LastTimeResetted != Today => resetting coins');
-      _prefs.setInt(Constants.COllECTED_COINS_KEY, 0);
+      await _prefs.setInt(Constants.COllECTED_COINS_KEY, 0);
       await _prefs.setString(Constants.LAST_TIME_RESETTED_COINS, today);
+      await _prefs.setDouble(Constants.TIME_REMAINING_KEY, 1.0);
     }
 
     double _timeRemaining =
@@ -382,7 +383,8 @@ class _CountDownPointerState extends State<CountDownPointer>
 
   void _saveState() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setDouble(Constants.TIME_REMAINING_KEY, _countDownController.value);
+    await _prefs.setDouble(
+        Constants.TIME_REMAINING_KEY, _countDownController.value);
   }
 
   void _collectCoin() async {

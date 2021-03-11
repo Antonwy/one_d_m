@@ -97,7 +97,11 @@ exports.onCreateDonation = functions
             (sess.data()?.donation_goal ?? 0) > 0
           ) {
             await sess.ref.update({
-              donation_goal_current: increment(donation.amount),
+              donation_goal_current: increment(
+                Math.round(
+                  donation.amount / (sess.data()?.donation_unit_value ?? 1)
+                )
+              ),
             });
           }
         })

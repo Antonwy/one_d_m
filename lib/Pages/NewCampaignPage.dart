@@ -132,13 +132,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
               return CustomScrollView(controller: _scrollController, slivers: [
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
-                  leading: IconButton(
-                      icon: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: _bTheme.dark,
-                        size: 30,
-                      ),
-                      onPressed: () => Navigator.pop(context)),
+                  leading: BackButton(
+                    color: _bTheme.dark,
+                  ),
                   actions: [
                     FutureBuilder<Organisation>(
                         future: _organizationFuture == null &&

@@ -82,10 +82,6 @@ class _ODMAppState extends State<ODMApp> {
         theme: ThemeData(
           appBarTheme: AppBarTheme(brightness: Brightness.light),
           primarySwatch: Colors.indigo,
-          pageTransitionsTheme: PageTransitionsTheme(builders: {
-            TargetPlatform.android: ZoomPageTransitionsBuilder(),
-            TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-          }),
         ),
         home: PageManagerWidget());
   }

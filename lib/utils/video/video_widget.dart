@@ -28,7 +28,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  pVideoPlayerController _controller;
+  VideoPlayerController _controller;
   ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _muted;
@@ -42,7 +42,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       setState(() => _isVideoLoaded = true);
       _downloadAndCacheVideo().then((file) {
         if (file != null) {
-          _controller = pVideoPlayerController.file(file);
+          _controller = VideoPlayerController.file(file);
           _initializeVideoPlayerFuture = _controller.initialize().then((_) {
             // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
             setState(() {});
@@ -50,11 +50,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       });
     }
-    // _controller = pVideoPlayerController.network(widget.url);
-    // _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-    //   // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-    //   setState(() {});
-    // });
+
     if (_controller?.value?.initialized == true) {
       if (widget.play) {
         _controller.play();
@@ -93,13 +89,23 @@ class _VideoWidgetState extends State<VideoWidget> {
     return FutureBuilder(
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
+        print("Snapshot $snapshot");
         if (snapshot.connectionState == ConnectionState.done) {
           _controller.setVolume(_muted ? 0 : 1);
           _chewieController = ChewieController(
               videoPlayerController: _controller,
               autoInitialize: true,
               showControls: false,
-              looping: true);
+              looping: true,
+              placeholder: Container(
+                height: 260,
+                width: double.infinity,
+                child: _buildImage(),
+              ),
+              errorBuilder: (context, txt) {
+                print("ERROR: $txt");
+                return Text(txt);
+              });
           return AspectRatio(
             aspectRatio: _controller.value.aspectRatio < 1
                 ? 0.8

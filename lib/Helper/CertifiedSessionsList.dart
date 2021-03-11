@@ -146,58 +146,62 @@ class CertifiedSessionView extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     return Container(
       width: 220,
-      child: CustomOpenContainer(
-        closedColor: Colors.grey[200],
-        closedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(Constants.radius)),
-        closedElevation: 0,
-        openBuilder: (context, close, scrollController) => CertifiedSessionPage(
-          session: session,
-          scrollController: scrollController,
-        ),
-        closedBuilder: (context, open) => Stack(
-          children: [
-            session?.imgUrl == null
-                ? Container()
-                : Positioned.fill(
-                    child: CachedNetworkImage(
-                      imageUrl: session?.imgUrl,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-            session?.imgUrl == null
-                ? Container()
-                : Positioned.fill(
-                    child: Material(
-                      color: Colors.black38,
-                    ),
-                  ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                          child: AutoSizeText(
-                        session?.name ?? '',
-                        style: session?.imgUrl == null
-                            ? _theme.textTheme.dark.bodyText1
-                            : _theme.textTheme.light.bodyText1,
-                        maxLines: 1,
-                      )),
-                      SizedBox(
-                        width: 6,
+      child: Material(
+        borderRadius: BorderRadius.circular(Constants.radius),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CertifiedSessionPage(
+                          session: session,
+                        )));
+          },
+          child: Stack(
+            children: [
+              session?.imgUrl == null
+                  ? Container()
+                  : Positioned.fill(
+                      child: CachedNetworkImage(
+                        imageUrl: session?.imgUrl,
+                        fit: BoxFit.cover,
                       ),
-                      Icon(
-                        Icons.verified,
-                        color: Helper.hexToColor("#71e34b"),
-                      )
-                    ],
-                  )),
-            ),
-          ],
+                    ),
+              session?.imgUrl == null
+                  ? Container()
+                  : Positioned.fill(
+                      child: Material(
+                        color: Colors.black38,
+                      ),
+                    ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                            child: AutoSizeText(
+                          session?.name ?? '',
+                          style: session?.imgUrl == null
+                              ? _theme.textTheme.dark.bodyText1
+                              : _theme.textTheme.light.bodyText1,
+                          maxLines: 1,
+                        )),
+                        SizedBox(
+                          width: 6,
+                        ),
+                        Icon(
+                          Icons.verified,
+                          color: Helper.hexToColor("#71e34b"),
+                        )
+                      ],
+                    )),
+              ),
+            ],
+          ),
         ),
       ),
     );

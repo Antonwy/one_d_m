@@ -28,45 +28,30 @@ class _CategoriesListState extends State<CategoriesList> {
   Widget build(BuildContext context) {
     return ListView.separated(
       scrollDirection: Axis.horizontal,
-      itemCount: Category.categories.length + 1,
+      itemCount: Category.categories.length,
       separatorBuilder: (context, index) => SizedBox(
         width: 10,
       ),
       itemBuilder: (context, index) {
-        Category cat = Category.categories[index == 0 ? index : index - 1];
+        Category cat = Category.categories[index];
         bool isSelected = cat.id == _selectedCategoryId;
         return Center(
-          child: index == 0
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: CustomOpenContainer(
-                    closedElevation: 0,
-                    closedColor: ColorTheme.whiteBlue,
-                    closedShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Constants.radius),
-                    ),
-                    openBuilder: (context, close, scrollController) =>
-                        FindFriendsPage(scrollController: scrollController),
-                    closedBuilder: (context, open) => CategoryItem(
-                      index: index,
-                      onPressed: open,
-                      category: null,
-                      isSelected: false,
-                      isAddFriendsButton: true,
-                    ),
-                  ),
-                )
-              : CategoryItem(
-                  index: index,
-                  onPressed: () {
-                    setState(() {
-                      _selectedCategoryId = cat.id;
-                    });
-                    widget.onCategoryChanged(cat.id);
-                  },
-                  category: cat,
-                  isSelected: isSelected,
-                ),
+          child: Padding(
+            padding: EdgeInsets.only(
+                left: index == 0 ? 12.0 : 0.0,
+                right: index == Category.categories.length - 1 ? 12.0 : 0),
+            child: CategoryItem(
+              index: index,
+              onPressed: () {
+                setState(() {
+                  _selectedCategoryId = cat.id;
+                });
+                widget.onCategoryChanged(cat.id);
+              },
+              category: cat,
+              isSelected: isSelected,
+            ),
+          ),
         );
       },
     );

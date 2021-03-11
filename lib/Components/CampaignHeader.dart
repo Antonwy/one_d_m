@@ -53,17 +53,11 @@ class _CampaignHeaderState extends State<CampaignHeader> {
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
-        child: CustomOpenContainer(
-          closedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Constants.radius)),
-          closedElevation: 1,
-          openBuilder: (context, close, scrollController) {
-            widget.isInView = false;
-            return NewCampaignPage(widget.campaign,
-                scrollController: scrollController);
-          },
-          closedColor: ColorTheme.appBg,
-          closedBuilder: (context, open) => VisibilityDetector(
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          borderRadius: BorderRadius.circular(Constants.radius),
+          elevation: 1,
+          child: VisibilityDetector(
             key: Key(widget.campaign.id),
             onVisibilityChanged: (VisibilityInfo info) {
               var visiblePercentage = (info.visibleFraction) * 100;
@@ -80,7 +74,13 @@ class _CampaignHeaderState extends State<CampaignHeader> {
               }
             },
             child: InkWell(
-              onTap: open,
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            NewCampaignPage(widget.campaign)));
+              },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[

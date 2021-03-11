@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/Components/SearchResultsList.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 
 class SearchPage extends StatefulWidget {
@@ -18,7 +19,7 @@ class _SearchPageState extends State<SearchPage> {
     _displaySize = MediaQuery.of(context).size;
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorTheme.appBg,
         body: CustomScrollView(
           slivers: <Widget>[
             SliverSearchBar(
@@ -43,7 +44,7 @@ class SliverSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: ColorTheme.appBg,
       iconTheme: IconThemeData(color: Colors.black),
       expandedHeight: 80,
       flexibleSpace: Align(
@@ -54,9 +55,9 @@ class SliverSearchBar extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: Material(
-              borderRadius: BorderRadius.circular(Constants.radius),
-              elevation: 2,
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(Constants.radius - 6),
+              elevation: 1,
+              color: ColorTheme.appBg,
               child: Center(
                   child: Padding(
                 padding: const EdgeInsets.only(right: 18.0),

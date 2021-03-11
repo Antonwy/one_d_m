@@ -67,13 +67,6 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
         child: CustomScrollView(controller: widget.scrollController, slivers: <
             Widget>[
           SliverAppBar(
-            leading: IconButton(
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                size: 30,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
             title: widget.afterRegister
                 ? Text(
                     "Finde Freunde",

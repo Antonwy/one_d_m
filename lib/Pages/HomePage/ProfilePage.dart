@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -11,6 +12,7 @@ import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/DailyReport.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -24,6 +26,7 @@ import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:one_d_m/Pages/notification_page.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -81,11 +84,10 @@ class ProfilePageState extends State<ProfilePage>
             child: LatestDonatorsView(),
           ),
           const SliverToBoxAdapter(
-              child: SizedBox(
-            height: 12,
-          )),
-          const SliverToBoxAdapter(
             child: _GiftAvailable(),
+          ),
+          SliverToBoxAdapter(
+            child: _DailyReport(),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -124,6 +126,165 @@ class ProfilePageState extends State<ProfilePage>
   }
 }
 
+class _DailyReport extends StatefulWidget {
+  _DailyReport();
+
+  @override
+  __DailyReportState createState() => __DailyReportState();
+}
+
+class __DailyReportState extends State<_DailyReport> {
+  ThemeManager _theme;
+
+  @override
+  Widget build(BuildContext context) {
+    _theme = ThemeManager.of(context);
+    return StreamBuilder<DailyReport>(
+        stream: DatabaseService.getDailyReport(),
+        builder: (context, snapshot) {
+          DailyReport dr = snapshot.data;
+          if (!snapshot.hasData) return SizedBox.shrink();
+
+          return FutureBuilder<bool>(
+              initialData: false,
+              future: _shouldShow(),
+              builder: (context, snapshot) {
+                return !snapshot.data
+                    ? SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.fromLTRB(12.0, 12, 12, 0),
+                        child: Material(
+                          color: _theme.colors.contrast,
+                          borderRadius: BorderRadius.circular(Constants.radius),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AutoSizeText(
+                                        dr.title,
+                                        style: _theme
+                                            .textTheme.textOnContrast.headline5,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                    XMargin(6),
+                                    Text(
+                                      dr.date,
+                                      style: _theme
+                                          .textTheme.textOnContrast.caption,
+                                    )
+                                  ],
+                                ),
+                                if (dr.subtitle == null) YMargin(6),
+                                Text(
+                                  dr.subtitle ?? "",
+                                  style:
+                                      _theme.textTheme.textOnContrast.caption,
+                                ),
+                                if (dr.subtitle != null) YMargin(6),
+                                Text(
+                                  dr.text ?? "",
+                                  style:
+                                      _theme.textTheme.textOnContrast.bodyText2,
+                                ),
+                                YMargin(6),
+                                Text(
+                                  "Was wir gestern erreicht haben:",
+                                  style:
+                                      _theme.textTheme.textOnContrast.headline6,
+                                ),
+                                YMargin(6),
+                                ..._buildWWR(dr),
+                                YMargin(12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        dr.goodbye ?? "",
+                                        style: _theme
+                                            .textTheme.textOnContrast.bodyText1,
+                                      ),
+                                    ),
+                                    XMargin(6),
+                                    FlatButton.icon(
+                                      onPressed: () => _close(dr.date),
+                                      label: Text("Schließen"),
+                                      icon: Icon(
+                                        Icons.close,
+                                        size: 14,
+                                        color: _theme.colors.textOnDark,
+                                      ),
+                                      textColor: _theme.colors.textOnDark,
+                                      color: _theme.colors.dark,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6)),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+              });
+        });
+  }
+
+  Future<bool> _shouldShow() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    String today = DateFormat("dd.MM.yyyy").format(DateTime.now());
+
+    if (_prefs.containsKey(Constants.DAILY_REPORT_KEY)) {
+      String val = _prefs.getString(Constants.DAILY_REPORT_KEY);
+      if (val == today) return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _close(String date) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    await _prefs.setString(Constants.DAILY_REPORT_KEY, date);
+    setState(() {});
+  }
+
+  List<Widget> _buildWWR(DailyReport dr) {
+    List<Widget> widgets = [];
+
+    for (WhatWeReached wwr in dr.whatWeReached) {
+      if (wwr.text.contains("**")) {
+        List<String> splitted = wwr.text.split("**");
+        widgets.add(RichText(
+            text: TextSpan(
+                style: _theme.textTheme.textOnContrast.bodyText2,
+                children: [
+              TextSpan(
+                text: splitted[0],
+              ),
+              TextSpan(
+                  text: wwr.value.toString(),
+                  style: TextStyle(fontWeight: FontWeight.w800)),
+              TextSpan(
+                text: splitted.length >= 2 ? splitted[1] : "",
+              ),
+            ])));
+      } else {
+        widgets.add(Text(
+          wwr.text,
+          style: _theme.textTheme.textOnContrast.bodyText1,
+        ));
+      }
+    }
+
+    return widgets;
+  }
+}
+
 class _GiftAvailable extends StatefulWidget {
   const _GiftAvailable();
 
@@ -133,6 +294,7 @@ class _GiftAvailable extends StatefulWidget {
 
 class __GiftAvailableState extends State<_GiftAvailable> {
   bool _loading = false;
+  bool _collected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +304,7 @@ class __GiftAvailableState extends State<_GiftAvailable> {
       stream: DatabaseService.getAdBalance(context.read<UserManager>().uid),
       builder: (context, snapshot) => snapshot.data.gift > 0
           ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(Constants.radius)),
@@ -163,13 +325,19 @@ class __GiftAvailableState extends State<_GiftAvailable> {
                         disabledColor: _theme.colors.contrast.withOpacity(.8),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6)),
-                        onPressed: _loading
+                        onPressed: _loading || _collected
                             ? null
                             : () async {
-                                print("GIFT");
+                                setState(() {
+                                  _loading = true;
+                                });
                                 await DatabaseService.getGift(
                                     context.read<UserManager>().uid,
                                     gift: snapshot.data.gift);
+                                setState(() {
+                                  _loading = false;
+                                  _collected = true;
+                                });
                                 await PushNotification.of(context).show(
                                     NotificationContent(
                                         title:

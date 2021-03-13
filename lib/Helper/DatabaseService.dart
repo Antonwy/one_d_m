@@ -4,10 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
+import 'package:one_d_m/Helper/DailyReport.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -61,7 +63,8 @@ class DatabaseService {
       DEVICE_TOKEN = "device_token",
       FEEDBACK = "feedback",
       URL = "url",
-      MESSAGES = "messages";
+      MESSAGES = "messages",
+      DAILY_REPORTS = "daily_reports";
 
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
   static final FirebaseFunctions cloudFunctions = FirebaseFunctions.instance;
@@ -92,6 +95,8 @@ class DatabaseService {
       firestore.collection(ORGANISATIONS);
   static final CollectionReference sessionsCollection =
       firestore.collection(SESSIONS);
+  static final CollectionReference dailyReportsCollection =
+      firestore.collection(DAILY_REPORTS);
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.doc(uid).get();
@@ -985,5 +990,19 @@ class DatabaseService {
 
   static Future<String> getFeedbackUrl() async {
     return (await statisticsCollection.doc(FEEDBACK).get()).data()[URL];
+  }
+
+  static Future<DailyReport> getDailyReportFuture([DateTime date]) async {
+    String dateString = DateFormat("dd.MM.yyyy").format(date ?? DateTime.now());
+    return DailyReport.fromDoc(
+        await dailyReportsCollection.doc(dateString).get());
+  }
+
+  static Stream<DailyReport> getDailyReport([DateTime date]) {
+    String dateString = DateFormat("dd.MM.yyyy").format(date ?? DateTime.now());
+    return dailyReportsCollection
+        .doc(dateString)
+        .snapshots()
+        .map((doc) => DailyReport.fromDoc(doc));
   }
 }

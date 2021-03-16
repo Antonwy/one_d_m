@@ -313,13 +313,14 @@ class _NewsPostState extends State<NewsPost> {
   Widget _buildCreatorTitle(News news) {
     bool _isSessionNews = news.sessionId?.isNotEmpty ?? false;
 
-    return _isSessionNews
-        ? FutureBuilder<Session>(
-            future: DatabaseService.getSessionFuture(news.sessionId),
-            builder: (context, snapshot) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
-                child: GestureDetector(
+    return Padding(
+      padding:
+          EdgeInsets.fromLTRB(12, 12, 0, news.text?.isEmpty ?? true ? 12 : 0),
+      child: _isSessionNews
+          ? FutureBuilder<Session>(
+              future: DatabaseService.getSessionFuture(news.sessionId),
+              builder: (context, snapshot) {
+                return GestureDetector(
                   onTap: snapshot.hasData
                       ? () {
                           Navigator.push(
@@ -334,16 +335,13 @@ class _NewsPostState extends State<NewsPost> {
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: ThemeManager.of(context).colors.dark)),
-                ),
-              );
-            },
-          )
-        : FutureBuilder<Campaign>(
-            future: DatabaseService.getCampaign(news.campaignId),
-            builder: (context, snapshot) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
-                child: GestureDetector(
+                );
+              },
+            )
+          : FutureBuilder<Campaign>(
+              future: DatabaseService.getCampaign(news.campaignId),
+              builder: (context, snapshot) {
+                return GestureDetector(
                   onTap: snapshot.hasData
                       ? () {
                           Navigator.push(
@@ -358,10 +356,10 @@ class _NewsPostState extends State<NewsPost> {
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: ThemeManager.of(context).colors.dark)),
-                ),
-              );
-            },
-          );
+                );
+              },
+            ),
+    );
   }
 }
 

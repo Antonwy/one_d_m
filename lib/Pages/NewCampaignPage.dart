@@ -177,11 +177,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 SliverToBoxAdapter(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FullscreenImages(
-                                  [campaign.imgUrl, ...campaign.moreImages])));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => FullscreenImages(
+                      //             [campaign.imgUrl, ...campaign.moreImages])));
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -498,7 +498,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     ),
                     const YMargin(8),
                     Container(
-                      height: 116,
+                      height: 180,
                       child: ListView.separated(
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,

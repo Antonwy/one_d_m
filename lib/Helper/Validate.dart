@@ -17,8 +17,9 @@ class Validate {
   }
 
   static String telephone(String text) {
-    if (text.length < 8 || text.length > 15) {
-      return 'Bitte gib deine Telefonnummer ein.';
+    if (text.isEmpty) return null;
+    if (!RegExp(r'(^(?:[+0]9)?[0-9]{10,12}$)').hasMatch(text)) {
+      return 'Bitte gib eine richtige Telefonnummer ein.';
     }
     return null;
   }

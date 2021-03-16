@@ -1,20 +1,15 @@
 import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/button_list.dart';
-import 'package:flutter_signin_button/button_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/LoginPage.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'HomePage/HomePage.dart';
 
@@ -158,32 +153,28 @@ class _RoundButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: OpenContainer(
-        openBuilder: (context, close) => toPage,
-        closedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(Constants.radius)),
-        openColor: pageColor,
-        closedElevation: 0,
-        closedColor: isRegister ? ColorTheme.blue : ColorTheme.appGrey,
-        closedBuilder: (context, open) => Container(
-          height: 52,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: open,
-              child: Center(
-                  child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: AutoSizeText(
-                  isRegister ? "Registrieren" : "Login",
-                  maxLines: 1,
-                  style: TextStyle(
-                      color: isRegister ? Colors.white : ColorTheme.blue,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600),
-                ),
-              )),
-            ),
+      child: Container(
+        height: 52,
+        child: Material(
+          color: isRegister ? ColorTheme.blue : ColorTheme.appGrey,
+          borderRadius: BorderRadius.circular(Constants.radius),
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => toPage));
+            },
+            child: Center(
+                child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: AutoSizeText(
+                isRegister ? "Registrieren" : "Login",
+                maxLines: 1,
+                style: TextStyle(
+                    color: isRegister ? Colors.white : ColorTheme.blue,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600),
+              ),
+            )),
           ),
         ),
       ),

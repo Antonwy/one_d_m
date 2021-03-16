@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
-import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:provider/provider.dart';
 
 class VerifyEmailPage extends StatefulWidget {
@@ -41,7 +39,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         leading: BackButton(
             color: ColorTheme.blue,
             onPressed: () async {
-              await _um.logout();
+              await _um.delete();
               Navigator.push(context,
                   MaterialPageRoute(builder: (c) => ChooseLoginMethodPage()));
             }),
@@ -61,7 +59,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       _loading = true;
                     });
                     await _um.fireUser.reload();
-                    _um.fireUser =  _um.auth.currentUser;
+                    _um.fireUser = _um.auth.currentUser;
                     if (_um.fireUser.emailVerified) {
                       _openWidget = FindFriendsPage(afterRegister: true);
                       open();

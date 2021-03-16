@@ -42,7 +42,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       setState(() => _isVideoLoaded = true);
       _downloadAndCacheVideo().then((file) {
         if (file != null) {
-          _controller = VideoPlayerController.file(file);
+          _controller = VideoPlayerController.file(file,
+              videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
           _initializeVideoPlayerFuture = _controller.initialize().then((_) {
             // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
             setState(() {});

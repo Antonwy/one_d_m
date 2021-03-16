@@ -125,7 +125,7 @@ class CertifiedSessionView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CachedNetworkImage(
-                  imageUrl: session.imgUrl,
+                  imageUrl: session?.imgUrl ?? "",
                   height: 120,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -133,28 +133,43 @@ class CertifiedSessionView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                   child: Text(
-                    session.name,
+                    session?.name ?? "",
                     style: _theme.textTheme.light.bodyText1,
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.fromLTRB(8, 0, 14, 0),
                   child: Row(
-                    children: [
-                      Text(
-                        "${((session.donationGoalCurrent / session.donationGoal) * 100).round()}%",
-                        style: _theme.textTheme.light.bodyText2,
-                      ),
-                      XMargin(12),
-                      Expanded(
-                        child: PercentLine(
-                          percent: session.donationGoalCurrent /
-                              session.donationGoal,
-                          height: 8.0,
-                          color: _theme.colors.light,
-                        ),
-                      ),
-                    ],
+                    children: session?.donationUnit == null
+                        ? [
+                            Text(
+                              "0%",
+                              style: _theme.textTheme.light.bodyText2,
+                            ),
+                            XMargin(12),
+                            Expanded(
+                              child: PercentLine(
+                                percent: 0,
+                                height: 8.0,
+                                color: _theme.colors.light,
+                              ),
+                            ),
+                          ]
+                        : [
+                            Text(
+                              "${((session.donationGoalCurrent / session.donationGoal) * 100).round()}%",
+                              style: _theme.textTheme.light.bodyText2,
+                            ),
+                            XMargin(12),
+                            Expanded(
+                              child: PercentLine(
+                                percent: session.donationGoalCurrent /
+                                    session.donationGoal,
+                                height: 8.0,
+                                color: _theme.colors.light,
+                              ),
+                            ),
+                          ],
                   ),
                 ),
               ],

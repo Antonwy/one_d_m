@@ -18,7 +18,6 @@ import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:should_rebuild/should_rebuild.dart' as rebuild;
 
 import 'PushNotification.dart';
 import 'circular_countdown_timer.dart';
@@ -40,7 +39,18 @@ class _ChartsPageView extends StatefulWidget {
 
 class _ChartsPageViewState extends State<_ChartsPageView>
     with AutomaticKeepAliveClientMixin {
-  PageIndicatorController _pageController = PageIndicatorController();
+  ValueNotifier<double> _page;
+  PageIndicatorController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _page = ValueNotifier<double>(0.0);
+    _pageController = PageIndicatorController()
+      ..addListener(() {
+        _page.value = _pageController.page;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +129,8 @@ class _ChartsPageViewState extends State<_ChartsPageView>
                       inactiveColor: _bTheme.dark.withOpacity(.25),
                       activeColor: _bTheme.dark,
                       inkColor: _bTheme.dark,
-                      controller: _pageController,
+                      pageCount: 3,
+                      page: _page,
                     ),
                   ),
                 ],
@@ -196,22 +207,17 @@ class __DCInformationState extends State<_DCInformation>
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              children: [
-                                Text(
-                                  '${balance?.dcBalance ?? 0}',
-                                  style: TextStyle(
-                                      fontSize: 24.0,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          ThemeManager.of(context).colors.dark),
-                                ),
-                                const XMargin(5),
-                                Text('Donation Votes'),
-                              ],
+                            Text(
+                              '${balance?.dcBalance ?? 0}',
+                              style: TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: ThemeManager.of(context).colors.dark),
                             ),
+                            const XMargin(5),
+                            Text('Donation Votes'),
                           ],
                         ),
                         SizedBox(height: 5.0),

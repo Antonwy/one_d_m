@@ -232,7 +232,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
             ),
             const YMargin(8),
             Container(
-              height: 116,
+              height: 180,
               child: ListView.separated(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,

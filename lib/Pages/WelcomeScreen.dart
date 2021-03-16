@@ -18,13 +18,16 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   PageIndicatorController _pageController = PageIndicatorController();
   double _page = 0.0;
+  ValueNotifier<double> _pageNotifier;
 
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
+    _pageNotifier = ValueNotifier(0.0);
     _pageController.addListener(() {
+      _pageNotifier.value = _pageController.page;
       setState(() {
         _page = _pageController.page;
       });
@@ -126,7 +129,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 inactiveColor: ColorTheme.blue.withOpacity(.2),
                 activeColor: ColorTheme.blue,
                 inkColor: ColorTheme.blue,
-                controller: _pageController,
+                page: _pageNotifier,
+                pageCount: 5,
               ),
             ),
           )

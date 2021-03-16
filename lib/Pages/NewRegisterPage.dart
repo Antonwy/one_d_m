@@ -321,6 +321,10 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
   }
 
   void _register() async {
+    if (!_acceptedAGBs) {
+      _showSnackBar("Bitte akzeptiere die AGBs!");
+      return;
+    }
     if (!_formKey.currentState.validate()) return;
     setState(() {
       _loading = true;
@@ -380,6 +384,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
   }
 
   void _showSnackBar(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

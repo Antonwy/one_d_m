@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Components/UserFollowButton.dart';
@@ -46,13 +47,7 @@ class _NotificationPageState extends State<NotificationPage> {
       );
 
   Widget _buildAppBar() => SliverAppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: BackButton(),
         title: Text('Neuigkeiten',
             style: TextStyle(color: ThemeManager.of(context).colors.dark)),
         automaticallyImplyLeading: false,
@@ -73,8 +68,29 @@ class _NotificationPageState extends State<NotificationPage> {
               ));
             List<String> followers = snapshot.data;
             if (followers.isEmpty)
-              return SliverToBoxAdapter(
-                child: SizedBox.shrink(),
+              return SliverFillRemaining(
+                child: Center(
+                    child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      SvgPicture.asset(
+                        "assets/images/no-news.svg",
+                        height: MediaQuery.of(context).size.height * .25,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        "Noch keine Neuigkeiten vorhanden",
+                        style: Theme.of(context).textTheme.bodyText2,
+                      ),
+                    ],
+                  ),
+                )),
               );
 
             return SliverList(

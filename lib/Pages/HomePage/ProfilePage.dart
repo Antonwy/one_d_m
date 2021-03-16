@@ -478,6 +478,8 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
                                                             .baseline,
+                                                    textBaseline:
+                                                        TextBaseline.alphabetic,
                                                     children: [
                                                       Text(
                                                         '${balance?.dcBalance ?? 0}',

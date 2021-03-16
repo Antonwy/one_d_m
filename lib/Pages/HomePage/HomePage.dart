@@ -78,7 +78,11 @@ class HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         ThemeManager _theme = ThemeManager.of(context, listen: false);
+        ValueNotifier<double> _pageValue = ValueNotifier(0.0);
         PageIndicatorController _controller = new PageIndicatorController();
+        _controller.addListener(() {
+          _pageValue.value = _controller.page;
+        });
         return AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -135,7 +139,8 @@ class HomePageState extends State<HomePage> {
                 inactiveColor: ColorTheme.darkblue.withOpacity(.3),
                 activeColor: ColorTheme.darkblue,
                 inkColor: ColorTheme.darkblue,
-                controller: _controller,
+                page: _pageValue,
+                pageCount: 2,
               ),
             ],
           ),

@@ -81,7 +81,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
   @override
   void initState() {
     _selectedValue = widget.defaultSelectedAmount.toDouble();
-    _isAnim = widget.campaign.dvAnimation.isNotEmpty;
+    _isAnim = widget.campaign.dvAnimation?.isNotEmpty ?? false;
     _adbalanceStream =
         DatabaseService.getAdBalance(widget.user?.id ?? widget.uid);
 

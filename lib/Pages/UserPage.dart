@@ -272,10 +272,16 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     ));
 
     for (Campaign c in campaigns) {
-      list.add(CampaignHeader(
-        campaign: c,
-      ));
+      list.add(FutureBuilder<Campaign>(
+          future: DatabaseService.getCampaign(c.id),
+          builder: (context, snapshot) {
+            return CampaignHeader(
+              campaign: snapshot.data ?? c,
+            );
+          }));
     }
+
+    list.add(YMargin(24));
     return list;
   }
 }

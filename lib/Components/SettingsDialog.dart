@@ -7,6 +7,7 @@ import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/ChooseLoginMethodPage.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FaqPage.dart';
@@ -46,48 +47,76 @@ class _SettingsDialogState extends State<SettingsDialog> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: CustomOpenContainer(
-                    openBuilder: (context, close, controller) =>
-                        UserPage(um.user, scrollController: controller),
-                    closedElevation: 0,
-                    closedColor: ColorTheme.whiteBlue,
-                    closedBuilder: (context, open) => Material(
-                      borderRadius: BorderRadius.circular(Constants.radius),
-                      clipBehavior: Clip.antiAlias,
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: open,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: <Widget>[
-                              Material(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Container(
-                                    child: RoundedAvatar(
-                                        um.user?.thumbnailUrl ??
-                                            um.user?.imgUrl),
-                                    width: 50,
-                                    height: 50,
-                                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomOpenContainer(
+                          openBuilder: (context, close, controller) =>
+                              UserPage(um.user, scrollController: controller),
+                          closedElevation: 0,
+                          closedColor: ColorTheme.whiteBlue,
+                          closedBuilder: (context, open) => Material(
+                            borderRadius:
+                                BorderRadius.circular(Constants.radius),
+                            clipBehavior: Clip.antiAlias,
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: open,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Material(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Container(
+                                          child: RoundedAvatar(
+                                              um.user?.thumbnailUrl ??
+                                                  um.user?.imgUrl),
+                                          width: 50,
+                                          height: 50,
+                                        ),
+                                      ),
+                                      color: _theme.colors.contrast,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Constants.radius + 2)),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      "${um.user?.name}",
+                                      style: _textTheme.headline6
+                                          .copyWith(color: ColorTheme.blue),
+                                    )
+                                  ],
                                 ),
-                                color: _theme.colors.contrast,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        Constants.radius + 2)),
                               ),
-                              SizedBox(width: 10),
-                              Text(
-                                "${um.user?.name}",
-                                style: _textTheme.headline6
-                                    .copyWith(color: ColorTheme.blue),
-                              )
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      XMargin(12),
+                      Material(
+                        color: ColorTheme.appBg,
+                        borderRadius: BorderRadius.circular(Constants.radius),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                            onTap: () async {
+                              String url =
+                                  await DatabaseService.getFeedbackUrl();
+
+                              if (await canLaunch(url)) {
+                                await launch(url);
+                              }
+                            },
+                            child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Icon(
+                                  CupertinoIcons.exclamationmark_bubble_fill,
+                                  color: ThemeManager.of(context).colors.dark,
+                                ))),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 10),

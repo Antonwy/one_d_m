@@ -49,6 +49,10 @@ class MyTextTheme {
     textOnContrast = BaseTextTheme(_textTheme, _theme.textOnContrast);
     textOnDark = BaseTextTheme(_textTheme, _theme.textOnDark);
   }
+
+  BaseTextTheme withColor(Color color) {
+    return BaseTextTheme(_textTheme, color);
+  }
 }
 
 class BaseTextTheme {

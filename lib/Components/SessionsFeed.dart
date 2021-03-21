@@ -8,6 +8,7 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -268,15 +269,14 @@ class _DonateButton extends StatelessWidget {
                                   : () async {
                                       BottomDialog bd = BottomDialog(context);
                                       bd.show(DonationDialogWidget(
-                                        campaign:
-                                            await DatabaseService.getCampaign(
-                                                sm.baseSession.campaignId),
-                                        user: um.user,
-                                        context: context,
-                                        close: bd.close,
-                                        sessionId: sm.baseSession.id,
-                                        uid: um.uid
-                                      ));
+                                          campaign:
+                                              await DatabaseService.getCampaign(
+                                                  sm.baseSession.campaignId),
+                                          user: um.user,
+                                          context: context,
+                                          close: bd.close,
+                                          sessionId: sm.baseSession.id,
+                                          uid: um.uid));
                                     },
                               child: Text("UNTERSTÜTZEN"),
                             );
@@ -470,6 +470,8 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
   final SessionMember member;
   final bool invited, showTargetAmount;
   final Color color, avatarColor, avatarBackColor;
+  final String donationUnit;
+  final int dvController;
   ThemeManager _theme;
 
   SessionMemberView(
@@ -479,7 +481,9 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
       this.avatarColor,
       this.avatarBackColor,
       this.invited = false,
-      this.showTargetAmount = true})
+      this.showTargetAmount = true,
+      this.donationUnit = "DV",
+      this.dvController = 1})
       : super(key: key);
 
   @override
@@ -525,7 +529,7 @@ class SessionMemberView<T extends BaseSessionManager> extends StatelessWidget {
                             height: 25,
                             child: Center(
                               child: AutoSizeText(
-                                  "${user?.name ?? 'Laden...'}\n${member?.donationAmount ?? 0} DV",
+                                  "${user?.name ?? 'Laden...'}\n${Numeral(((member?.donationAmount ?? 0) / dvController).round()).value()} $donationUnit",
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   style: TextStyle(

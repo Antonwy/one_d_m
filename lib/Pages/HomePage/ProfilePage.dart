@@ -29,6 +29,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../DailyReportPage.dart';
+
 class ProfilePage extends StatefulWidget {
   final VoidCallback onExploreTapped;
   final ScrollController scrollController;
@@ -87,7 +89,7 @@ class ProfilePageState extends State<ProfilePage>
             child: _GiftAvailable(),
           ),
           SliverToBoxAdapter(
-            child: _DailyReport(),
+            child: DailyReportProfileWidget(),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -126,23 +128,22 @@ class ProfilePageState extends State<ProfilePage>
   }
 }
 
-class _DailyReport extends StatefulWidget {
-  _DailyReport();
+class DailyReportProfileWidget extends StatefulWidget {
+  DailyReportProfileWidget();
 
   @override
-  __DailyReportState createState() => __DailyReportState();
+  _DailyReportWidgeProfiletState createState() =>
+      _DailyReportWidgeProfiletState();
 }
 
-class __DailyReportState extends State<_DailyReport> {
-  ThemeManager _theme;
-
+class _DailyReportWidgeProfiletState extends State<DailyReportProfileWidget> {
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
     return StreamBuilder<DailyReport>(
         stream: DatabaseService.getDailyReport(),
         builder: (context, snapshot) {
           DailyReport dr = snapshot.data;
+          print(snapshot);
           if (!snapshot.hasData) return SizedBox.shrink();
 
           return FutureBuilder<bool>(
@@ -151,85 +152,9 @@ class __DailyReportState extends State<_DailyReport> {
               builder: (context, snapshot) {
                 return !snapshot.data
                     ? SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.fromLTRB(12.0, 12, 12, 0),
-                        child: Material(
-                          color: _theme.colors.contrast,
-                          borderRadius: BorderRadius.circular(Constants.radius),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: AutoSizeText(
-                                        dr.title,
-                                        style: _theme
-                                            .textTheme.textOnContrast.headline5,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                    XMargin(6),
-                                    Text(
-                                      dr.date,
-                                      style: _theme
-                                          .textTheme.textOnContrast.caption,
-                                    )
-                                  ],
-                                ),
-                                if (dr.subtitle == null) YMargin(6),
-                                Text(
-                                  dr.subtitle ?? "",
-                                  style:
-                                      _theme.textTheme.textOnContrast.caption,
-                                ),
-                                if (dr.subtitle != null) YMargin(6),
-                                Text(
-                                  dr.text ?? "",
-                                  style:
-                                      _theme.textTheme.textOnContrast.bodyText2,
-                                ),
-                                YMargin(6),
-                                Text(
-                                  "Was wir gestern erreicht haben:",
-                                  style:
-                                      _theme.textTheme.textOnContrast.headline6,
-                                ),
-                                YMargin(6),
-                                ..._buildWWR(dr),
-                                YMargin(12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        dr.goodbye ?? "",
-                                        style: _theme
-                                            .textTheme.textOnContrast.bodyText1,
-                                      ),
-                                    ),
-                                    XMargin(12),
-                                    FlatButton.icon(
-                                      onPressed: () => _close(dr.date),
-                                      label: Text("Schließen"),
-                                      icon: Icon(
-                                        Icons.close,
-                                        size: 14,
-                                        color: _theme.colors.textOnDark,
-                                      ),
-                                      textColor: _theme.colors.textOnDark,
-                                      color: _theme.colors.dark,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(6)),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                    : DailyReportWidget(
+                        dailyReport: dr,
+                        close: _close,
                       );
               });
         });
@@ -252,11 +177,99 @@ class __DailyReportState extends State<_DailyReport> {
     await _prefs.setString(Constants.DAILY_REPORT_KEY, date);
     setState(() {});
   }
+}
+
+class DailyReportWidget extends StatelessWidget {
+  ThemeManager _theme;
+  final DailyReport dailyReport;
+  final Future<void> Function(String) close;
+
+  DailyReportWidget({this.dailyReport, this.close});
+
+  @override
+  Widget build(BuildContext context) {
+    _theme = ThemeManager.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 12, 12, 0),
+      child: Material(
+        color: _theme.colors.contrast,
+        borderRadius: BorderRadius.circular(Constants.radius),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: AutoSizeText(
+                      dailyReport?.title ?? "",
+                      style: _theme.textTheme.textOnContrast.headline5,
+                      maxLines: 1,
+                    ),
+                  ),
+                  XMargin(6),
+                  Text(
+                    dailyReport?.date ?? "",
+                    style: _theme.textTheme.textOnContrast.caption,
+                  )
+                ],
+              ),
+              if (dailyReport?.subtitle == null) YMargin(6),
+              Text(
+                dailyReport?.subtitle ?? "",
+                style: _theme.textTheme.textOnContrast.caption,
+              ),
+              if (dailyReport?.subtitle != null) YMargin(6),
+              Text(
+                dailyReport?.text ?? "",
+                style: _theme.textTheme.textOnContrast.bodyText2,
+              ),
+              YMargin(6),
+              Text(
+                "Was wir gestern erreicht haben:",
+                style: _theme.textTheme.textOnContrast.headline6,
+              ),
+              YMargin(6),
+              ..._buildWWR(dailyReport),
+              YMargin(12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      dailyReport?.goodbye ?? "",
+                      style: _theme.textTheme.textOnContrast.bodyText1,
+                    ),
+                  ),
+                  XMargin(12),
+                  close != null
+                      ? FlatButton.icon(
+                          onPressed: () => close(dailyReport.date),
+                          label: Text("Schließen"),
+                          icon: Icon(
+                            Icons.close,
+                            size: 14,
+                            color: _theme.colors.textOnDark,
+                          ),
+                          textColor: _theme.colors.textOnDark,
+                          color: _theme.colors.dark,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6)),
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   List<Widget> _buildWWR(DailyReport dr) {
     List<Widget> widgets = [];
 
-    for (WhatWeReached wwr in dr.whatWeReached) {
+    for (WhatWeReached wwr in (dailyReport?.whatWeReached ?? [])) {
       if (wwr.text.contains("**")) {
         List<String> splitted = wwr.text.split("**");
         widgets.add(RichText(
@@ -583,8 +596,14 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                           //     context: context),
                                           _appBarButton(
                                               icon: CupertinoIcons
-                                                  .exclamationmark_bubble_fill,
-                                              onPressed: give_feedback,
+                                                  .quote_bubble_fill,
+                                              onPressed: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            DailyReportPage()));
+                                              },
                                               context: context),
                                           _appBarButton(
                                               icon: CupertinoIcons.bell_fill,
@@ -650,14 +669,6 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
         ),
       );
     });
-  }
-
-  Future<void> give_feedback() async {
-    String url = await DatabaseService.getFeedbackUrl();
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    }
   }
 
   Widget _appBarButton(

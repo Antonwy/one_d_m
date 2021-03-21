@@ -930,6 +930,13 @@ class DatabaseService {
         .map((doc) => DailyReport.fromDoc(doc));
   }
 
+  static Stream<List<DailyReport>> getAllDailyReports() {
+    return dailyReportsCollection
+        .orderBy("date", descending: true)
+        .snapshots()
+        .map(DailyReport.fromQuerySnapshot);
+  }
+
   static Stream<List<Goal>> getGoals() {
     return goalsCollection.snapshots().map(Goal.fromQuerySnapshot);
   }
@@ -938,6 +945,7 @@ class DatabaseService {
     return goalsCollection
         .doc(gid)
         .collection(CHECKPOINTS)
+        .orderBy(GoalCheckpoint.VALUE, descending: false)
         .snapshots()
         .map(GoalCheckpoint.fromQuerySnapshot);
   }

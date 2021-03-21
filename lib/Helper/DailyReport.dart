@@ -26,7 +26,11 @@ class DailyReport {
         text: data[TEXT],
         date: doc.id,
         whatWeReached: WhatWeReached.convertToList(wwr),
-        goodbye: doc[GOODBYE]);
+        goodbye: data[GOODBYE]);
+  }
+
+  static List<DailyReport> fromQuerySnapshot(QuerySnapshot qs) {
+    return qs.docs.map((doc) => DailyReport.fromDoc(doc)).toList();
   }
 
   static const String TITLE = "title",

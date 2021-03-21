@@ -1051,24 +1051,32 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
                   ),
                 ),
                 uniqueAllMembers.isNotEmpty
-                    ? SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                                left: index == 0 ? 6.0 : 0.0,
-                                right: index == uniqueAllMembers.length - 1
-                                    ? 6.0
-                                    : 0.0),
-                            child: SessionMemberView<CertifiedSessionManager>(
-                              member: uniqueAllMembers[index],
-                              showTargetAmount: true,
-                              color: sm.session.primaryColor,
-                              avatarColor: Colors.white,
-                              avatarBackColor: sm.session.secondaryColor,
-                            ),
+                    ? StreamBuilder<Campaign>(
+                        stream: sm.campaign,
+                        builder: (context, snapshot) {
+                          return SliverList(
+                            delegate:
+                                SliverChildBuilderDelegate((context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                    left: index == 0 ? 6.0 : 0.0,
+                                    right: index == uniqueAllMembers.length - 1
+                                        ? 6.0
+                                        : 0.0),
+                                child: SessionMemberView<
+                                        CertifiedSessionManager>(
+                                    member: uniqueAllMembers[index],
+                                    showTargetAmount: true,
+                                    color: sm.session.primaryColor,
+                                    avatarColor: Colors.white,
+                                    avatarBackColor: sm.session.secondaryColor,
+                                    donationUnit: snapshot.data?.unit ?? "DV",
+                                    dvController:
+                                        snapshot.data?.dvController ?? 1),
+                              );
+                            }, childCount: uniqueAllMembers.length),
                           );
-                        }, childCount: uniqueAllMembers.length),
-                      )
+                        })
                     : SliverToBoxAdapter(child: SizedBox.shrink())
               ],
             )),

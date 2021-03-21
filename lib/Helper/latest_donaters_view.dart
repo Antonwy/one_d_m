@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 
 import '../Components/InfoFeed.dart';
@@ -89,9 +90,9 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                                       YMargin(6),
                                       dailyTargetDone
                                           ? Icon(Icons.done)
-                                          : GoalWidget(
+                                          : DailyGoalWidget(
                                               title:
-                                                  "${info.dailyAmount}/${Numeral(info.dailyAmountTarget).value()} DV",
+                                                  "${Numeral(info.dailyAmount).value()}/${Numeral(info.dailyAmountTarget).value()} DV",
                                               percent: info.dailyAmount /
                                                   info.dailyAmountTarget,
                                             ),
@@ -103,8 +104,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                           }),
                       XMargin(8.0),
                       _buildDonator(
-                          amount: d[index].amount.toString(),
-                          uid: d[index].userId),
+                          amount: d[index].amount, uid: d[index].userId),
                     ],
                   ),
                 );
@@ -113,14 +113,14 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                     left: index == 0 ? 12.0 : 0.0,
                     right: index == d.length - 1 ? 12.0 : 0.0),
                 child: _buildDonator(
-                    amount: d[index].amount.toString(), uid: d[index].userId),
+                    amount: d[index].amount, uid: d[index].userId),
               );
             },
           );
         },
       );
 
-  Widget _buildDonator({String amount, String uid}) => FutureBuilder<User>(
+  Widget _buildDonator({int amount, String uid}) => FutureBuilder<User>(
       future: DatabaseService.getUser(uid),
       builder: (context, snapshot) {
         User u = snapshot.data;
@@ -145,7 +145,9 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                   name: u?.name,
                 ),
               ),
-              Text('${amount}DV',
+              AutoSizeText('${Numeral(amount).value()} DV',
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
                   style: Theme.of(context).textTheme.bodyText1.copyWith(
                         fontWeight: FontWeight.w700,
                         color: ThemeManager.of(context)

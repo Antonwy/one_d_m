@@ -32,6 +32,8 @@ export class DatabaseConstants {
   static readonly session_members: string = 'session_members';
   static readonly session_invites: string = 'session_invites';
   static readonly id: string = 'id';
+  static readonly goals: string = 'goals';
+  static readonly insgesamt: string = 'Insgesamt';
 }
 
 export class CampaignFields {

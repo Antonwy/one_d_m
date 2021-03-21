@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -36,7 +35,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ThemeManager _theme = ThemeManager.of(context);
     return Material(
       color: ColorTheme.navBar,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 18),
         child: DefaultTextStyle(
@@ -196,7 +195,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         subtitle: Text(
                             "${isGhost ? "Niemand" : "Jeder"} kann dein Profil sehen"),
                         trailing: Icon(
-                          isGhost ? Icons.visibility_off : Icons.visibility,
+                          isGhost
+                              ? CupertinoIcons.eye_slash_fill
+                              : CupertinoIcons.eye_fill,
                           size: 18,
                         ),
                         onTap: () async {
@@ -264,7 +265,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ListTile(
                   title: Text("Logout"),
                   trailing: Icon(
-                    Icons.power_settings_new,
+                    CupertinoIcons.power,
                     size: 24,
                   ),
                   onTap: () async {

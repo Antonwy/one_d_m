@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
-import 'package:one_d_m/Components/SearchBar.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CategoryDialog.dart';
@@ -10,7 +9,6 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
-import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
@@ -62,7 +60,7 @@ class _ExplorePageState extends State<ExplorePage>
                           ),
                           IconButton(
                               icon: Icon(
-                                Icons.search,
+                                CupertinoIcons.search,
                                 color: _theme.colors.dark,
                               ),
                               onPressed: () {
@@ -73,7 +71,7 @@ class _ExplorePageState extends State<ExplorePage>
                               }),
                           IconButton(
                               icon: Icon(
-                                Icons.person_add,
+                                CupertinoIcons.person_add,
                                 color: _theme.colors.dark,
                               ),
                               onPressed: () {
@@ -85,9 +83,9 @@ class _ExplorePageState extends State<ExplorePage>
                               }),
                           IconButton(
                             icon: Stack(
-                              overflow: Overflow.visible,
+                              clipBehavior: Clip.antiAlias,
                               children: [
-                                Center(child: Icon(Icons.filter_alt)),
+                                Center(child: Icon(Icons.filter_alt_rounded)),
                                 _categoryId != 100
                                     ? Positioned(
                                         right: 0,

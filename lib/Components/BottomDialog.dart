@@ -26,10 +26,10 @@ class BottomDialog {
 }
 
 class _Dialog extends StatefulWidget {
-  Widget child;
-  ValueNotifier<bool> open;
-  Duration duration;
-  Curve curve;
+  final Widget child;
+  final ValueNotifier<bool> open;
+  final Duration duration;
+  final Curve curve;
 
   _Dialog(this.child, {this.open, this.duration, this.curve});
 

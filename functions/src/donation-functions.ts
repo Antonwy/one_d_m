@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { DonationType, ChargesType } from './types';
+import { DonationType, ChargesType, CampaignType, SessionType } from './types';
 import { DatabaseConstants } from './database-constants';
 
 const firestore = admin.firestore();
@@ -57,25 +57,42 @@ exports.onCreateDonation = functions
         )
       );
 
+    let campaign;
+    try {
+      campaign = (
+        await firestore
+          .collection(DatabaseConstants.campaigns)
+          .doc(donation.campaign_id)
+          .get()
+      ).data() as CampaignType;
+    } catch (error) {
+      functions.logger.info(`Getting campaign ${donation.campaign_id} failed`);
+    }
+
     // update the donatedAmount in Session Members and session
     if (
       donation.session_id !== null &&
       donation.session_id !== undefined &&
-      donation.session_id.length != 0
+      donation.session_id.length !== 0
     ) {
-      const isSessionMember = (
-        await firestore
-          .collection(DatabaseConstants.sessions)
-          .doc(donation.session_id)
-          .collection(DatabaseConstants.session_members)
-          .doc(donation.user_id)
-          .get()
-      ).exists;
+      const sessionRef = firestore
+        .collection(DatabaseConstants.sessions)
+        .doc(donation.session_id);
+
+      let session;
+      let sessionDoc;
+
+      try {
+        sessionDoc = await sessionRef.get();
+        session = sessionDoc.data() as SessionType;
+      } catch (error) {
+        functions.logger.info(`Getting session ${donation.session_id} failed!`);
+      }
+
+      const isSessionMember: boolean = sessionDoc?.exists ?? false;
 
       if (isSessionMember) {
-        await firestore
-          .collection(DatabaseConstants.sessions)
-          .doc(donation.session_id)
+        await sessionRef
           .collection(DatabaseConstants.session_members)
           .doc(donation.user_id)
           .update({ donation_amount: increment(donation.amount) })
@@ -86,30 +103,19 @@ exports.onCreateDonation = functions
           );
       }
 
-      const sessionRef = firestore
-        .collection(DatabaseConstants.sessions)
-        .doc(donation.session_id);
-      await sessionRef
-        .get()
-        .then(async (sess) => {
-          if (
-            sess.data() !== undefined &&
-            (sess.data()?.donation_goal ?? 0) > 0
-          ) {
-            await sess.ref.update({
-              donation_goal_current: increment(
-                Math.round(
-                  donation.amount / (sess.data()?.donation_unit_value ?? 1)
-                )
-              ),
-            });
-          }
-        })
-        .catch((err) =>
-          functions.logger.info(
-            `Error getting session ${donation.session_id}! Error: ${err}`
-          )
-        );
+      if (session !== undefined && (session?.donation_goal ?? 0) > 0) {
+        await sessionDoc?.ref
+          .update({
+            donation_goal_current: increment(
+              Math.round(donation.amount / (campaign?.dv_controller ?? 1))
+            ),
+          })
+          .catch((err) =>
+            functions.logger.info(
+              `Error incrementing donation_goal_current ${err}`
+            )
+          );
+      }
 
       await sessionRef
         .update({ current_amount: increment(donation.amount) })
@@ -164,6 +170,25 @@ exports.onCreateDonation = functions
           )
         );
       await snapshot.ref.set({ ad_dc_amount: maxDCsToUse }, { merge: true });
+    }
+    const goalRef = firestore.collection(DatabaseConstants.goals);
+    await goalRef.doc(DatabaseConstants.insgesamt).set(
+      {
+        current_value: increment(donation.amount),
+      },
+      { merge: true }
+    );
+
+    if (campaign !== undefined) {
+      const campaignUnit = campaign.donation_unit ?? 'DV';
+      await goalRef.doc(campaignUnit).set(
+        {
+          current_value: increment(
+            Math.round(donation.amount / (campaign.dv_controller ?? 1))
+          ),
+        },
+        { merge: true }
+      );
     }
   });
 

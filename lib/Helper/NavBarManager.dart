@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 class NavBarManager extends ChangeNotifier {
   PageController controller;
-  double position = 0.0;
+  double position = 1.0;
 
   NavBarManager(PageController controller) {
     this.controller = controller;

@@ -11,10 +11,8 @@ import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/DailyReport.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
-import 'package:one_d_m/Helper/DonationsGroup.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
-import 'package:one_d_m/Helper/Ranking.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/SessionMessage.dart';
@@ -24,6 +22,7 @@ import 'package:stripe_payment/stripe_payment.dart';
 
 import 'Campaign.dart';
 import 'Donation.dart';
+import 'GoalPageManager.dart';
 import 'User.dart';
 
 class DatabaseService {
@@ -64,6 +63,8 @@ class DatabaseService {
       FEEDBACK = "feedback",
       URL = "url",
       MESSAGES = "messages",
+      GOALS = "goals",
+      CHECKPOINTS = "checkpoints",
       DAILY_REPORTS = "daily_reports";
 
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -97,6 +98,8 @@ class DatabaseService {
       firestore.collection(SESSIONS);
   static final CollectionReference dailyReportsCollection =
       firestore.collection(DAILY_REPORTS);
+  static final CollectionReference goalsCollection =
+      firestore.collection(GOALS);
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.doc(uid).get();
@@ -528,24 +531,6 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
-  static Stream<List<DonationsGroup>> getDonationsFeedFromDate(String uid,
-      [DateTime dt]) {
-    DateTime searchedDate = dt ?? DateTime.now();
-
-    DateTime searchStartDate =
-        DateTime(searchedDate.year, searchedDate.month, searchedDate.day);
-    DateTime searchEndDate = searchStartDate.add(Duration(days: 1));
-    return donationFeedCollection
-        .doc(uid)
-        .collection(DONATIONS)
-        .where(Donation.CREATEDAT,
-            isGreaterThan: Timestamp.fromDate(searchStartDate))
-        .where(Donation.CREATEDAT,
-            isLessThan: Timestamp.fromDate(searchEndDate))
-        .snapshots()
-        .map(DonationsGroup.fromQuerySnapshot);
-  }
-
   static Stream<DonationInfo> getDonationInfo() {
     return statisticsCollection
         .doc(DONATIONINFO)
@@ -686,67 +671,6 @@ class DatabaseService {
         .collection(PRIVATEDATA)
         .doc(DATA)
         .set({User.DEVICETOKEN: null}, SetOptions(merge: true)));
-  }
-
-  static Stream<bool> hasRankingContentForToday(String uid, {DateTime date}) {
-    return donationFeedCollection
-        .doc(uid)
-        .collection(Ranking.DAILYRANKINGS)
-        .doc(Ranking.getFormatedDate(date))
-        .snapshots()
-        .map((doc) => doc.exists);
-  }
-
-  static Stream<FriendsRanking> getFriendsRanking(String uid, {DateTime date}) {
-    return donationFeedCollection
-        .doc(uid)
-        .collection(Ranking.DAILYRANKINGS)
-        .doc(Ranking.getFormatedDate(date))
-        .collection(Ranking.USERS)
-        // .orderBy(Ranking.AMOUNT, descending: true)
-        .limit(5)
-        .snapshots()
-        .map(FriendsRanking.fromQuery);
-  }
-
-  static Stream<CampaignsRanking> getCampaignsRanking(String uid,
-      {DateTime date}) {
-    return donationFeedCollection
-        .doc(uid)
-        .collection(Ranking.DAILYRANKINGS)
-        .doc(Ranking.getFormatedDate(date))
-        .collection(Ranking.CAMPAIGNS)
-        // .orderBy(Ranking.AMOUNT, descending: true)
-        .limit(5)
-        .snapshots()
-        .map(CampaignsRanking.fromQuery);
-  }
-
-  static Stream<int> getDailyDonationsAmount(String uid, {DateTime date}) {
-    return donationFeedCollection
-        .doc(uid)
-        .collection(Ranking.DAILYRANKINGS)
-        .doc(Ranking.getFormatedDate(date))
-        .collection(Ranking.USERS)
-        .doc(uid)
-        .snapshots()
-        .map(((doc) {
-      if (!doc.exists) return 0;
-      return doc[Ranking.AMOUNT];
-    }));
-  }
-
-  static Stream<int> getDailyFriendsDonationsAmount(String uid,
-      {DateTime date}) {
-    return donationFeedCollection
-        .doc(uid)
-        .collection(Ranking.DAILYRANKINGS)
-        .doc(Ranking.getFormatedDate(date))
-        .snapshots()
-        .map(((doc) {
-      if (!doc.exists) return 0;
-      return doc[Ranking.AMOUNT];
-    }));
   }
 
   static Future<Organisation> getOrganisation(String oid) async {
@@ -1004,5 +928,17 @@ class DatabaseService {
         .doc(dateString)
         .snapshots()
         .map((doc) => DailyReport.fromDoc(doc));
+  }
+
+  static Stream<List<Goal>> getGoals() {
+    return goalsCollection.snapshots().map(Goal.fromQuerySnapshot);
+  }
+
+  static Stream<List<GoalCheckpoint>> getCheckpointsOfGoal(String gid) {
+    return goalsCollection
+        .doc(gid)
+        .collection(CHECKPOINTS)
+        .snapshots()
+        .map(GoalCheckpoint.fromQuerySnapshot);
   }
 }

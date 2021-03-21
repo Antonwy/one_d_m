@@ -12,7 +12,6 @@ import 'package:one_d_m/Helper/NativeAds.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,7 +55,6 @@ class ODMApp extends StatefulWidget {
 class _ODMAppState extends State<ODMApp> {
   @override
   void initState() {
-    notificationPlugin.setListenerForLowerVersions(onNotificationLowerVersion);
     StripePayment.setOptions(
         StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
     getThemeIndex().then((value) {
@@ -85,6 +83,4 @@ class _ODMAppState extends State<ODMApp> {
         ),
         home: PageManagerWidget());
   }
-
-  onNotificationLowerVersion(ReceivedNotification notification) {}
 }

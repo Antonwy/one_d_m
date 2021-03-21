@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Pages/FindFriendsPage.dart';
 
 class CategoriesList extends StatefulWidget {
   final Function(int) onCategoryChanged;

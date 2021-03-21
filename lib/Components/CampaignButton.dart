@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -7,18 +6,17 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
-
 import 'AnimatedFutureBuilder.dart';
 import 'CustomOpenContainer.dart';
 
 class CampaignButton extends StatelessWidget {
-  String id;
-  Campaign campaign;
-  Color color;
-  TextStyle textStyle;
-  double elevation;
-  Function(Campaign) onPressed;
-  double borderRadius;
+  final String id;
+  final Campaign campaign;
+  final Color color;
+  final TextStyle textStyle;
+  final double elevation;
+  final Function(Campaign) onPressed;
+  final double borderRadius;
 
   CampaignButton(this.id,
       {this.campaign,

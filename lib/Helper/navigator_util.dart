@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-class MyNavigators{
 
-}
 extension MyNavigator on BuildContext {
   navigateReplace(Widget route, {isDialog = false}) =>
       Navigator.pushReplacement(
@@ -13,15 +11,14 @@ extension MyNavigator on BuildContext {
       );
 
   navigate(Widget route, {isDialog = false}) => Navigator.push(
-    this,
-    MaterialPageRoute(
-      fullscreenDialog: isDialog,
-      builder: (context) => route,
-    ),
-  );
+        this,
+        MaterialPageRoute(
+          fullscreenDialog: isDialog,
+          builder: (context) => route,
+        ),
+      );
 
-  popToFirst() =>
-      Navigator.of(this).popUntil((route) => route.isFirst);
+  popToFirst() => Navigator.of(this).popUntil((route) => route.isFirst);
 
   popView() => Navigator.pop(this);
 

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:line_icons/line_icons.dart';
@@ -25,7 +27,6 @@ import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/currency.dart';
 import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/Helper/notification_helper.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/chart/circle_painter.dart';
 import 'package:provider/provider.dart';
@@ -75,6 +76,8 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
 
   Stream<AdBalance> _adbalanceStream;
 
+  Future<Artboard> _futureRiveArtboard;
+
   @override
   void initState() {
     _selectedValue = widget.defaultSelectedAmount.toDouble();
@@ -109,26 +112,40 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         }
       }
     });
+
     if (_isAnim) {
-      _loadRive();
+      _futureRiveArtboard = _loadAndCacheRive();
     }
+
     super.initState();
   }
 
-  _loadRive() {
-    NetworkAssetBundle(Uri.parse(widget.campaign.dvAnimation))
-        .load('')
-        .then((data) async {
+  Future<Artboard> _loadAndCacheRive() async {
+    try {
+      final cacheManager = DefaultCacheManager();
+      FileInfo fileInfo = await cacheManager.getFileFromCache(
+          widget.campaign.dvAnimation); // Get video from cache first
+
+      if (fileInfo?.file == null) {
+        fileInfo = await cacheManager.downloadFile(widget.campaign.dvAnimation);
+      }
+
+      Uint8List list = await fileInfo.file.readAsBytes();
+      ByteData byteData = ByteData.view(list.buffer);
+
       final file = RiveFile();
 
-      if (file.import(data)) {
+      if (file.import(byteData)) {
         final artboard = file.mainArtboard;
 
         artboard
             .addController(_controller = SimpleAnimation(_currentAnimation));
-        setState(() => _riveArtboard = artboard);
+        _riveArtboard = artboard;
+        return artboard;
       }
-    });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -425,18 +442,22 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
     }
   }
 
-  Widget _buildHeadingAnimation() => ClipRRect(
-        borderRadius: BorderRadius.circular(18.0),
-        child: Container(
-            width: double.infinity,
-            height: 180,
-            child: _riveArtboard == null
-                ? SizedBox.shrink()
-                : Rive(
-                    fit: BoxFit.fitWidth,
-                    artboard: _riveArtboard,
-                  )),
-      );
+  Widget _buildHeadingAnimation() => FutureBuilder(
+      future: _futureRiveArtboard,
+      builder: (context, snapshot) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(18.0),
+          child: Container(
+              width: double.infinity,
+              height: 180,
+              child: !snapshot.hasData
+                  ? SizedBox.shrink()
+                  : Rive(
+                      fit: BoxFit.fitWidth,
+                      artboard: _riveArtboard,
+                    )),
+        );
+      });
 
   Widget _buildheading(String url, String title, String authorId) => Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -468,7 +489,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: _bTheme.dark),
                 ),
@@ -682,7 +703,6 @@ class DonationButton extends StatelessWidget {
     ddm.showAnimation = true;
 
     if (keyboardFocus.hasPrimaryFocus) keyboardFocus.unfocus();
-    await notificationPlugin.showNotification('Horaaa!', 'You save the world');
   }
 }
 

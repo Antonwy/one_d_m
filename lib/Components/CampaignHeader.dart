@@ -1,12 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Organisation.dart';
+import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
@@ -14,9 +12,7 @@ import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
 import 'BottomDialog.dart';
-import 'CustomOpenContainer.dart';
 import 'DonationDialogWidget.dart';
 
 class CampaignHeader extends StatefulWidget {
@@ -34,18 +30,6 @@ class CampaignHeader extends StatefulWidget {
 }
 
 class _CampaignHeaderState extends State<CampaignHeader> {
-  bool _muted = true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -111,12 +95,11 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                         Row(
                           children: [
                             Expanded(
-                              child: AutoSizeText(
-                                widget.campaign.name,
-                                style: textTheme.headline6,
-                                maxLines: 1,
-                              ),
-                            ),
+                                child: AutoSizeText(
+                              widget.campaign.name,
+                              style: textTheme.headline6,
+                              maxLines: 1,
+                            )),
                             XMargin(12),
                             Material(
                                 clipBehavior: Clip.antiAlias,
@@ -150,7 +133,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                                 children: [
                                   CampaignTag(
                                       text:
-                                          "${widget.campaign?.amount ?? 0} DV gesammelt",
+                                          "${Numeral(((widget.campaign?.amount ?? 0) / (widget.campaign?.dvController ?? 1)).round()).value()} ${widget.campaign?.unit ?? "DV"} gesammelt",
                                       color: _theme.colors.dark,
                                       textColor: _theme.colors.textOnDark,
                                       icon: Icons.info,

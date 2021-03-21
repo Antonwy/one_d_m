@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
@@ -6,7 +7,6 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
 import 'package:one_d_m/Components/PushNotification.dart';
-import 'package:one_d_m/Components/RoundButtonHomePage.dart';
 import 'package:one_d_m/Components/SettingsDialog.dart';
 import 'package:one_d_m/Components/session_post_feed.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
@@ -209,7 +209,7 @@ class __DailyReportState extends State<_DailyReport> {
                                             .textTheme.textOnContrast.bodyText1,
                                       ),
                                     ),
-                                    XMargin(6),
+                                    XMargin(12),
                                     FlatButton.icon(
                                       onPressed: () => _close(dr.date),
                                       label: Text("Schließen"),
@@ -510,13 +510,20 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                                   ),
                                                 ],
                                               ),
-                                              RoundButtonHomePage(
-                                                dark: true,
-                                                icon: Icons.settings,
-                                                onTap: () {
-                                                  BottomDialog(context)
-                                                      .show(SettingsDialog());
-                                                },
+                                              Material(
+                                                shape: CircleBorder(),
+                                                color: _theme.colors.dark,
+                                                child: IconButton(
+                                                  icon: Icon(
+                                                      CupertinoIcons
+                                                          .settings_solid,
+                                                      color: _theme
+                                                          .colors.textOnDark),
+                                                  onPressed: () {
+                                                    BottomDialog(context)
+                                                        .show(SettingsDialog());
+                                                  },
+                                                ),
                                               )
                                             ],
                                           ),
@@ -575,12 +582,12 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                           //     },
                                           //     context: context),
                                           _appBarButton(
-                                              icon: Icons.feedback,
+                                              icon: CupertinoIcons
+                                                  .exclamationmark_bubble_fill,
                                               onPressed: give_feedback,
                                               context: context),
                                           _appBarButton(
-                                              icon: Icons
-                                                  .notifications_none_rounded,
+                                              icon: CupertinoIcons.bell_fill,
                                               onPressed: () {
                                                 Navigator.push(
                                                     context,
@@ -590,7 +597,8 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                                               },
                                               context: context),
                                           _appBarButton(
-                                              icon: Icons.settings,
+                                              icon:
+                                                  CupertinoIcons.settings_solid,
                                               onPressed: () {
                                                 BottomDialog(context)
                                                     .show(SettingsDialog());

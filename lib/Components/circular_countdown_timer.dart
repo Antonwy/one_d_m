@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'custom_timer_painter.dart';
 

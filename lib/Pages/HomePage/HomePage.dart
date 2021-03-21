@@ -4,10 +4,12 @@ import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/GoalPageManager.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/HomePage/GoalPage.dart';
 import 'package:provider/provider.dart';
 
 import 'ExplorePage.dart';
@@ -24,7 +26,7 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<ProfilePageState> profileGlobalKey =
       new GlobalKey<ProfilePageState>();
   PageController _pageController = PageController(
-    initialPage: 0,
+    initialPage: 1,
     keepPage: false,
   );
   ScrollController _scrollController = ScrollController();
@@ -54,6 +56,9 @@ class HomePageState extends State<HomePage> {
                 _resetPageScroll();
               },
               children: <Widget>[
+                ChangeNotifierProvider(
+                    create: (_) => GoalPageManager(),
+                    builder: (context, child) => GoalPage()),
                 ProfilePage(
                   key: profileGlobalKey,
                   scrollController: _scrollController,
@@ -105,7 +110,7 @@ class HomePageState extends State<HomePage> {
                         ),
                         YMargin(6),
                         Text(
-                          "Alle 4 Minuten erhälst du ein Donation Vote, den du dann spenden kannst. Du kannst maximal 6 Donation Votes pro Tag erhalten.",
+                          "Alle 2 Minuten erhälst du ein Donation Vote, den du dann spenden kannst. Du kannst maximal 6 Donation Votes pro Tag erhalten.",
                           style: _theme.textTheme.dark.bodyText2,
                         ),
                       ],

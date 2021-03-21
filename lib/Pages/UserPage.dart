@@ -480,26 +480,25 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                                 ],
                               ))),
                     )),
-                IgnorePointer(
-                  ignoring: _fullVisible,
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    children: <Widget>[
-                      AppBar(
-                        leading: IconButton(
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 30,
-                          ),
-                          onPressed: () => Navigator.pop(context),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: <Widget>[
+                    AppBar(
+                      leading: IconButton(
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 30,
                         ),
-                        brightness: Brightness.dark,
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        iconTheme:
-                            IconThemeData(color: _theme.colors.textOnDark),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      Opacity(
+                      brightness: Brightness.dark,
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      iconTheme: IconThemeData(color: _theme.colors.textOnDark),
+                    ),
+                    IgnorePointer(
+                      ignoring: _fullVisible,
+                      child: Opacity(
                         opacity: percentage,
                         child: Transform.translate(
                           offset: Tween<Offset>(
@@ -532,59 +531,59 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                           ),
                         ),
                       ),
-                      Opacity(
-                        opacity: percentage,
-                        child: Transform.translate(
-                          offset: Tween<Offset>(
-                                  begin: Offset(0, _minExtend - maxExtent),
-                                  end: Offset.zero)
-                              .transform(percentage),
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                _followersCollumn(
-                                    text: "Abonnenten",
-                                    stream:
-                                        DatabaseService.getFollowedUsersStream(
-                                            user.id)),
-                                Material(
-                                  borderRadius: BorderRadius.circular(5),
-                                  clipBehavior: Clip.antiAlias,
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: (user?.donatedAmount == null
-                                                ? 0
-                                                : user.donatedAmount) >
-                                            0
-                                        ? () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (c) =>
-                                                        UsersDonationsPage(
-                                                            user)));
-                                          }
-                                        : null,
-                                    child: _textNumberColumn(
-                                        text: "Unterstützt",
-                                        number:
-                                            "${Numeral(user?.donatedAmount).value()} DV"),
-                                  ),
+                    ),
+                    Opacity(
+                      opacity: percentage,
+                      child: Transform.translate(
+                        offset: Tween<Offset>(
+                                begin: Offset(0, _minExtend - maxExtent),
+                                end: Offset.zero)
+                            .transform(percentage),
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              _followersCollumn(
+                                  text: "Abonnenten",
+                                  stream:
+                                      DatabaseService.getFollowedUsersStream(
+                                          user.id)),
+                              Material(
+                                borderRadius: BorderRadius.circular(5),
+                                clipBehavior: Clip.antiAlias,
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: (user?.donatedAmount == null
+                                              ? 0
+                                              : user.donatedAmount) >
+                                          0
+                                      ? () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (c) =>
+                                                      UsersDonationsPage(
+                                                          user)));
+                                        }
+                                      : null,
+                                  child: _textNumberColumn(
+                                      text: "Unterstützt",
+                                      number:
+                                          "${Numeral(user?.donatedAmount).value()} DV"),
                                 ),
-                                _followersCollumn(
-                                    text: "Abonniert",
-                                    stream:
-                                        DatabaseService.getFollowingUsersStream(
-                                            user.id)),
-                              ],
-                            ),
+                              ),
+                              _followersCollumn(
+                                  text: "Abonniert",
+                                  stream:
+                                      DatabaseService.getFollowingUsersStream(
+                                          user.id)),
+                            ],
                           ),
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                    )
+                  ],
                 ),
               ],
             ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CategoriesList.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
@@ -92,15 +94,16 @@ class _CategoryDialogWidget extends StatelessWidget {
                             "Wähle Kategorie",
                             style: _theme.textTheme.dark.bodyText1,
                           ),
-                          RaisedButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6)),
+                          ElevatedButton(
                             onPressed: () {
                               Navigator.pop<int>(context, _categoryIndex);
                             },
-                            child: Text("FILTERN"),
-                            color: _theme.colors.contrast,
-                            textColor: _theme.colors.textOnContrast,
+                            child: Text("FILTERN",
+                                style: TextStyle(
+                                    color: _theme.colors.textOnContrast)),
+                            style: ElevatedButton.styleFrom(
+                              primary: _theme.colors.contrast,
+                            ),
                           ),
                         ],
                       ),

@@ -275,6 +275,7 @@ class _DonateButton extends StatelessWidget {
                                         context: context,
                                         close: bd.close,
                                         sessionId: sm.baseSession.id,
+                                        uid: um.uid
                                       ));
                                     },
                               child: Text("UNTERSTÜTZEN"),

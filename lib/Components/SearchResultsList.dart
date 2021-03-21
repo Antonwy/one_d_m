@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/OrganisationButton.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/User.dart';
@@ -137,7 +138,7 @@ class SearchResultsList extends StatelessWidget {
         organisation.id,
         textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
         organisation: organisation,
-        color: Colors.white,
+        color: ColorTheme.appBg,
         elevation: 1,
       ),
     );

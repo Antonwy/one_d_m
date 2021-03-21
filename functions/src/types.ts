@@ -40,6 +40,8 @@ export interface CampaignType {
   subscribed_count: number;
   target_amount: number;
   title: string;
+  dv_controller?: number;
+  donation_unit?: string;
 }
 
 export interface NewsType {
@@ -89,6 +91,8 @@ export interface SessionType {
   end_date: FirebaseFirestore.Timestamp;
   creator_id: string;
   img_url?: string;
+  donation_goal_current?: number;
+  donation_goal?: number;
 }
 
 export interface UserSessionType {

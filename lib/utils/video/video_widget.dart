@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:video_player/video_player.dart';
 
@@ -90,7 +92,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     return FutureBuilder(
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
-        print("Snapshot $snapshot");
         if (snapshot.connectionState == ConnectionState.done) {
           _controller.setVolume(_muted ? 0 : 1);
           _chewieController = ChewieController(
@@ -132,23 +133,27 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _buildImage() {
-    // if (widget.image != null)
-    //   return Image(
-    //     image: widget.image,
-    //     fit: BoxFit.cover,
-    //   );
-    //
-    // if (widget.imageUrl != null && widget.imageUrl.isNotEmpty)
-    //   return CachedNetworkImage(
-    //     imageUrl: widget.imageUrl,
-    //     fit: BoxFit.cover,
-    //   );
+    if (widget.image != null)
+      return Image(
+        image: widget.image,
+        fit: BoxFit.cover,
+      );
+
+    if (widget.imageUrl != null && widget.imageUrl.isNotEmpty)
+      return CachedNetworkImage(
+        imageUrl: widget.imageUrl,
+        fit: BoxFit.cover,
+      );
 
     return Container(
       height: 64,
       width: 64,
+      color: ColorTheme.appBg,
       child: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          valueColor:
+              AlwaysStoppedAnimation(ThemeManager.of(context).colors.dark),
+        ),
       ),
     );
   }

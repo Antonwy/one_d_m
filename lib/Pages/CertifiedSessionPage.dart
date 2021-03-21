@@ -514,7 +514,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
           sliver: SliverToBoxAdapter(
               child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 flex: 6,
@@ -574,83 +574,6 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
             ],
           )),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(12.0, 4, 12, 6),
-          sliver: SliverToBoxAdapter(
-            child: Row(
-              children: [
-                StreamBuilder<Session>(
-                    stream: csm.sessionStream,
-                    builder: (context, snapshot) {
-                      return Expanded(
-                        flex: 4,
-                        child: _InfoView(
-                          description: "DV",
-                          value: snapshot.data?.currentAmount ??
-                              csm.session.currentAmount ??
-                              0,
-                          color: snapshot?.data?.secondaryColor ??
-                              csm.session.secondaryColor,
-                        ),
-                      );
-                    }),
-                SizedBox(
-                  width: 8,
-                ),
-                StreamBuilder<Session>(
-                    stream: csm.sessionStream,
-                    builder: (context, snapshot) {
-                      return Expanded(
-                        flex: 6,
-                        child: StreamBuilder<Campaign>(
-                            stream: csm.campaign,
-                            builder: (context, cSnap) {
-                              return CustomOpenContainer(
-                                closedShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        Constants.radius)),
-                                closedElevation: 0,
-                                openBuilder:
-                                    (context, close, scrollController) =>
-                                        NewCampaignPage(
-                                  cSnap.data,
-                                  scrollController: scrollController,
-                                ),
-                                tappable: cSnap.hasData,
-                                closedColor: csm.session.primaryColor,
-                                closedBuilder: (context, open) => _InfoView(
-                                  imageUrl: snapshot.data?.campaignImgUrl ??
-                                      csm.session.campaignImgUrl,
-                                  description: snapshot.data?.campaignName ??
-                                      csm.session.campaignName,
-                                  color: snapshot?.data?.primaryColor ??
-                                      csm.session.primaryColor,
-                                ),
-                              );
-                            }),
-                      );
-                    }),
-                SizedBox(
-                  width: 8,
-                ),
-                StreamBuilder<Session>(
-                    stream: csm.sessionStream,
-                    builder: (context, snapshot) {
-                      return Expanded(
-                        flex: 4,
-                        child: _InfoView(
-                          description: "Mitglieder",
-                          value: (snapshot.data?.memberCount ??
-                              csm.session.memberCount),
-                          color: snapshot?.data?.secondaryColor ??
-                              csm.session.secondaryColor,
-                        ),
-                      );
-                    }),
-              ],
-            ),
-          ),
-        ),
         SliverToBoxAdapter(child: _buildSessionGoal(csm, _theme)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12.0),
@@ -695,69 +618,166 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
           return (session?.donationGoal ?? 0) > 0 &&
                   session?.donationUnit != null &&
                   session?.donationUnitEffect != null
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 6.0),
-                  child: Material(
-                    color: session.secondaryColor,
-                    borderRadius: BorderRadius.circular(Constants.radius),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+              ? StreamBuilder<Campaign>(
+                  stream: csm.campaign,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return SizedBox.shrink();
+                    Campaign campaign = snapshot.data;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.flag_outlined,
-                                size: 18,
-                                color: _theme.colors.light,
+                          Material(
+                            color: session.secondaryColor,
+                            borderRadius:
+                                BorderRadius.circular(Constants.radius),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                  text:
+                                                      "${Numeral(session.donationGoalCurrent).value()} "),
+                                              if (campaign.unitSmiley != null &&
+                                                  campaign
+                                                      .unitSmiley.isNotEmpty)
+                                                TextSpan(
+                                                    text:
+                                                        "${campaign.unitSmiley}",
+                                                    style: TextStyle(
+                                                        fontSize: 38,
+                                                        fontWeight:
+                                                            FontWeight.w300))
+                                              else
+                                                TextSpan(
+                                                    text:
+                                                        "${campaign.unit ?? "DV"}",
+                                                    style: TextStyle(
+                                                        fontSize: 22,
+                                                        fontWeight:
+                                                            FontWeight.w300))
+                                            ],
+                                            style: _theme
+                                                .textTheme.light.headline5
+                                                .copyWith(
+                                                    fontSize: 38,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                          ),
+                                        ),
+                                        YMargin(8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              border: Border.all(
+                                                  color: _theme.colors.light)),
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            clipBehavior: Clip.antiAlias,
+                                            borderRadius:
+                                                BorderRadius.circular(24),
+                                            child: InkWell(
+                                              onTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            NewCampaignPage(
+                                                                campaign)));
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 4.0,
+                                                        horizontal: 12),
+                                                child: Text(
+                                                    "${campaign?.name ?? ""}",
+                                                    style: _theme.textTheme
+                                                        .light.bodyText1),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )),
+                                  YMargin(6),
+                                  Container(
+                                      width: double.infinity,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6.0),
+                                        child: PercentLine(
+                                          percent: session.donationGoalCurrent /
+                                              session.donationGoal,
+                                          height: 10.0,
+                                          color: _theme.colors.light,
+                                        ),
+                                      )),
+                                  YMargin(6.0),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "${_formatPercent(session)}% erreicht",
+                                        style: _theme.textTheme.light.bodyText1,
+                                      ),
+                                      RichText(
+                                          text: TextSpan(
+                                              style: _theme
+                                                  .textTheme.light.bodyText1
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                              children: [
+                                            TextSpan(
+                                              text: "Ziel: ",
+                                            ),
+                                            TextSpan(
+                                                text:
+                                                    "${session.donationGoal} ",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            TextSpan(
+                                                text:
+                                                    "${campaign.unitSmiley ?? campaign.unit ?? "DV"}"),
+                                          ])),
+                                    ],
+                                  )
+                                ],
                               ),
-                              XMargin(6.0),
-                              Text(
-                                "Session Ziel:",
-                                style: _theme.textTheme.light.headline6,
-                              ),
-                            ],
+                            ),
                           ),
-                          YMargin(6.0),
-                          Container(
-                              width: double.infinity,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 6.0),
-                                child: PercentLine(
-                                  percent: session.donationGoalCurrent /
-                                      session.donationGoal,
-                                  height: 8.0,
-                                  color: _theme.colors.light,
-                                ),
-                              )),
-                          YMargin(6.0),
-                          RichText(
-                              text: TextSpan(
-                                  style: _theme.textTheme.light.bodyText1
-                                      .copyWith(fontWeight: FontWeight.bold),
-                                  children: [
-                                TextSpan(
-                                    text:
-                                        "${session.donationGoalCurrent} ${session.donationUnit} "),
-                                TextSpan(
-                                    text:
-                                        "${session.donationUnitEffect}. Das Ziel sind: ",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w400)),
-                                TextSpan(
-                                    text:
-                                        "${session.donationGoal} ${session.donationUnit}."),
-                              ]))
                         ],
                       ),
-                    ),
-                  ),
-                )
+                    );
+                  })
               : SizedBox.shrink();
         });
+  }
+
+  String _formatPercent(Session session) {
+    double percentValue =
+        (session.donationGoalCurrent / session.donationGoal) * 100;
+
+    if (percentValue < 1) return percentValue.toStringAsFixed(2);
+    if ((percentValue % 1) == 0) return percentValue.toInt().toString();
+
+    return percentValue.toStringAsFixed(1);
   }
 
   Widget _buildPostFeed() => Consumer<CertifiedSessionManager>(

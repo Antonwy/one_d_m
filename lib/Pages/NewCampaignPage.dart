@@ -211,7 +211,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                   ? VideoWidget(
                                       url: widget.campaign.longVideoUrl,
                                       play: isInView,
-                                      imageUrl: widget.campaign.longVideoUrl,
+                                      imageUrl: widget.campaign.imgUrl,
                                       muted: _muted,
                                       toggleMuted: _toggleMuted,
                                     )
@@ -273,14 +273,13 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: 220,
-                              child: AutoSizeText(
-                                campaign?.name ?? "Laden...",
-                                maxLines: 1,
-                                style: _textTheme.headline5
-                                    .copyWith(fontWeight: FontWeight.w700),
-                              ),
-                            ),
+                                width: 220,
+                                child: AutoSizeText(
+                                  campaign?.name ?? "Laden...",
+                                  maxLines: 1,
+                                  style: _textTheme.headline5
+                                      .copyWith(fontWeight: FontWeight.w700),
+                                )),
                             FutureBuilder<Organisation>(
                                 future: _organizationFuture == null &&
                                         campaign?.authorId != null
@@ -358,8 +357,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           _StatCollumn(
-                              value: campaign?.amount ?? 0,
-                              description: "Donation Votes"),
+                              value: ((campaign?.amount ?? 0) /
+                                      campaign.dvController)
+                                  .round(),
+                              description:
+                                  "${campaign?.unit ?? "Donation Votes"}"),
                           XMargin(6),
                           _StatCollumn(
                               value: campaign?.subscribedCount ?? 0,

@@ -157,7 +157,7 @@ class _ColumnStats extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(
+        AutoSizeText(
           Numeral(value).value(),
           style: TextStyle(
               color: _bTheme.dark, fontSize: 32, fontWeight: FontWeight.w600),
@@ -312,6 +312,7 @@ class _CountDownPointerState extends State<CountDownPointer>
     setState(() {
       _loadingAd = show;
     });
+
     return RewardedVideoAd.instance.load(
       adUnitId: Constants.ADMOB_REWARD_ID,
     );
@@ -381,7 +382,13 @@ class _CountDownPointerState extends State<CountDownPointer>
     }
   }
 
-  void _adViewed() {
+  void _adViewed() async {
+    _collectCoin();
+    String uid = context.read<UserManager>().uid;
+    await DatabaseService.incrementAdBalance(uid);
+    PushNotification.of(context)
+        .show(NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
+
     _viewAd = false;
     _collectedDVs = 0;
     _countDownController.restart(duration: Constants.USEAGE_POINT_DURATION);
@@ -441,12 +448,6 @@ class _CountDownPointerState extends State<CountDownPointer>
         print("New DV");
         _collectedDVs++;
 
-        _collectCoin();
-        String uid = context.read<UserManager>().uid;
-        await DatabaseService.incrementAdBalance(uid);
-        PushNotification.of(context).show(
-            NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
-
         _viewAd = true;
         _countDownController.complete();
       },
@@ -492,8 +493,8 @@ class _CountDownPointerState extends State<CountDownPointer>
   bool get wantKeepAlive => true;
 }
 
-class GoalWidget extends StatelessWidget {
-  const GoalWidget({
+class DailyGoalWidget extends StatelessWidget {
+  const DailyGoalWidget({
     Key key,
     @required this.title,
     @required this.percent,

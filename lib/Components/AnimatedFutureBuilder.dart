@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AnimatedFutureBuilder<E> extends StatelessWidget {
-  Future<E> future;
-  Widget Function(BuildContext, AsyncSnapshot<E>) builder;
-  Duration duration;
-  Curve curve;
+  final Future<E> future;
+  final Widget Function(BuildContext, AsyncSnapshot<E>) builder;
+  final Duration duration;
+  final Curve curve;
 
   AnimatedFutureBuilder({
     @required this.future,

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:one_d_m/Helper/ImageUrl.dart';
 
 class News {
   static final String CAMPAIGNID = "campaign_id",
@@ -58,7 +57,7 @@ class News {
       CAMPAIGNIMGURL: campaignImgUrl,
       CREATEDAT: Timestamp.now(),
       SESSION_ID: sessionId,
-      USERID:userId
+      USERID: userId
     };
   }
 

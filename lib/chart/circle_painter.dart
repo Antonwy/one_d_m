@@ -38,8 +38,8 @@ class CirclePainter extends CustomPainter {
     paint.strokeWidth = 20;
     paint.style = PaintingStyle.stroke;
     var center = Offset(
-      getAxisX(430.0, width),
-      getAxisY(215.0, height),
+      getAxisX((width / 2) - 50, width),
+      getAxisY((height / 2) - 50, height),
     );
     var radius = getAxisBoth(200, width, height);
     _drawArcGroup(

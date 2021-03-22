@@ -102,7 +102,9 @@ class HomePageState extends State<HomePage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset("assets/images/ic_flower.png"),
+                        Image.asset(
+                          "assets/images/ic_flower.png",
+                        ),
                         YMargin(12),
                         Text(
                           "Du hast 3 DV erhalten",
@@ -110,7 +112,7 @@ class HomePageState extends State<HomePage> {
                         ),
                         YMargin(6),
                         Text(
-                          "Alle 2 Minuten erhälst du ein Donation Vote, den du dann spenden kannst. Du kannst maximal 6 Donation Votes pro Tag erhalten.",
+                          "Um mehr DVs zu erhalten, kannst du alle 2 Minuten durch einen Klick auf den Play Button ein Video anschauen. Nach dem anschauen erhälst du einen DV.",
                           style: _theme.textTheme.dark.bodyText2,
                         ),
                       ],
@@ -137,6 +139,7 @@ class HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
+              YMargin(12),
               InkPageIndicator(
                 gap: 8,
                 padding: 0,

@@ -14,7 +14,8 @@ class DailyReport {
       this.goodbye});
 
   factory DailyReport.fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    if (!doc.exists) return null;
+    Map<String, dynamic> data = doc.data() ?? {};
 
     List<Map<String, dynamic>> wwr = [];
 

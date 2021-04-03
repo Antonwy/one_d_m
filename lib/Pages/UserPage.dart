@@ -13,7 +13,6 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -250,15 +249,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
           ],
         ),
       );
-
-  List<Widget> _generateDonations(List<Donation> donations) {
-    return donations
-        .map((d) => DonationWidget(
-              d,
-              withUsername: false,
-            ))
-        .toList();
-  }
 
   List<Widget> _generateChildren() {
     List<Widget> list = [];

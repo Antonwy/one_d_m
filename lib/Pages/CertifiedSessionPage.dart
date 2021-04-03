@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +110,7 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
             titleSpacing: 0,
             iconTheme: IconThemeData(color: _theme.colors.dark),
 
-            ///removed chat feature for now
+            // removed chat feature for now
             // actions: [_CertifiedSessionPageIndicator(_pageController)],
           ),
           body: _CertifiedSessionInfoPage(
@@ -832,7 +834,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
         ),
       ));
 
-      if (rateCount >= adRate) {
+      if (Platform.isIOS && rateCount >= adRate) {
         widgets.add(Padding(
           padding: const EdgeInsets.all(10.0),
           child: NewsNativeAd(

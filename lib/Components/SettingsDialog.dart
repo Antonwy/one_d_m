@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -20,6 +21,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'DonationWidget.dart';
 
 class SettingsDialog extends StatefulWidget {
+  static Widget builder(BuildContext context) => SettingsDialog();
+
   @override
   _SettingsDialogState createState() => _SettingsDialogState();
 }
@@ -34,13 +37,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     um = Provider.of<UserManager>(context);
     _textTheme = Theme.of(context).accentTextTheme;
     ThemeManager _theme = ThemeManager.of(context);
-    return Material(
-      color: ColorTheme.navBar,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 18),
-        child: DefaultTextStyle(
-          style: TextStyle(color: ColorTheme.blue),
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(
+          Size(double.infinity, MediaQuery.of(context).size.height * .9)),
+      child: SingleChildScrollView(
+        controller: ModalScrollController.of(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 18),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -107,6 +110,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
                               if (await canLaunch(url)) {
                                 await launch(url);
+                              } else {
+                                print("Cannot launch url: $url");
                               }
                             },
                             child: Padding(

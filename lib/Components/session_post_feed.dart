@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -105,7 +106,7 @@ class PostFeedState extends State<PostFeed> {
       );
 
       ///add native add only if post length is higher than adrate
-      if (posts.length > adRate) {
+      if (Platform.isIOS && posts.length > adRate) {
         if (rateCount >= adRate) {
           widgets.add(
             Padding(
@@ -122,17 +123,6 @@ class PostFeedState extends State<PostFeed> {
 
     return widgets;
   }
-
-  Widget _buildNewsTitleWidget() => Padding(
-        padding: const EdgeInsets.only(left: 12, bottom: 10),
-        child: Text(
-          "News",
-          style: ThemeManager.of(context).textTheme.dark.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-        ),
-      );
 }
 
 class _LoadingIndicator extends StatelessWidget {

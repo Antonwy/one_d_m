@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:one_d_m/Components/CustomTextField.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -161,6 +163,9 @@ class _EditProfileState extends State<EditProfile> {
               SizedBox(height: 20),
               _textView(
                   label: "Nutzername",
+                  formatters: [
+                    FilteringTextInputFormatter.allow(RegExp("[a-z0-9-._]"))
+                  ],
                   initValue: um.user.name,
                   onChanged: (text) {
                     _name = text;
@@ -238,7 +243,11 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget _textView(
-          {Key key, String label, Function onChanged, String initValue}) =>
+          {Key key,
+          String label,
+          Function onChanged,
+          String initValue,
+          List<TextInputFormatter> formatters}) =>
       Theme(
         key: key,
         data: ThemeData.dark().copyWith(accentColor: ColorTheme.blue),
@@ -247,6 +256,7 @@ class _EditProfileState extends State<EditProfile> {
           cursorColor: ColorTheme.blue,
           initialValue: initValue,
           onChanged: onChanged,
+          inputFormatters: formatters ?? [],
           decoration: InputDecoration(
               labelText: label,
               labelStyle: TextStyle(color: ColorTheme.blue),

@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -58,7 +59,7 @@ class _NotificationPageState extends State<NotificationPage> {
       );
 
   Widget _buildFollowers() => Consumer<UserManager>(
-        builder: (context, um, child) => StreamBuilder(
+        builder: (context, um, child) => StreamBuilder<List<String>>(
           stream: DatabaseService.getFollowedUsersStream(um.uid),
           builder: (_, snapshot) {
             if (!snapshot.hasData)

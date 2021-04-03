@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
 
 import '../Components/InfoFeed.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
@@ -159,23 +158,4 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
           ),
         );
       });
-
-  Widget _buildCarousel(List<Widget> donators) => CarouselSlider(
-      items: donators,
-      options: CarouselOptions(
-        height: 90,
-        viewportFraction: 0.2,
-        initialPage: 0,
-        enableInfiniteScroll: true,
-        reverse: false,
-        autoPlay: true,
-        pauseAutoPlayInFiniteScroll: false,
-        pauseAutoPlayOnTouch: false,
-        pauseAutoPlayOnManualNavigate: false,
-        autoPlayInterval: Duration(milliseconds: 9000),
-        autoPlayAnimationDuration: Duration(milliseconds: 9000),
-        autoPlayCurve: Curves.linear,
-        enlargeCenterPage: false,
-        scrollDirection: Axis.horizontal,
-      ));
 }

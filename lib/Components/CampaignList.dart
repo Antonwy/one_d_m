@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
@@ -61,20 +63,11 @@ class _CampaignListState extends State<CampaignList> {
 
   List<Widget> _buildChildren(List<Campaign> campaigns) {
     List<Widget> list = [];
-    int adRate = Constants.AD_CAMPAIGNS_RATE;
-    int rateCount = 0;
 
     for (Campaign c in campaigns) {
-      rateCount++;
-
       list.add(CampaignHeader(
         campaign: c,
       ));
-
-      if (rateCount >= adRate) {
-        list.add(ExploreNativeAd());
-        rateCount = 0;
-      }
     }
 
     list.add(SizedBox(

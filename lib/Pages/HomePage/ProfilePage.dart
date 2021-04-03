@@ -2,6 +2,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:one_d_m/Helper/ReplaceText.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
@@ -25,9 +31,6 @@ import 'package:one_d_m/Helper/recomended_sessions.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:one_d_m/Pages/notification_page.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../DailyReportPage.dart';
 
@@ -74,7 +77,8 @@ class ProfilePageState extends State<ProfilePage>
                 builder: (context, snapshot) {
                   User user = snapshot.data;
                   return SliverPersistentHeader(
-                    delegate: _ProfileHeader(user),
+                    delegate: _ProfileHeader(user,
+                        safeArea: MediaQuery.of(context).padding.top),
                     pinned: true,
                   );
                 }),
@@ -328,11 +332,12 @@ class __GiftAvailableState extends State<_GiftAvailable> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: AutoSizeText(
-                          "Du hast ${snapshot.data.gift} DV bekommen!",
-                          style: _theme.textTheme.textOnDark.bodyText1,
-                        ),
-                      ),
+                          child: ReplaceText(
+                        text: snapshot.data.giftMessage,
+                        value: snapshot.data.gift.toString(),
+                        style: _theme.textTheme.textOnDark.bodyText1,
+                      )),
+                      XMargin(6),
                       FlatButton.icon(
                         color: _theme.colors.contrast,
                         disabledColor: _theme.colors.contrast.withOpacity(.8),
@@ -430,17 +435,17 @@ class NoContentProfilePage extends StatelessWidget {
 
 class _ProfileHeader extends SliverPersistentHeaderDelegate {
   final User user;
-  double _minExtend = 80.0, _maxExtend = 236;
+  double _minExtend, _maxExtend, safeArea;
   bool _fullVisible = true;
 
-  _ProfileHeader(this.user);
+  _ProfileHeader(this.user, {this.safeArea}) {
+    _maxExtend = safeArea + 190;
+    _minExtend = safeArea + 64;
+  }
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    ThemeManager _theme = ThemeManager.of(context);
-    _minExtend = MediaQuery.of(context).padding.top + 64.0;
-
     return LayoutBuilder(builder: (context, constraints) {
       final double percentage =
           (constraints.maxHeight - _minExtend) / (_maxExtend - minExtent);
@@ -462,205 +467,22 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
                     Opacity(
                         opacity: 1 - percentage,
                         child: IgnorePointer(
-                          ignoring: !_fullVisible,
-                          child: Container(
-                              height: constraints.maxHeight,
-                              width: constraints.maxWidth,
-                              child: Material(
-                                  color: ColorTheme.appBg,
-                                  child: SafeArea(
-                                      bottom: false,
-                                      child: Builder(builder: (context) {
-                                        AdBalance balance =
-                                            context.watch<AdBalance>();
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12.0),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .baseline,
-                                                    textBaseline:
-                                                        TextBaseline.alphabetic,
-                                                    children: [
-                                                      Text(
-                                                        '${balance?.dcBalance ?? 0}',
-                                                        style: TextStyle(
-                                                            fontSize: 24.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: _theme
-                                                                .colors.dark),
-                                                      ),
-                                                      const XMargin(5),
-                                                      Text('Donation Votes',
-                                                          style: _theme
-                                                              .textTheme
-                                                              .dark
-                                                              .bodyText1),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 5.0),
-                                                  AutoSizeText(
-                                                    'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color:
-                                                            _theme.colors.dark),
-                                                  ),
-                                                ],
-                                              ),
-                                              Material(
-                                                shape: CircleBorder(),
-                                                color: _theme.colors.dark,
-                                                child: IconButton(
-                                                  icon: Icon(
-                                                      CupertinoIcons
-                                                          .settings_solid,
-                                                      color: _theme
-                                                          .colors.textOnDark),
-                                                  onPressed: () {
-                                                    BottomDialog(context)
-                                                        .show(SettingsDialog());
-                                                  },
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        );
-                                      })))),
-                        )),
+                            ignoring: !_fullVisible,
+                            child: _ScrolledHeader(
+                              showSettings: showSettingsDialog,
+                            ))),
                     Opacity(
-                      opacity: percentage,
-                      child: Transform.translate(
-                        offset: Tween<Offset>(
-                                begin: Offset(0, _minExtend - maxExtent),
-                                end: Offset.zero)
-                            .transform(percentage),
-                        child: IgnorePointer(
-                          ignoring: _fullVisible,
-                          child: SafeArea(
-                            bottom: false,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(12, 6, 12, 0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            "Gespendet: ",
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                color: _theme.colors.dark),
-                                          ),
-                                          Text(
-                                            "${Numeral(user?.donatedAmount ?? 0).value()} DV",
-                                            style: TextStyle(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold,
-                                                color: _theme.colors.dark),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          // _appBarButton(
-                                          //     icon: Icons.message_rounded,
-                                          //     onPressed: () {
-                                          //       PushNotification.of(context)
-                                          //           .show(NotificationContent(
-                                          //               title: "Test Titel",
-                                          //               body:
-                                          //                   "Hier könnte die Beschreibung stehen."));
-                                          //     },
-                                          //     context: context),
-                                          _appBarButton(
-                                              icon: CupertinoIcons
-                                                  .quote_bubble_fill,
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            DailyReportPage()));
-                                              },
-                                              context: context),
-                                          _appBarButton(
-                                              icon: CupertinoIcons.bell_fill,
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            NotificationPage()));
-                                              },
-                                              context: context),
-                                          _appBarButton(
-                                              icon:
-                                                  CupertinoIcons.settings_solid,
-                                              onPressed: () {
-                                                BottomDialog(context)
-                                                    .show(SettingsDialog());
-                                              },
-                                              context: context),
-                                          XMargin(6),
-                                          Container(
-                                            child: CustomOpenContainer(
-                                              openBuilder: (context, close,
-                                                      controller) =>
-                                                  UserPage(user,
-                                                      scrollController:
-                                                          controller),
-                                              closedShape:
-                                                  RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              Constants
-                                                                  .radius)),
-                                              closedElevation: 0,
-                                              tappable: user != null,
-                                              closedBuilder: (context, open) =>
-                                                  RoundedAvatar(
-                                                user?.thumbnailUrl ??
-                                                    user?.imgUrl,
-                                                name: user?.name,
-                                              ),
-                                            ),
-                                            width: 40,
-                                            height: 40,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  InfoFeed(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                        opacity: percentage,
+                        child: Transform.translate(
+                            offset: Tween<Offset>(
+                                    begin: Offset(0, _minExtend - maxExtent),
+                                    end: Offset.zero)
+                                .transform(percentage),
+                            child: IgnorePointer(
+                                ignoring: _fullVisible,
+                                child: _NotScrolledHeader(
+                                  showSettings: showSettingsDialog,
+                                ))))
                   ],
                 ),
               )
@@ -671,8 +493,43 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
     });
   }
 
-  Widget _appBarButton(
-      {BuildContext context, IconData icon, void Function() onPressed}) {
+  void showSettingsDialog(BuildContext context) {
+    showMaterialModalBottomSheet(
+        context: context,
+        builder: SettingsDialog.builder,
+        backgroundColor: ColorTheme.appBg,
+        duration: Duration(milliseconds: 250),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(Constants.radius))));
+  }
+
+  @override
+  double get maxExtent => _maxExtend;
+
+  @override
+  double get minExtent => _minExtend;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
+  }
+}
+
+class _AppBarButton extends StatelessWidget {
+  const _AppBarButton({
+    Key key,
+    @required this.context,
+    @required this.icon,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final BuildContext context;
+  final IconData icon;
+  final void Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       color: ColorTheme.appBg,
       borderRadius: BorderRadius.circular(Constants.radius),
@@ -687,15 +544,166 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
               ))),
     );
   }
+}
+
+class _ScrolledHeader extends StatelessWidget {
+  final Function(BuildContext context) showSettings;
+
+  const _ScrolledHeader({Key key, this.showSettings}) : super(key: key);
 
   @override
-  double get maxExtent => _maxExtend;
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return Material(
+        color: ColorTheme.appBg,
+        child: SafeArea(
+            bottom: false,
+            child: Builder(builder: (context) {
+              AdBalance balance = context.watch<AdBalance>();
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '${balance?.dcBalance ?? 0}',
+                              style: TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: _theme.colors.dark),
+                            ),
+                            const XMargin(5),
+                            Text('Donation Votes',
+                                style: _theme.textTheme.dark.bodyText1),
+                          ],
+                        ),
+                        SizedBox(height: 5.0),
+                        AutoSizeText(
+                          'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: _theme.colors.dark),
+                        ),
+                      ],
+                    ),
+                    Material(
+                      shape: CircleBorder(),
+                      color: _theme.colors.dark,
+                      child: IconButton(
+                        icon: Icon(CupertinoIcons.settings_solid,
+                            color: _theme.colors.textOnDark),
+                        onPressed: () {
+                          showSettings(context);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              );
+            })));
+  }
+}
+
+class _NotScrolledHeader extends StatelessWidget {
+  final Function(BuildContext context) showSettings;
+
+  const _NotScrolledHeader({
+    Key key,
+    @required this.showSettings,
+  }) : super(key: key);
 
   @override
-  double get minExtent => _minExtend;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return true;
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    User user = context.watch<UserManager>().user;
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 6, 12, 0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Gespendet: ",
+                      style: TextStyle(fontSize: 15, color: _theme.colors.dark),
+                    ),
+                    Text(
+                      "${Numeral(user?.donatedAmount ?? 0).value()} DV",
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: _theme.colors.dark),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _AppBarButton(
+                        icon: CupertinoIcons.quote_bubble_fill,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DailyReportPage()));
+                        },
+                        context: context),
+                    _AppBarButton(
+                        icon: CupertinoIcons.bell_fill,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => NotificationPage()));
+                        },
+                        context: context),
+                    _AppBarButton(
+                        icon: CupertinoIcons.settings_solid,
+                        onPressed: () {
+                          showSettings(context);
+                        },
+                        context: context),
+                    XMargin(6),
+                    Container(
+                      child: CustomOpenContainer(
+                        openBuilder: (context, close, controller) =>
+                            UserPage(user, scrollController: controller),
+                        closedShape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(Constants.radius)),
+                        closedElevation: 0,
+                        tappable: user != null,
+                        closedBuilder: (context, open) => RoundedAvatar(
+                          user?.thumbnailUrl ?? user?.imgUrl,
+                          name: user?.name,
+                        ),
+                      ),
+                      width: 40,
+                      height: 40,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            InfoFeed(),
+          ],
+        ),
+      ),
+    );
   }
 }

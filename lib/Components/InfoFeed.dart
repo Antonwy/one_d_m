@@ -1,7 +1,8 @@
 import 'dart:math';
-
+import 'dart:io' show Platform;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'PushNotification.dart';
-import 'circular_countdown_timer.dart';
 
 class InfoFeed extends StatelessWidget {
   @override
@@ -195,49 +195,46 @@ class __DCInformationState extends State<_DCInformation>
             vertical: 20.0,
             horizontal: 25.0,
           ),
-          child: Column(
-            children: [
-              Builder(builder: (context) {
-                AdBalance balance = context.watch<AdBalance>();
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Builder(builder: (context) {
+            AdBalance balance = context.watch<AdBalance>();
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '${balance?.dcBalance ?? 0}',
-                              style: TextStyle(
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: ThemeManager.of(context).colors.dark),
-                            ),
-                            const XMargin(5),
-                            Text('Donation Votes'),
-                          ],
-                        ),
-                        SizedBox(height: 5.0),
-                        AutoSizeText(
-                          'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
+                        Text(
+                          '${balance?.dcBalance ?? 0}',
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                              color: ThemeManager.of(context).colors.dark),
                         ),
+                        const XMargin(5),
+                        Text('Donation Votes'),
                       ],
                     ),
-                    CountDownPointer(
-                      size: 60,
-                    )
+                    SizedBox(height: 5.0),
+                    AutoSizeText(
+                      'Entspricht ${Currency((balance?.dcBalance ?? 0) * 5).value()}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ],
-                );
-              }),
-            ],
-          )),
+                ),
+                PlayButton(
+                  size: 60,
+                )
+              ],
+            );
+          })),
     );
   }
 
@@ -245,45 +242,43 @@ class __DCInformationState extends State<_DCInformation>
   bool get wantKeepAlive => true;
 }
 
-class CountDownPointer extends StatefulWidget {
+class PlayButton extends StatefulWidget {
   final double size;
   final bool showLabel;
 
-  const CountDownPointer({
+  const PlayButton({
     Key key,
     this.size,
     this.showLabel,
   }) : super(key: key);
   @override
-  _CountDownPointerState createState() => _CountDownPointerState();
+  _PlayButtonState createState() => _PlayButtonState();
 }
 
-class _CountDownPointerState extends State<CountDownPointer>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  CountDownController _countDownController;
-  int _collectedDVs = 0;
+class _PlayButtonState extends State<PlayButton>
+    with SingleTickerProviderStateMixin {
   int _alreadyCollectedCoins = 0;
-  bool _viewAd = false, _loadingAd = true;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) {
-      _countDownController.pause();
-      _saveState();
-    } else if (!_viewAd && _alreadyCollectedCoins <= 6)
-      _countDownController.resume();
-  }
+  bool _loadingAd = true;
+  AnimationController _controller;
+  ThemeManager _theme;
 
   @override
   void initState() {
     super.initState();
 
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 750));
+    _controller.repeat(reverse: true);
+
     _initStorage();
 
-    _countDownController = CountDownController();
-    WidgetsBinding.instance.addObserver(this);
-
     _initAds();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _initAds() {
@@ -293,10 +288,6 @@ class _CountDownPointerState extends State<CountDownPointer>
         if (mounted && _loadingAd) {
           RewardedVideoAd.instance.show();
         }
-
-        setState(() {
-          _loadingAd = false;
-        });
       } else if (event == RewardedVideoAdEvent.rewarded) {
         print('REWARD');
         _adViewed();
@@ -304,6 +295,9 @@ class _CountDownPointerState extends State<CountDownPointer>
           event == RewardedVideoAdEvent.completed) {
         _loadAd(show: false);
       }
+      setState(() {
+        _loadingAd = false;
+      });
     };
     _loadAd(show: false).then((value) => print('loadAd() -> $value'));
   }
@@ -314,7 +308,9 @@ class _CountDownPointerState extends State<CountDownPointer>
     });
 
     return RewardedVideoAd.instance.load(
-      adUnitId: Constants.ADMOB_REWARD_ID,
+      adUnitId: Platform.isAndroid
+          ? Constants.ADMOB_REWARD_ID_ANDROID
+          : Constants.ADMOB_REWARD_ID,
     );
   }
 
@@ -322,7 +318,12 @@ class _CountDownPointerState extends State<CountDownPointer>
     try {
       await RewardedVideoAd.instance.show();
     } catch (err) {
-      print(err);
+      PushNotification.of(context).show(NotificationContent(
+          title: "Das hat leider nicht funktioniert.",
+          body:
+              "Momentan haben wir leider keine Werbung die wir dir zeigen können.",
+          icon: Icons.error_outline));
+      print("Ad Error: $err");
       setState(() {
         _loadingAd = false;
       });
@@ -349,37 +350,10 @@ class _CountDownPointerState extends State<CountDownPointer>
       print('LastTimeResetted != Today => resetting coins');
       await _prefs.setInt(Constants.COllECTED_COINS_KEY, 0);
       await _prefs.setString(Constants.LAST_TIME_RESETTED_COINS, today);
-      await _prefs.setDouble(Constants.TIME_REMAINING_KEY, 1.0);
     }
 
-    double _timeRemaining =
-        _prefs.getDouble(Constants.TIME_REMAINING_KEY) ?? 1.0;
-    print("TimeRemaining: $_timeRemaining");
-    _countDownController.restartFromValue(_timeRemaining);
     int _collCoins = _prefs.getInt(Constants.COllECTED_COINS_KEY) ?? 0;
     _alreadyCollectedCoins = _collCoins;
-
-    print('Collected Coins: $_collCoins');
-
-    if (_collCoins > 0) {
-      print('INIT COINS: $_collCoins');
-      int _modCoins = _collCoins % 2;
-      print('MOD COINS: $_modCoins');
-
-      if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY) {
-        _collectedDVs = _modCoins;
-        _viewAd = true;
-        _countDownController.complete();
-      } else if (_modCoins == 0 && _timeRemaining == 1.0) {
-        _collectedDVs = _modCoins;
-        _viewAd = true;
-        _countDownController.complete();
-      } else {
-        setState(() {
-          _collectedDVs = _modCoins;
-        });
-      }
-    }
   }
 
   void _adViewed() async {
@@ -388,16 +362,6 @@ class _CountDownPointerState extends State<CountDownPointer>
     await DatabaseService.incrementAdBalance(uid);
     PushNotification.of(context)
         .show(NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
-
-    _viewAd = false;
-    _collectedDVs = 0;
-    _countDownController.restart(duration: Constants.USEAGE_POINT_DURATION);
-  }
-
-  void _saveState() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    await _prefs.setDouble(
-        Constants.TIME_REMAINING_KEY, _countDownController.value);
   }
 
   void _collectCoin() async {
@@ -405,52 +369,48 @@ class _CountDownPointerState extends State<CountDownPointer>
     int collectedCoins = _prefs.getInt(Constants.COllECTED_COINS_KEY) ?? 0;
     print("collect coin: $collectedCoins");
     await _prefs.setInt(Constants.COllECTED_COINS_KEY, ++collectedCoins);
-    _alreadyCollectedCoins++;
+    _alreadyCollectedCoins = collectedCoins;
     print('Already collected coins: $_alreadyCollectedCoins');
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print("ViewAd: $_viewAd");
-    return CircularCountDownTimer(
-      controller: _countDownController,
-      duration: Constants.USEAGE_POINT_DURATION,
-      width: widget.size,
-      height: widget.size,
-      showLabel: false,
-      color: ThemeManager.of(context).colors.dark.withOpacity(0.05),
-      fillColor: ThemeManager.of(context).colors.dark,
-      strokeWidth: 5.0,
-      strokeCap: StrokeCap.round,
-      isTimerTextShown: true,
-      isReverse: true,
-      textFormat: CountdownTextFormat.MM_SS,
-      textStyle: TextStyle(
-        color: ColorTheme.blue,
-        fontWeight: FontWeight.w700,
-        fontSize: 12,
+    _theme = ThemeManager.of(context);
+    return ScaleTransition(
+      scale: Tween<double>(begin: 1.0, end: 1.2).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.linearToEaseOut)),
+      child: RotationTransition(
+        turns: Tween<double>(begin: -0.01, end: .01).animate(CurvedAnimation(
+            parent: _controller, curve: Curves.linearToEaseOut)),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) => Material(
+            child: child,
+            elevation:
+                Tween<double>(begin: 0.0, end: 16.0).animate(_controller).value,
+            borderRadius: BorderRadius.circular(Constants.radius),
+            clipBehavior: Clip.antiAlias,
+            color: _theme.colors.dark,
+          ),
+          child: InkWell(
+            onTap: _buttonClick,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buttonIcon(),
+                    YMargin(4),
+                    _buttonText(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      childBuilder: () {
-        return !_viewAd
-            ? Text(
-                _countDownController.getTime(),
-                style: TextStyle(fontWeight: FontWeight.w600),
-              )
-            : _timerEnded();
-      },
-      onComplete: () async {
-        print("New DV");
-        _collectedDVs++;
-
-        _viewAd = true;
-        _countDownController.complete();
-      },
     );
   }
 
@@ -461,36 +421,55 @@ class _CountDownPointerState extends State<CountDownPointer>
     return "Viel Spaß beim Spenden!";
   }
 
-  Widget _timerEnded() {
+  void _buttonClick() async {
+    if (_loadingAd) return;
+
+    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY) {
+      Helper.showAlert(context, "Du hast heute bereits 6 DVs gesammelt!",
+          title: "Das wars für heute!");
+      return;
+    }
+
+    await _loadAd(show: true);
+    await _showIfAlreadyAvailable();
+  }
+
+  Widget _buttonText() {
+    String text = "DV einsammeln";
     if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
-      return IconButton(
-          icon: Icon(Icons.done_rounded),
-          onPressed: () async {
-            Helper.showAlert(context, "Du hast heute bereits 6 DVs gesammelt!",
-                title: "Das wars für heute!");
-          });
+      text = "6DV gesammelt";
+    else if (_loadingAd) text = "Ad Laden...";
+
+    return AutoSizeText(text,
+        maxLines: 1,
+        minFontSize: 4,
+        style: TextStyle(fontSize: 6, color: _theme.colors.textOnDark));
+  }
+
+  Widget _buttonIcon() {
+    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
+      return Icon(
+        Icons.done_rounded,
+        color: _theme.colors.textOnDark,
+      );
 
     if (_loadingAd)
       return Container(
-        width: 25,
-        height: 25,
+        width: 15,
+        height: 15,
         child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation(ThemeManager.of(context).colors.dark),
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation(
+            _theme.colors.textOnDark,
+          ),
         ),
       );
 
-    return IconButton(
-        icon: Icon(Icons.play_arrow_rounded),
-        onPressed: () async {
-          await _loadAd(show: true);
-          await _showIfAlreadyAvailable();
-          // _adViewed();
-        });
+    return Icon(
+      CupertinoIcons.play,
+      color: _theme.colors.textOnDark,
+    );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class DailyGoalWidget extends StatelessWidget {

@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:135941554667:android:b76bf4c4b7d2fa7d8a59ae",
+        "mobilesdk_app_id": "1:135941554667:android:ee82ec25973b33f98a59ae",
         "android_client_info": {
-          "package_name": "com.onedm.one_d_m"
+          "package_name": "com.odm.onedollarmovement"
         }
       },
       "oauth_client": [

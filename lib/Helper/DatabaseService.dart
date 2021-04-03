@@ -447,7 +447,11 @@ class DatabaseService {
 
   static Future<void> createFollow(String meId, String toId) async {
     if (meId == toId) return;
-    followingCollection.doc(meId).collection(USERS).doc(toId).set({"id": toId});
+    followingCollection
+        .doc(meId)
+        .collection(USERS)
+        .doc(toId)
+        .set({"id": toId, "createdAt": Timestamp.now()});
   }
 
   static Future<void> deleteFollow(String meId, String toId) async {
@@ -485,6 +489,10 @@ class DatabaseService {
         .collection(USERS)
         .snapshots()
         .map((qs) => qs.docs.map((ds) => ds.id).toList());
+  }
+
+  static Stream<QuerySnapshot> getFollowedUsersStreamRaw(String uid) {
+    return followedCollection.doc(uid).collection(USERS).snapshots();
   }
 
   static Future<List<Campaign>> getCampaignListFromIds(List<String> ids) async {

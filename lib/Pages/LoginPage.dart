@@ -74,120 +74,124 @@ class _LoginPageState extends State<LoginPage> {
           ),
           SliverFillRemaining(
             child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Login",
-                      style: _textTheme.headline3.copyWith(
-                        color: ColorTheme.blue,
-                      ),
-                    ),
-                    Text(
-                      "Gib deine Email und dein Passwort ein.",
-                      style:
-                          _textTheme.caption.copyWith(color: ColorTheme.blue),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    CustomTextField(
-                      label: "Email",
-                      hint: "tester@gmail.com",
-                      preficIcon: Icon(Icons.email),
-                      textInputType: TextInputType.emailAddress,
-                      textColor: ColorTheme.blue,
-                      focusedColor: ColorTheme.blue,
-                      activeColor: ColorTheme.blue,
-                      autoCorrect: false,
-                      inputFormatter: [UserNameFormatter()],
-                      onChanged: (text) {
-                        _email = text.trim().toLowerCase();
-                      },
-                      validator: Validate.email,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    CustomTextField(
-                      label: "Passwort",
-                      obscureText: true,
-                      preficIcon: Icon(Icons.vpn_key),
-                      textInputType: TextInputType.visiblePassword,
-                      textColor: ColorTheme.blue,
-                      focusedColor: ColorTheme.blue,
-                      activeColor: ColorTheme.blue,
-                      onChanged: (text) {
-                        _password = text;
-                      },
-                      validator: Validate.password,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        FloatingActionButton.extended(
-                          onPressed:
-                              _um.status == Status.Authenticating || _loading
-                                  ? null
-                                  : _login,
-                          elevation: 0,
-                          highlightElevation: 7,
-                          splashColor: ColorTheme.appGrey,
-                          hoverColor: ColorTheme.appGrey,
-                          focusColor: ColorTheme.appGrey,
-                          shape: RoundedRectangleBorder(
-                              side:
-                                  BorderSide(width: 2, color: ColorTheme.blue),
-                              borderRadius: BorderRadius.circular(23)),
-                          backgroundColor: ColorTheme.appGrey,
-                          icon: _um.status == Status.Authenticating || _loading
-                              ? Container(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation(
-                                      ColorTheme.blue,
-                                    ),
-                                  ),
-                                )
-                              : Icon(Icons.done, color: ColorTheme.blue),
-                          label: Text(
-                            "Login",
-                            style: TextStyle(color: ColorTheme.blue),
-                          ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Login",
+                        style: _textTheme.headline3.copyWith(
+                          color: ColorTheme.blue,
                         ),
-                        Consumer<UserManager>(
-                          builder: (context, um, child) => InkWell(
-                            onTap: () async {
-                              String msg = await showDialog(
-                                  context: context,
-                                  builder: (context) => ResetPasswordDialog());
-                              if (msg != null) {
-                                Scaffold.of(context)
-                                    .showSnackBar(SnackBar(content: Text(msg)));
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Passwort zurücksetzen",
-                                style: TextStyle(
-                                    color: ColorTheme.blue,
-                                    decoration: TextDecoration.underline),
-                              ),
+                      ),
+                      Text(
+                        "Gib deine Email und dein Passwort ein.",
+                        style:
+                            _textTheme.caption.copyWith(color: ColorTheme.blue),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CustomTextField(
+                        label: "Email",
+                        hint: "tester@gmail.com",
+                        preficIcon: Icon(Icons.email),
+                        textInputType: TextInputType.emailAddress,
+                        textColor: ColorTheme.blue,
+                        focusedColor: ColorTheme.blue,
+                        activeColor: ColorTheme.blue,
+                        autoCorrect: false,
+                        inputFormatter: [UserNameFormatter()],
+                        onChanged: (text) {
+                          _email = text.trim().toLowerCase();
+                        },
+                        validator: Validate.email,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      CustomTextField(
+                        label: "Passwort",
+                        obscureText: true,
+                        preficIcon: Icon(Icons.vpn_key),
+                        textInputType: TextInputType.visiblePassword,
+                        textColor: ColorTheme.blue,
+                        focusedColor: ColorTheme.blue,
+                        activeColor: ColorTheme.blue,
+                        onChanged: (text) {
+                          _password = text;
+                        },
+                        validator: Validate.password,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          FloatingActionButton.extended(
+                            onPressed:
+                                _um.status == Status.Authenticating || _loading
+                                    ? null
+                                    : _login,
+                            elevation: 0,
+                            highlightElevation: 7,
+                            splashColor: ColorTheme.appGrey,
+                            hoverColor: ColorTheme.appGrey,
+                            focusColor: ColorTheme.appGrey,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    width: 2, color: ColorTheme.blue),
+                                borderRadius: BorderRadius.circular(23)),
+                            backgroundColor: ColorTheme.appGrey,
+                            icon:
+                                _um.status == Status.Authenticating || _loading
+                                    ? Container(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation(
+                                            ColorTheme.blue,
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(Icons.done, color: ColorTheme.blue),
+                            label: Text(
+                              "Login",
+                              style: TextStyle(color: ColorTheme.blue),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    YMargin(30),
-                  ],
+                          Consumer<UserManager>(
+                            builder: (context, um, child) => InkWell(
+                              onTap: () async {
+                                String msg = await showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        ResetPasswordDialog());
+                                if (msg != null) {
+                                  Scaffold.of(context).showSnackBar(
+                                      SnackBar(content: Text(msg)));
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  "Passwort zurücksetzen",
+                                  style: TextStyle(
+                                      color: ColorTheme.blue,
+                                      decoration: TextDecoration.underline),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      YMargin(30),
+                    ],
+                  ),
                 ),
               ),
             ),

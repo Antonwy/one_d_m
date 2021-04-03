@@ -24,6 +24,7 @@ class _GoalPageState extends State<GoalPage>
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            automaticallyImplyLeading: false,
             title: Row(
               children: [
                 Text("Roadmap", style: TextStyle(color: _theme.colors.dark)),

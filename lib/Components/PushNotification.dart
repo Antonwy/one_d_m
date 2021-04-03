@@ -87,7 +87,7 @@ class _PushWidgetState extends State<PushWidget>
             child: Row(
               children: [
                 Icon(
-                  Icons.notification_important,
+                  widget.content?.icon ?? Icons.notification_important,
                   color: _theme.colors.textOnDark,
                 ),
                 XMargin(12),
@@ -126,8 +126,10 @@ class _PushWidgetState extends State<PushWidget>
 
 class NotificationContent {
   String title, body;
+  IconData icon;
 
-  NotificationContent({this.title, this.body});
+  NotificationContent(
+      {this.title, this.body, this.icon = Icons.notification_important});
 
   static NotificationContent fromMessage(Map<String, dynamic> map) {
     Map<String, dynamic> tempMap;

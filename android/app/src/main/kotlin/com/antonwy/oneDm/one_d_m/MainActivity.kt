@@ -1,7 +1,7 @@
-package com.antonwy.oneDm.one_d_m
+package com.odm.onedollarmovement
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity: FlutterActivity() {
-
+    
 }

@@ -17,6 +17,8 @@ class Constants {
   static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/6108621899";
   static const String ADMOB_REWARD_ID =
       "ca-app-pub-6737404453820737/6200394305";
+  static const String ADMOB_REWARD_ID_ANDROID =
+      "ca-app-pub-6737404453820737/4245048297";
   static const String ADMOB_EXPLORE_ID =
       "ca-app-pub-6737404453820737/8020130056";
   static const String ADMOB_SESSION_ID =

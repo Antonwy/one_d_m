@@ -8,10 +8,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
@@ -237,8 +235,14 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                   padding:
                                                       const EdgeInsets.all(2.0),
                                                   child: IconButton(
-                                                      icon:
-                                                          Icon(LineIcons.minus),
+                                                      icon: Text(
+                                                        "-",
+                                                        style: TextStyle(
+                                                            fontSize: 28,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w300),
+                                                      ),
                                                       color: _bTheme.dark,
                                                       onPressed: () {
                                                         if (_selectedValue >
@@ -285,8 +289,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                                   padding:
                                                       const EdgeInsets.all(2.0),
                                                   child: IconButton(
-                                                      icon:
-                                                          Icon(LineIcons.plus),
+                                                      icon: Icon(Icons.add),
                                                       color: _bTheme.light,
                                                       onPressed: () {
                                                         if ((ddm?.adBalance
@@ -676,7 +679,7 @@ class DonationButton extends StatelessWidget {
   }
 }
 
-class DonationAnimationWidget extends HookWidget {
+class DonationAnimationWidget extends StatelessWidget {
   ThemeManager _bTheme;
   ThemeData _theme;
   final Function close;
@@ -873,43 +876,44 @@ class DonationAnimationWidget extends HookWidget {
     );
   }
 
-  Widget _buildDonatedAmountContent(int amount, Campaign campaign) => Material(
-        elevation: 1,
-        borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
-        color: _bTheme.colors.dark,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                children: [
-                  Text('Du hast ',
-                      style: _bTheme.textTheme.textOnDark.headline6),
-                  NumberSlideAnimation(
-                    number: "${(amount / campaign.dvController).round()}",
-                    duration: const Duration(seconds: 3),
-                    curve: Curves.bounceIn,
-                    textStyle: _bTheme.textTheme.textOnDark.headline6.copyWith(
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline),
-                  ),
-                  Text(' ${campaign.unitSmiley ?? campaign.unit ?? "DV"}',
-                      style: _bTheme.textTheme.textOnDark.headline6),
-                  Text('gespendet!',
-                      style: _bTheme.textTheme.textOnDark.headline6),
-                ],
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Text('Das entspricht ${amount * 5} Cent',
-                  style: _theme.textTheme.subtitle2
-                      .copyWith(color: _bTheme.colors.light.withOpacity(.7))),
-            ],
-          ),
+  Widget _buildDonatedAmountContent(int amount, Campaign campaign) {
+    return Material(
+      elevation: 1,
+      borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
+      color: _bTheme.colors.dark,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              children: [
+                Text('Du hast ', style: _bTheme.textTheme.textOnDark.headline6),
+                NumberSlideAnimation(
+                  number: "${(amount / campaign.dvController).round()}",
+                  duration: const Duration(seconds: 3),
+                  curve: Curves.bounceIn,
+                  textStyle: _bTheme.textTheme.textOnDark.headline6.copyWith(
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline),
+                ),
+                Text(' ${campaign.unitSmiley ?? campaign.unit ?? "DV"}',
+                    style: _bTheme.textTheme.textOnDark.headline6),
+                Text('gespendet!',
+                    style: _bTheme.textTheme.textOnDark.headline6),
+              ],
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Text('Das entspricht ${amount * 5} Cent',
+                style: _theme.textTheme.subtitle2
+                    .copyWith(color: _bTheme.colors.light.withOpacity(.7))),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildCampaignImage(String imageUrl) => Material(
         borderRadius: BorderRadius.circular(Constants.radius),

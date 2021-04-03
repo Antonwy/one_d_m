@@ -3,13 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:one_d_m/Helper/API/ApiError.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+// import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'StorageService.dart';
 import 'User.dart';
 
@@ -27,7 +27,7 @@ class UserManager extends ChangeNotifier {
   firebaseAuth.FirebaseAuth _auth;
   firebaseAuth.User _fireUser;
   Status _status = Status.Uninitialized;
-  GoogleSignIn _googleSignIn;
+  // GoogleSignIn _googleSignIn;
   bool firstSignIn = false;
 
   Status get status => _status;
@@ -50,10 +50,10 @@ class UserManager extends ChangeNotifier {
   firebaseAuth.FirebaseAuth get auth => _auth;
 
   UserManager.instance() {
-    _googleSignIn = GoogleSignIn(scopes: [
-      'profile',
-      'email',
-    ]);
+    // _googleSignIn = GoogleSignIn(scopes: [
+    //   'profile',
+    //   'email',
+    // ]);
     _auth = firebaseAuth.FirebaseAuth.instance;
     _auth.authStateChanges().listen(_onAuthStateChanged);
   }
@@ -67,64 +67,64 @@ class UserManager extends ChangeNotifier {
     return fireUser.delete();
   }
 
-  Future<ApiResult<firebaseAuth.User>> signInWithApple() async {
-    try {
-      final AuthorizationCredentialAppleID appleResult =
-          await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
+//   Future<ApiResult<firebaseAuth.User>> signInWithApple() async {
+//     try {
+//       final AuthorizationCredentialAppleID appleResult =
+//           await SignInWithApple.getAppleIDCredential(
+//         scopes: [
+//           AppleIDAuthorizationScopes.email,
+//           AppleIDAuthorizationScopes.fullName,
+//         ],
+//       );
 
-      final firebaseAuth.AuthCredential credential =
-          firebaseAuth.OAuthProvider('apple.com').credential(
-        accessToken: appleResult.authorizationCode,
-        idToken: appleResult.identityToken,
-      );
+//       final firebaseAuth.AuthCredential credential =
+//           firebaseAuth.OAuthProvider('apple.com').credential(
+//         accessToken: appleResult.authorizationCode,
+//         idToken: appleResult.identityToken,
+//       );
 
-      firebaseAuth.UserCredential firebaseResult =
-          await _auth.signInWithCredential(credential);
-      _fireUser = firebaseResult.user;
+//       firebaseAuth.UserCredential firebaseResult =
+//           await _auth.signInWithCredential(credential);
+//       _fireUser = firebaseResult.user;
 
-      return ApiSuccess(data: _fireUser);
-    } catch (error) {
-      print(error);
-      return ApiError("Etwas ist schief gelaufen!");
-    }
-  }
+//       return ApiSuccess(data: _fireUser);
+//     } catch (error) {
+//       print(error);
+//       return ApiError("Etwas ist schief gelaufen!");
+//     }
+//   }
 
-  Future<ApiResult<firebaseAuth.User>> signInWithGoogle() async {
-//    await _googleSignIn.signOut();
-    bool isSignedIn = await _googleSignIn.isSignedIn();
+//   Future<ApiResult<firebaseAuth.User>> signInWithGoogle() async {
+// //    await _googleSignIn.signOut();
+//     bool isSignedIn = await _googleSignIn.isSignedIn();
 
-    if (isSignedIn) {
-      _fireUser = _auth.currentUser;
-      return ApiSuccess(data: _fireUser, message: "Bereits eingeloggt");
-    }
+//     if (isSignedIn) {
+//       _fireUser = _auth.currentUser;
+//       return ApiSuccess(data: _fireUser, message: "Bereits eingeloggt");
+//     }
 
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+//     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
 
-    if (googleUser == null) return ApiError("Etwas ist schief gelaufen!");
+//     if (googleUser == null) return ApiError("Etwas ist schief gelaufen!");
 
-    GoogleSignInAuthentication googleAuthentication;
+//     GoogleSignInAuthentication googleAuthentication;
 
-    try {
-      googleAuthentication = await googleUser.authentication;
-    } on PlatformException catch (exc) {
-      return ApiError(exc.message);
-    }
+//     try {
+//       googleAuthentication = await googleUser.authentication;
+//     } on PlatformException catch (exc) {
+//       return ApiError(exc.message);
+//     }
 
-    if (googleAuthentication == null)
-      return ApiError("Etwas ist schief gelaufen!");
-    final firebaseAuth.GoogleAuthCredential credential =
-        firebaseAuth.GoogleAuthProvider.credential(
-            idToken: googleAuthentication.idToken,
-            accessToken: googleAuthentication.accessToken);
+//     if (googleAuthentication == null)
+//       return ApiError("Etwas ist schief gelaufen!");
+//     final firebaseAuth.GoogleAuthCredential credential =
+//         firebaseAuth.GoogleAuthProvider.credential(
+//             idToken: googleAuthentication.idToken,
+//             accessToken: googleAuthentication.accessToken);
 
-    _fireUser = (await _auth.signInWithCredential(credential)).user;
-    return ApiSuccess(data: _fireUser);
-  }
+//     _fireUser = (await _auth.signInWithCredential(credential)).user;
+//     return ApiSuccess(data: _fireUser);
+//   }
 
   Future<ApiResult<firebaseAuth.User>> signIn(
       String email, String password) async {
@@ -278,7 +278,7 @@ class UserManager extends ChangeNotifier {
   Future<void> logout() async {
     await DatabaseService.deleteDeviceToken(uid);
     await _auth.signOut();
-    await _googleSignIn.signOut();
+    // await _googleSignIn.signOut();
     status = Status.Unauthenticated;
   }
 

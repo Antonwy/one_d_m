@@ -98,22 +98,22 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
     );
   }
 
-  void _appleSignIn() async {
-    UserManager um = Provider.of<UserManager>(context, listen: false);
-    setState(() {
-      _loading = true;
-    });
+  // void _appleSignIn() async {
+  //   UserManager um = Provider.of<UserManager>(context, listen: false);
+  //   setState(() {
+  //     _loading = true;
+  //   });
 
-    _nextStepsSocialSignIn(await um.signInWithApple());
-  }
+  //   _nextStepsSocialSignIn(await um.signInWithApple());
+  // }
 
-  void _googleSignIn() async {
-    UserManager um = Provider.of<UserManager>(context, listen: false);
-    setState(() {
-      _loading = true;
-    });
-    _nextStepsSocialSignIn(await um.signInWithGoogle());
-  }
+  // void _googleSignIn() async {
+  //   UserManager um = Provider.of<UserManager>(context, listen: false);
+  //   setState(() {
+  //     _loading = true;
+  //   });
+  //   _nextStepsSocialSignIn(await um.signInWithGoogle());
+  // }
 
   void _nextStepsSocialSignIn(ApiResult res) async {
     print(res);

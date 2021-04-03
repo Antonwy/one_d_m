@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/NativeAd.dart';
@@ -131,7 +133,7 @@ class _NewsHomePageState extends State<NewsHomePage>
         child: NewsPost(n),
       ));
 
-      if (rateCount >= adRate) {
+      if (Platform.isIOS && rateCount >= adRate) {
         widgets.add(NewsNativeAd());
         rateCount = 0;
       }

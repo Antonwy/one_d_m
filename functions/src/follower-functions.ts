@@ -17,12 +17,14 @@ exports.createFollower = functions.firestore
     // UserId that got a new follower (Jordi)
     const followingId = context.params.followingId;
 
+    const createdAt = admin.firestore.Timestamp.now();
+
     await firestore
       .collection(DatabaseConstants.followed)
       .doc(followingId)
       .collection(DatabaseConstants.users)
       .doc(followedId)
-      .set({ id: followedId });
+      .set({ id: followedId, createdAt });
 
     const privateData = await firestore
       .collection(DatabaseConstants.user)

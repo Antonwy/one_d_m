@@ -1,22 +1,23 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/DialogHolder.dart';
+import 'package:one_d_m/Helper/DynamicLinkManager.dart';
 import 'package:one_d_m/Helper/GoalPageManager.dart';
 import 'package:one_d_m/Helper/NavBarManager.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/HomePage/GoalPage.dart';
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'ExplorePage.dart';
 import 'ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key}) : super(key: key);
+  Future initFuture;
+  HomePage({Key key, this.initFuture}) : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();
@@ -25,6 +26,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<ProfilePageState> profileGlobalKey =
       new GlobalKey<ProfilePageState>();
+
   PageController _pageController = PageController(
     initialPage: 1,
     keepPage: false,
@@ -34,10 +36,44 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    if (Provider.of<UserManager>(context, listen: false).firstSignIn) {
-      print("SHOW WELCOME");
-      Future.delayed(Duration(seconds: 1)).then((v) => showWelcomeDialog());
-    }
+
+    DynamicLinkManager.initialize(context);
+
+    Future.wait([
+      widget.initFuture ?? Future.value(),
+      Future.delayed(Duration(seconds: 1))
+    ]).then((v) {
+      _createDialogQueue();
+    });
+  }
+
+  void _createDialogQueue() async {
+    StartupDialogManager sdm = StartupDialogManager(context,
+        isFirstStart: context.read<UserManager>().firstSignIn);
+    sdm.addDialogToQueue(
+        StartDialogModel(DialogHolder.showWelcomeDialog, onFirstStart: true));
+    print("SHOULD UPDATE: ${context.read<RemoteConfigManager>().shouldUpdate}");
+    if (await _shouldShowVersionDialog())
+      sdm.addDialogToQueue(StartDialogModel(DialogHolder.showUpdateAppDialog));
+
+    sdm.showDialogs();
+  }
+
+  Future<bool> _shouldShowVersionDialog() async {
+    RemoteConfigManager _rcm = context.read<RemoteConfigManager>();
+    if (!_rcm.shouldUpdate) return false;
+
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    int _versionNumber =
+        _prefs.getInt(Constants.UPDATE_DIALOG_DO_NOT_REMIND_AGAIN) ?? -1;
+    print(_versionNumber);
+
+    if (_versionNumber == -1) return true;
+
+    if (_versionNumber == (int.tryParse(_rcm.packageInfo.buildNumber) ?? 1))
+      return false;
+
+    return true;
   }
 
   @override
@@ -78,95 +114,6 @@ class HomePageState extends State<HomePage> {
         ));
   }
 
-  void showWelcomeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        ThemeManager _theme = ThemeManager.of(context, listen: false);
-        ValueNotifier<double> _pageValue = ValueNotifier(0.0);
-        PageIndicatorController _controller = new PageIndicatorController();
-        _controller.addListener(() {
-          _pageValue.value = _controller.page;
-        });
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 350,
-                width: context.screenWidth(),
-                child: PageView(
-                  controller: _controller,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          "assets/images/ic_flower.png",
-                        ),
-                        YMargin(12),
-                        Text(
-                          "Du hast 3 DV erhalten",
-                          style: _theme.textTheme.dark.headline6,
-                        ),
-                        YMargin(6),
-                        Text(
-                          "Um mehr DVs zu erhalten, kannst du alle 2 Minuten durch einen Klick auf den Play Button ein Video anschauen. Nach dem anschauen erhälst du einen DV.",
-                          style: _theme.textTheme.dark.bodyText2,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          "assets/icons/ic_donation.png",
-                        ),
-                        YMargin(12),
-                        Text(
-                          "Spenden",
-                          style: _theme.textTheme.dark.headline6,
-                        ),
-                        YMargin(6),
-                        Text(
-                          'Du kannst an Projekt und Sessions spenden indem du den "Unterstützen" Button in der rechten unteren Ecke drückst.',
-                          style: _theme.textTheme.dark.bodyText2,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              YMargin(12),
-              InkPageIndicator(
-                gap: 8,
-                padding: 0,
-                shape: IndicatorShape.circle(4),
-                inactiveColor: ColorTheme.darkblue.withOpacity(.3),
-                activeColor: ColorTheme.darkblue,
-                inkColor: ColorTheme.darkblue,
-                page: _pageValue,
-                pageCount: 2,
-              ),
-            ],
-          ),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Constants.radius)),
-          actions: <Widget>[
-            FlatButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                textColor: _theme.colors.dark,
-                child: Text("Verstanden")),
-          ],
-        );
-      },
-    );
-  }
-
   void _changePage(int page) {
     _pageController
         .animateToPage(page,
@@ -188,4 +135,38 @@ class HomePageState extends State<HomePage> {
     _pageController.dispose();
     super.dispose();
   }
+}
+
+class StartupDialogManager {
+  final BuildContext context;
+  final bool isFirstStart;
+  List<StartDialogModel> _dialogQueue = [];
+
+  StartupDialogManager(this.context, {this.isFirstStart = false});
+
+  void addDialogToQueue(StartDialogModel dialogModel) {
+    _dialogQueue.add(dialogModel);
+  }
+
+  Future showDialogs() async {
+    print("SHOWING DIALOGS");
+    while (_dialogQueue.isNotEmpty) {
+      print("SHOW DIALOG");
+      await _showDialog(_dialogQueue.removeAt(0));
+      await Future.delayed(Duration(milliseconds: 500));
+    }
+  }
+
+  Future _showDialog(StartDialogModel model) async {
+    if (model.onFirstStart && !isFirstStart) return;
+
+    await model.build(context);
+  }
+}
+
+class StartDialogModel {
+  final bool onFirstStart;
+  final Future Function(BuildContext) build;
+
+  StartDialogModel(this.build, {this.onFirstStart = false});
 }

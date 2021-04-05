@@ -51,14 +51,16 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
           ? Consumer<UserManager>(
               builder: (context, um, child) => FloatingActionButton(
                 onPressed: () {
-                  final homepage = HomePage();
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (c) => homepage),
-                      (route) => route.isFirst);
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                      (route) => route.isCurrent);
                 },
-                backgroundColor: ColorTheme.orange,
-                child: Icon(Icons.arrow_forward),
+                backgroundColor: _theme.colors.dark,
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: _theme.colors.textOnDark,
+                ),
               ),
             )
           : null,

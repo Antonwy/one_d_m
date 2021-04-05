@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -6,10 +5,8 @@ import 'package:one_d_m/Helper/API/ApiResult.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/LoginPage.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
-import 'package:provider/provider.dart';
 
 import 'HomePage/HomePage.dart';
 
@@ -158,6 +155,7 @@ class _RoundButton extends StatelessWidget {
         child: Material(
           color: isRegister ? ColorTheme.blue : ColorTheme.appGrey,
           borderRadius: BorderRadius.circular(Constants.radius),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
               Navigator.push(

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:catcher/core/catcher.dart';
 import 'package:catcher/handlers/console_handler.dart';
 import 'package:catcher/handlers/sentry_handler.dart';
@@ -7,16 +6,22 @@ import 'package:catcher/mode/silent_report_mode.dart';
 import 'package:catcher/model/catcher_options.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/AdManager.dart';
+import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/NativeAds.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
+import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
+import 'Helper/Campaign.dart';
 import 'Helper/Constants.dart';
 import 'Pages/PageManagerWidget.dart';
 
@@ -41,7 +46,10 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ThemeManager(context)),
         Provider(
           create: (context) => PushNotificationService(context),
-        )
+        ),
+        Provider(
+          create: (context) => RemoteConfigManager(),
+        ),
       ], child: ODMApp()),
       debugConfig: debugOptions,
       releaseConfig: releaseOptions);
@@ -62,7 +70,7 @@ class _ODMAppState extends State<ODMApp> {
           ThemeHolder.themes[value];
     });
     Platform.isAndroid ? NativeAds.initialize() : null;
-    FirebaseAdMob.instance.initialize(appId: Constants.ADMOB_APP_ID);
+    FirebaseAdMob.instance.initialize(appId: AdManager.appId);
     super.initState();
   }
 

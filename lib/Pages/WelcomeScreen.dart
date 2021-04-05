@@ -109,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onPressed: () async {
                     await _getPermission();
 
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ChooseLoginMethodPage()));

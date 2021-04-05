@@ -13,9 +13,12 @@ class Constants {
       "pk_live_b82q59Wk8dCYMa2ruGWHPP27003iVVmsoY";
   static const String THEME_KEY = "theme_key";
   static const int DEFAULT_THEME_INDEX = 1;
-  static const String ADMOB_APP_ID = "ca-app-pub-6737404453820737~6152019777";
+  static const String ADMOB_APP_ID_IOS =
+      "ca-app-pub-6737404453820737~6152019777";
+  static const String ADMOB_APP_ID_ANDROID =
+      "ca-app-pub-6737404453820737~6610538948";
   static const String ADMOB_NEWS_ID = "ca-app-pub-6737404453820737/6108621899";
-  static const String ADMOB_REWARD_ID =
+  static const String ADMOB_REWARD_ID_IOS =
       "ca-app-pub-6737404453820737/6200394305";
   static const String ADMOB_REWARD_ID_ANDROID =
       "ca-app-pub-6737404453820737/4245048297";
@@ -36,6 +39,9 @@ class Constants {
   static const String TIME_REMAINING_KEY = "time_remaining_key";
   static const String COllECTED_COINS_KEY = "collected_coins_key";
   static const String LAST_TIME_RESETTED_COINS = "last_time_resetted_coins";
+
+  static const String UPDATE_DIALOG_DO_NOT_REMIND_AGAIN =
+      "update_dialog_do_not_remind_again";
 
   static const int IMG_CHANGE_POINT = 3;
 

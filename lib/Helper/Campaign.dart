@@ -63,17 +63,17 @@ class Campaign {
       this.moreImages,
       this.dvAnimation,
       this.thumbnailUrl,
-      this.maxAnimCount,
-      this.dvController,
+      this.maxAnimCount = 3,
+      this.dvController = 1,
       this.categoryId,
       this.shortVideoUrl,
       this.longVideoUrl,
-      this.donationEffects,
-      this.effects,
-      this.tags,
-      this.unit,
+      this.donationEffects = const [],
+      this.effects = const [],
+      this.tags = const [],
+      this.unit = "DV",
       this.unitSmiley,
-      this.singularUnit});
+      this.singularUnit = "DV"});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
@@ -154,7 +154,7 @@ class Campaign {
 
   @override
   String toString() {
-    return 'Campaign{name: $name, description: $description, city: $city, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, id: $id, authorId: $authorId}';
+    return 'Campaign{name: $name, description: $description, city: $city, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, id: $id, authorId: $authorId, tags: $tags}';
   }
 
   @override

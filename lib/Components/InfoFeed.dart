@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
+import 'package:one_d_m/Helper/AdManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
+import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -257,18 +259,42 @@ class PlayButton extends StatefulWidget {
 
 class _PlayButtonState extends State<PlayButton>
     with SingleTickerProviderStateMixin {
-  int _alreadyCollectedCoins = 0;
+  int _alreadyCollectedCoins = 0, _maxDVs;
   bool _loadingAd = true;
   AnimationController _controller;
   ThemeManager _theme;
+  Animation<double> _curvedAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 750));
-    _controller.repeat(reverse: true);
+    _maxDVs = context.read<RemoteConfigManager>().maxDVs;
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+
+    _curvedAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutSine,
+    );
+
+    _controller.addStatusListener((status) {
+      switch (status) {
+        case AnimationStatus.completed:
+          _controller.reverse();
+          break;
+        case AnimationStatus.dismissed:
+          Future.delayed(Duration(seconds: 5)).then((val) {
+            if (!done) _controller.forward();
+          });
+          break;
+        default:
+      }
+    });
+    _controller.forward();
 
     _initStorage();
 
@@ -308,9 +334,7 @@ class _PlayButtonState extends State<PlayButton>
     });
 
     return RewardedVideoAd.instance.load(
-      adUnitId: Platform.isAndroid
-          ? Constants.ADMOB_REWARD_ID_ANDROID
-          : Constants.ADMOB_REWARD_ID,
+      adUnitId: AdManager.rewardedAdUnitId,
     );
   }
 
@@ -364,6 +388,8 @@ class _PlayButtonState extends State<PlayButton>
         .show(NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
   }
 
+  bool get done => _alreadyCollectedCoins >= _maxDVs;
+
   void _collectCoin() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     int collectedCoins = _prefs.getInt(Constants.COllECTED_COINS_KEY) ?? 0;
@@ -377,21 +403,15 @@ class _PlayButtonState extends State<PlayButton>
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return ScaleTransition(
-      scale: Tween<double>(begin: 1.0, end: 1.2).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.linearToEaseOut)),
-      child: RotationTransition(
-        turns: Tween<double>(begin: -0.01, end: .01).animate(CurvedAnimation(
-            parent: _controller, curve: Curves.linearToEaseOut)),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) => Material(
-            child: child,
-            elevation:
-                Tween<double>(begin: 0.0, end: 16.0).animate(_controller).value,
-            borderRadius: BorderRadius.circular(Constants.radius),
-            clipBehavior: Clip.antiAlias,
-            color: _theme.colors.dark,
-          ),
+      scale: Tween<double>(begin: 1.0, end: 1.1).animate(_curvedAnimation),
+      child: SlideTransition(
+        position: Tween<Offset>(begin: Offset.zero, end: Offset(0, -.08))
+            .animate(_curvedAnimation),
+        child: Material(
+          borderRadius: BorderRadius.circular(Constants.radius),
+          clipBehavior: Clip.antiAlias,
+          color: _theme.colors.dark,
+          elevation: 12,
           child: InkWell(
             onTap: _buttonClick,
             child: AspectRatio(
@@ -415,8 +435,7 @@ class _PlayButtonState extends State<PlayButton>
   }
 
   String _pushMsgTitle() {
-    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
-      return "Das wars für heute. Vielen Dank für deine Aktivität!";
+    if (done) return "Das wars für heute. Vielen Dank für deine Aktivität!";
 
     return "Viel Spaß beim Spenden!";
   }
@@ -424,8 +443,8 @@ class _PlayButtonState extends State<PlayButton>
   void _buttonClick() async {
     if (_loadingAd) return;
 
-    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY) {
-      Helper.showAlert(context, "Du hast heute bereits 6 DVs gesammelt!",
+    if (done) {
+      Helper.showAlert(context, "Du hast heute bereits $_maxDVs DVs gesammelt!",
           title: "Das wars für heute!");
       return;
     }
@@ -436,8 +455,8 @@ class _PlayButtonState extends State<PlayButton>
 
   Widget _buttonText() {
     String text = "DV einsammeln";
-    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
-      text = "6DV gesammelt";
+    if (done)
+      text = "${_maxDVs}DV gesammelt";
     else if (_loadingAd) text = "Ad Laden...";
 
     return AutoSizeText(text,
@@ -447,7 +466,7 @@ class _PlayButtonState extends State<PlayButton>
   }
 
   Widget _buttonIcon() {
-    if (_alreadyCollectedCoins >= Constants.DVS_PER_DAY)
+    if (done)
       return Icon(
         Icons.done_rounded,
         color: _theme.colors.textOnDark,

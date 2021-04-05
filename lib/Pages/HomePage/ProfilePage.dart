@@ -516,32 +516,37 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
   }
 }
 
-class _AppBarButton extends StatelessWidget {
-  const _AppBarButton({
+class AppBarButton extends StatelessWidget {
+  const AppBarButton({
     Key key,
-    @required this.context,
-    @required this.icon,
+    this.icon,
+    this.child,
+    this.color,
+    this.iconColor,
     @required this.onPressed,
   }) : super(key: key);
 
-  final BuildContext context;
   final IconData icon;
+  final Color color, iconColor;
+  final Widget child;
   final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ColorTheme.appBg,
+      color: color ?? ColorTheme.appBg,
       borderRadius: BorderRadius.circular(Constants.radius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
           onTap: onPressed,
           child: Padding(
               padding: const EdgeInsets.all(8),
-              child: Icon(
-                icon,
-                color: ThemeManager.of(context).colors.dark,
-              ))),
+              child: icon == null
+                  ? child
+                  : Icon(
+                      icon,
+                      color: iconColor ?? ThemeManager.of(context).colors.dark,
+                    ))),
     );
   }
 }
@@ -654,30 +659,30 @@ class _NotScrolledHeader extends StatelessWidget {
                 ),
                 Row(
                   children: <Widget>[
-                    _AppBarButton(
-                        icon: CupertinoIcons.quote_bubble_fill,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DailyReportPage()));
-                        },
-                        context: context),
-                    _AppBarButton(
-                        icon: CupertinoIcons.bell_fill,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NotificationPage()));
-                        },
-                        context: context),
-                    _AppBarButton(
-                        icon: CupertinoIcons.settings_solid,
-                        onPressed: () {
-                          showSettings(context);
-                        },
-                        context: context),
+                    AppBarButton(
+                      icon: CupertinoIcons.quote_bubble_fill,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DailyReportPage()));
+                      },
+                    ),
+                    AppBarButton(
+                      icon: CupertinoIcons.bell_fill,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NotificationPage()));
+                      },
+                    ),
+                    AppBarButton(
+                      icon: CupertinoIcons.settings_solid,
+                      onPressed: () {
+                        showSettings(context);
+                      },
+                    ),
                     XMargin(6),
                     Container(
                       child: CustomOpenContainer(
@@ -687,6 +692,7 @@ class _NotScrolledHeader extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(Constants.radius)),
                         closedElevation: 0,
+                        closedColor: ColorTheme.appBg,
                         tappable: user != null,
                         closedBuilder: (context, open) => RoundedAvatar(
                           user?.thumbnailUrl ?? user?.imgUrl,

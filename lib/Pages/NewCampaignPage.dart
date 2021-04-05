@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
@@ -16,6 +18,7 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/DynamicLinkManager.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
@@ -24,11 +27,12 @@ import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/Pages/FullscreenImages.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -73,40 +77,50 @@ class _NewCampaignPageState extends State<NewCampaignPage>
         ? null
         : DatabaseService.getOrganisation(widget.campaign?.authorId);
 
-    _campaignStream = widget.campaign?.id == null
-        ? null
-        : DatabaseService.getCampaignStream(widget.campaign?.id);
+    _campaignStream = DatabaseService.getCampaignStream(widget.campaign?.id);
 
     super.initState();
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _shareCampaign() async {
+    if ((campaign?.name?.isEmpty ?? true) ||
+        (campaign?.imgUrl?.isEmpty ?? true)) return;
+    Share.share(
+        (await DynamicLinkManager.createCampaignLink(campaign)).toString());
   }
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _bTheme = ThemeManager.of(context).colors;
-    return Scaffold(
-        backgroundColor: ColorTheme.appBg,
-        floatingActionButton: OfflineBuilder(
-            child: Container(),
-            connectivityBuilder: (context, connection, child) {
-              bool activated = connection != ConnectivityResult.none;
-              return Consumer<UserManager>(builder: (context, um, child) {
-                return StreamBuilder<Campaign>(
-                    initialData: widget.campaign,
-                    stream: _campaignStream,
-                    builder: (context, snapshot) {
+    return StreamBuilder<Campaign>(
+        initialData: widget.campaign,
+        stream: _campaignStream,
+        builder: (context, snapshot) {
+          campaign = snapshot.data;
+          return Scaffold(
+              backgroundColor: ColorTheme.appBg,
+              floatingActionButton: OfflineBuilder(
+                  child: Container(),
+                  connectivityBuilder: (context, connection, child) {
+                    bool activated = connection != ConnectivityResult.none;
+                    return Consumer<UserManager>(builder: (context, um, child) {
                       return FloatingActionButton.extended(
                           backgroundColor:
                               activated ? _bTheme.dark : Colors.grey,
                           label: Text("Unterstützen"),
-                          onPressed: activated
+                          onPressed: activated &&
+                                  snapshot.connectionState ==
+                                      ConnectionState.active &&
+                                  snapshot.hasData
                               ? () {
+                                  print(snapshot);
                                   BottomDialog bd = BottomDialog(context);
                                   bd.show(DonationDialogWidget(
                                     campaign: snapshot.data,
@@ -121,21 +135,19 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                   Helper.showConnectionSnackBar(context);
                                 });
                     });
-              });
-            }),
-        body: StreamBuilder<Campaign>(
-            initialData: widget.campaign,
-            stream: _campaignStream,
-            builder: (context, snapshot) {
-              campaign = snapshot.data;
-
-              return CustomScrollView(controller: _scrollController, slivers: [
+                  }),
+              body: CustomScrollView(controller: _scrollController, slivers: [
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
                   leading: BackButton(
                     color: _bTheme.dark,
                   ),
                   actions: [
+                    Center(
+                      child: AppBarButton(
+                          icon: CupertinoIcons.share,
+                          onPressed: _shareCampaign),
+                    ),
                     FutureBuilder<Organisation>(
                         future: _organizationFuture == null &&
                                 campaign?.authorId != null
@@ -207,18 +219,18 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           borderRadius: BorderRadius.circular(6),
                           child: Stack(
                             children: [
-                              widget.campaign.longVideoUrl != null
+                              campaign?.longVideoUrl != null
                                   ? VideoWidget(
-                                      url: widget.campaign.longVideoUrl,
+                                      url: campaign?.longVideoUrl,
                                       play: isInView,
-                                      imageUrl: widget.campaign.imgUrl,
+                                      imageUrl: campaign?.imgUrl,
                                       muted: _muted,
                                       toggleMuted: _toggleMuted,
                                     )
                                   : CachedNetworkImage(
                                       width: double.infinity,
                                       height: 260,
-                                      imageUrl: widget.campaign.imgUrl,
+                                      imageUrl: campaign?.imgUrl ?? "",
                                       fit: BoxFit.cover,
                                       errorWidget: (_, __, ___) => Container(
                                         height: 260,
@@ -245,7 +257,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      widget.campaign?.longVideoUrl != null
+                                      campaign?.longVideoUrl != null
                                           ? MuteButton(
                                               muted: _muted,
                                               toggle: _toggleMuted,
@@ -325,9 +337,9 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                           ],
                         ),
                         Consumer<UserManager>(builder: (context, um, child) {
-                          return um.uid == widget.campaign?.adminId &&
-                                  widget.campaign?.adminId != null &&
-                                  widget.campaign.adminId.isNotEmpty
+                          return um.uid == campaign?.adminId &&
+                                  campaign?.adminId != null &&
+                                  campaign.adminId.isNotEmpty
                               ? _createPostButton()
                               : StreamBuilder<bool>(
                                   initialData: false,
@@ -357,8 +369,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           _StatCollumn(
-                              value: ((campaign?.amount ?? 0) /
-                                      campaign.dvController)
+                              value: ((campaign?.amount ?? 0.0) /
+                                      (campaign?.dvController ?? 1.0))
                                   .round(),
                               description:
                                   "${campaign?.unit ?? "Donation Votes"}"),
@@ -400,11 +412,12 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                 SliverToBoxAdapter(
                   child: YMargin(100),
                 )
-              ]);
-            }));
+              ]));
+        });
   }
 
   Widget _buildTags() {
+    print("TAGS: ${campaign.tags}");
     return campaign.tags.isNotEmpty &&
             campaign.tags.where((el) => el.isNotEmpty).isNotEmpty
         ? Padding(
@@ -413,7 +426,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
               spacing: 6,
               runSpacing: 6,
               children: [
-                for (String tag in widget.campaign?.tags ?? [])
+                for (String tag in campaign?.tags)
                   if (tag.isNotEmpty) CampaignTag(text: tag)
               ],
             ),
@@ -477,10 +490,10 @@ class _NewCampaignPageState extends State<NewCampaignPage>
 
   Widget _buildCampaignSessions() => SliverToBoxAdapter(
         child: StreamBuilder(
-            stream: widget.campaign?.id == null
+            stream: campaign?.id == null
                 ? null
                 : DatabaseService.getCertifiedSessionsFromCampaign(
-                    widget.campaign?.id),
+                    campaign?.id),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<Session> sessions = snapshot.data;
@@ -631,7 +644,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
         closedElevation: 0,
         openBuilder: (context, close, scrollController) => CreatePostScreen(
           isSession: false,
-          campaign: widget.campaign,
+          campaign: campaign,
           controller: scrollController,
         ),
         closedColor: Colors.transparent,

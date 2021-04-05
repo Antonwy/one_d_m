@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/PushNotification.dart';
+import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
@@ -24,11 +25,29 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   StreamSubscription _fmStream;
   HomePage _homePage;
+  Future<void> _initAppFuture;
+  Future<void> _startupFuture;
 
   @override
   void initState() {
     super.initState();
-    _homePage = HomePage();
+    _initAppFuture = initializeApp();
+    _startupFuture =
+        Future.wait([_initAppFuture, Future.delayed(Duration(seconds: 2))]);
+    _homePage = HomePage(
+      initFuture: _startupFuture,
+    );
+  }
+
+  @override
+  void dispose() {
+    if (_fmStream != null) _fmStream.cancel();
+    super.dispose();
+  }
+
+  Future<void> initializeApp() async {
+    RemoteConfigManager _rcm = context.read<RemoteConfigManager>();
+    await _rcm.initialize();
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -45,12 +64,6 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
         // TODO optional
       },
     );
-  }
-
-  @override
-  void dispose() {
-    if (_fmStream != null) _fmStream.cancel();
-    super.dispose();
   }
 
   @override
@@ -79,7 +92,7 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     }
 
     return FutureBuilder(
-        future: Future.delayed(Duration(milliseconds: 2000)),
+        future: _startupFuture,
         builder: (context, snapshot) {
           return Stack(
             children: <Widget>[

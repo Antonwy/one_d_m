@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Session.dart';
 
-abstract class BaseSessionManager {
+abstract class BaseSessionManager extends ChangeNotifier {
   final BaseSession baseSession;
   Stream<List<SessionMember>> membersStream;
   Stream<List<Donation>> donationStream;
@@ -103,7 +104,14 @@ class CertifiedSessionManager extends BaseSessionManager {
   void initStreams() {
     isInSession = DatabaseService.userIsInSession(uid, baseSession.id);
     membersStream = DatabaseService.getSessionMembers(baseSession.id, 100);
-    donationStream = DatabaseService.getDonationsFromSession(baseSession.id);
-    campaign = DatabaseService.getCampaignStream(session.campaignId);
+    campaign = session.campaignId == null
+        ? null
+        : DatabaseService.getCampaignStream(session.campaignId);
+    sessionStream.listen((session) {
+      this.session = session;
+      if (session.campaignId != null)
+        campaign = DatabaseService.getCampaignStream(session.campaignId);
+      notifyListeners();
+    });
   }
 }

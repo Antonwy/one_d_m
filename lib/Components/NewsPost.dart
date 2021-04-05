@@ -61,7 +61,7 @@ class _NewsPostState extends State<NewsPost> {
         var visiblePercentage = (info.visibleFraction) * 100;
         if (mounted) {
           if (visiblePercentage == 100) {
-            widget.onPostSeen();
+            widget?.onPostSeen();
             setState(() {
               widget.isInView = true;
             });

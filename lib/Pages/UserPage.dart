@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -13,6 +14,7 @@ import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/DynamicLinkManager.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Session.dart';
@@ -22,8 +24,10 @@ import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/EditProfile.dart';
 import 'package:one_d_m/Pages/FollowersListPage.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 class UserPage extends StatefulWidget {
   User user;
@@ -432,6 +436,11 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   UserHeader(this.user);
 
+  Future<void> _shareUser() async {
+    if ((user?.name?.isEmpty ?? true)) return;
+    Share.share((await DynamicLinkManager.createUserLink(user)).toString());
+  }
+
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -491,6 +500,17 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       iconTheme: IconThemeData(color: _theme.colors.textOnDark),
+                      actions: [
+                        Center(
+                          child: AppBarButton(
+                            onPressed: _shareUser,
+                            color: _theme.colors.dark,
+                            iconColor: _theme.colors.textOnDark,
+                            icon: CupertinoIcons.share,
+                          ),
+                        ),
+                        XMargin(12)
+                      ],
                     ),
                     IgnorePointer(
                       ignoring: _fullVisible,

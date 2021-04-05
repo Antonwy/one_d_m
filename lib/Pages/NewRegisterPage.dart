@@ -47,11 +47,6 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
     _um = Provider.of<UserManager>(context);
     _socialSignIn = widget.socialSignIn;
 
-    if (_um.status == Status.Authenticated)
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        Navigator.pop(context);
-      });
-
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: ColorTheme.blue,
@@ -346,7 +341,9 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
       if (_password1 != _password2) {
         _showSnackBar("Deine Passwörter stimmen nicht überein!");
         _um.status = Status.Unauthenticated;
-        setState(() {});
+        setState(() {
+          _loading = false;
+        });
         return;
       }
 

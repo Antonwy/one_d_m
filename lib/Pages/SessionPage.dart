@@ -92,30 +92,33 @@ class FloatingDonationButton extends StatelessWidget {
         connectivityBuilder: (context, connection, child) {
           bool _connected = connection != ConnectivityResult.none;
           return Consumer<UserManager>(
-            builder: (context, um, child) => FloatingActionButton.extended(
-                onPressed: _connected
-                    ? () async {
-                        BottomDialog bd = BottomDialog(context);
-                        bd.show(DonationDialogWidget(
-                          campaign: await DatabaseService.getCampaign(
-                              session.campaignId),
-                          user: um.user,
-                          context: context,
-                          close: bd.close,
-                          sessionId: session.id,
-                          uid: um.uid,
-                        ));
-                      }
-                    : null,
-                label: Text(
-                  "Unterstützen",
-                  style: TextStyle(
-                      color: _connected
-                          ? _theme.colors.textOnDark
-                          : Colors.white60),
-                ),
-                backgroundColor:
-                    _connected ? color ?? _theme.colors.dark : Colors.grey),
+            builder: (context, um, child) {
+              bool _active = _connected && session?.campaignId != null;
+              return FloatingActionButton.extended(
+                  onPressed: _active
+                      ? () async {
+                          BottomDialog bd = BottomDialog(context);
+                          bd.show(DonationDialogWidget(
+                            campaign: await DatabaseService.getCampaign(
+                                session.campaignId),
+                            user: um.user,
+                            context: context,
+                            close: bd.close,
+                            sessionId: session.id,
+                            uid: um.uid,
+                          ));
+                        }
+                      : null,
+                  label: Text(
+                    "Unterstützen",
+                    style: TextStyle(
+                        color: _active
+                            ? _theme.colors.textOnDark
+                            : Colors.white60),
+                  ),
+                  backgroundColor:
+                      _active ? color ?? _theme.colors.dark : Colors.grey);
+            },
           );
         });
   }

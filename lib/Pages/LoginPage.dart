@@ -12,12 +12,7 @@ import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/VerifyEmailPage.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatefulWidget {
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
+class LoginPage extends StatelessWidget {
   TextTheme _textTheme;
 
   String _password, _email;
@@ -27,33 +22,13 @@ class _LoginPageState extends State<LoginPage> {
 
   GlobalKey<FormState> _formKey = GlobalKey();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  BuildContext context;
 
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     _textTheme = Theme.of(context).textTheme;
     _um = Provider.of<UserManager>(context);
-
-    if (_um.status == Status.Authenticated)
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-            (route) => route.isFirst);
-      });
-    if (_um.status == Status.Unverified && _loading == false) {
-      _loading = true;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-        try {
-          ContactManager.uploadPhoneNumbers(
-              await ContactManager.phoneNumberList());
-        } on PermissionException catch (e) {
-          print(e);
-        }
-
-        Navigator.push(
-            context, MaterialPageRoute(builder: (c) => VerifyEmailPage()));
-      });
-    }
 
     return Scaffold(
       key: _scaffoldKey,
@@ -164,29 +139,26 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(color: ColorTheme.blue),
                             ),
                           ),
-                          Consumer<UserManager>(
-                            builder: (context, um, child) => InkWell(
-                              onTap: () async {
-                                String msg = await showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        ResetPasswordDialog());
-                                if (msg != null) {
-                                  Scaffold.of(context).showSnackBar(
-                                      SnackBar(content: Text(msg)));
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  "Passwort zurücksetzen",
-                                  style: TextStyle(
-                                      color: ColorTheme.blue,
-                                      decoration: TextDecoration.underline),
-                                ),
+                          InkWell(
+                            onTap: () async {
+                              String msg = await showDialog(
+                                  context: context,
+                                  builder: (context) => ResetPasswordDialog());
+                              if (msg != null) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text(msg)));
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Passwort zurücksetzen",
+                                style: TextStyle(
+                                    color: ColorTheme.blue,
+                                    decoration: TextDecoration.underline),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                       YMargin(30),
@@ -207,6 +179,27 @@ class _LoginPageState extends State<LoginPage> {
 
     if (res.hasError()) {
       _showSnackBar(res.message);
+    }
+
+    if (_um.status == Status.Authenticated)
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+          (route) => route.isCurrent);
+
+    if (_um.status == Status.Unverified && !_loading) {
+      _loading = true;
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        try {
+          ContactManager.uploadPhoneNumbers(
+              await ContactManager.phoneNumberList());
+        } on PermissionException catch (e) {
+          print(e);
+        }
+
+        Navigator.push(
+            context, MaterialPageRoute(builder: (c) => VerifyEmailPage()));
+      });
     }
 
     await _um.afterAuthentication();

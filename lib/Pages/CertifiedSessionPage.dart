@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/Avatar.dart';
@@ -14,6 +15,7 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/DynamicLinkManager.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
@@ -23,11 +25,13 @@ import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class CertifiedSessionPage extends StatefulWidget {
@@ -52,8 +56,6 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
   ScrollController _scrollController;
   ValueNotifier _scrollOffset;
 
-  ImageProvider _sessionImage;
-
   @override
   void initState() {
     _scrollController = widget.scrollController ?? ScrollController();
@@ -69,8 +71,6 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
       _pagePosition.value = _pageController.page;
     });
 
-    _sessionImage = CachedNetworkImageProvider(widget.session.imgUrl ?? '');
-
     super.initState();
   }
 
@@ -81,11 +81,18 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
     super.dispose();
   }
 
+  Future<void> _shareSession(Session session) async {
+    if ((session?.name?.isEmpty ?? true) || (session?.imgUrl?.isEmpty ?? true))
+      return;
+    Share.share(
+        (await DynamicLinkManager.createSessionLink(session)).toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     UserManager _um = Provider.of<UserManager>(context, listen: false);
-    return Provider<CertifiedSessionManager>(
+    return ChangeNotifierProvider<CertifiedSessionManager>(
       create: (context) =>
           CertifiedSessionManager(session: session, uid: _um.uid),
       builder: (context, child) {
@@ -96,9 +103,11 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
               opacity: 1 - val,
               child: Transform.scale(
                 scale: 1 - val,
-                child: FloatingDonationButton(
-                  session,
-                  color: session.primaryColor,
+                child: Consumer<CertifiedSessionManager>(
+                  builder: (context, csm, child) => FloatingDonationButton(
+                    csm.session,
+                    color: session.primaryColor,
+                  ),
                 ),
               ),
             ),
@@ -111,12 +120,21 @@ class _CertifiedSessionPageState extends State<CertifiedSessionPage> {
             iconTheme: IconThemeData(color: _theme.colors.dark),
 
             // removed chat feature for now
-            // actions: [_CertifiedSessionPageIndicator(_pageController)],
+            actions: [
+              Center(
+                child: Consumer<CertifiedSessionManager>(
+                  builder: (context, csm, child) => AppBarButton(
+                    onPressed: () => _shareSession(csm.session),
+                    icon: CupertinoIcons.share,
+                  ),
+                ),
+              ),
+              XMargin(12),
+            ],
           ),
           body: _CertifiedSessionInfoPage(
             controller: _scrollController,
-            sessionId: widget.session.id,
-            image: _sessionImage,
+            sessionId: session.id,
           ),
 
           ///removed chat feature for now
@@ -454,10 +472,8 @@ class _ChatTextField extends StatelessWidget {
 class _CertifiedSessionInfoPage extends StatefulWidget {
   ScrollController controller;
   final String sessionId;
-  ImageProvider image;
 
-  _CertifiedSessionInfoPage(
-      {Key key, this.controller, this.sessionId, this.image})
+  _CertifiedSessionInfoPage({Key key, this.controller, this.sessionId})
       : super(key: key);
 
   @override
@@ -471,7 +487,6 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
 
   @override
   void initState() {
-    widget.controller = ScrollController()..addListener(() {});
     super.initState();
   }
 
@@ -479,8 +494,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return Consumer<CertifiedSessionManager>(
-      builder: (context, csm, child) =>
-          CustomScrollView(controller: widget.controller, slivers: [
+      builder: (context, csm, child) => CustomScrollView(slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           sliver: SliverToBoxAdapter(
@@ -506,7 +520,6 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                   clipBehavior: Clip.antiAliasWithSaveLayer,
                   child: _CertifiedSessionTitle(
                     isInView: _isInView,
-                    image: widget.image,
                   )),
             ),
           ),
@@ -526,7 +539,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     AutoSizeText(
-                      csm.session.name,
+                      csm.session?.name ?? "Laden...",
                       maxLines: 1,
                       style: Theme.of(context).textTheme.headline6.copyWith(
                           fontWeight: FontWeight.bold,
@@ -565,7 +578,7 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
               XMargin(12),
               Expanded(
                 flex: 3,
-                child: csm.session.creatorId?.isNotEmpty ?? true
+                child: csm.session?.creatorId?.isNotEmpty ?? true
                     ? Consumer<UserManager>(
                         builder: (context, um, child) =>
                             um.uid == csm.session.creatorId
@@ -613,163 +626,141 @@ class __CertifiedSessionInfoPageState extends State<_CertifiedSessionInfoPage> {
   }
 
   Widget _buildSessionGoal(CertifiedSessionManager csm, ThemeManager _theme) {
-    return StreamBuilder<Session>(
-        stream: csm.sessionStream,
-        builder: (context, snapshot) {
-          Session session = snapshot.data;
-          return (session?.donationGoal ?? 0) > 0 &&
-                  session?.donationUnit != null &&
-                  session?.donationUnitEffect != null
-              ? StreamBuilder<Campaign>(
-                  stream: csm.campaign,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return SizedBox.shrink();
-                    Campaign campaign = snapshot.data;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Material(
-                            color: session.secondaryColor,
-                            borderRadius:
-                                BorderRadius.circular(Constants.radius),
-                            child: Padding(
+    Session session = csm?.session;
+    return (session?.donationGoal ?? 0) > 0 &&
+            session?.donationUnit != null &&
+            session?.donationUnitEffect != null
+        ? StreamBuilder<Campaign>(
+            stream: csm.campaign,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return SizedBox.shrink();
+              Campaign campaign = snapshot.data;
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Material(
+                      color: session.secondaryColor,
+                      borderRadius: BorderRadius.circular(Constants.radius),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                                child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Center(
-                                      child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
+                                  RichText(
+                                    text: TextSpan(
                                       children: [
-                                        RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                  text:
-                                                      "${Numeral(session.donationGoalCurrent).value()} "),
-                                              if (campaign.unitSmiley != null &&
-                                                  campaign
-                                                      .unitSmiley.isNotEmpty)
-                                                TextSpan(
-                                                    text:
-                                                        "${campaign.unitSmiley}",
-                                                    style: TextStyle(
-                                                        fontSize: 38,
-                                                        fontWeight:
-                                                            FontWeight.w300))
-                                              else
-                                                TextSpan(
-                                                    text:
-                                                        "${campaign.unit ?? "DV"}",
-                                                    style: TextStyle(
-                                                        fontSize: 22,
-                                                        fontWeight:
-                                                            FontWeight.w300))
-                                            ],
-                                            style: _theme
-                                                .textTheme.light.headline5
-                                                .copyWith(
-                                                    fontSize: 38,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                          ),
-                                        ),
-                                        YMargin(8),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
-                                              border: Border.all(
-                                                  color: _theme.colors.light)),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            clipBehavior: Clip.antiAlias,
-                                            borderRadius:
-                                                BorderRadius.circular(24),
-                                            child: InkWell(
-                                              onTap: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            NewCampaignPage(
-                                                                campaign)));
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 4.0,
-                                                        horizontal: 12),
-                                                child: Text(
-                                                    "${campaign?.name ?? ""}",
-                                                    style: _theme.textTheme
-                                                        .light.bodyText1),
-                                              ),
-                                            ),
-                                          ),
-                                        )
+                                        TextSpan(
+                                            text:
+                                                "${Numeral(session.donationGoalCurrent).value()} "),
+                                        if (campaign.unitSmiley != null &&
+                                            campaign.unitSmiley.isNotEmpty)
+                                          TextSpan(
+                                              text: "${campaign.unitSmiley}",
+                                              style: TextStyle(
+                                                  fontSize: 38,
+                                                  fontWeight: FontWeight.w300))
+                                        else
+                                          TextSpan(
+                                              text: "${campaign.unit ?? "DV"}",
+                                              style: TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.w300))
                                       ],
+                                      style: _theme.textTheme.light.headline5
+                                          .copyWith(
+                                              fontSize: 38,
+                                              fontWeight: FontWeight.bold),
                                     ),
-                                  )),
-                                  YMargin(6),
+                                  ),
+                                  YMargin(8),
                                   Container(
-                                      width: double.infinity,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 6.0),
-                                        child: PercentLine(
-                                          percent: session.donationGoalCurrent /
-                                              session.donationGoal,
-                                          height: 10.0,
-                                          color: _theme.colors.light,
-                                        ),
-                                      )),
-                                  YMargin(6.0),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "${_formatPercent(session)}% erreicht",
-                                        style: _theme.textTheme.light.bodyText1,
-                                      ),
-                                      RichText(
-                                          text: TextSpan(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(
+                                            color: _theme.colors.light)),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      clipBehavior: Clip.antiAlias,
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      NewCampaignPage(
+                                                          campaign)));
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 4.0, horizontal: 12),
+                                          child: Text("${campaign?.name ?? ""}",
                                               style: _theme
-                                                  .textTheme.light.bodyText1
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                              children: [
-                                            TextSpan(
-                                              text: "Ziel: ",
-                                            ),
-                                            TextSpan(
-                                                text:
-                                                    "${session.donationGoal} ",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            TextSpan(
-                                                text:
-                                                    "${campaign.unitSmiley ?? campaign.unit ?? "DV"}"),
-                                          ])),
-                                    ],
+                                                  .textTheme.light.bodyText1),
+                                        ),
+                                      ),
+                                    ),
                                   )
                                 ],
                               ),
-                            ),
-                          ),
-                        ],
+                            )),
+                            YMargin(6),
+                            Container(
+                                width: double.infinity,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6.0),
+                                  child: PercentLine(
+                                    percent: session.donationGoalCurrent /
+                                        session.donationGoal,
+                                    height: 10.0,
+                                    color: _theme.colors.light,
+                                  ),
+                                )),
+                            YMargin(6.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${_formatPercent(session)}% erreicht",
+                                  style: _theme.textTheme.light.bodyText1,
+                                ),
+                                RichText(
+                                    text: TextSpan(
+                                        style: _theme.textTheme.light.bodyText1
+                                            .copyWith(
+                                                fontWeight: FontWeight.w400),
+                                        children: [
+                                      TextSpan(
+                                        text: "Ziel: ",
+                                      ),
+                                      TextSpan(
+                                          text: "${session.donationGoal} ",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      TextSpan(
+                                          text:
+                                              "${campaign.unitSmiley ?? campaign.unit ?? "DV"}"),
+                                    ])),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                    );
-                  })
-              : SizedBox.shrink();
-        });
+                    ),
+                  ],
+                ),
+              );
+            })
+        : SizedBox.shrink();
   }
 
   String _formatPercent(Session session) {
@@ -927,10 +918,8 @@ class _InfoView extends StatelessWidget {
 
 class _CertifiedSessionTitle extends StatefulWidget {
   final bool isInView;
-  final ImageProvider image;
 
-  const _CertifiedSessionTitle({Key key, this.isInView, this.image})
-      : super(key: key);
+  const _CertifiedSessionTitle({Key key, this.isInView}) : super(key: key);
 
   @override
   __CertifiedSessionTitleState createState() => __CertifiedSessionTitleState();
@@ -949,9 +938,9 @@ class __CertifiedSessionTitleState extends State<_CertifiedSessionTitle> {
   Widget build(BuildContext context) {
     return Consumer<CertifiedSessionManager>(
       builder: (context, csm, child) => csm.session?.videoUrl == null
-          ? Image(
+          ? CachedNetworkImage(
               height: 220,
-              image: widget.image,
+              imageUrl: csm.session?.imgUrl ?? "",
               fit: BoxFit.cover,
             )
           : Stack(
@@ -959,7 +948,7 @@ class __CertifiedSessionTitleState extends State<_CertifiedSessionTitle> {
                 VideoWidget(
                   url: csm.session.videoUrl,
                   play: widget.isInView,
-                  image: widget.image,
+                  imageUrl: csm.session.imgUrl,
                   muted: _muted,
                   toggleMuted: _toggleMuted,
                 ),
@@ -1040,6 +1029,7 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Consumer<CertifiedSessionManager>(
         builder: (context, sm, child) => SizedBox(
@@ -1069,7 +1059,8 @@ class __CertifiedSessionMembersState extends State<_CertifiedSessionMembers> {
                                         CertifiedSessionManager>(
                                     member: uniqueAllMembers[index],
                                     showTargetAmount: true,
-                                    color: sm.session.primaryColor,
+                                    color: sm.session?.primaryColor ??
+                                        _theme.colors.dark,
                                     avatarColor: Colors.white,
                                     avatarBackColor: sm.session.secondaryColor,
                                     donationUnit: snapshot.data?.unit ?? "DV",

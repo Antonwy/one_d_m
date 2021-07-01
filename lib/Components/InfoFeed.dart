@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:io' show Platform;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
@@ -383,6 +384,7 @@ class _PlayButtonState extends State<PlayButton>
   void _adViewed() async {
     _collectCoin();
     String uid = context.read<UserManager>().uid;
+    context.read<FirebaseAnalytics>().logEvent(name: "Reward earned");
     await DatabaseService.incrementAdBalance(uid);
     PushNotification.of(context)
         .show(NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));

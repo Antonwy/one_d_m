@@ -17,7 +17,8 @@ class Campaign {
       thumbnailUrl,
       adminId,
       shortVideoUrl,
-      longVideoUrl;
+      longVideoUrl,
+      blurHash;
   final List<String> moreImages, donationEffects, effects, tags;
 
   static final String ID = "id",
@@ -46,6 +47,7 @@ class Campaign {
       DV_CONTROLLER = "dv_controller",
       UNIT = "donation_unit",
       UNIT_SMILEY = "donation_unit_smiley",
+      BLUR_HASH = "blur_hash",
       SINGULAR_UNIT = "donation_unit_singular";
 
   Campaign(
@@ -73,42 +75,44 @@ class Campaign {
       this.tags = const [],
       this.unit = "DV",
       this.unitSmiley,
-      this.singularUnit = "DV"});
+      this.singularUnit = "DV",
+      this.blurHash});
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) {
     return Campaign(
-      id: snapshot.id,
-      name: snapshot.data()[NAME],
-      amount: snapshot.data()[AMOUNT],
-      description: snapshot.data()[DESCRIPTION],
-      shortDescription: snapshot.data()[SHORTDESCRIPTION],
-      subscribedCount: snapshot.data()[SUBSCRIBEDCOUNT],
-      createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
-      imgUrl: snapshot.data()[IMAGEURL],
-      thumbnailUrl: snapshot.data()[THUMBNAILURL] ?? '',
-      authorId: snapshot.data()[AUTHORID],
-      shortVideoUrl: snapshot.data()[SHORTVIDEOURL],
-      longVideoUrl: snapshot.data()[LONGVIDEOURL],
-      adminId: snapshot.data()[ADMINID],
-      dvController: snapshot.data()[DV_CONTROLLER] ?? 1,
-      maxAnimCount: snapshot.data()[MAX_ANIM_COUNT] ?? 3,
-      unit: snapshot.data()[UNIT],
-      unitSmiley: snapshot.data()[UNIT_SMILEY],
-      singularUnit: snapshot.data()[SINGULAR_UNIT] ?? snapshot.data()[UNIT],
-      categoryId: snapshot.data()[CATEGORYID],
-      dvAnimation: snapshot.data()[DV_ANIMATION] ?? '',
-      moreImages: snapshot.data()[MOREIMAGES] == null
-          ? []
-          : List.from(snapshot.data()[MOREIMAGES]),
-      effects: snapshot.data()[EFFECTS] == null
-          ? []
-          : List.from(snapshot.data()[EFFECTS]),
-      donationEffects: snapshot.data()[DONATION_EFFECTS] == null
-          ? []
-          : List.from(snapshot.data()[DONATION_EFFECTS]),
-      tags:
-          snapshot.data()[TAGS] == null ? [] : List.from(snapshot.data()[TAGS]),
-    );
+        id: snapshot.id,
+        name: snapshot.data()[NAME],
+        amount: snapshot.data()[AMOUNT],
+        description: snapshot.data()[DESCRIPTION],
+        shortDescription: snapshot.data()[SHORTDESCRIPTION],
+        subscribedCount: snapshot.data()[SUBSCRIBEDCOUNT],
+        createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
+        imgUrl: snapshot.data()[IMAGEURL],
+        thumbnailUrl: snapshot.data()[THUMBNAILURL] ?? '',
+        authorId: snapshot.data()[AUTHORID],
+        shortVideoUrl: snapshot.data()[SHORTVIDEOURL],
+        longVideoUrl: snapshot.data()[LONGVIDEOURL],
+        adminId: snapshot.data()[ADMINID],
+        dvController: snapshot.data()[DV_CONTROLLER] ?? 1,
+        maxAnimCount: snapshot.data()[MAX_ANIM_COUNT] ?? 3,
+        unit: snapshot.data()[UNIT],
+        unitSmiley: snapshot.data()[UNIT_SMILEY],
+        singularUnit: snapshot.data()[SINGULAR_UNIT] ?? snapshot.data()[UNIT],
+        categoryId: snapshot.data()[CATEGORYID],
+        dvAnimation: snapshot.data()[DV_ANIMATION] ?? '',
+        moreImages: snapshot.data()[MOREIMAGES] == null
+            ? []
+            : List.from(snapshot.data()[MOREIMAGES]),
+        effects: snapshot.data()[EFFECTS] == null
+            ? []
+            : List.from(snapshot.data()[EFFECTS]),
+        donationEffects: snapshot.data()[DONATION_EFFECTS] == null
+            ? []
+            : List.from(snapshot.data()[DONATION_EFFECTS]),
+        tags: snapshot.data()[TAGS] == null
+            ? []
+            : List.from(snapshot.data()[TAGS]),
+        blurHash: snapshot.data()[BLUR_HASH]);
   }
 
   static Campaign fromShortSnapshot(DocumentSnapshot snapshot) {

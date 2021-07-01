@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 
 import 'Constants.dart';
@@ -12,6 +13,10 @@ class Helper {
       hexCode = "FF" + hexCode;
     }
     return Color(int.parse(hexCode, radix: 16));
+  }
+
+  static String colorToHex(Color color) {
+    return '#' + color.value.toRadixString(16).substring(2);
   }
 
   static double mapValue(n, start1, stop1, start2, stop2) {
@@ -85,5 +90,13 @@ class Helper {
     return Scaffold.of(context)
         .showSnackBar(SnackBar(content: Text("Stelle eine Verbindung her!")))
         .closed;
+  }
+
+  static Future<void> showConnectionPushNotification(BuildContext context) {
+    NotificationContent content = NotificationContent(
+        title: "Keine Verbindung",
+        body: "Stelle eine Verbindung zum Internet her.",
+        icon: Icons.wifi_off);
+    return PushNotification.of(context).show(content);
   }
 }

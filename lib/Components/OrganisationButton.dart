@@ -32,7 +32,7 @@ class OrganisationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedFutureBuilder<Organisation>(
         future: organisation == null
-            ? DatabaseService.getCampaign(id)
+            ? DatabaseService.getOrganisation(id)
             : Future.value(organisation),
         builder: (context, snapshot) {
           if (snapshot.hasData)

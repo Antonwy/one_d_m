@@ -1,5 +1,12 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CampaignButton.dart';
@@ -8,45 +15,55 @@ import 'package:one_d_m/Components/CustomTextField.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Provider/CreateSessionManager.dart';
+import 'package:one_d_m/Helper/Provider/SessionManager.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Helper/margin.dart';
+import 'package:one_d_m/Pages/SessionPage.dart';
+
 import 'package:provider/provider.dart';
 
-class CreateSessionPage extends StatelessWidget {
-  ScrollController _scrollController;
-  ThemeManager _theme;
+import 'HomePage/ProfilePage.dart';
 
-  CreateSessionPage(this._scrollController);
+class CreateSessionPage extends StatelessWidget {
+  ThemeManager _theme;
+  BaseSession _baseSession;
+
+  CreateSessionPage([this._baseSession]);
 
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return ChangeNotifierProvider<CreateSessionManager>(
-      create: (context) => CreateSessionManager(),
+      create: (context) =>
+          CreateSessionManager(context, baseSession: _baseSession),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorTheme.appBg,
         floatingActionButton:
             Consumer<CreateSessionManager>(builder: (context, csm, child) {
+          Color textColor = _theme.correctColorFor(csm.primaryColor);
           return FloatingActionButton.extended(
-            backgroundColor: _theme.colors.contrast,
+            backgroundColor: csm.primaryColor,
             label: Text(
-              "Fertig",
-              style: TextStyle(color: _theme.colors.textOnContrast),
+              csm.editMode ? "Updaten" : "Erstellen",
+              style: TextStyle(color: textColor),
             ),
             icon: csm.loading
                 ? Container(
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation(_theme.colors.textOnContrast),
+                      valueColor: AlwaysStoppedAnimation(textColor),
                     ))
                 : Icon(
                     Icons.done,
-                    color: _theme.colors.textOnContrast,
+                    color: textColor,
                   ),
             onPressed: csm.loading
                 ? null
@@ -65,78 +82,232 @@ class CreateSessionPage extends StatelessWidget {
           );
         }),
         body: CustomScrollView(
-          controller: _scrollController,
           slivers: [
-            SliverAppBar(
-              title: Text(
-                "Session erstellen",
-                style: TextStyle(color: _theme.colors.dark),
-              ),
-              iconTheme: IconThemeData(color: _theme.colors.dark),
-              backgroundColor: Colors.white,
-            ),
             SliverToBoxAdapter(
-                child: Column(
+                child: Stack(
               children: [
-                SizedBox(
-                  height: 20,
+                Container(
+                  height: MediaQuery.of(context).size.width,
+                  width: double.infinity,
+                  child: Consumer<CreateSessionManager>(
+                    builder: (context, csm, child) {
+                      print(csm.image);
+                      Color textColor =
+                          _theme.correctColorFor(csm.secondaryColor);
+                      return Material(
+                        color: csm.secondaryColor,
+                        child: InkWell(
+                          onTap: () async {
+                            ImagePicker picker = ImagePicker();
+                            PickedFile file = await picker.getImage(
+                                source: ImageSource.gallery);
+
+                            if (file?.path != null) csm.image = File(file.path);
+                          },
+                          child: getTitleImage(csm, textColor),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                SvgPicture.asset(
-                  "assets/images/sessions.svg",
-                  height: 120,
-                ),
-                SizedBox(
-                  height: 10,
+                Positioned(
+                  left: 12,
+                  top: MediaQuery.of(context).padding.top,
+                  right: 12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AppBarButton(
+                          elevation: 10,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icons.arrow_back),
+                      Consumer<CreateSessionManager>(
+                        builder: (context, csm, child) => AppBarButton(
+                          elevation: 10,
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        SessionPage(csm.previewSession)));
+                          },
+                          text: "Vorschau",
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             )),
+            _ColorPicker(),
             _SessionNameInput(),
             _SessionDescriptionInput(),
             _DonationTarget(),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Projekt",
-                      style: _theme.textTheme.dark.headline6,
-                    ),
-                    Text(
-                      "Wähle ein Projekt, an das während der Session gespendet werden soll.",
-                      style: _theme.textTheme.dark.caption,
-                    ),
-                  ],
+            if (_baseSession == null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Projekt",
+                        style: _theme.textTheme.dark.headline6,
+                      ),
+                      Text(
+                        "Wähle ein Projekt, an das während der Session gespendet werden soll.",
+                        style: _theme.textTheme.dark.caption,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            _CampaignOptions(),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Freunde",
-                      style: _theme.textTheme.dark.headline6,
-                    ),
-                    Text(
-                      "Wähle die Freunde aus, die der Session beitreten sollen.",
-                      style: _theme.textTheme.dark.caption,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _FriendsOptions(),
+            if (_baseSession == null) _CampaignOptions(),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 120,
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget getTitleImage(CreateSessionManager csm, Color textColor) {
+    if (csm.image != null) {
+      return Image.file(
+        csm.image,
+        fit: BoxFit.cover,
+      );
+    }
+
+    if (csm.editMode)
+      return CachedNetworkImage(
+          imageUrl: csm.baseSession.imgUrl, fit: BoxFit.cover);
+
+    return SafeArea(
+      bottom: false,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.photo,
+              color: textColor,
+            ),
+            YMargin(12),
+            Text(
+              "Wähle ein Titelbild für deine Session aus!",
+              style:
+                  _theme.textTheme.correctColorFor(csm.secondaryColor).caption,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ColorPicker extends StatelessWidget {
+  ThemeManager _theme;
+  BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
+    _theme = ThemeManager.of(context);
+    this.context = context;
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+        child: Consumer<CreateSessionManager>(
+          builder: (context, csm, child) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Farben",
+                style: _theme.textTheme.dark.headline6,
+              ),
+              Text(
+                "Wähle zwei Farben für deine Session.",
+                style: _theme.textTheme.dark.caption,
+              ),
+              YMargin(12),
+              Row(
+                children: [
+                  _colorWidget(
+                      text: "Primary",
+                      color: csm.primaryColor,
+                      onChangeColor: (color) => csm.primaryColor = color),
+                  XMargin(12),
+                  _colorWidget(
+                      text: "Secondary",
+                      color: csm.secondaryColor,
+                      onChangeColor: (color) => csm.secondaryColor = color)
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _colorWidget(
+      {String text, Color color, void Function(Color) onChangeColor}) {
+    return Expanded(
+      child: Material(
+        color: color,
+        elevation: 1,
+        borderRadius: BorderRadius.circular(Constants.radius),
+        child: InkWell(
+          onTap: () async {
+            Color mColor = await showDialog<Color>(
+                context: context,
+                builder: (context) {
+                  Color selectedColor = color;
+                  return AlertDialog(
+                    contentPadding: const EdgeInsets.all(12),
+                    title: Text("Wähle $text color"),
+                    content: MaterialColorPicker(
+                      shrinkWrap: true,
+                      elevation: 0,
+                      allowShades: true,
+                      onColorChange: (color) => selectedColor = color,
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "Abbrechen",
+                            style: TextStyle(color: Colors.red),
+                          )),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, selectedColor);
+                        },
+                        child: Text("Auswählen",
+                            style: TextStyle(color: _theme.colors.dark)),
+                      ),
+                    ],
+                  );
+                });
+            if (mColor != null) onChangeColor(mColor);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 18),
+            child: Center(
+              child: Text(text,
+                  style: ThemeData.estimateBrightnessForColor(color) ==
+                          Brightness.dark
+                      ? _theme.textTheme.light.bodyText1
+                      : _theme.textTheme.dark.bodyText1),
+            ),
+          ),
         ),
       ),
     );
@@ -150,14 +321,22 @@ class _DonationTarget extends StatefulWidget {
 
 class __DonationTargetState extends State<_DonationTarget> {
   ThemeManager _theme;
-  int _targetAmount = 3;
+
+  int _targetAmount = 100;
+
+  @override
+  void initState() {
+    super.initState();
+    CreateSessionManager csm = context.read<CreateSessionManager>();
+    if (csm.editMode) _targetAmount = csm.baseSession.donationGoal;
+  }
 
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -166,7 +345,7 @@ class __DonationTargetState extends State<_DonationTarget> {
               style: _theme.textTheme.dark.headline6,
             ),
             Text(
-              "Überlege dir wieviel DV jeder Nutzer spenden soll.",
+              "Überlege dir was das Ziel dieser Session ist.",
               style: _theme.textTheme.dark.caption,
             ),
             SizedBox(
@@ -174,42 +353,46 @@ class __DonationTargetState extends State<_DonationTarget> {
             ),
             Row(
               children: [
-                Material(
-                  color: _theme.colors.contrast,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Theme(
-                    data: ThemeData(
-                        accentColor: _theme.colors.textOnContrast,
-                        textTheme: TextTheme(
-                            body1: TextStyle(
-                                color: _theme.colors.textOnContrast
-                                    .withOpacity(.8)))),
-                    child: NumberPicker.horizontal(
-                      initialValue: _targetAmount,
-                      minValue: 1,
-                      maxValue: 100,
-                      listViewHeight: 80,
-                      onChanged: (n) {
-                        setState(() {
-                          _targetAmount = n;
-                        });
-                        Provider.of<CreateSessionManager>(context,
-                                listen: false)
-                            .amountPerUser = n;
-                      },
-                    ),
-                  ),
+                Consumer<CreateSessionManager>(
+                  builder: (context, csm, child) {
+                    int step = 10;
+                    return Material(
+                      color: csm.secondaryColor,
+                      borderRadius: BorderRadius.circular(12),
+                      child: NumberPicker.horizontal(
+                        initialValue: _targetAmount,
+                        minValue: 10,
+                        maxValue: 10000,
+                        step: step,
+                        listViewHeight: 80,
+                        haptics: true,
+                        textStyle: TextStyle(
+                            color: _theme
+                                .correctColorFor(csm.secondaryColor)
+                                .withOpacity(.5)),
+                        selectedTextStyle: TextStyle(
+                            color: _theme.correctColorFor(csm.secondaryColor),
+                            fontWeight: FontWeight.bold),
+                        onChanged: (n) {
+                          setState(() {
+                            _targetAmount = n;
+                          });
+                          csm.donationGoal = n;
+                        },
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(
                   width: 12,
                 ),
-                Text(
-                  "DV ",
-                  style: _theme.textTheme.dark.headline6,
-                ),
-                Text(
-                  "pro Session Mitglied.",
-                  style: _theme.textTheme.dark.bodyText1,
+                Consumer<CreateSessionManager>(
+                  builder: (context, csm, child) => Text(
+                    csm.editMode
+                        ? csm.baseSession.donationUnit
+                        : (csm.selectedCampaign?.unit ?? "DV"),
+                    style: _theme.textTheme.dark.bodyText1,
+                  ),
                 ),
               ],
             )
@@ -220,12 +403,7 @@ class __DonationTargetState extends State<_DonationTarget> {
   }
 }
 
-class _SessionNameInput extends StatefulWidget {
-  @override
-  __SessionNameInputState createState() => __SessionNameInputState();
-}
-
-class __SessionNameInputState extends State<_SessionNameInput> {
+class _SessionNameInput extends StatelessWidget {
   ThemeManager _theme;
 
   TextEditingController _controller = TextEditingController();
@@ -237,7 +415,7 @@ class __SessionNameInputState extends State<_SessionNameInput> {
       child: Consumer<UserManager>(
         builder: (context, um, child) {
           String sessionDefaultName =
-              "${um.user.name[0].toUpperCase()}${um.user.name.substring(1)}'s Session";
+              "${um.user.name[0].toUpperCase()}${um.user.name.substring(1)}s Session";
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
 
@@ -266,10 +444,13 @@ class __SessionNameInputState extends State<_SessionNameInput> {
                 ),
                 CustomTextField(
                   controller: _controller,
-                  focusedColor: _theme.colors.contrast,
+                  focusedColor: _theme.colors.dark,
                   textColor: _theme.colors.dark,
                   hint: "e.g. Spendenaktion",
                   label: "Session Name",
+                  inputFormatter: [
+                    FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9-._ ]"))
+                  ],
                   onChanged: (txt) {
                     csm.sessionName = txt;
                   },
@@ -283,13 +464,7 @@ class __SessionNameInputState extends State<_SessionNameInput> {
   }
 }
 
-class _SessionDescriptionInput extends StatefulWidget {
-  @override
-  __SessionDescriptionInputState createState() =>
-      __SessionDescriptionInputState();
-}
-
-class __SessionDescriptionInputState extends State<_SessionDescriptionInput> {
+class _SessionDescriptionInput extends StatelessWidget {
   ThemeManager _theme;
 
   TextEditingController _controller = TextEditingController();
@@ -302,6 +477,9 @@ class __SessionDescriptionInputState extends State<_SessionDescriptionInput> {
         builder: (context, um, child) {
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
+
+          if (csm.editMode && (_controller.text?.isEmpty ?? true))
+            _controller.text = csm.baseSession.sessionDescription;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -321,7 +499,7 @@ class __SessionDescriptionInputState extends State<_SessionDescriptionInput> {
                 ),
                 CustomTextField(
                   controller: _controller,
-                  focusedColor: _theme.colors.contrast,
+                  focusedColor: _theme.colors.dark,
                   textColor: _theme.colors.dark,
                   maxLines: 4,
                   maxLength: 200,
@@ -336,87 +514,6 @@ class __SessionDescriptionInputState extends State<_SessionDescriptionInput> {
           );
         },
       ),
-    );
-  }
-}
-
-class _FriendsOptions extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserManager>(
-      builder: (context, um, child) => StreamBuilder<List<String>>(
-        stream: DatabaseService.getFollowingUsersStream(um.uid),
-        builder: (context, snapshot) {
-          List<String> userIds = snapshot.data ?? [];
-
-          if (snapshot.connectionState == ConnectionState.done &&
-              userIds.isEmpty)
-            return SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-                child: Text(
-                    "Um eine Session zu erstellen, musst du mindestens 2 Freunde abonniert haben!"),
-              ),
-            );
-
-          return SliverList(
-            delegate: SliverChildBuilderDelegate(
-                (context, index) => Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 6),
-                      child: _UserButton(userIds[index]),
-                    ),
-                childCount: userIds.length),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _UserButton extends StatelessWidget {
-  String uid;
-  ThemeManager _theme;
-
-  _UserButton(this.uid);
-
-  @override
-  Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
-    return FutureBuilder<User>(
-      future: DatabaseService.getUser(uid),
-      builder: (context, snapshot) {
-        User user = snapshot.data;
-        CreateSessionManager csm = Provider.of<CreateSessionManager>(context);
-
-        bool selected = csm.selectedUsers.contains(user);
-
-        return Card(
-          margin: const EdgeInsets.all(0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-            child: Row(
-              children: [
-                Avatar(user?.imgUrl),
-                SizedBox(
-                  width: 12,
-                ),
-                Text(
-                  user?.name ?? "Laden...",
-                  style: _theme.textTheme.dark.bodyText1,
-                ),
-                Expanded(child: Container()),
-                TurningAddButton(
-                  selected: selected,
-                  onPressed: () =>
-                      selected ? csm.removeUser(user) : csm.addUser(user),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -438,7 +535,13 @@ class _CampaignOptions extends StatelessWidget {
                   csm.selectedCampaign == null &&
                   campaigns.isNotEmpty) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  csm.selectedCampaign = campaigns[0];
+                  if (csm.editMode) {
+                    csm.selectedCampaign = Campaign(
+                        name: csm.baseSession.campaignName,
+                        imgUrl: csm.baseSession.campaignImgUrl,
+                        id: csm.baseSession.campaignId);
+                  } else
+                    csm.selectedCampaign = campaigns[0];
                 });
               }
 
@@ -491,6 +594,7 @@ class _SearchCampaignButton extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1.0,
           child: CustomOpenContainer(
+            closedColor: ColorTheme.appBg,
             openBuilder: (context, close, scrollController) =>
                 _SearchPage<Campaign>(
               scrollController: scrollController,
@@ -526,7 +630,7 @@ class _HorizontalCampaignView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Material(
             borderRadius: BorderRadius.circular(12),
-            color: selected ? _theme.colors.contrast : Colors.white,
+            color: selected ? csm.secondaryColor : ColorTheme.appBg,
             elevation: 1,
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -544,7 +648,9 @@ class _HorizontalCampaignView extends StatelessWidget {
                     Text(
                       campaign.name,
                       style: selected
-                          ? _theme.textTheme.textOnContrast.headline6
+                          ? _theme.textTheme
+                              .correctColorFor(csm.secondaryColor)
+                              .headline6
                           : _theme.textTheme.dark.headline6,
                     ),
                   ],
@@ -582,7 +688,7 @@ class __SearchPageState<E> extends State<_SearchPage<E>> {
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorTheme.appBg,
       floatingActionButton: Builder(builder: (context) {
         return FloatingActionButton.extended(
           icon: Icon(
@@ -622,7 +728,7 @@ class __SearchPageState<E> extends State<_SearchPage<E>> {
           ),
           FutureBuilder<List<E>>(
               future: campaign is E
-                  ? DatabaseService.getCampaignFromQuery(_query)
+                  ? DatabaseService.getCampaignFromQuery(_query, limit: 20)
                   : DatabaseService.getUsersFromQuery(_query),
               builder: (context, snapshot) {
                 List<E> data = snapshot.data ?? [];
@@ -678,7 +784,7 @@ class __SearchPageState<E> extends State<_SearchPage<E>> {
                         ? CampaignButton((data[index] as Campaign).id,
                             color: selected
                                 ? _theme.colors.contrast
-                                : Colors.white,
+                                : ColorTheme.appBg,
                             campaign: (data[index] as Campaign),
                             textStyle: selected
                                 ? TextStyle(color: _theme.colors.textOnContrast)

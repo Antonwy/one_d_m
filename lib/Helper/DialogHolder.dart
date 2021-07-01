@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'ColorTheme.dart';
 import 'Constants.dart';
@@ -130,11 +133,15 @@ class DialogHolder {
                 textColor: Colors.red,
                 child: Text("Nicht wieder erinnern")),
             FlatButton(
-                onPressed: () {
+                onPressed: () async {
+                  if (await canLaunch(Constants.STORE_LINK)) {
+                    await launch(Constants.STORE_LINK);
+                  }
+
                   Navigator.pop(context);
                 },
                 textColor: _theme.colors.dark,
-                child: Text("Verstanden")),
+                child: Text(Platform.isAndroid ? "PlayStore" : "AppStore")),
           ],
         );
       },

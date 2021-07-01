@@ -5,9 +5,11 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
+import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:provider/provider.dart';
 import 'CampaignButton.dart';
+import 'SessionButton.dart';
 
 class SearchResultsList extends StatelessWidget {
   String query;
@@ -22,12 +24,12 @@ class SearchResultsList extends StatelessWidget {
           return FutureBuilder<List<User>>(
               future: DatabaseService.getUsersFromQuery(query),
               builder: (context, uSnapshot) {
-                return FutureBuilder<List<Organisation>>(
-                  future: DatabaseService.getOrganisationsFromQuery(query),
-                  builder: (context, oSnapshot) {
-                    List<Campaign> resCampaigns = List();
-                    List<User> resUsers = List();
-                    List<Organisation> resOrganisations = List();
+                return FutureBuilder<List<BaseSession>>(
+                  future: DatabaseService.getSessionsFromQuery(query),
+                  builder: (context, sSnapshot) {
+                    List<Campaign> resCampaigns = [];
+                    List<User> resUsers = [];
+                    List<BaseSession> resSessions = [];
                     if (uSnapshot.hasData) {
                       resUsers.addAll(uSnapshot.data);
                     }
@@ -35,8 +37,8 @@ class SearchResultsList extends StatelessWidget {
                       resCampaigns.addAll(cSnapshot.data);
                     }
 
-                    if (oSnapshot.hasData) {
-                      resOrganisations.addAll(oSnapshot.data);
+                    if (sSnapshot.hasData) {
+                      resSessions.addAll(sSnapshot.data);
                     }
 
                     return SliverList(
@@ -59,17 +61,17 @@ class SearchResultsList extends StatelessWidget {
                         SizedBox(
                           height: 10,
                         ),
-                        resOrganisations.isEmpty
+                        resSessions.isEmpty
                             ? Container()
                             : Padding(
                                 padding:
                                     const EdgeInsets.only(left: 20, bottom: 10),
                                 child: Text(
-                                  "Organisationen",
+                                  "Sessions",
                                   style: Theme.of(context).textTheme.headline6,
                                 ),
                               ),
-                        ..._buildOrganisations(resOrganisations),
+                        ..._buildSessions(resSessions),
                         SizedBox(
                           height: 10,
                         ),
@@ -87,12 +89,6 @@ class SearchResultsList extends StatelessWidget {
                         SizedBox(height: 50)
                       ],
                     ));
-
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
                   },
                 );
               });
@@ -121,23 +117,23 @@ class SearchResultsList extends StatelessWidget {
     );
   }
 
-  _buildOrganisations(List<Organisation> organisations) {
+  _buildSessions(List<BaseSession> sessions) {
     List<Widget> res = [];
 
-    organisations.forEach((c) {
-      res.add(_buildOrganisation(c));
+    sessions.forEach((s) {
+      res.add(_buildSession(s));
     });
 
     return res;
   }
 
-  _buildOrganisation(Organisation organisation) {
+  _buildSession(BaseSession session) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: OrganisationButton(
-        organisation.id,
+      child: SessionButton(
+        session.id,
         textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
-        organisation: organisation,
+        session: session,
         color: ColorTheme.appBg,
         elevation: 1,
       ),
@@ -159,6 +155,7 @@ class SearchResultsList extends StatelessWidget {
       child: UserButton(
         user.id,
         user: user,
+        elevation: 1,
         textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
       ),
     );

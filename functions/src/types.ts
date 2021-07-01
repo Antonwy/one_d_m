@@ -120,3 +120,22 @@ export interface SessionInviteType {
   session_description: string;
   amount_per_user: number;
 }
+
+export interface FeedType {
+  id: string;
+  feed_type: 'follow' | 'survey';
+  created_at: FirebaseFirestore.Timestamp;
+}
+
+export interface SurveyType {
+  survey_type?: 'multiple-choice' | 'single-choice';
+  created_at?: FirebaseFirestore.Timestamp;
+  rollout?: boolean;
+  question?: string;
+  evaluation?: { [k: string]: number };
+  result_count?: number;
+}
+
+export interface CheckBoxSurveyType extends SurveyType {
+  answers: [string];
+}

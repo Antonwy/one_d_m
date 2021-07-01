@@ -14,3 +14,4 @@ exports.friends = require('./friends-functions');
 exports.ads = require('./ad-functions');
 exports.session = require('./session-functions');
 exports.organization = require('./organization-functions');
+exports.surveys = require('./survey-functions');

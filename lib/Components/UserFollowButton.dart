@@ -10,8 +10,12 @@ class UserFollowButton extends StatefulWidget {
   final Color color, textColor;
   final double backOpacity;
 
-  UserFollowButton(
-      {this.followerId, this.color, this.textColor, this.backOpacity = .5});
+  UserFollowButton({
+    this.followerId,
+    this.color,
+    this.textColor,
+    this.backOpacity = .5,
+  });
 
   @override
   _UserFollowButtonState createState() => _UserFollowButtonState();

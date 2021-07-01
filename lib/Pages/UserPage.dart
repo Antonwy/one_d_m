@@ -1,16 +1,18 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
+import 'package:one_d_m/Components/SessionList.dart';
 import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -64,7 +66,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   User user;
 
-  List<Session> mySessions = [];
+  Future<List<String>> mySessions;
 
   @override
   void initState() {
@@ -72,17 +74,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
     user = widget.user;
 
-    DatabaseService.getCertifiedSessions().listen((event) {
-      mySessions.clear();
-      event.forEach((element) {
-        DatabaseService.userIsInSession(user.id, element.id).listen((isExist) {
-          if (isExist) {
-            mySessions.add(element);
-          }
-          setState(() {});
-        });
-      });
-    });
+    context.read<FirebaseAnalytics>().setCurrentScreen(screenName: "User Page");
+
+    mySessions = DatabaseService.getCertifiedSessionsFromUserFuture(user.id);
 
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -155,11 +149,17 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                     user: user,
                     followers: _followers,
                   ),
-                  mySessions.isNotEmpty
-                      ? _buildCampaignSessions(mySessions)
-                      : SliverToBoxAdapter(
-                          child: SizedBox.shrink(),
-                        ),
+                  FutureBuilder<List<String>>(
+                      future: mySessions,
+                      initialData: [],
+                      builder: (context, snapshot) {
+                        print(snapshot);
+                        return (snapshot.data?.isNotEmpty ?? false)
+                            ? _buildCampaignSessions(snapshot.data)
+                            : SliverToBoxAdapter(
+                                child: SizedBox.shrink(),
+                              );
+                      }),
                   StreamBuilder<List<Campaign>>(
                       stream: DatabaseService.getSubscribedCampaignsStream(
                           widget.user.id),
@@ -221,7 +221,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCampaignSessions(List<Session> sessions) => SliverToBoxAdapter(
+  Widget _buildCampaignSessions(List<String> sessions) => SliverToBoxAdapter(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -246,7 +246,15 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                         padding: EdgeInsets.only(
                             left: index == 0 ? 12.0 : 0.0,
                             right: index == sessions.length - 1 ? 12.0 : 0.0),
-                        child: CertifiedSessionView(sessions[index]),
+                        child: FutureBuilder<CertifiedSession>(
+                            future: DatabaseService.getSessionFuture(
+                                sessions[index]),
+                            builder: (context, snapshot) {
+                              return snapshot.hasData &&
+                                      snapshot.data.id != null
+                                  ? SessionView(snapshot.data)
+                                  : SizedBox.shrink();
+                            }),
                       ),
                   itemCount: sessions.length),
             ),
@@ -395,6 +403,7 @@ class _RecommendationUser extends StatelessWidget {
                   children: [
                     RoundedAvatar(
                       user?.imgUrl,
+                      blurHash: user?.imgUrl,
                       loading: !snapshot.hasData,
                       color: _theme.colors.dark,
                       iconColor: _theme.colors.contrast,
@@ -436,9 +445,10 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   UserHeader(this.user);
 
-  Future<void> _shareUser() async {
+  Future<void> _shareUser(BuildContext context) async {
     if ((user?.name?.isEmpty ?? true)) return;
-    Share.share((await DynamicLinkManager.createUserLink(user)).toString());
+    Share.share(
+        (await DynamicLinkManager.of(context).createUserLink(user)).toString());
   }
 
   @override
@@ -503,7 +513,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                       actions: [
                         Center(
                           child: AppBarButton(
-                            onPressed: _shareUser,
+                            onPressed: () => _shareUser(context),
                             color: _theme.colors.dark,
                             iconColor: _theme.colors.textOnDark,
                             icon: CupertinoIcons.share,
@@ -616,6 +626,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
         imageBuilder: (context, imageProvider) => Container(
           height: size.height,
           width: size.width,
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(Constants.radius),
             image: DecorationImage(
@@ -640,9 +651,11 @@ class UserHeader extends SliverPersistentHeaderDelegate {
         placeholder: (_, __) => Container(
           height: size.height,
           width: size.width,
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: user.blurHash == null
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : BlurHash(hash: user.blurHash),
         ),
       );
 
@@ -704,7 +717,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         borderRadius: BorderRadius.circular(6)),
                     color: _theme.colors.contrast,
                     onPressed: () async {
-                      await _toggleFollow(um.uid, _followed);
+                      await _toggleFollow(um.uid, _followed, context);
                     },
                     child: Center(
                       child: Text(
@@ -717,11 +730,14 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           });
   }
 
-  Future<void> _toggleFollow(String uid, bool followed) async {
+  Future<void> _toggleFollow(
+      String uid, bool followed, BuildContext context) async {
     if (followed) {
       await DatabaseService.deleteFollow(uid, user.id);
+      await context.read<FirebaseAnalytics>().logEvent(name: "Deleted Follow");
     } else {
       await DatabaseService.createFollow(uid, user.id);
+      await context.read<FirebaseAnalytics>().logEvent(name: "Created Follow");
     }
   }
 

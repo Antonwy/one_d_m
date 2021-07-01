@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
+import 'package:one_d_m/Components/SessionList.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
@@ -46,7 +46,7 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
         ///
         List<String> sessionIds = sessionsWithPost.toSet().toList();
 
-        return StreamBuilder<List<Session>>(
+        return StreamBuilder<List<CertifiedSession>>(
             stream: DatabaseService.getCertifiedSessions(),
             builder: (context, snapshot) {
               List<BaseSession> sessions = snapshot.data ?? [];
@@ -90,12 +90,12 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
         stream: DatabaseService.getSession(sid),
         builder: (_, snapshot) {
           if (!snapshot.hasData) return SizedBox.shrink();
-          Session s = snapshot.data;
+          CertifiedSession s = snapshot.data;
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              Expanded(child: CertifiedSessionView(s)),
+              Expanded(child: SessionView(s)),
               YMargin(6),
               _SessionJoinButton(
                 session: s,
@@ -107,7 +107,7 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
 }
 
 class _SessionJoinButton extends StatefulWidget {
-  final Session session;
+  final CertifiedSession session;
 
   _SessionJoinButton({Key key, this.session}) : super(key: key);
 

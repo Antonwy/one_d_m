@@ -15,6 +15,7 @@ import 'package:one_d_m/Helper/keep_alive_stream.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
+import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/utils/timeline.dart';
 
 import 'NativeAd.dart';
@@ -26,7 +27,7 @@ abstract class PostItem {
 }
 
 class HeadingItem implements PostItem {
-  final Stream<Session> session;
+  final Stream<CertifiedSession> session;
   final Stream<Campaign> campaign;
   final bool isSession;
 
@@ -39,7 +40,7 @@ class HeadingItem implements PostItem {
       stream: isSession ? session : campaign,
       builder: (_, snapshot) {
         if (snapshot.hasData) {
-          Session session;
+          CertifiedSession session;
           Campaign campaign;
           isSession ? session = snapshot.data : campaign = snapshot.data;
           return Container(
@@ -49,9 +50,8 @@ class HeadingItem implements PostItem {
               closedColor: ColorTheme.appBg,
               closedElevation: 0,
               openBuilder: (context, close, scrollController) => isSession
-                  ? CertifiedSessionPage(
-                      session: snapshot.data,
-                      scrollController: scrollController,
+                  ? SessionPage(
+                      snapshot.data,
                     )
                   : NewCampaignPage(
                       campaign,
@@ -272,10 +272,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
                     borderRadius: BorderRadius.circular(6)),
                 closedElevation: 0,
                 openBuilder: (context, close, scrollController) =>
-                    CertifiedSessionPage(
-                  session: snapshot.data,
-                  scrollController: scrollController,
-                ),
+                    SessionPage(snapshot.data),
                 closedBuilder: (context, open) => Material(
                   borderRadius: BorderRadius.circular(6),
                   color: _theme.colors.contrast,
@@ -284,7 +281,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Zur Session',
+                        Text('Zur CertifiedSession',
                             style:
                                 TextStyle(color: _theme.colors.textOnContrast)),
                         XMargin(6),

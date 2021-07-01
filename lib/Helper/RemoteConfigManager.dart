@@ -5,11 +5,13 @@ import 'package:package_info/package_info.dart';
 class RemoteConfigManager {
   static const String MIN_BUILD_NUMBER = "min_build_number";
   static const String MAX_DVS_PER_DAY = "max_dvs_per_day";
+  static const String FORCE_UPDATE_BUILD_NUMBER = "force_update_build_number";
   static const int MAX_DVS_PER_DAY_DEFAULT = Constants.DVS_PER_DAY;
 
   RemoteConfig _remoteConfig;
   PackageInfo packageInfo;
   bool shouldUpdate = false;
+  bool forceUpdate = false;
 
   Future initialize() async {
     _remoteConfig = await RemoteConfig.instance;
@@ -20,6 +22,7 @@ class RemoteConfigManager {
       await _remoteConfig.setDefaults(defaults);
       await fetchAndActivate();
       shouldUpdate = _checkIfShouldUpdate();
+      forceUpdate = _checkIfShouldForceUpdate();
       _printInfos();
     } on FetchThrottledException catch (e) {
       print("Remote config fetch throttled: $e");
@@ -34,25 +37,32 @@ class RemoteConfigManager {
     print("CurrentVersion is: ${_getDefaultBuildNumber()}");
     print("RemoteConfig Version is: ${_remoteConfig.getInt(MIN_BUILD_NUMBER)}");
     print("RemoteConfig suggests to update version: $shouldUpdate");
+    print("RemoteConfig forces to update version: $shouldUpdate");
     print("Max DVs to collect: ${_remoteConfig.getString(MAX_DVS_PER_DAY)}");
   }
 
   Map<String, dynamic> _createDefaults() {
     return {
       MIN_BUILD_NUMBER: _getDefaultBuildNumber(),
-      MAX_DVS_PER_DAY: MAX_DVS_PER_DAY_DEFAULT
+      FORCE_UPDATE_BUILD_NUMBER: 0,
+      MAX_DVS_PER_DAY: MAX_DVS_PER_DAY_DEFAULT,
     };
   }
 
   int _getDefaultBuildNumber() => int.tryParse(packageInfo.buildNumber) ?? 1;
 
   Future fetchAndActivate() async {
-    await _remoteConfig.fetch(expiration: Duration(seconds: 0));
+    await _remoteConfig.fetch(expiration: Duration());
     await _remoteConfig.activateFetched();
   }
 
   bool _checkIfShouldUpdate() {
     return _remoteConfig.getInt(MIN_BUILD_NUMBER) > _getDefaultBuildNumber();
+  }
+
+  bool _checkIfShouldForceUpdate() {
+    return _remoteConfig.getInt(FORCE_UPDATE_BUILD_NUMBER) >=
+        _getDefaultBuildNumber();
   }
 
   int get maxDVs => _remoteConfig.getInt(MAX_DVS_PER_DAY);

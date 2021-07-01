@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
+import 'package:one_d_m/Helper/ColorTheme.dart';
+import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/News.dart';
@@ -24,7 +26,7 @@ import 'package:uuid/uuid.dart';
 class CreatePostScreen extends StatefulWidget {
   final Campaign campaign;
   final bool isSession;
-  final Session session;
+  final BaseSession session;
   final ScrollController controller;
 
   const CreatePostScreen(
@@ -58,7 +60,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final thumbHeight = 150;
   bool _imagePickerActive = false;
   bool _processing = false;
-  bool _canceled = false;
+  bool _canceled = false, _showInMainfeed = true;
   double _progress = 0.0;
   int _videoDuration = 0;
   String _processPhase = '';
@@ -113,20 +115,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               children: <Widget>[
                 _showImage(),
                 const YMargin(40),
-                Material(
-                  elevation: 5,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12)),
-                  child: _textField(
-                      hint: "Beschreibung",
-                      multiline: true,
-                      onSaved: (text) {
-                        _postText = text;
-                      }),
-                ),
+                _textField(
+                    hint: "Beschreibung",
+                    multiline: true,
+                    onSaved: (text) {
+                      _postText = text;
+                    }),
+                YMargin(12),
+                _buildCheckBox(),
                 const YMargin(20),
-                _buildCreatePostButton(context)
+                _buildCreatePostButton(context),
               ],
             ),
           ),
@@ -170,7 +168,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         text: _postText,
         shortText: _postShortText,
         videoUrl: _isVideo ? videoInfo.videoUrl : null,
-        imageUrl: _isVideo ? videoInfo.coverUrl : imgUrl);
+        imageUrl: _isVideo ? videoInfo.coverUrl : imgUrl,
+        showInMainfeed: _showInMainfeed);
 
     DatabaseService.createNews(news).then((value) {
       setState(() {
@@ -199,11 +198,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       child: Container(
         width: double.infinity,
         height: 200,
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12), topRight: Radius.circular(12)),
-              border: Border.all(width: 1, color: Colors.grey)),
+        child: Material(
+          borderRadius: BorderRadius.circular(Constants.radius),
+          color: Colors.white,
+          elevation: 1,
           clipBehavior: Clip.antiAlias,
           child: Center(
             child: _isVideo
@@ -250,21 +248,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           hintText: "",
           hintStyle: TextStyle(color: Colors.red),
           border: OutlineInputBorder(),
-          errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12)),
-              borderSide: BorderSide(color: Colors.red)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12)),
-              borderSide: BorderSide(color: Colors.grey)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12)),
-              borderSide: BorderSide(color: Colors.grey))),
+          errorBorder: OutlineInputBorder()),
+    );
+  }
+
+  Widget _buildCheckBox() {
+    return CheckboxListTile(
+      value: _showInMainfeed,
+      onChanged: (val) {
+        setState(() {
+          _showInMainfeed = !_showInMainfeed;
+        });
+      },
+      title: Text("Im Mainfeed anzeigen"),
     );
   }
 
@@ -300,7 +296,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
           const YMargin(10),
           AutoSizeText(
-            isPhoto ? 'Fuge ein \nFoto hinzu' : 'Fuge ein \nVideo hinzu',
+            isPhoto ? 'Füge ein \nFoto hinzu' : 'Füge ein \nVideo hinzu',
             maxLines: 2,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyText1,

@@ -113,7 +113,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                             Text(
                               user == null
                                   ? "Laden..."
-                                  : "${user.name} hat sie zu einer Session eingeladen.",
+                                  : "${user.name} hat sie zu einer CertifiedSession eingeladen.",
                               style: _theme.textTheme.dark.caption,
                             ),
                           ],

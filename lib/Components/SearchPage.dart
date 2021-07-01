@@ -1,8 +1,13 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/Components/SearchResultsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
+import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
+import 'package:provider/provider.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -10,14 +15,18 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  Size _displaySize;
-
   String _query = "";
 
   @override
-  Widget build(BuildContext context) {
-    _displaySize = MediaQuery.of(context).size;
+  void initState() {
+    super.initState();
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Search Page");
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: ColorTheme.appBg,
         body: CustomScrollView(
@@ -35,50 +44,82 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-class SliverSearchBar extends StatelessWidget {
+class SliverSearchBar extends StatefulWidget {
   final Function(String) onChanged;
 
-  const SliverSearchBar({Key key, this.onChanged}) : super(key: key);
+  SliverSearchBar({Key key, this.onChanged}) : super(key: key);
+
+  @override
+  _SliverSearchBarState createState() => _SliverSearchBarState();
+}
+
+class _SliverSearchBarState extends State<SliverSearchBar> {
+  TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      widget.onChanged(_controller.text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
     return SliverAppBar(
+      pinned: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      iconTheme: IconThemeData(color: _theme.colors.textOnContrast),
       automaticallyImplyLeading: false,
-      backgroundColor: ColorTheme.appBg,
-      iconTheme: IconThemeData(color: Colors.black),
-      expandedHeight: 80,
-      flexibleSpace: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          height: 60,
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      title: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 56,
             child: Material(
-              borderRadius: BorderRadius.circular(Constants.radius - 6),
-              elevation: 1,
               color: ColorTheme.appBg,
-              child: Center(
-                  child: Padding(
-                padding: const EdgeInsets.only(right: 18.0),
-                child: Row(
-                  children: <Widget>[
-                    BackButton(),
-                    Expanded(
-                      child: TextField(
-                        onChanged: onChanged,
-                        decoration:
-                            InputDecoration.collapsed(hintText: "Suchen"),
-                      ),
+              elevation: 1,
+              borderRadius: BorderRadius.circular(Constants.radius),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6.0, right: 6),
+                    child: AppBarButton(
+                      icon: Icons.arrow_back,
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    Icon(Icons.search),
-                  ],
-                ),
-              )),
+                  ),
+                  Expanded(
+                      child: TextField(
+                    controller: _controller,
+                    cursorColor: _theme.colors.dark,
+                    decoration: InputDecoration(
+                        border: InputBorder.none, hintText: "Suchen"),
+                    style:
+                        _theme.textTheme.dark.bodyText1.copyWith(fontSize: 18),
+                  )),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: AppBarButton(
+                      icon: _controller.text.isNotEmpty
+                          ? Icons.close
+                          : CupertinoIcons.search,
+                      onPressed: _controller.text.isNotEmpty
+                          ? () {
+                              _controller.text = "";
+                            }
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
+      toolbarHeight: 70,
     );
   }
 }

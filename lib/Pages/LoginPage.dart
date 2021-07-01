@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CustomTextField.dart';
@@ -12,21 +13,32 @@ import 'package:one_d_m/Pages/HomePage/HomePage.dart';
 import 'package:one_d_m/Pages/VerifyEmailPage.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   TextTheme _textTheme;
 
   String _password, _email;
+
   bool _loading = false;
 
   UserManager _um;
 
   GlobalKey<FormState> _formKey = GlobalKey();
+
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  BuildContext context;
+
+  @override
+  void initState() {
+    context.read<FirebaseAnalytics>().setCurrentScreen(screenName: "LoginPage");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    this.context = context;
     _textTheme = Theme.of(context).textTheme;
     _um = Provider.of<UserManager>(context);
 
@@ -181,11 +193,13 @@ class LoginPage extends StatelessWidget {
       _showSnackBar(res.message);
     }
 
-    if (_um.status == Status.Authenticated)
+    if (_um.status == Status.Authenticated) {
+      context.read<FirebaseAnalytics>().logLogin();
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomePage()),
           (route) => route.isCurrent);
+    }
 
     if (_um.status == Status.Unverified && !_loading) {
       _loading = true;

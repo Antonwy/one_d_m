@@ -5,29 +5,29 @@ import 'package:catcher/handlers/sentry_handler.dart';
 import 'package:catcher/mode/silent_report_mode.dart';
 import 'package:catcher/model/catcher_options.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/AdManager.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/NativeAds.dart';
 import 'package:one_d_m/Helper/PushNotificationService.dart';
 import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stripe_payment/stripe_payment.dart';
-
-import 'Helper/Campaign.dart';
+// import 'package:stripe_payment/stripe_payment.dart';
 import 'Helper/Constants.dart';
 import 'Pages/PageManagerWidget.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  timeago.setLocaleMessages('de', timeago.DeMessages());
 
   /// Debug configuration with dialog report mode and console handler. It will show dialog and once user accepts it, error will be shown   /// in console.
   CatcherOptions debugOptions =
@@ -50,6 +50,9 @@ void main() async {
         Provider(
           create: (context) => RemoteConfigManager(),
         ),
+        Provider(
+          create: (context) => FirebaseAnalytics(),
+        )
       ], child: ODMApp()),
       debugConfig: debugOptions,
       releaseConfig: releaseOptions);
@@ -63,8 +66,8 @@ class ODMApp extends StatefulWidget {
 class _ODMAppState extends State<ODMApp> {
   @override
   void initState() {
-    StripePayment.setOptions(
-        StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
+    // StripePayment.setOptions(
+    //     StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
     getThemeIndex().then((value) {
       ThemeManager.of(context, listen: false).colors =
           ThemeHolder.themes[value];
@@ -85,6 +88,10 @@ class _ODMAppState extends State<ODMApp> {
         navigatorKey: Catcher.navigatorKey,
         title: 'One Dollar Movement',
         debugShowCheckedModeBanner: false,
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(
+              analytics: context.read<FirebaseAnalytics>()),
+        ],
         theme: ThemeData(
           appBarTheme: AppBarTheme(brightness: Brightness.light),
           primarySwatch: Colors.indigo,

@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class User {
-  String email, name, password, id, phoneNumber, imgUrl, thumbnailUrl;
+  String email, name, password, id, phoneNumber, imgUrl, thumbnailUrl, blurHash;
   int donatedAmount;
   bool admin, ghost;
   List<String> subscribedCampaignsIds = [];
@@ -13,6 +14,7 @@ class User {
       SUBSCRIBEDCAMPAIGNS = "subscribed_campaigns",
       DONATEDAMOUNT = "donated_amount",
       IMAGEURL = "image_url",
+      BLUR_HASH = "blur_hash",
       THUMBNAILURL = "thumbnail_url",
       DEVICETOKEN = "device_token",
       GHOST = "ghost",
@@ -30,7 +32,8 @@ class User {
       this.ghost = false,
       List<String> subscribedCampaignsIds,
       this.imgUrl,
-      this.thumbnailUrl})
+      this.thumbnailUrl,
+      this.blurHash})
       : this.subscribedCampaignsIds = subscribedCampaignsIds ?? [];
 
   static User fromSnapshot(DocumentSnapshot snapshot) {
@@ -48,7 +51,8 @@ class User {
         imgUrl: snapshot.data()[IMAGEURL],
         thumbnailUrl: snapshot.data().containsKey(THUMBNAILURL)
             ? snapshot[THUMBNAILURL]
-            : null);
+            : null,
+        blurHash: snapshot.data()[BLUR_HASH]);
   }
 
   static List<User> listFromSnapshots(List<DocumentSnapshot> snapshots) {
@@ -80,5 +84,17 @@ class User {
   @override
   String toString() {
     return 'User{email: $email, name: $name, phoneNumber: $phoneNumber, password: $password, profileImage: $imgUrl, id: $id, ghost: $ghost}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is User && other.name == this.name;
+  }
+
+  @override
+  int get hashCode {
+    return name.hashCode;
   }
 }

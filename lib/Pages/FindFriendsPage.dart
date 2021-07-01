@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/UserButton.dart';
@@ -37,6 +38,9 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
     precachePicture(
         SvgPicture.asset("assets/images/explore.svg").pictureProvider, null);
     _topRankingUsersFuture = DatabaseService.getUsers(10);
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Find Friends Page");
   }
 
   @override

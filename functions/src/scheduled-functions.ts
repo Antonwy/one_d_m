@@ -32,8 +32,7 @@ async function sendDailyPoints() {
     .get()
     .then(async (userList) => {
       functions.logger.info('users length:' + userList.docs.length);
-      userList.docs.forEach(async (user) => {
-        // increment dv points
+      for await (const user of userList.docs) {
         const userDoc = firestore
           .collection(DatabaseConstants.user)
           .doc(user.id);
@@ -44,6 +43,7 @@ async function sendDailyPoints() {
           .set(
             {
               gift: 1,
+              gift_message: null,
             },
             { merge: true }
           );
@@ -75,7 +75,7 @@ async function sendDailyPoints() {
             .catch((err) => functions.logger.info(err));
           console.log(pushRes);
         }
-      });
+      }
     });
 }
 

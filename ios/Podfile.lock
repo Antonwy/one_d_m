@@ -237,6 +237,8 @@ PODS:
     - Flutter
   - device_info (0.0.1):
     - Flutter
+  - Firebase/Analytics (6.33.0):
+    - Firebase/Core
   - Firebase/Auth (6.33.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 6.9.2)
@@ -268,6 +270,11 @@ PODS:
     - firebase_core
     - Flutter
     - Google-Mobile-Ads-SDK
+  - firebase_analytics (6.3.0):
+    - Firebase/Analytics (~> 6.33.0)
+    - Firebase/CoreOnly (~> 6.33.0)
+    - firebase_core
+    - Flutter
   - firebase_auth (0.18.4-1):
     - Firebase/Auth (~> 6.33.0)
     - Firebase/CoreOnly (~> 6.33.0)
@@ -456,10 +463,6 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
-  - Stripe (19.4.0)
-  - stripe_payment (1.0.0):
-    - Flutter
-    - Stripe (~> 19.4.0)
   - Toast (4.0.0)
   - TOCropViewController (2.5.5)
   - url_launcher (0.0.1):
@@ -477,6 +480,7 @@ DEPENDENCIES:
   - contacts_service (from `.symlinks/plugins/contacts_service/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - firebase_admob (from `.symlinks/plugins/firebase_admob/ios`)
+  - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
@@ -495,7 +499,6 @@ DEPENDENCIES:
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - stripe_payment (from `.symlinks/plugins/stripe_payment/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - video_player (from `.symlinks/plugins/video_player/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
@@ -532,7 +535,6 @@ SPEC REPOS:
     - PromisesObjC
     - Protobuf
     - Reachability
-    - Stripe
     - Toast
     - TOCropViewController
 
@@ -551,6 +553,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info/ios"
   firebase_admob:
     :path: ".symlinks/plugins/firebase_admob/ios"
+  firebase_analytics:
+    :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -585,8 +589,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
-  stripe_payment:
-    :path: ".symlinks/plugins/stripe_payment/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
   video_player:
@@ -605,6 +607,7 @@ SPEC CHECKSUMS:
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 8db6f2d1b2c5e2984efba4949a145875a8f65fe5
   firebase_admob: c3b3b8762181c9748d7e74595044641f0180816b
+  firebase_analytics: 36a619088c46224900829f14f4daa71585693a6f
   firebase_auth: d5159db3873478d1ac839af7b10d2f831516136a
   firebase_core: 5d6a02f3d85acd5f8321c2d6d62877626a670659
   firebase_dynamic_links: 65b0918ed77292e87534b4b668d2e293c58f35e0
@@ -649,14 +652,12 @@ SPEC CHECKSUMS:
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
-  Stripe: 92f1c73a9dbd3c54277ed06a1fea6e08f20414c6
-  stripe_payment: 1cbe9c339c21b5ecf01035e80eea351067c67c56
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
   wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
 
-PODFILE CHECKSUM: b64eb7e9eb6f2c11f5f34bd8cc6547cf1924169b
+PODFILE CHECKSUM: a8a2fd3b16b98eb1f952e5775b3bf5fbf3388e25
 
 COCOAPODS: 1.10.1

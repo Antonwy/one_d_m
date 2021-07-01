@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CampaignButton.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
@@ -73,7 +74,7 @@ class DonationWidget extends StatelessWidget {
                           : ColorTheme.whiteBlue)),
             ),
             subtitle: AutoSizeText(
-              "${donation.campaignName} (${timeago.format(donation.createdAt)})",
+              "${donation.campaignName} (${timeago.format(donation.createdAt, locale: "de")})",
               maxLines: 1,
               style: TextStyle(
                   color: textColor ??
@@ -120,7 +121,7 @@ class DonationWidget extends StatelessWidget {
             deleted: donation.campaignDeleted,
           ),
           subtitle: Text(
-            timeago.format(donation.createdAt),
+            timeago.format(donation.createdAt, locale: "de"),
             style: TextStyle(
                 color: textColor ??
                     (backgroundLight
@@ -135,7 +136,7 @@ class DonationWidget extends StatelessWidget {
                       (backgroundLight
                           ? ColorTheme.blue
                           : ColorTheme.whiteBlue))),
-          trailing: Text(
+          trailing: AutoSizeText(
             "${Numeral(donation.amount).value()} DV",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -238,12 +239,10 @@ class DonationWidget extends StatelessWidget {
 }
 
 class RoundedAvatar extends StatelessWidget {
-  final String imgUrl;
+  final String imgUrl, name, blurHash;
   final bool loading, backgroundLight, deleted;
-  final double height;
-  final double defaultHeight = 20, borderRadius, elevation;
+  final double height, defaultHeight = 20, borderRadius, elevation;
   final Color iconColor, color;
-  final String name;
   final BoxFit fit;
 
   ThemeManager _theme;
@@ -258,7 +257,8 @@ class RoundedAvatar extends StatelessWidget {
       this.color,
       this.deleted = false,
       this.fit = BoxFit.cover,
-      this.name});
+      this.name,
+      this.blurHash});
 
   @override
   Widget build(BuildContext context) {
@@ -293,21 +293,22 @@ class RoundedAvatar extends StatelessWidget {
         color: iconColor ?? _theme.colors.contrast,
       );
 
+    Widget _pIndicator = AspectRatio(
+      aspectRatio: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          valueColor: AlwaysStoppedAnimation(
+              backgroundLight ? _theme.colors.contrast : _theme.colors.dark),
+        ),
+      ),
+    );
+
     return imgUrl == null
         ? Center(
             child: loading
-                ? Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation(backgroundLight
-                            ? _theme.colors.dark
-                            : _theme.colors.contrast),
-                      ),
-                    ),
-                  )
+                ? _pIndicator
                 : name != null
                     ? Text(
                         name[0].toUpperCase(),
@@ -328,6 +329,8 @@ class RoundedAvatar extends StatelessWidget {
               Icons.error,
               color: iconColor ?? _theme.colors.contrast,
             ),
+            placeholder: (context, _) =>
+                blurHash != null ? BlurHash(hash: blurHash) : _pIndicator,
           );
   }
 }

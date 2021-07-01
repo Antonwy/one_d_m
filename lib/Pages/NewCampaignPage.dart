@@ -2,9 +2,11 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
@@ -13,8 +15,8 @@ import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
 import 'package:one_d_m/Components/CampaignHeader.dart';
+import 'package:one_d_m/Components/SessionList.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
@@ -65,7 +67,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   @override
   void initState() {
     _scrollController = widget.scrollController ?? ScrollController();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _tabIndex = _tabController.index;
     _tabController.addListener(() {
       setState(() {
@@ -78,6 +80,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
         : DatabaseService.getOrganisation(widget.campaign?.authorId);
 
     _campaignStream = DatabaseService.getCampaignStream(widget.campaign?.id);
+
+    context.read<FirebaseAnalytics>().setCurrentScreen(
+        screenName: widget.campaign?.name == null
+            ? "Campaign Page"
+            : "${widget.campaign.name} Page");
 
     super.initState();
   }
@@ -92,7 +99,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
     if ((campaign?.name?.isEmpty ?? true) ||
         (campaign?.imgUrl?.isEmpty ?? true)) return;
     Share.share(
-        (await DynamicLinkManager.createCampaignLink(campaign)).toString());
+        (await DynamicLinkManager.of(context).createCampaignLink(campaign))
+            .toString());
   }
 
   @override
@@ -114,7 +122,8 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                       return FloatingActionButton.extended(
                           backgroundColor:
                               activated ? _bTheme.dark : Colors.grey,
-                          label: Text("Unterstützen"),
+                          label: Text("Unterstützen",
+                              style: TextStyle(color: _bTheme.textOnDark)),
                           onPressed: activated &&
                                   snapshot.connectionState ==
                                       ConnectionState.active &&
@@ -137,141 +146,146 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     });
                   }),
               body: CustomScrollView(controller: _scrollController, slivers: [
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  leading: BackButton(
-                    color: _bTheme.dark,
-                  ),
-                  actions: [
-                    Center(
-                      child: AppBarButton(
-                          icon: CupertinoIcons.share,
-                          onPressed: _shareCampaign),
-                    ),
-                    FutureBuilder<Organisation>(
-                        future: _organizationFuture == null &&
-                                campaign?.authorId != null
-                            ? DatabaseService.getOrganisation(
-                                campaign?.authorId)
-                            : _organizationFuture,
-                        builder: (context, snapshot) {
-                          return Container(
-                            height: 30,
-                            width: 30,
-                            margin: const EdgeInsets.all(12),
-                            child: GestureDetector(
-                              onTap: !snapshot.hasData
-                                  ? null
-                                  : () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  OrganisationPage(
-                                                      snapshot.data)));
-                                      ;
-                                    },
-                              child: RoundedAvatar(
-                                snapshot.data?.thumbnailUrl ??
-                                    snapshot.data?.imgUrl,
-                                elevation: 1,
-                                color: ColorTheme.appBg,
-                                backgroundLight: true,
-                                loading: !snapshot.hasData,
-                                fit: BoxFit.contain,
-                                borderRadius: 6,
-                              ),
-                            ),
-                          );
-                        })
-                  ],
-                ),
                 SliverToBoxAdapter(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) => FullscreenImages(
-                      //             [campaign.imgUrl, ...campaign.moreImages])));
+                  child: VisibilityDetector(
+                    key: Key(widget.campaign.id),
+                    onVisibilityChanged: (VisibilityInfo info) {
+                      var visiblePercentage = (info.visibleFraction) * 100;
+                      if (mounted) {
+                        if (visiblePercentage == 100) {
+                          setState(() {
+                            isInView = true;
+                          });
+                        } else {
+                          setState(() {
+                            isInView = false;
+                          });
+                        }
+                      }
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: VisibilityDetector(
-                        key: Key(widget.campaign.id),
-                        onVisibilityChanged: (VisibilityInfo info) {
-                          var visiblePercentage = (info.visibleFraction) * 100;
-                          if (mounted) {
-                            if (visiblePercentage == 100) {
-                              setState(() {
-                                isInView = true;
-                              });
-                            } else {
-                              setState(() {
-                                isInView = false;
-                              });
-                            }
-                          }
-                        },
-                        child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          elevation: 10,
-                          borderRadius: BorderRadius.circular(6),
-                          child: Stack(
-                            children: [
-                              campaign?.longVideoUrl != null
-                                  ? VideoWidget(
-                                      url: campaign?.longVideoUrl,
-                                      play: isInView,
-                                      imageUrl: campaign?.imgUrl,
-                                      muted: _muted,
-                                      toggleMuted: _toggleMuted,
-                                    )
-                                  : CachedNetworkImage(
-                                      width: double.infinity,
+                    child: Stack(
+                      children: [
+                        Stack(
+                          children: [
+                            campaign?.longVideoUrl != null
+                                ? VideoWidget(
+                                    height: MediaQuery.of(context).size.width,
+                                    url: campaign?.longVideoUrl,
+                                    play: isInView,
+                                    imageUrl: campaign?.imgUrl,
+                                    muted: _muted,
+                                    toggleMuted: _toggleMuted,
+                                    blurHash: campaign?.blurHash,
+                                  )
+                                : CachedNetworkImage(
+                                    width: double.infinity,
+                                    height: MediaQuery.of(context).size.width,
+                                    imageUrl: campaign?.imgUrl ?? "",
+                                    fit: BoxFit.cover,
+                                    errorWidget: (_, __, ___) => Container(
                                       height: 260,
-                                      imageUrl: campaign?.imgUrl ?? "",
-                                      fit: BoxFit.cover,
-                                      errorWidget: (_, __, ___) => Container(
-                                        height: 260,
-                                        child: Center(
-                                            child: Icon(
-                                          Icons.error,
-                                          color: ColorTheme.orange,
-                                        )),
-                                      ),
-                                      placeholder: (context, url) => Container(
-                                        height: 260,
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      ),
+                                      child: Center(
+                                          child: Icon(
+                                        Icons.error,
+                                        color: ColorTheme.orange,
+                                      )),
                                     ),
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    placeholder: (context, url) =>
+                                        campaign?.blurHash != null
+                                            ? BlurHash(hash: campaign.blurHash)
+                                            : Container(
+                                                height: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              ),
+                                  ),
+                            Positioned(
+                              top: MediaQuery.of(context).padding.top,
+                              right: 12,
+                              left: 12,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  AppBarButton(
+                                      elevation: 10,
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icons.arrow_back),
+                                  Row(
                                     children: [
-                                      campaign?.longVideoUrl != null
-                                          ? MuteButton(
-                                              muted: _muted,
-                                              toggle: _toggleMuted,
-                                            )
-                                          : SizedBox.shrink(),
-                                      SizedBox.shrink(),
+                                      Center(
+                                        child: AppBarButton(
+                                            icon: CupertinoIcons.share,
+                                            elevation: 10,
+                                            onPressed: _shareCampaign),
+                                      ),
+                                      XMargin(6),
+                                      FutureBuilder<Organisation>(
+                                          future: _organizationFuture == null &&
+                                                  campaign?.authorId != null
+                                              ? DatabaseService.getOrganisation(
+                                                  campaign?.authorId)
+                                              : _organizationFuture,
+                                          builder: (context, snapshot) {
+                                            return AppBarButton(
+                                              elevation: 10,
+                                              onPressed: !snapshot.hasData
+                                                  ? null
+                                                  : () {
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  OrganisationPage(
+                                                                      snapshot
+                                                                          .data)));
+                                                    },
+                                              child: RoundedAvatar(
+                                                snapshot.data?.thumbnailUrl ??
+                                                    snapshot.data?.imgUrl,
+                                                height: 15,
+                                                color: ColorTheme.appBg,
+                                                backgroundLight: true,
+                                                loading: !snapshot.hasData,
+                                                fit: BoxFit.contain,
+                                                borderRadius: 6,
+                                              ),
+                                            );
+                                          })
                                     ],
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                campaign?.longVideoUrl != null
+                                    ? MuteButton(
+                                        muted: _muted,
+                                        toggle: _toggleMuted,
+                                      )
+                                    : SizedBox.shrink(),
+                                SizedBox.shrink(),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
@@ -496,7 +510,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                     campaign?.id),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                List<Session> sessions = snapshot.data;
+                List<CertifiedSession> sessions = snapshot.data;
 
                 if (sessions.isEmpty) return _buildEmptyWidget("Sessions");
 
@@ -526,7 +540,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                     right: index == sessions.length - 1
                                         ? 12.0
                                         : 0.0),
-                                child: CertifiedSessionView(sessions[index]),
+                                child: SessionView(sessions[index]),
                               ),
                           itemCount: sessions.length),
                     ),
@@ -661,16 +675,21 @@ class _NewCampaignPageState extends State<NewCampaignPage>
     setState(() {
       _isLoading = true;
     });
-    if (_subscribed)
+    if (_subscribed) {
       await DatabaseService.deleteSubscription(campaign, uid)
           .then((value) => setState(() {
                 _isLoading = false;
               }));
-    else
+      await context.read<FirebaseAnalytics>().logEvent(
+          name: "Left Campaign", parameters: {"campaign": campaign.name});
+    } else {
       await DatabaseService.createSubscription(campaign, uid)
           .then((value) => setState(() {
                 _isLoading = false;
               }));
+      await context.read<FirebaseAnalytics>().logEvent(
+          name: "Joined Campaign", parameters: {"campaign": campaign.name});
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,6 +41,12 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
 
   String _email, _username, _phone, _password1, _password2;
   bool _loading = false, _socialSignIn, _acceptedAGBs = false;
+
+  @override
+  void initState() {
+    context.read<FirebaseAnalytics>().setCurrentScreen(screenName: "LoginPage");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -378,6 +385,7 @@ class _NewRegisterPageState extends State<NewRegisterPage> {
 
     await _um.afterAuthentication();
 
+    context.read<FirebaseAnalytics>().logSignUp(signUpMethod: "Email");
     Navigator.push(
         context,
         MaterialPageRoute(

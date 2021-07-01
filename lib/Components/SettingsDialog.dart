@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
   UserManager um;
 
   TextTheme _textTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Settings Dialog");
+  }
 
   @override
   Widget build(BuildContext context) {

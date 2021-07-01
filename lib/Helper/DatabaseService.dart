@@ -11,14 +11,16 @@ import 'package:one_d_m/Helper/API/ApiSuccess.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/DailyReport.dart';
 import 'package:one_d_m/Helper/DonationInfo.dart';
+import 'package:one_d_m/Helper/Feed.dart';
 import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Organisation.dart';
 import 'package:one_d_m/Helper/SearchResult.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
+import 'package:one_d_m/Helper/Suggestion.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
-import 'package:stripe_payment/stripe_payment.dart';
+// import 'package:stripe_payment/stripe_payment.dart';
 
 import 'Campaign.dart';
 import 'Donation.dart';
@@ -65,7 +67,11 @@ class DatabaseService {
       MESSAGES = "messages",
       GOALS = "goals",
       CHECKPOINTS = "checkpoints",
-      DAILY_REPORTS = "daily_reports";
+      SUGGESTIONS = "suggestions",
+      DAILY_REPORTS = "daily_reports",
+      SURVEYS = "surveys",
+      RESULTS = "results",
+      FEED_DATA = "feed_data";
 
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
   static final FirebaseFunctions cloudFunctions = FirebaseFunctions.instance;
@@ -100,6 +106,10 @@ class DatabaseService {
       firestore.collection(DAILY_REPORTS);
   static final CollectionReference goalsCollection =
       firestore.collection(GOALS);
+  static final CollectionReference suggestionsCollection =
+      firestore.collection(SUGGESTIONS);
+  static final CollectionReference surveysCollection =
+      firestore.collection(SURVEYS);
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.doc(uid).get();
@@ -264,10 +274,11 @@ class DatabaseService {
     return SearchResult(campaigns: campaigns, users: users);
   }
 
-  static Future<List<Campaign>> getCampaignFromQuery(String query) async {
+  static Future<List<Campaign>> getCampaignFromQuery(String query,
+      {limit: 5}) async {
     QuerySnapshot qs = await campaignsCollection
         .where(Campaign.NAME, isGreaterThanOrEqualTo: query)
-        .limit(5)
+        .limit(limit)
         .get();
 
     List<Campaign> campaigns =
@@ -302,6 +313,60 @@ class DatabaseService {
 
     org.removeWhere((Organisation c) => !c.name.contains(query));
     return org;
+  }
+
+  static Future<List<BaseSession>> getSessionsFromQuery(String query,
+      {bool onlyCertified = false, String onlySessionsFrom}) async {
+    Set<BaseSession> sessions = Set();
+
+    List<Query> queries = [];
+
+    queries.add(_filterQuery(
+        queryString: query,
+        onlyCertified: onlyCertified,
+        onlySessionsFrom: onlySessionsFrom));
+
+    if (query.isNotEmpty) {
+      if (query[0].toUpperCase() == query[0]) {
+        queries.add(_filterQuery(
+            queryString: "${query[0].toLowerCase()}${query.substring(1)}",
+            onlyCertified: onlyCertified,
+            onlySessionsFrom: onlySessionsFrom));
+      } else {
+        queries.add(_filterQuery(
+            queryString: "${query[0].toUpperCase()}${query.substring(1)}",
+            onlyCertified: onlyCertified,
+            onlySessionsFrom: onlySessionsFrom));
+      }
+    }
+
+    for (Query query in queries) {
+      QuerySnapshot snapshot = await query.get();
+      sessions.addAll(snapshot.docs.map((doc) =>
+          doc.data()[BaseSession.IS_CERTIFIED]
+              ? CertifiedSession.fromDoc(doc)
+              : Session.fromDoc(doc)));
+    }
+
+    sessions.removeWhere(
+        (BaseSession s) => !s.name.toLowerCase().contains(query.toLowerCase()));
+    return sessions.toList();
+  }
+
+  static Query _filterQuery(
+      {String queryString, bool onlyCertified, String onlySessionsFrom}) {
+    Query query = sessionsCollection;
+
+    if (queryString.isNotEmpty)
+      query = query.where(BaseSession.SESSION_NAME,
+          isGreaterThanOrEqualTo: queryString);
+
+    if (onlyCertified)
+      query = query.where(BaseSession.IS_CERTIFIED, isEqualTo: true);
+    if (onlySessionsFrom?.isNotEmpty ?? false)
+      query = query.where(BaseSession.CREATOR_ID, isEqualTo: onlySessionsFrom);
+
+    return query = query.limit(20);
   }
 
   static Future<void> createSubscription(Campaign campaign, String uid) async {
@@ -424,6 +489,14 @@ class DatabaseService {
 
   static Stream<List<News>> getAllPosts() {
     return newsCollection
+        .orderBy(News.CREATEDAT, descending: true)
+        .snapshots()
+        .map((doc) => News.listFromSnapshot(doc.docs));
+  }
+
+  static Stream<List<News>> getMainFeedPosts() {
+    return newsCollection
+        .where(News.SHOW_IN_MAINFEED, isEqualTo: true)
         .orderBy(News.CREATEDAT, descending: true)
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
@@ -565,6 +638,18 @@ class DatabaseService {
         .map((qs) => Donation.listFromSnapshots(qs.docs));
   }
 
+  static Stream<List<Donation>> getTodaysDonationsFromUser(String uid) {
+    DateTime now = DateTime.now();
+    DateTime date = DateTime(now.year, now.month, now.day);
+
+    return donationsCollection
+        .where(Donation.USERID, isEqualTo: uid)
+        .where(Donation.CREATEDAT,
+            isGreaterThanOrEqualTo: Timestamp.fromDate(date))
+        .snapshots()
+        .map((qs) => Donation.listFromSnapshots(qs.docs));
+  }
+
   static Stream<List<Donation>> getLatestDonations(
       {int limit = 3, bool isDescending = true}) {
     return donationsCollection
@@ -624,22 +709,22 @@ class DatabaseService {
     return userList;
   }
 
-  static Future<void> addCard({PaymentMethod card, String uid}) {
-    return userCollection
-        .doc(uid)
-        .collection(CARDS)
-        .doc(card.id)
-        .set(card.toJson());
-  }
+  // static Future<void> addCard({PaymentMethod card, String uid}) {
+  //   return userCollection
+  //       .doc(uid)
+  //       .collection(CARDS)
+  //       .doc(card.id)
+  //       .set(card.toJson());
+  // }
 
-  static Future<void> deleteCard({PaymentMethod card, String uid}) {
-    return userCollection.doc(uid).collection(CARDS).doc(card.id).delete();
-  }
+  // static Future<void> deleteCard({PaymentMethod card, String uid}) {
+  //   return userCollection.doc(uid).collection(CARDS).doc(card.id).delete();
+  // }
 
-  static Stream<List<PaymentMethod>> getCards(String uid) {
-    return userCollection.doc(uid).collection(CARDS).snapshots().map((qs) =>
-        qs.docs.map((doc) => PaymentMethod.fromJson(doc.data())).toList());
-  }
+  // static Stream<List<PaymentMethod>> getCards(String uid) {
+  //   return userCollection.doc(uid).collection(CARDS).snapshots().map((qs) =>
+  //       qs.docs.map((doc) => PaymentMethod.fromJson(doc.data())).toList());
+  // }
 
   static Stream<bool> hasPaymentMethod(String uid) {
     return userCollection
@@ -699,8 +784,14 @@ class DatabaseService {
         .map((qs) => Campaign.listFromSnapshot(qs.docs));
   }
 
-  static Future<HttpsCallableResult> createSession(UploadableSession session) {
-    return cloudFunctions.httpsCallable(CREATESESSION).call(session.toMap());
+  static Future<void> createSession(UploadableSession session) {
+    return sessionsCollection
+        .doc(session.id)
+        .set(session.toMap(), SetOptions(merge: true));
+  }
+
+  static Future<void> updateSession(UploadableSession session) {
+    return sessionsCollection.doc(session.id).update(session.toUpdateMap());
   }
 
   static Stream<List<BaseSession>> getSessionsFromUser(String uid) {
@@ -713,44 +804,70 @@ class DatabaseService {
         .map((BaseSession.fromQuerySnapshot));
   }
 
-  static Stream<List<Session>> getCertifiedSessionsFromUser(String uid) {
+  static Stream<List<BaseSession>> getCertifiedSessionsFromUser(String uid) {
     return userCollection
         .doc(uid)
         .collection(SESSIONS)
         .where(BaseSession.END_DATE, isNull: true)
         .snapshots()
-        .map((Session.fromQuerySnapshot));
+        .map((BaseSession.fromQuerySnapshot));
   }
 
-  static Stream<List<Session>> getCertifiedSessions() {
+  static Future<List<String>> getCertifiedSessionsFromUserFuture(
+      String uid) async {
+    if (uid == null) return [];
+    return (await userCollection.doc(uid).collection(SESSIONS).get())
+        .docs
+        .map((doc) => doc.id)
+        .toList();
+  }
+
+  static Stream<List<CertifiedSession>> getCertifiedSessions() {
     return sessionsCollection
-        .where(BaseSession.END_DATE, isNull: true)
+        .where(BaseSession.IS_CERTIFIED, isEqualTo: true)
         .snapshots()
         .map((qs) {
       return qs.docs.map((e) {
-        return Session.fromDoc(e);
+        return CertifiedSession.fromDoc(e);
       }).toList();
     });
   }
 
-  static Stream<List<Session>> getCertifiedSessionsFromCampaign(
+  static Stream<List<CertifiedSession>> getCertifiedSessionsFromCampaign(
       String campaignId) {
     return sessionsCollection
-        .where(BaseSession.END_DATE, isNull: true)
+        .where(BaseSession.IS_CERTIFIED, isEqualTo: true)
         .where('campaign_id', isEqualTo: campaignId)
         .snapshots()
         .map((qs) {
       return qs.docs.map((e) {
-        return Session.fromDoc(e);
+        return CertifiedSession.fromDoc(e);
       }).toList();
     });
   }
 
-  static Stream<Session> getSession(String sid) {
+  static Stream<BaseSession> getSession(String sid) {
+    return sessionsCollection.doc(sid).snapshots().map((doc) =>
+        (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
+            ? CertifiedSession.fromDoc(doc)
+            : Session.fromDoc(doc));
+  }
+
+  static Stream<List<BaseSession>> getSessions([int limit = 20]) {
     return sessionsCollection
-        .doc(sid)
+        .orderBy(BaseSession.IS_CERTIFIED, descending: true)
+        .orderBy(BaseSession.SORT_IMPORTANCE, descending: true)
+        .limit(limit)
         .snapshots()
-        .map((doc) => Session.fromDoc(doc));
+        .map((qs) => BaseSession.fromQuerySnapshot(qs));
+  }
+
+  static Future<List<BaseSession>> getSessionsFuture([int limit = 20]) async {
+    return BaseSession.fromQuerySnapshot(await sessionsCollection
+        .orderBy(BaseSession.IS_CERTIFIED, descending: true)
+        .orderBy(BaseSession.SORT_IMPORTANCE, descending: true)
+        .limit(limit)
+        .get());
   }
 
   static Stream<bool> userIsInSession(String uid, String sid) {
@@ -794,8 +911,8 @@ class DatabaseService {
     });
   }
 
-  static Future<Session> getSessionFuture(String sid) async {
-    return Session.fromDoc(await sessionsCollection.doc(sid).get());
+  static Future<CertifiedSession> getSessionFuture(String sid) async {
+    return CertifiedSession.fromDoc(await sessionsCollection.doc(sid).get());
   }
 
   static Stream<List<SessionMember>> getSessionMembers(String sid,
@@ -804,7 +921,7 @@ class DatabaseService {
         .doc(sid)
         .collection(SESSION_MEMBERS)
         .limit(limit)
-        // .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
+        .orderBy(SessionMember.DONATION_AMOUNT, descending: true)
         .snapshots()
         .map(SessionMember.fromQuerySnapshot);
   }
@@ -956,5 +1073,57 @@ class DatabaseService {
         .orderBy(GoalCheckpoint.VALUE, descending: false)
         .snapshots()
         .map(GoalCheckpoint.fromQuerySnapshot);
+  }
+
+  static Future<List<Suggestion>> getSuggestions() async {
+    return (await suggestionsCollection.get())
+        .docs
+        .map((doc) => Suggestion.fromDoc(doc))
+        .toList();
+  }
+
+  static Stream<FeedDoc> getUserFeedDoc(String uid) {
+    return feedCollection
+        .doc(uid)
+        .snapshots()
+        .map((doc) => FeedDoc.fromDoc(doc));
+  }
+
+  static Stream<List<FeedObject>> getFeed(String uid) {
+    return feedCollection
+        .doc(uid)
+        .collection(FEED_DATA)
+        .orderBy(FeedObject.CREATED_AT, descending: true)
+        .snapshots()
+        .map(FeedObject.fromQuerySnapshot);
+  }
+
+  static Future<void> unseeFeed(String uid) {
+    return feedCollection.doc(uid).set({FeedDoc.UNSEEN_OBJECTS: []});
+  }
+
+  static Future<Survey> getSurveyDeleteFromFeedIfNotExists(
+      String sid, String uid) async {
+    DocumentSnapshot snap = await surveysCollection.doc(sid).get();
+    if (!snap.exists) {
+      print("DELETING $sid from $uid");
+      await feedCollection.doc(uid).collection(FEED_DATA).doc(sid).delete();
+      return null;
+    }
+    return Survey.fromDoc(snap);
+  }
+
+  static Future<void> sendSurveyResults(Survey survey, {String uid}) {
+    return surveysCollection
+        .doc(survey.id)
+        .collection(RESULTS)
+        .doc(uid)
+        .set(survey.buildResult());
+  }
+
+  static Future<bool> hasContributedToSurvey({String uid, String sid}) async {
+    return (await surveysCollection.doc(sid).collection(RESULTS).doc(uid).get())
+            ?.exists ??
+        false;
   }
 }

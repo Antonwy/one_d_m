@@ -42,7 +42,7 @@ exports.onDeleteCampaign = functions.firestore
         ' subscribed users'
     );
 
-    followedUsersQuery.forEach(async (doc) => {
+    for await (const doc of followedUsersQuery.docs) {
       await doc.ref
         .delete()
         .then(() => {
@@ -58,7 +58,7 @@ exports.onDeleteCampaign = functions.firestore
         .collection(DatabaseConstants.campaigns)
         .doc(campaignId)
         .delete();
-    });
+    }
 
     // updating charges_campaigns with deleted status
     await firestore
@@ -90,12 +90,14 @@ exports.onDeleteCampaign = functions.firestore
       });
 
     // delete all news where campaign id is equival to campaignId
-    firestore
+    await firestore
       .collection(DatabaseConstants.news)
       .where(CampaignFields.campaign_id, '==', campaignId)
       .get()
-      .then((newSnapshot) => {
-        newSnapshot.docs.forEach(async (doc) => await doc.ref.delete());
+      .then(async (newSnapshot) => {
+        for await (const doc of newSnapshot.docs) {
+          await doc.ref.delete();
+        }
       })
       .catch((e) => {
         functions.logger.info(e);
@@ -108,24 +110,24 @@ exports.onDeleteCampaign = functions.firestore
     await campaignSessions
       .get()
       .then(async (sessions) => {
-        sessions.docs.forEach(async (doc) => {
+        for await (const doc of sessions.docs) {
           await doc.ref
             .listCollections()
             .then(async (list) => {
               console.log('subcollections length:' + list.length);
-              list.forEach(async (collection) => {
+              for await (const collection of list) {
                 await collection.get().then(async (col_docs) => {
-                  col_docs.docs.forEach(async (col_doc) => {
+                  for await (const col_doc of col_docs.docs) {
                     await col_doc.ref.delete();
-                  });
+                  }
                 });
-              });
+              }
             })
             .catch((e) => {
               functions.logger.info(e);
             });
           await doc.ref.delete();
-        });
+        }
       })
       .catch((e) => {
         functions.logger.info(e);
@@ -149,9 +151,9 @@ exports.onDeleteCampaign = functions.firestore
     await cDonations
       .get()
       .then(async (list) => {
-        list.forEach(
-          async (d) => await d.ref.update({ campaign_deleted: true })
-        );
+        for await (const d of list.docs) {
+          await d.ref.update({ campaign_deleted: true });
+        }
       })
       .catch((e) => functions.logger.error(e));
 
@@ -175,9 +177,10 @@ exports.onUpdateCampaign = functions.firestore
         .collection(DatabaseConstants.donations)
         .where(CampaignFields.campaign_id, '==', campaignId)
         .get();
-      toUpdateDonationsQuery.docs.forEach(
-        async (doc) => await doc.ref.update(updateValue)
-      );
+
+      for await (const doc of toUpdateDonationsQuery.docs) {
+        await doc.ref.update(updateValue);
+      }
       // update news
       const toUpdateNewsQuery = await firestore
         .collection(DatabaseConstants.news)
@@ -186,9 +189,10 @@ exports.onUpdateCampaign = functions.firestore
       functions.logger.info(
         'news found to update:' + toUpdateNewsQuery.docs.length
       );
-      toUpdateNewsQuery.docs.forEach(
-        async (doc) => await doc.ref.update(updateValue)
-      );
+
+      for await (const doc of toUpdateNewsQuery.docs) {
+        await doc.ref.update(updateValue);
+      }
       // delete old image_url
       if (
         before.image_url !== undefined &&
@@ -214,9 +218,9 @@ exports.onUpdateCampaign = functions.firestore
           functions.logger.info(
             'sessions found to update:' + sessions.docs.length
           );
-          sessions.docs.forEach(async (doc) => {
+          for await (const doc of sessions.docs) {
             await doc.ref.update(updateValue);
-          });
+          }
         });
       // update subscribed campaigns
       const subscribedCampaignsUsersQuery = await firestore
@@ -229,14 +233,14 @@ exports.onUpdateCampaign = functions.firestore
           subscribedCampaignsUsersQuery.docs.length
       );
 
-      subscribedCampaignsUsersQuery.forEach(async (doc) => {
+      for await (const doc of subscribedCampaignsUsersQuery.docs) {
         await firestore
           .collection(DatabaseConstants.subscribed_campaigns)
           .doc(doc.data().id)
           .collection(DatabaseConstants.subscribed_campaigns)
           .doc(campaignId)
           .update(updateValue);
-      });
+      }
     } else return;
   });
 

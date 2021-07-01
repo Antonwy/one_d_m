@@ -190,6 +190,44 @@ exports.onCreateDonation = functions
         { merge: true }
       );
     }
+
+    // log donation
+    console.log(`Start logging donation ${snapshot.id}`);
+
+    const donDate: Date = donation.created_at.toDate();
+    const formattedDate: string = `${donDate.getDate()}.${
+      donDate.getMonth() + 1
+    }.${donDate.getFullYear()}`;
+
+    if (
+      campaign !== undefined &&
+      campaign.donation_unit !== undefined &&
+      campaign.dv_controller
+    ) {
+      await firestore
+        .collection(DatabaseConstants.statistics)
+        .doc(DatabaseConstants.donation_info)
+        .collection(campaign.donation_unit)
+        .doc(formattedDate)
+        .set(
+          {
+            amount: increment(donation.amount / campaign.dv_controller),
+          },
+          { merge: true }
+        );
+    }
+
+    await firestore
+      .collection(DatabaseConstants.statistics)
+      .doc(DatabaseConstants.donation_info)
+      .collection('DV')
+      .doc(formattedDate)
+      .set(
+        {
+          amount: increment(donation.amount),
+        },
+        { merge: true }
+      );
   });
 
 exports.onDeleteDonation = functions.firestore

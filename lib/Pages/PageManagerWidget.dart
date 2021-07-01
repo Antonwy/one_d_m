@@ -7,6 +7,7 @@ import 'package:one_d_m/Components/PushNotification.dart';
 import 'package:one_d_m/Helper/RemoteConfigManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/Pages/ForceUpdateScreen.dart';
 import 'package:one_d_m/Pages/NewRegisterPage.dart';
 import 'package:provider/provider.dart';
 
@@ -94,6 +95,11 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     return FutureBuilder(
         future: _startupFuture,
         builder: (context, snapshot) {
+          if (snapshot.hasData &&
+              context.read<RemoteConfigManager>().forceUpdate) {
+            return ForceUpdateScreen();
+          }
+
           return Stack(
             children: <Widget>[
               _um?.uid == null

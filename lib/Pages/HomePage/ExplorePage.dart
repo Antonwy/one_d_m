@@ -3,15 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
+import 'package:one_d_m/Components/SessionList.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/CategoryDialog.dart';
-import 'package:one_d_m/Helper/CertifiedSessionsList.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Helper/User.dart';
+import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/Helper/speed_scroll_physics.dart';
+import 'package:one_d_m/Pages/CreateSessionPage.dart';
 import 'package:one_d_m/Pages/FindFriendsPage.dart';
 import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 
@@ -42,9 +42,10 @@ class _ExplorePageState extends State<ExplorePage>
         physics: CustomPageViewScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
-            backgroundColor: Colors.transparent,
+            backgroundColor: ColorTheme.appBg,
             centerTitle: false,
             automaticallyImplyLeading: false,
+            pinned: true,
             flexibleSpace: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -70,40 +71,18 @@ class _ExplorePageState extends State<ExplorePage>
                               MaterialPageRoute(
                                   builder: (context) => FindFriendsPage()));
                         }),
+                    XMargin(6),
                     AppBarButton(
-                      child: Stack(
-                        clipBehavior: Clip.antiAlias,
-                        children: [
-                          Center(child: Icon(Icons.filter_alt_rounded)),
-                          _categoryId != 100
-                              ? Positioned(
-                                  right: 0,
-                                  top: -5,
-                                  child: Material(
-                                    shape: CircleBorder(),
-                                    color: Colors.red,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: Text(
-                                        "1",
-                                        style: _theme.textTheme.light.bodyText2
-                                            .copyWith(fontSize: 10),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container()
-                        ],
-                      ),
-                      onPressed: () async {
-                        int resIndex = await CategoryDialog.of(context,
-                                initialIndex: _categoryId)
-                            .show();
-                        setState(() {
-                          _categoryId = resIndex;
-                        });
-                      },
-                    ),
+                        icon: Icons.add,
+                        color: _theme.colors.dark,
+                        iconColor: _theme.colors.textOnDark,
+                        text: "Session erstellen",
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CreateSessionPage()));
+                        }),
                   ],
                 ),
               ),
@@ -111,13 +90,31 @@ class _ExplorePageState extends State<ExplorePage>
           ),
           SliverPadding(
               padding: const EdgeInsets.only(bottom: 6, top: 6),
-              sliver: CertifiedSessionsList()),
+              sliver: SessionList()),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(left: 12.0, bottom: 10.0, top: 8),
-              child: Text(
-                'Projekte',
-                style: Theme.of(context).textTheme.headline6,
+              padding: const EdgeInsets.only(
+                  left: 12.0, bottom: 10.0, top: 8, right: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Projekte',
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                  AppBarButton(
+                    hint: _categoryId != 100 ? 1 : 0,
+                    icon: Icons.filter_alt_rounded,
+                    onPressed: () async {
+                      int resIndex = await CategoryDialog.of(context,
+                              initialIndex: _categoryId)
+                          .show();
+                      setState(() {
+                        _categoryId = resIndex;
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
           ),

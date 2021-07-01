@@ -3,17 +3,18 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoWidget extends StatefulWidget {
-  final String url;
+  final String url, imageUrl, blurHash;
   final bool play, muted;
-  final String imageUrl;
   final ImageProvider image;
   final void Function() toggleMuted;
+  final double height;
 
   const VideoWidget(
       {Key key,
@@ -22,7 +23,9 @@ class VideoWidget extends StatefulWidget {
       this.muted = true,
       this.toggleMuted,
       this.imageUrl,
-      this.image})
+      this.image,
+      this.height,
+      this.blurHash})
       : super(key: key);
 
   @override
@@ -40,6 +43,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   void initState() {
     super.initState();
     _muted = widget.muted;
+
     if (!_isVideoLoaded) {
       setState(() => _isVideoLoaded = true);
       _downloadAndCacheVideo().then((file) {
@@ -49,17 +53,14 @@ class _VideoWidgetState extends State<VideoWidget> {
           _initializeVideoPlayerFuture = _controller.initialize().then((_) {
             // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
             setState(() {});
+            if (widget.play) {
+              _controller.play();
+              _controller.setLooping(true);
+              _controller.setVolume(_muted ? 0 : 1);
+            }
           });
         }
       });
-    }
-
-    if (_controller?.value?.initialized == true) {
-      if (widget.play) {
-        _controller.play();
-        _controller.setLooping(true);
-        _controller.setVolume(_muted ? 0 : 1);
-      }
     }
   }
 
@@ -99,31 +100,32 @@ class _VideoWidgetState extends State<VideoWidget> {
               autoInitialize: true,
               showControls: false,
               looping: true,
-              placeholder: Container(
-                height: 260,
-                width: double.infinity,
-                child: _buildImage(),
-              ),
+              placeholder: Text("placeholder"),
               errorBuilder: (context, txt) {
                 print("ERROR: $txt");
                 return Text(txt);
               });
-          return AspectRatio(
-            aspectRatio: _controller.value.aspectRatio < 1
-                ? 0.8
-                : _controller.value.aspectRatio,
+
+          return Container(
+            height: widget.height ?? 260,
+            width: double.infinity,
             child: GestureDetector(
                 onTap: widget?.toggleMuted,
                 child: FittedBox(
                   fit: BoxFit.cover,
-                  child: Chewie(
-                    controller: _chewieController,
+                  clipBehavior: Clip.antiAlias,
+                  child: SizedBox(
+                    width: _controller.value.aspectRatio,
+                    height: 1,
+                    child: Chewie(
+                      controller: _chewieController,
+                    ),
                   ),
                 )),
           );
         } else {
           return Container(
-            height: 260,
+            height: widget.height ?? 260,
             width: double.infinity,
             child: _buildImage(),
           );
@@ -143,6 +145,14 @@ class _VideoWidgetState extends State<VideoWidget> {
       return CachedNetworkImage(
         imageUrl: widget.imageUrl,
         fit: BoxFit.cover,
+        placeholder: (context, url) => widget.blurHash != null
+            ? BlurHash(hash: widget.blurHash)
+            : Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(
+                      ThemeManager.of(context).colors.dark),
+                ),
+              ),
       );
 
     return Container(

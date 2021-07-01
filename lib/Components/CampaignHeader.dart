@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -73,6 +74,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                           url: widget.campaign.shortVideoUrl,
                           play: widget.isInView,
                           imageUrl: widget.campaign.imgUrl,
+                          blurHash: widget.campaign.blurHash,
                           muted: true,
                         )
                       : CachedNetworkImage(
@@ -85,6 +87,14 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                             Icons.error,
                             color: ColorTheme.orange,
                           )),
+                          placeholder: (context, url) =>
+                              widget.campaign.blurHash != null
+                                  ? BlurHash(hash: widget.campaign.blurHash)
+                                  : Center(
+                                      child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation(
+                                              _theme.colors.dark)),
+                                    ),
                           alignment: Alignment.center,
                         ),
                   Padding(

@@ -116,14 +116,6 @@ class _EditProfileState extends State<EditProfile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               SizedBox(height: 20),
-              Text(
-                "Account Daten ändern:",
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: ColorTheme.blue),
-              ),
-              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[

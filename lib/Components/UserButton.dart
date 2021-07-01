@@ -17,36 +17,44 @@ class UserButton extends StatelessWidget {
   final TextStyle textStyle;
   final double elevation;
   final bool withAddButton;
+  final void Function(User user) onPressed;
 
   UserButton(this.id,
       {this.user,
-      this.color,
+      this.color = ColorTheme.appBg,
       this.avatarColor = ColorTheme.blue,
       this.textStyle = const TextStyle(color: Colors.black),
       this.elevation = 1,
       this.withAddButton = false,
+      this.onPressed,
       this.additionalText});
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return FutureBuilder<User>(
         future: user == null ? DatabaseService.getUser(id) : Future.value(user),
         builder: (context, snapshot) {
-          if (snapshot.hasData)
-            return Container(
-              key: Key(id),
-              height: 60,
-              child: CustomOpenContainer(
-                openBuilder: (context, close, controller) =>
-                    UserPage(snapshot.data, scrollController: controller),
-                closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                closedElevation: elevation,
-                closedColor: color ?? ColorTheme.appBg,
-                closedBuilder: (context, open) => InkWell(
-                  onTap: open,
+          if (snapshot.hasData) {
+            return Material(
+              borderRadius: BorderRadius.circular(5),
+              clipBehavior: Clip.antiAlias,
+              color: color,
+              elevation: elevation,
+              child: Container(
+                key: Key(id),
+                height: 60,
+                child: InkWell(
+                  onTap: () {
+                    if (onPressed != null) {
+                      onPressed(snapshot.data);
+                      return;
+                    }
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UserPage(snapshot.data)));
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -56,9 +64,11 @@ class UserButton extends StatelessWidget {
                           child: Row(
                             children: <Widget>[
                               RoundedAvatar(
-                                  snapshot.data?.thumbnailUrl ??
-                                      snapshot.data?.imgUrl,
-                                  color: avatarColor),
+                                snapshot.data?.thumbnailUrl ??
+                                    snapshot.data?.imgUrl,
+                                color: avatarColor,
+                                blurHash: snapshot.data?.blurHash,
+                              ),
                               SizedBox(width: 10),
                               Expanded(
                                 child: Container(
@@ -99,6 +109,7 @@ class UserButton extends StatelessWidget {
                 ),
               ),
             );
+          }
           return Container(
             key: Key("${id}_loading"),
             height: 60,

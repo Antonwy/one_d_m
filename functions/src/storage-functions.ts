@@ -7,6 +7,7 @@ import {
   DatabaseConstants,
   StorageConstants,
 } from './database-constants';
+import { createBlurHash } from './http-functions';
 
 const firestore = admin.firestore();
 
@@ -26,9 +27,8 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
   console.log('Name: ' + obj.name);
 
   const splittedPaths: string[] = obj.name.split('/');
-  const splittedName: string[] = splittedPaths[splittedPaths.length - 1].split(
-    '_'
-  );
+  const splittedName: string[] =
+    splittedPaths[splittedPaths.length - 1].split('_');
   console.log('SplittedName: ' + splittedName);
   const imageType: ImageType = splittedName[0] as ImageType;
   const resulution: ImageRes = splittedName[splittedName.length - 1].replace(
@@ -37,6 +37,8 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
   ) as ImageRes;
   const id = splittedName[1];
 
+  const url = generateUrl(obj);
+
   if (imageType === ImagePrefix.news) {
     if (resulution === ImageResolutions.high)
       await firestore
@@ -44,7 +46,8 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         .doc(id)
         .set(
           {
-            image_url: generateUrl(obj),
+            image_url: url,
+            blur_hash: await createBlurHash(url),
           },
           { merge: true }
         );
@@ -58,7 +61,8 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         .doc(id)
         .set(
           {
-            image_url: generateUrl(obj),
+            img_url: url,
+            blur_hash: await createBlurHash(url),
           },
           { merge: true }
         );
@@ -69,20 +73,18 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         .doc(id)
         .set(
           {
-            image_url: generateUrl(obj),
+            image_url: url,
+            blur_hash: await createBlurHash(url),
           },
           { merge: true }
         );
     else
-      await firestore
-        .collection(DatabaseConstants.campaigns)
-        .doc(id)
-        .set(
-          {
-            thumbnail_url: generateUrl(obj),
-          },
-          { merge: true }
-        );
+      await firestore.collection(DatabaseConstants.campaigns).doc(id).set(
+        {
+          thumbnail_url: url,
+        },
+        { merge: true }
+      );
   } else if (imageType === ImagePrefix.user) {
     if (resulution === ImageResolutions.high)
       await firestore
@@ -90,20 +92,19 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         .doc(id)
         .set(
           {
-            image_url: generateUrl(obj),
+            image_url: url,
+            blur_hash: await createBlurHash(url),
           },
           { merge: true }
         );
-    else
-      await firestore
-        .collection(DatabaseConstants.user)
-        .doc(id)
-        .set(
-          {
-            thumbnail_url: generateUrl(obj),
-          },
-          { merge: true }
-        );
+    else {
+      await firestore.collection(DatabaseConstants.user).doc(id).set(
+        {
+          thumbnail_url: url,
+        },
+        { merge: true }
+      );
+    }
   }
 });
 

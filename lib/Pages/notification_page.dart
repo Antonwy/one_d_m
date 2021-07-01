@@ -1,12 +1,14 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
+import 'package:one_d_m/Helper/Feed.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
@@ -14,9 +16,9 @@ import 'package:one_d_m/Helper/margin.dart';
 import 'package:provider/provider.dart';
 
 class NotificationPage extends StatefulWidget {
-  final ScrollController scrollController;
+  final FeedDoc feedDoc;
 
-  const NotificationPage({Key key, this.scrollController}) : super(key: key);
+  const NotificationPage(this.feedDoc);
 
   @override
   _NotificationPageState createState() => _NotificationPageState();
@@ -26,6 +28,7 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   void initState() {
     super.initState();
+    DatabaseService.unseeFeed(context.read<UserManager>().uid);
   }
 
   @override
@@ -37,109 +40,31 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   Widget _buildBody() => CustomScrollView(
-        controller: widget.scrollController,
-        slivers: [
-          _buildAppBar(),
-          const SliverToBoxAdapter(
-            child: YMargin(20),
-          ),
-          _buildFollowers()
-        ],
+        slivers: [_buildAppBar(), _buildFeed()],
       );
 
   Widget _buildAppBar() => SliverAppBar(
-        leading: BackButton(),
+        pinned: true,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Neuigkeiten',
             style: TextStyle(color: ThemeManager.of(context).colors.dark)),
-        automaticallyImplyLeading: false,
         brightness: Brightness.dark,
-        backgroundColor: ColorTheme.whiteBlue,
+        backgroundColor: ColorTheme.appBg,
         iconTheme: IconThemeData(color: ColorTheme.blue),
-        elevation: 0,
       );
 
-  Widget _buildFollowers() => Consumer<UserManager>(
-        builder: (context, um, child) => StreamBuilder<List<String>>(
-          stream: DatabaseService.getFollowedUsersStream(um.uid),
-          builder: (_, snapshot) {
-            if (!snapshot.hasData)
-              return SliverToBoxAdapter(
-                  child: Center(
-                child: CircularProgressIndicator(),
-              ));
-            List<String> followers = snapshot.data;
-            if (followers.isEmpty)
-              return SliverFillRemaining(
-                child: Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SvgPicture.asset(
-                        "assets/images/no-news.svg",
-                        height: MediaQuery.of(context).size.height * .25,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Noch keine Neuigkeiten vorhanden",
-                        style: Theme.of(context).textTheme.bodyText2,
-                      ),
-                    ],
-                  ),
-                )),
-              );
-
-            return SliverList(
-                delegate: SliverChildListDelegate(_buildUsers(followers)));
-          },
-        ),
-      );
-
-  List<Widget> _buildUsers(List<String> followers) => followers
-      .map((id) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-            child: UserButton(
-              id,
-              elevation: 0,
-              withAddButton: true,
-              additionalText: "folgt dir jetzt",
-            ),
-          ))
-      .toList();
-
-  Widget _buildUserAvatar(String url, bool loading) => Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: RoundedAvatar(
-          url,
-          loading: loading,
-        ),
-      );
-
-  Widget _buildTitle(User user) => AutoSizeText.rich(
-        TextSpan(children: [
-          TextSpan(
-              text: user?.name ?? '',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: ' folgt dir jetzt'),
-        ]),
-        style: TextStyle(fontSize: 14),
-      );
-
-  Widget _buildFollowButton(
-    String uid,
-  ) =>
-      UserFollowButton(
-        followerId: uid,
-      );
-
-  Future<void> _followUser(
-    String uid,
-  ) async {
-    await DatabaseService.createFollow(context.read<UserManager>().uid, uid);
+  Widget _buildFeed() {
+    print("BUILD FEED");
+    return StreamBuilder<List<FeedObject>>(
+        initialData: [],
+        stream: DatabaseService.getFeed(context.read<UserManager>().uid),
+        builder: (context, snapshot) {
+          return SliverList(
+              delegate: SliverChildBuilderDelegate((context, i) {
+            FeedObject _fo = snapshot.data[i];
+            return _fo.buildWidget(context,
+                highlighted: widget.feedDoc.unseenObjects.contains(_fo.id));
+          }, childCount: snapshot.data?.length ?? 0));
+        });
   }
 }

@@ -136,7 +136,7 @@ export async function deleteUser(uid: string) {
     .get()
     .then(async (campaignsList) => {
       functions.logger.info('Campaigns length:' + campaignsList.docs.length);
-      campaignsList.docs.forEach(async (campaign) => {
+      for await (const campaign of campaignsList.docs) {
         await firestore
           .collection(DatabaseConstants.campaigns_subscribed_users)
           .doc(campaign.id)
@@ -151,7 +151,7 @@ export async function deleteUser(uid: string) {
         await campaign.ref.delete().then(() => {
           functions.logger.info('campaign:' + campaign.id + ' deleted');
         });
-      });
+      }
     })
     .catch((e) => {
       functions.logger.error(e);
@@ -188,7 +188,7 @@ export async function deleteUser(uid: string) {
     .get()
     .then(async (sessionsList) => {
       functions.logger.info('sessions length:' + sessionsList.docs.length);
-      sessionsList.docs.forEach(async (session) => {
+      for await (const session of sessionsList.docs) {
         await firestore
           .collection(DatabaseConstants.sessions)
           .doc(session.id)
@@ -208,7 +208,7 @@ export async function deleteUser(uid: string) {
           .catch((err) =>
             functions.logger.error('Decrementing Session failed! ' + err)
           );
-      });
+      }
     });
 
   // delete user from following
@@ -219,7 +219,9 @@ export async function deleteUser(uid: string) {
     .get()
     .then(async (usersList) => {
       functions.logger.info('following length:' + usersList.docs.length);
-      usersList.docs.forEach(async (doc) => await doc.ref.delete());
+      for await (const doc of usersList.docs) {
+        await doc.ref.delete();
+      }
     })
     .catch((err) => functions.logger.info(err));
 
@@ -229,7 +231,9 @@ export async function deleteUser(uid: string) {
     .get()
     .then(async (donationsList) => {
       functions.logger.info('domations length:' + donationsList.docs.length);
-      donationsList.docs.forEach(async (doc) => await doc.ref.delete());
+      for await (const doc of donationsList.docs) {
+        await doc.ref.delete();
+      }
     })
     .catch((err) => functions.logger.info(err));
 
@@ -240,7 +244,9 @@ export async function deleteUser(uid: string) {
     .then(async (chargesList) => {
       functions.logger.info('chargesList length:' + chargesList.docs.length);
 
-      chargesList.docs.forEach(async (doc) => await doc.ref.delete());
+      for await (const doc of chargesList.docs) {
+        await doc.ref.delete();
+      }
     })
     .catch((err) => functions.logger.info(err));
 
@@ -251,20 +257,24 @@ export async function deleteUser(uid: string) {
     .get()
     .then(async (friendsList) => {
       functions.logger.info('friendslist length:' + friendsList.docs.length);
-      friendsList.docs.forEach(async (doc) => await doc.ref.delete());
+      for await (const doc of friendsList.docs) {
+        await doc.ref.delete();
+      }
     })
     .catch((err) => functions.logger.info(err));
 
-  const userRef = await firestore.collection(DatabaseConstants.user).doc(uid);
+  const userRef = firestore.collection(DatabaseConstants.user).doc(uid);
 
   userRef
     .listCollections()
     .then(async (collectionList) => {
-      collectionList.forEach(async (collection) => {
+      for await (const collection of collectionList) {
         await collection.get().then(async (docsList) => {
-          docsList.docs.forEach(async (doc) => await doc.ref.delete());
+          for await (const doc of docsList.docs) {
+            await doc.ref.delete();
+          }
         });
-      });
+      }
     })
     .catch((e) => {
       functions.logger.error(e);

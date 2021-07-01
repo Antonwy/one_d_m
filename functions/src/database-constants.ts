@@ -34,6 +34,17 @@ export class DatabaseConstants {
   static readonly id: string = 'id';
   static readonly goals: string = 'goals';
   static readonly insgesamt: string = 'Insgesamt';
+  static readonly feed: string = 'feed';
+  static readonly feed_data: string = 'feed_data';
+  static readonly surveys: string = 'surveys';
+  static readonly results: string = 'results';
+  static readonly evaluation: string = 'evaluation';
+  static readonly result_count: string = 'result_count';
+}
+
+export class SurveyTypes {
+  static readonly multiple_choice: string = 'multiple-choice';
+  static readonly single_answer: string = 'single-answer';
 }
 
 export class CampaignFields {
@@ -46,6 +57,7 @@ export class DonationFields {
   static readonly created_at: string = 'created_at';
   static readonly campaign_id: string = 'campaign_id';
   static readonly campaign_deleted: string = 'campaign_deleted';
+  static readonly session_id: string = 'session_id';
 }
 
 export class PrivateUserFields {

@@ -15,9 +15,9 @@ exports.onOrganizationDeleted = functions.firestore
         functions.logger.info(
           'total campaigns deleted: ' + campaigns.docs.length
         );
-        campaigns.docs.forEach(async (campaign) => {
+        for await (const campaign of campaigns.docs) {
           await campaign.ref.delete();
-        });
+        }
       })
       .catch((e) => {
         functions.logger.info(e);

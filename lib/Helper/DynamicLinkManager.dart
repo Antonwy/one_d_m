@@ -1,8 +1,9 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Helper/Session.dart';
-import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
+import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/Pages/UserPage.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +14,14 @@ import 'User.dart';
 import 'UserManager.dart';
 
 class DynamicLinkManager {
-  static void initialize(BuildContext context) async {
+  final BuildContext context;
+
+  DynamicLinkManager(this.context);
+
+  factory DynamicLinkManager.of(BuildContext context) =>
+      DynamicLinkManager(context);
+
+  void initialize() async {
     print("INIT DEEPLINKS");
     FirebaseDynamicLinks.instance.onLink(
         onSuccess: (PendingDynamicLinkData dynamicLink) async {
@@ -22,79 +30,27 @@ class DynamicLinkManager {
       print("TEST DEEPLINK");
       print(deepLink);
       if (deepLink != null) {
-        Map<String, dynamic> params = deepLink.queryParameters;
-        print(params);
-        if (params.containsKey(Donation.CAMPAIGNID)) {
-          String _campaignId = params[Donation.CAMPAIGNID];
-          print("PUSHING TO CAMPAIGN: $_campaignId");
-          try {
-            Campaign campaign = await DatabaseService.getCampaign(_campaignId);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => NewCampaignPage(campaign)),
-            );
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Das Projekt wurde nicht gefunden!")));
-            print(e);
-          }
-          return;
-        }
-
-        if (params.containsKey(Donation.SESSION_ID)) {
-          String _sessionId = params[Donation.SESSION_ID];
-          print("PUSHING TO SESSION: $_sessionId");
-          try {
-            Session session =
-                await DatabaseService.getSessionFuture(_sessionId);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CertifiedSessionPage(session: session)),
-            );
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Die Session wurde nicht gefunden!")));
-            print(e);
-          }
-          return;
-        }
-
-        if (params.containsKey(Donation.USERID)) {
-          String _userId = params[Donation.USERID];
-          print("PUSHING TO USER: $_userId");
-          try {
-            User user = await DatabaseService.getUser(_userId);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => UserPage(user)),
-            );
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Der Nutzer wurde nicht gefunden!")));
-            print(e);
-          }
-          return;
-        }
+        _handleUri(deepLink, context: context);
       }
     }, onError: (OnLinkErrorException e) async {
       print('onLinkError');
       print(e.message);
     });
 
-    // final PendingDynamicLinkData data =
-    //     await FirebaseDynamicLinks.instance.getInitialLink();
-    // final Uri deepLink = data?.link;
-    // print(deepLink);
+    if (context.read<UserManager>().status != Status.Authenticated) return;
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    final Uri deepLink = data?.link;
+    print(deepLink);
 
-    // if (deepLink != null) {
-    //   // Navigator.pushNamed(context, deepLink.path);
-    // }
+    if (deepLink != null) {
+      _handleUri(deepLink, context: context);
+    }
   }
 
-  static Future<Uri> createCampaignLink(Campaign campaign,
-      {bool short = true}) async {
+  Future<Uri> createCampaignLink(Campaign campaign, {bool short = true}) async {
+    await context.read<FirebaseAnalytics>().logShare(
+        contentType: "Share Campaign", itemId: campaign.name, method: "normal");
     return createLink(
         title: 'Schau dir das Projekt "${campaign.name}" an!',
         description:
@@ -105,8 +61,12 @@ class DynamicLinkManager {
         short: short);
   }
 
-  static Future<Uri> createSessionLink(Session session,
+  Future<Uri> createSessionLink(BaseSession session,
       {bool short = true}) async {
+    await context.read<FirebaseAnalytics>().logShare(
+        contentType: "Share CertifiedSession",
+        itemId: session.name,
+        method: "normal");
     return createLink(
         title: 'Schau dir ${session.name} an!',
         description: 'Komm auf ODM um ${session.name} zu unterstützen!',
@@ -116,7 +76,9 @@ class DynamicLinkManager {
         short: short);
   }
 
-  static Future<Uri> createUserLink(User user, {bool short = true}) async {
+  Future<Uri> createUserLink(User user, {bool short = true}) async {
+    await context.read<FirebaseAnalytics>().logShare(
+        contentType: "Share User", itemId: user.name, method: "normal");
     return createLink(
         title: 'Schau dir ${user.name}\'s Profil an!',
         description: "Komm auf ODM um ${user.name}'s Profil anzusehen!",
@@ -151,5 +113,61 @@ class DynamicLinkManager {
     return short
         ? (await parameters.buildShortLink()).shortUrl
         : parameters.buildUrl();
+  }
+}
+
+void _handleUri(Uri deepLink, {BuildContext context}) async {
+  Map<String, dynamic> params = deepLink.queryParameters;
+  print(params);
+  if (params.containsKey(Donation.CAMPAIGNID)) {
+    String _campaignId = params[Donation.CAMPAIGNID];
+    print("PUSHING TO CAMPAIGN: $_campaignId");
+    try {
+      Campaign campaign = await DatabaseService.getCampaign(_campaignId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NewCampaignPage(campaign)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Das Projekt wurde nicht gefunden!")));
+      print(e);
+    }
+    return;
+  }
+
+  if (params.containsKey(Donation.SESSION_ID)) {
+    String _sessionId = params[Donation.SESSION_ID];
+    print("PUSHING TO SESSION: $_sessionId");
+    try {
+      CertifiedSession session =
+          await DatabaseService.getSessionFuture(_sessionId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SessionPage(session)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Die Session wurde nicht gefunden!")));
+      print(e);
+    }
+    return;
+  }
+
+  if (params.containsKey(Donation.USERID)) {
+    String _userId = params[Donation.USERID];
+    print("PUSHING TO USER: $_userId");
+    try {
+      User user = await DatabaseService.getUser(_userId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => UserPage(user)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Der Nutzer wurde nicht gefunden!")));
+      print(e);
+    }
+    return;
   }
 }

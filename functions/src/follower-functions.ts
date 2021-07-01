@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { UserType } from './types';
+import { FeedType, UserType } from './types';
 import { DatabaseConstants } from './database-constants';
 
 const firestore = admin.firestore();
@@ -42,6 +42,27 @@ exports.createFollower = functions.firestore
 
     console.log(data);
 
+    // create feed object
+    const userFeedDoc = firestore
+      .collection(DatabaseConstants.feed)
+      .doc(followingId);
+
+    await userFeedDoc
+      .collection(DatabaseConstants.feed_data)
+      .doc(followedId)
+      .set({
+        id: followedId,
+        feed_type: 'follow',
+        created_at: createdAt,
+      } as FeedType);
+
+    await userFeedDoc.set(
+      {
+        unseen_objects: admin.firestore.FieldValue.arrayUnion(followedId),
+      },
+      { merge: true }
+    );
+
     if (
       data === undefined ||
       deviceToken === undefined ||
@@ -55,7 +76,10 @@ exports.createFollower = functions.firestore
         title: 'Du hast einen neuen Follower!',
         body: `${followedUser.name} folgt dir jetzt.`,
         icon:
-          followedUser?.image_url === null ? undefined : followedUser.image_url,
+          followedUser?.image_url === null ||
+          followedUser?.image_url === undefined
+            ? undefined
+            : followedUser.image_url,
       },
     };
 
@@ -84,4 +108,21 @@ exports.deleteFollower = functions.firestore
       .collection(DatabaseConstants.users)
       .doc(followedId)
       .delete();
+
+    await firestore
+      .collection(DatabaseConstants.feed)
+      .doc(followingId)
+      .collection(DatabaseConstants.feed_data)
+      .doc(followedId)
+      .delete();
+
+    await firestore
+      .collection(DatabaseConstants.feed)
+      .doc(followingId)
+      .set(
+        {
+          unseen_objects: admin.firestore.FieldValue.arrayRemove(followedId),
+        },
+        { merge: true }
+      );
   });

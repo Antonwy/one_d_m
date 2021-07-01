@@ -15,6 +15,11 @@ class ThemeManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  Color correctColorFor(Color color) =>
+      ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+          ? _currentTheme.light
+          : _currentTheme.dark;
+
   ThemeManager(BuildContext context) {
     _currentTheme = ThemeHolder.themes[Constants.DEFAULT_THEME_INDEX];
     materialTheme = Theme.of(context);
@@ -30,6 +35,11 @@ class MyTextTheme {
   BaseTheme _theme;
   TextTheme _textTheme;
   BaseTextTheme dark, contrast, light, darkerLight, textOnContrast, textOnDark;
+
+  BaseTextTheme correctColorFor(Color color) =>
+      ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+          ? light
+          : dark;
 
   MyTextTheme(this._textTheme, this._theme) {
     dark = BaseTextTheme(_textTheme, _theme.dark);
@@ -142,6 +152,14 @@ class ThemeHolder {
     textOnDark: Colors.white,
     textOnContrast: Colors.white,
   );
+  static BaseTheme pinkBlue = BaseTheme(
+    dark: Color.fromARGB(255, 70, 74, 110),
+    contrast: Color.fromARGB(255, 255, 166, 190),
+    darkerLight: Colors.grey[50],
+    light: Colors.white,
+    textOnDark: Colors.white,
+    textOnContrast: Color.fromARGB(255, 70, 74, 110),
+  );
 
   static List<BaseTheme> themes = [
     orangeBlue,
@@ -150,6 +168,7 @@ class ThemeHolder {
     darkYellow,
     blueYellow,
     brownRed,
-    brownYellow
+    brownYellow,
+    pinkBlue
   ];
 }

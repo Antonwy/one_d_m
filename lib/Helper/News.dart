@@ -11,7 +11,9 @@ class News {
       CREATEDAT = "created_at",
       CAMPAIGNIMGURL = "campaign_img_url",
       IMAGEURL = "image_url",
+      BLUR_HASH = "blur_hash",
       SESSION_ID = "session_id",
+      SHOW_IN_MAINFEED = "show_in_mainfeed",
       VIDEO_URL = "video_url";
 
   String campaignId,
@@ -25,24 +27,27 @@ class News {
       imageUrl,
       videoUrl,
       id,
-      sessionId;
+      sessionId,
+      blurHash;
   DateTime createdAt;
+  bool showInMainfeed;
 
-  News({
-    this.campaignId,
-    this.userId,
-    this.id,
-    this.organisationId,
-    this.title,
-    this.campaignImgUrl,
-    this.text,
-    this.shortText,
-    this.createdAt,
-    this.campaignName,
-    this.imageUrl,
-    this.videoUrl,
-    this.sessionId,
-  });
+  News(
+      {this.campaignId,
+      this.userId,
+      this.id,
+      this.organisationId,
+      this.title,
+      this.campaignImgUrl,
+      this.text,
+      this.shortText,
+      this.createdAt,
+      this.campaignName,
+      this.imageUrl,
+      this.videoUrl,
+      this.sessionId,
+      this.blurHash,
+      this.showInMainfeed = true});
 
   Map<String, dynamic> toMap() {
     return {
@@ -57,25 +62,27 @@ class News {
       CAMPAIGNIMGURL: campaignImgUrl,
       CREATEDAT: Timestamp.now(),
       SESSION_ID: sessionId,
-      USERID: userId
+      USERID: userId,
+      SHOW_IN_MAINFEED: showInMainfeed
     };
   }
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
     return News(
-      id: snapshot.id,
-      campaignId: snapshot.data()[CAMPAIGNID],
-      title: snapshot.data()[TITLE],
-      text: snapshot.data()[TEXT],
-      shortText: snapshot.data()[SHORTTEXT],
-      campaignName: snapshot.data()[CAMPAIGNNAME],
-      campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
-      sessionId: snapshot.data()[SESSION_ID],
-      imageUrl: snapshot.data()[IMAGEURL],
-      videoUrl: snapshot.data()[VIDEO_URL],
-      userId: snapshot.data()[USERID],
-      createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
-    );
+        id: snapshot.id,
+        campaignId: snapshot.data()[CAMPAIGNID],
+        title: snapshot.data()[TITLE],
+        text: snapshot.data()[TEXT],
+        shortText: snapshot.data()[SHORTTEXT],
+        campaignName: snapshot.data()[CAMPAIGNNAME],
+        campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
+        sessionId: snapshot.data()[SESSION_ID],
+        imageUrl: snapshot.data()[IMAGEURL],
+        videoUrl: snapshot.data()[VIDEO_URL],
+        userId: snapshot.data()[USERID],
+        createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
+        blurHash: snapshot.data()[BLUR_HASH],
+        showInMainfeed: snapshot.data()[SHOW_IN_MAINFEED]);
   }
 
   static List<News> listFromSnapshot(List<DocumentSnapshot> snapshot) {

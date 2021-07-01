@@ -60,7 +60,10 @@ class CampaignButton extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: <Widget>[
-                      RoundedAvatar(snapshot.data.imgUrl ?? ''),
+                      RoundedAvatar(
+                        snapshot.data.imgUrl ?? '',
+                        blurHash: campaign?.blurHash,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(

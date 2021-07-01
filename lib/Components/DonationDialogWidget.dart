@@ -4,9 +4,11 @@ import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -98,6 +100,10 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
       _futureRiveArtboard = _loadAndCacheRive();
     }
 
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Donation Dialog");
+
     super.initState();
   }
 
@@ -184,6 +190,7 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                       !_isAnim
                                           ? _buildheading(
                                               widget.campaign?.imgUrl ?? "",
+                                              widget.campaign?.blurHash,
                                               widget.campaign?.name ??
                                                   "Not found",
                                               widget.campaign?.authorId ?? "")
@@ -435,7 +442,9 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
         );
       });
 
-  Widget _buildheading(String url, String title, String authorId) => Row(
+  Widget _buildheading(
+          String url, String blurHash, String title, String authorId) =>
+      Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -449,6 +458,19 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                 width: 76,
                 imageUrl: url,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => blurHash != null
+                    ? BlurHash(hash: blurHash)
+                    : Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(
+                                ThemeManager.of(context).colors.dark,
+                              )),
+                        ),
+                      ),
               ),
             ),
           ),
@@ -459,15 +481,18 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AutoSizeText(
-                  title,
-                  maxLines: 1,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: _bTheme.dark),
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: AutoSizeText(
+                    title,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _bTheme.dark),
+                  ),
                 ),
                 FutureBuilder<Organisation>(
                     future: DatabaseService.getOrganisation(authorId),
@@ -673,6 +698,17 @@ class DonationButton extends StatelessWidget {
     ddm.loading = true;
 
     await DatabaseService.donate(donation);
+    try {
+      await context
+          .read<FirebaseAnalytics>()
+          ?.logEvent(name: "Donation", parameters: {
+        "amount": donation.amount,
+        "campaign": donation.campaignName,
+        "session": donation?.sessionId ?? ""
+      });
+    } catch (e) {
+      print(e);
+    }
 
     ddm.setLoadingWithoutRebuild(false);
     ddm.showAnimation = true;
@@ -1098,12 +1134,16 @@ class FieldWidget extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: ThemeManager.of(context).colors.light),
               ),
-              AutoSizeText(
-                title,
-                style: Theme.of(context).textTheme.subtitle1.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: ThemeManager.of(context).colors.light),
+              Expanded(
+                child: AutoSizeText(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: ThemeManager.of(context).colors.light),
+                ),
               )
             ],
           ),

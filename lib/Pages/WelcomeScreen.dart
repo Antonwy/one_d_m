@@ -1,12 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/Helper.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 import 'ChooseLoginMethodPage.dart';
 
@@ -25,6 +24,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Welcome Screen");
     _pageNotifier = ValueNotifier(0.0);
     _pageController.addListener(() {
       _pageNotifier.value = _pageController.page;

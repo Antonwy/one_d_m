@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
@@ -13,7 +14,6 @@ import 'package:one_d_m/Helper/News.dart';
 import 'package:one_d_m/Helper/Session.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
-import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
 import 'package:one_d_m/Pages/NewCampaignPage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
@@ -61,7 +61,7 @@ class _NewsPostState extends State<NewsPost> {
         var visiblePercentage = (info.visibleFraction) * 100;
         if (mounted) {
           if (visiblePercentage == 100) {
-            widget?.onPostSeen();
+            if (widget?.onPostSeen != null) widget.onPostSeen();
             setState(() {
               widget.isInView = true;
             });
@@ -92,6 +92,7 @@ class _NewsPostState extends State<NewsPost> {
                             imageUrl: widget.news.videoUrl,
                             muted: _muted,
                             toggleMuted: _toggleMuted,
+                            blurHash: widget.news?.blurHash,
                           )
                         : CachedNetworkImage(
                             width: double.infinity,
@@ -105,12 +106,14 @@ class _NewsPostState extends State<NewsPost> {
                                 color: ColorTheme.orange,
                               )),
                             ),
-                            placeholder: (context, url) => Container(
-                              height: 260,
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
+                            placeholder: (context, url) =>
+                                widget.news?.blurHash != null
+                                    ? BlurHash(
+                                        hash: widget.news.blurHash,
+                                      )
+                                    : Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
                             fit: BoxFit.fill,
                           ),
                     Positioned.fill(
@@ -315,7 +318,7 @@ class _NewsPostState extends State<NewsPost> {
       padding:
           EdgeInsets.fromLTRB(12, 12, 0, news.text?.isEmpty ?? true ? 12 : 0),
       child: _isSessionNews
-          ? FutureBuilder<Session>(
+          ? FutureBuilder<CertifiedSession>(
               future: DatabaseService.getSessionFuture(news.sessionId),
               builder: (context, snapshot) {
                 return GestureDetector(
@@ -324,8 +327,9 @@ class _NewsPostState extends State<NewsPost> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => CertifiedSessionPage(
-                                      session: snapshot.data)));
+                                  builder: (context) => SessionPage(
+                                        snapshot.data,
+                                      )));
                         }
                       : null,
                   child: Text('@${snapshot.data?.name ?? 'Laden...'}',
@@ -382,10 +386,7 @@ class _NewsHeader extends StatelessWidget {
                           snapshot.data,
                           scrollController: scrollController,
                         )
-                      : SessionPage(
-                          baseSession: snapshot.data,
-                          scrollController: scrollController,
-                        ),
+                      : SessionPage(snapshot.data),
               closedColor: ColorTheme.appBg,
               closedElevation: 0,
               closedShape: RoundedRectangleBorder(

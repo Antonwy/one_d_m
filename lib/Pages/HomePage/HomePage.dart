@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -37,7 +38,10 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    DynamicLinkManager.initialize(context);
+    DynamicLinkManager.of(context).initialize();
+
+    FirebaseAnalytics analytics = context.read<FirebaseAnalytics>();
+    analytics.setCurrentScreen(screenName: "HomeScreen");
 
     Future.wait([
       widget.initFuture ?? Future.value(),
@@ -76,6 +80,22 @@ class HomePageState extends State<HomePage> {
     return true;
   }
 
+  void _logPageChanges(int page) {
+    FirebaseAnalytics analytics = context.read<FirebaseAnalytics>();
+    switch (page) {
+      case 0:
+        analytics.logEvent(name: "Swipe to Roadmap");
+        break;
+      case 1:
+        analytics.logEvent(name: "Swipe to Profile");
+        break;
+      case 2:
+        analytics.logEvent(name: "Swipe to Explore");
+        break;
+      default:
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +105,7 @@ class HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               onPageChanged: (page) {
+                _logPageChanges(page);
                 if (page == 0) {
                   setState(() {});
                   profileGlobalKey.currentState.toggleVisible();

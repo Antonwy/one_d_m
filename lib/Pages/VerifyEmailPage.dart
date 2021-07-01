@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Helper/API/ApiResult.dart';
@@ -22,6 +23,14 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context
+        .read<FirebaseAnalytics>()
+        .setCurrentScreen(screenName: "Verify Email Page");
+  }
 
   @override
   Widget build(BuildContext context) {

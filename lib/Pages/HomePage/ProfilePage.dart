@@ -1,14 +1,14 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:one_d_m/Helper/Feed.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/ReplaceText.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
@@ -338,41 +338,51 @@ class __GiftAvailableState extends State<_GiftAvailable> {
                         style: _theme.textTheme.textOnDark.bodyText1,
                       )),
                       XMargin(6),
-                      FlatButton.icon(
-                        color: _theme.colors.contrast,
-                        disabledColor: _theme.colors.contrast.withOpacity(.8),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6)),
-                        onPressed: _loading || _collected
-                            ? null
-                            : () async {
-                                setState(() {
-                                  _loading = true;
-                                });
-                                await DatabaseService.getGift(
-                                    context.read<UserManager>().uid,
-                                    gift: snapshot.data.gift);
-                                setState(() {
-                                  _loading = false;
-                                  _collected = true;
-                                });
-                                await PushNotification.of(context).show(
-                                    NotificationContent(
-                                        title:
-                                            "${snapshot.data.gift} DV eingesammelt"));
-                              },
-                        icon: _loading
-                            ? Container(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation(
-                                      _theme.colors.textOnContrast),
-                                ))
-                            : Icon(Icons.redeem),
-                        label: Text("Einsammeln"),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      OfflineBuilder(
+                        child: Container(),
+                        connectivityBuilder: (context, status, child) =>
+                            FlatButton.icon(
+                          color: _theme.colors.contrast,
+                          disabledColor: _theme.colors.contrast.withOpacity(.8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6)),
+                          onPressed: _loading || _collected
+                              ? null
+                              : status != ConnectivityResult.none
+                                  ? () async {
+                                      setState(() {
+                                        _loading = true;
+                                      });
+                                      await DatabaseService.getGift(
+                                          context.read<UserManager>().uid,
+                                          gift: snapshot.data.gift);
+                                      await PushNotification.of(context).show(
+                                          NotificationContent(
+                                              title:
+                                                  "${snapshot.data.gift} DV eingesammelt"));
+                                      setState(() {
+                                        _loading = false;
+                                        _collected = true;
+                                      });
+                                    }
+                                  : () {
+                                      Helper.showConnectionPushNotification(
+                                          context);
+                                    },
+                          icon: _loading
+                              ? Container(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation(
+                                        _theme.colors.textOnContrast),
+                                  ))
+                              : Icon(Icons.redeem),
+                          label: Text("Einsammeln"),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
                       )
                     ],
                   ),
@@ -517,36 +527,80 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
 }
 
 class AppBarButton extends StatelessWidget {
-  const AppBarButton({
-    Key key,
-    this.icon,
-    this.child,
-    this.color,
-    this.iconColor,
-    @required this.onPressed,
-  }) : super(key: key);
+  const AppBarButton(
+      {Key key,
+      this.icon,
+      this.child,
+      this.color,
+      this.iconColor,
+      this.hint = 0,
+      this.elevation = 0,
+      this.onPressed,
+      this.text})
+      : super(key: key);
 
   final IconData icon;
   final Color color, iconColor;
   final Widget child;
   final void Function() onPressed;
+  final int hint;
+  final double elevation;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     return Material(
+      elevation: elevation,
       color: color ?? ColorTheme.appBg,
-      borderRadius: BorderRadius.circular(Constants.radius),
+      borderRadius: BorderRadius.circular(text == null ? Constants.radius : 26),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
           onTap: onPressed,
           child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: icon == null
-                  ? child
-                  : Icon(
-                      icon,
-                      color: iconColor ?? ThemeManager.of(context).colors.dark,
-                    ))),
+              padding: EdgeInsets.all((child != null ? 0 : 8)),
+              child: _buildIcon(context))),
+    );
+  }
+
+  Widget _buildIcon(BuildContext context) {
+    Widget iconChild;
+
+    if (icon == null) {
+      iconChild = child;
+    } else {
+      iconChild = Icon(
+        icon,
+        size: text == null ? null : 10,
+        color: iconColor ?? ThemeManager.of(context).colors.dark,
+      );
+    }
+
+    Widget iconPart = hint > 0
+        ? Stack(clipBehavior: Clip.none, children: [
+            iconChild,
+            Positioned(
+              left: 0,
+              top: -5,
+              child: Material(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Text(
+                    hint.toString(),
+                    style: TextStyle(color: Colors.white, fontSize: 8),
+                  ),
+                ),
+                shape: CircleBorder(),
+                color: Colors.red,
+              ),
+            )
+          ])
+        : iconChild;
+
+    if (text == null) return iconPart;
+
+    return Text(
+      text,
+      style: TextStyle(color: iconColor, fontSize: 10),
     );
   }
 }
@@ -601,17 +655,14 @@ class _ScrolledHeader extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Material(
-                      shape: CircleBorder(),
+                    AppBarButton(
+                      icon: CupertinoIcons.settings_solid,
                       color: _theme.colors.dark,
-                      child: IconButton(
-                        icon: Icon(CupertinoIcons.settings_solid,
-                            color: _theme.colors.textOnDark),
-                        onPressed: () {
-                          showSettings(context);
-                        },
-                      ),
-                    )
+                      iconColor: _theme.colors.textOnDark,
+                      onPressed: () {
+                        showSettings(context);
+                      },
+                    ),
                   ],
                 ),
               );
@@ -630,7 +681,8 @@ class _NotScrolledHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    User user = context.watch<UserManager>().user;
+    UserManager um = context.watch<UserManager>();
+    User user = um.user;
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -668,15 +720,22 @@ class _NotScrolledHeader extends StatelessWidget {
                                 builder: (context) => DailyReportPage()));
                       },
                     ),
-                    AppBarButton(
-                      icon: CupertinoIcons.bell_fill,
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NotificationPage()));
-                      },
-                    ),
+                    StreamBuilder<FeedDoc>(
+                        initialData: FeedDoc.zero(),
+                        stream: DatabaseService.getUserFeedDoc(um.uid),
+                        builder: (context, snapshot) {
+                          return AppBarButton(
+                            icon: CupertinoIcons.bell_fill,
+                            hint: snapshot.data.unseen,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          NotificationPage(snapshot.data)));
+                            },
+                          );
+                        }),
                     AppBarButton(
                       icon: CupertinoIcons.settings_solid,
                       onPressed: () {
@@ -697,6 +756,7 @@ class _NotScrolledHeader extends StatelessWidget {
                         closedBuilder: (context, open) => RoundedAvatar(
                           user?.thumbnailUrl ?? user?.imgUrl,
                           name: user?.name,
+                          blurHash: user?.blurHash,
                         ),
                       ),
                       width: 40,

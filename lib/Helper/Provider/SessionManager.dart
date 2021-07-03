@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,16 +9,17 @@ import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/ShareImage.dart';
 import 'package:one_d_m/Pages/SessionPage.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:social_share/social_share.dart';
 import '../DynamicLinkManager.dart';
 import '../ThemeManager.dart';
 import '../UserManager.dart';
 import '../margin.dart';
 
-abstract class BaseSessionManager extends ChangeNotifier {
+abstract class BaseSessionManager extends ChangeNotifier with Shareable {
   BaseSession baseSession;
   final bool isPreview;
   final String uid;
@@ -49,10 +51,15 @@ abstract class BaseSessionManager extends ChangeNotifier {
     super.dispose();
   }
 
+  Future<void> delete() {
+    return DatabaseService.deleteSession(baseSession);
+  }
+
   Future<void> share(BuildContext context) async {
     if ((baseSession?.name?.isEmpty ?? true) ||
         (baseSession.imgUrl?.isEmpty ?? true)) return;
-    Share.share(
+
+    SocialShare.shareOptions(
         (await DynamicLinkManager.of(context).createSessionLink(baseSession))
             .toString());
   }
@@ -106,6 +113,15 @@ abstract class BaseSessionManager extends ChangeNotifier {
 
   List<Widget> buildMore() {
     return [];
+  }
+
+  Future<InstagramImages> getShareImages(BuildContext context) {
+    return ShareImage.of(context).createSessionImageFromManager(this);
+  }
+
+  Future<String> getShareUrl(BuildContext context) async {
+    return (await DynamicLinkManager.of(context).createSessionLink(baseSession))
+        .toString();
   }
 }
 

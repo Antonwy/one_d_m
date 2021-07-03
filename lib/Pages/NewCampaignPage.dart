@@ -34,7 +34,7 @@ import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/Pages/create_post.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:social_share/social_share.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class NewCampaignPage extends StatefulWidget {
@@ -98,7 +98,7 @@ class _NewCampaignPageState extends State<NewCampaignPage>
   Future<void> _shareCampaign() async {
     if ((campaign?.name?.isEmpty ?? true) ||
         (campaign?.imgUrl?.isEmpty ?? true)) return;
-    Share.share(
+    SocialShare.shareOptions(
         (await DynamicLinkManager.of(context).createCampaignLink(campaign))
             .toString());
   }

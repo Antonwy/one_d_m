@@ -51,7 +51,6 @@ dependencies:
   ink_page_indicator: ^0.2.1
   flutter_svg: ^0.19.3
 
-  share: ^0.6.4+3
   auto_size_text: ^2.1.0
   flutter_offline: ^0.3.0
   # sign_in_with_apple: ^2.4.0
@@ -83,6 +82,8 @@ dependencies:
   styled_text: ^2.0.0
   flutter_blurhash: ^0.5.0
   flutter_material_color_picker: ^1.0.5
+  social_share: ^2.0.6
+  screenshot: ^1.2.1
 
 dependency_overrides:
   permission_handler_platform_interface: 2.0.1

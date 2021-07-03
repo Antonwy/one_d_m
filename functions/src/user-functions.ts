@@ -52,6 +52,10 @@ exports.onCreateUser = functions.firestore
         { merge: true }
       );
 
+    await firestore.collection(DatabaseConstants.feed).doc(user.uid).set({
+      unseen_objects: [],
+    });
+
     return firestore
       .collection(DatabaseConstants.statistics)
       .doc(DatabaseConstants.users_info)

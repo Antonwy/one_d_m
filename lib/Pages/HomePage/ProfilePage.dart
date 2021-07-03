@@ -726,7 +726,7 @@ class _NotScrolledHeader extends StatelessWidget {
                         builder: (context, snapshot) {
                           return AppBarButton(
                             icon: CupertinoIcons.bell_fill,
-                            hint: snapshot.data.unseen,
+                            hint: snapshot.data?.unseen ?? 1,
                             onPressed: () {
                               Navigator.push(
                                   context,

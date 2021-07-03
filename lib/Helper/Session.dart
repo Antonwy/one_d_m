@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Helper/DynamicLinkManager.dart';
+import 'package:one_d_m/Helper/ShareImage.dart';
 import 'package:provider/provider.dart';
 
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -208,18 +210,19 @@ class UploadableSession {
   final File image;
   final Color primaryColor, secondaryColor;
 
-  UploadableSession(
-      {this.id,
-      this.sessionName,
-      this.sessionDescription,
-      this.donationGoal,
-      this.campaign,
-      this.members,
-      this.image,
-      this.imgUrl,
-      this.primaryColor,
-      this.secondaryColor,
-      this.creatorId});
+  UploadableSession({
+    this.id,
+    this.sessionName,
+    this.sessionDescription,
+    this.donationGoal,
+    this.campaign,
+    this.members,
+    this.image,
+    this.imgUrl,
+    this.primaryColor,
+    this.secondaryColor,
+    this.creatorId,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -236,7 +239,7 @@ class UploadableSession {
       BaseSession.MEMBER_COUNT: 1,
       BaseSession.IMG_URL: imgUrl,
       BaseSession.IS_CERTIFIED: false,
-      BaseSession.SORT_IMPORTANCE: 0
+      BaseSession.SORT_IMPORTANCE: 0,
     };
   }
 
@@ -328,4 +331,9 @@ class SessionMember {
   }
 
   static const String ID = "id", DONATION_AMOUNT = "donation_amount";
+}
+
+mixin Shareable {
+  Future<String> getShareUrl(BuildContext context);
+  Future<InstagramImages> getShareImages(BuildContext context);
 }

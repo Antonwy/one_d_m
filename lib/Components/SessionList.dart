@@ -352,8 +352,7 @@ class _LongSessionListState extends State<LongSessionList> {
                   toolbarHeight: 100,
                 ),
                 SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
                   sliver: Consumer<LongSessionListManager>(
                       builder: (context, lsm, child) {
                     return FutureBuilder<List<BaseSession>>(
@@ -594,8 +593,9 @@ class SessionView extends StatelessWidget {
                                   XMargin(12),
                                   Expanded(
                                     child: PercentLine(
-                                      percent: session.donationGoalCurrent /
-                                          session.donationGoal,
+                                      percent: (session.donationGoalCurrent /
+                                              session.donationGoal)
+                                          .clamp(0.0, 1.0),
                                       height: 8.0,
                                       color: textColor,
                                     ),

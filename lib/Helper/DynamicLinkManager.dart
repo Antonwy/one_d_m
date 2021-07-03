@@ -52,9 +52,9 @@ class DynamicLinkManager {
     await context.read<FirebaseAnalytics>().logShare(
         contentType: "Share Campaign", itemId: campaign.name, method: "normal");
     return createLink(
-        title: 'Schau dir das Projekt "${campaign.name}" an!',
+        title: 'Schau dir das Projekt "${campaign.name}" auf ODM an!',
         description:
-            'Komm auf ODM um das Projekt "${campaign.name}" zu unterstützen!',
+            'Komm auf die One Dollar Movement App um das Projekt "${campaign.name}" zu unterstützen!',
         imageUrl: campaign.thumbnailUrl ?? campaign.imgUrl,
         link:
             'https://one-dollar-movement.com/?${Donation.CAMPAIGNID}=${campaign.id}',
@@ -68,8 +68,9 @@ class DynamicLinkManager {
         itemId: session.name,
         method: "normal");
     return createLink(
-        title: 'Schau dir ${session.name} an!',
-        description: 'Komm auf ODM um ${session.name} zu unterstützen!',
+        title: 'Schau dir ${session.name} auf ODM an!',
+        description:
+            'Komm auf die One Dollar Movement App um ${session.name} zu unterstützen!',
         imageUrl: session.imgUrl,
         link:
             'https://one-dollar-movement.com/?${Donation.SESSION_ID}=${session.id}',
@@ -80,8 +81,9 @@ class DynamicLinkManager {
     await context.read<FirebaseAnalytics>().logShare(
         contentType: "Share User", itemId: user.name, method: "normal");
     return createLink(
-        title: 'Schau dir ${user.name}\'s Profil an!',
-        description: "Komm auf ODM um ${user.name}'s Profil anzusehen!",
+        title: 'Schau dir ${user.name}\'s auf ODM Profil an!',
+        description:
+            "Komm auf die One Dollar Movement App um ${user.name}'s Profil anzusehen!",
         imageUrl: user?.thumbnailUrl ?? user?.imgUrl,
         link: 'https://one-dollar-movement.com/?${Donation.USERID}=${user.id}',
         short: short);

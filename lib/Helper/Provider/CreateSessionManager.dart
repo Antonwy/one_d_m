@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../DatabaseService.dart';
 import '../Session.dart';
 import '../User.dart';
+import 'SessionManager.dart';
 
 class CreateSessionManager extends ChangeNotifier {
   Campaign _selectedCampaign;
@@ -22,24 +23,24 @@ class CreateSessionManager extends ChangeNotifier {
   bool _loading = false, editMode = false;
   File _image;
   Color _primaryColor, _secondaryColor;
-  BaseSession baseSession;
+  BaseSessionManager baseSessionManager;
 
-  CreateSessionManager(BuildContext context, {this.baseSession}) {
+  CreateSessionManager(BuildContext context, {this.baseSessionManager}) {
     ThemeManager _theme = ThemeManager.of(context, listen: false);
     _primaryColor = _theme.colors.dark;
     _secondaryColor = _theme.colors.contrast;
     creatorId = context.read<UserManager>().uid;
-    if (baseSession != null) {
+    if (baseSessionManager != null) {
       editMode = true;
-      sessionName = baseSession.name;
-      sessionDescription = baseSession.sessionDescription;
-      primaryColor = baseSession.primaryColor;
-      secondaryColor = baseSession.secondaryColor;
+      sessionName = baseSessionManager.baseSession.name;
+      sessionDescription = baseSessionManager.baseSession.sessionDescription;
+      primaryColor = baseSessionManager.baseSession.primaryColor;
+      secondaryColor = baseSessionManager.baseSession.secondaryColor;
       selectedCampaign = Campaign(
-          name: baseSession.campaignName,
-          imgUrl: baseSession.campaignImgUrl,
-          id: baseSession.campaignId,
-          unit: baseSession.donationUnit);
+          name: baseSessionManager.baseSession.campaignName,
+          imgUrl: baseSessionManager.baseSession.campaignImgUrl,
+          id: baseSessionManager.baseSession.campaignId,
+          unit: baseSessionManager.baseSession.donationUnit);
     }
   }
 
@@ -105,7 +106,7 @@ class CreateSessionManager extends ChangeNotifier {
 
     print("Image: $image");
 
-    if (editMode) session.id = baseSession.id;
+    if (editMode) session.id = baseSessionManager.baseSession.id;
 
     print(session.id);
 
@@ -118,12 +119,16 @@ class CreateSessionManager extends ChangeNotifier {
     try {
       if (!editMode) {
         await DatabaseService.createSession(session);
-      } else if (uploadableSession.primaryColor != baseSession.primaryColor ||
-          uploadableSession.secondaryColor != baseSession.secondaryColor ||
-          uploadableSession.sessionName != baseSession.name ||
-          uploadableSession.donationGoal != baseSession.donationGoal ||
+      } else if (uploadableSession.primaryColor !=
+              baseSessionManager.baseSession.primaryColor ||
+          uploadableSession.secondaryColor !=
+              baseSessionManager.baseSession.secondaryColor ||
+          uploadableSession.sessionName !=
+              baseSessionManager.baseSession.name ||
+          uploadableSession.donationGoal !=
+              baseSessionManager.baseSession.donationGoal ||
           uploadableSession.sessionDescription !=
-              baseSession.sessionDescription ||
+              baseSessionManager.baseSession.sessionDescription ||
           image != null) {
         print("UPDATING...");
         await DatabaseService.updateSession(session);
@@ -143,7 +148,7 @@ class CreateSessionManager extends ChangeNotifier {
 
   PreviewSession get previewSession {
     return PreviewSession(
-        id: baseSession?.id,
+        id: baseSessionManager?.baseSession?.id,
         campaignId: selectedCampaign.id,
         name: sessionName,
         donationGoal: donationGoal,
@@ -154,7 +159,7 @@ class CreateSessionManager extends ChangeNotifier {
         creatorId: creatorId,
         secondaryColor: secondaryColor,
         primaryColor: primaryColor,
-        imgUrl: baseSession?.imgUrl,
+        imgUrl: baseSessionManager?.baseSession?.imgUrl,
         uploadableSession: uploadableSession);
   }
 

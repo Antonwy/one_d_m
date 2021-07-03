@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -10,6 +11,7 @@ import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
+import 'package:one_d_m/Components/SocialShareList.dart';
 import 'package:one_d_m/Components/UserFollowButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -17,16 +19,21 @@ import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/Donation.dart';
 import 'package:one_d_m/Helper/DynamicLinkManager.dart';
+import 'package:one_d_m/Helper/Helper.dart';
 import 'package:one_d_m/Helper/Numeral.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
 import 'package:one_d_m/Helper/Session.dart';
+import 'package:one_d_m/Helper/ShareImage.dart';
+import 'package:one_d_m/Helper/ShareManager.dart';
 import 'package:one_d_m/Helper/ThemeManager.dart';
 import 'package:one_d_m/Helper/User.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Helper/margin.dart';
 import 'package:one_d_m/utils/video/video_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:social_share/social_share.dart';
 
 import 'CertifiedSessionPage.dart';
 import 'CreateSessionPage.dart';
@@ -86,7 +93,7 @@ class FloatingDonationButton extends StatelessWidget {
 
               bool _active = _connected && sm.baseSession?.campaignId != null;
               Color textColor = _theme.correctColorFor(
-                  sm.baseSession.primaryColor ?? _theme.colors.dark);
+                  sm.baseSession.secondaryColor ?? _theme.colors.dark);
               return FloatingActionButton.extended(
                   onPressed: _active
                       ? () async {
@@ -107,7 +114,7 @@ class FloatingDonationButton extends StatelessWidget {
                         TextStyle(color: _active ? textColor : Colors.white60),
                   ),
                   backgroundColor: _active
-                      ? sm.baseSession.primaryColor ?? _theme.colors.dark
+                      ? sm.baseSession.secondaryColor ?? _theme.colors.dark
                       : Colors.grey);
             },
           );
@@ -145,7 +152,24 @@ class SessionTitleImage extends StatelessWidget {
                           children: [
                             AppBarButton(
                               elevation: 10,
-                              onPressed: () => sm.share(context),
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                          title: Text(
+                                              "${sm.baseSession.name} teilen"),
+                                          content: SocialShareList(
+                                            sm,
+                                            onClicked: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      Constants.radius)),
+                                        ));
+                              },
                               icon: CupertinoIcons.share,
                             ),
                             if (isCreator) XMargin(8),
@@ -155,9 +179,28 @@ class SessionTitleImage extends StatelessWidget {
                                 onPressed: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => CreateSessionPage(
-                                            sm?.baseSession))),
+                                        builder: (context) =>
+                                            CreateSessionPage(sm))),
                                 icon: Icons.edit,
+                              ),
+                            if (isCreator) XMargin(8),
+                            if (isCreator)
+                              AppBarButton(
+                                elevation: 10,
+                                onPressed: () async {
+                                  bool res = (await Helper.showWarningAlert(
+                                          context,
+                                          "Bist du dir sicher, dass du ${sm.baseSession.name} löschen willst?",
+                                          title: "Sicher?",
+                                          acceptButton: "LÖSCHEN")) ??
+                                      false;
+                                  if (res) {
+                                    sm.delete();
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                icon: Icons.delete,
+                                iconColor: Colors.red,
                               ),
                           ],
                         );
@@ -248,53 +291,74 @@ class SessionTitle extends StatelessWidget {
         child: Consumer<BaseSessionManager>(
       builder: (context, sm, child) => Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AutoSizeText(
-                    sm.baseSession?.name ?? "Laden...",
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.headline6.copyWith(
-                        fontWeight: FontWeight.bold, color: _theme.colors.dark),
+            Row(
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            flex: 6,
+                            child: AutoSizeText(
+                              sm.baseSession?.name ?? "Laden...",
+                              maxLines: 1,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline6
+                                  .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: _theme.colors.dark),
+                            ),
+                          ),
+                          if (sm.baseSession.isCertified) XMargin(6),
+                          if (sm.baseSession.isCertified)
+                            Icon(Icons.verified,
+                                color: Colors.greenAccent[400], size: 18),
+                        ],
+                      ),
+                      sm.baseSession?.creatorId?.isNotEmpty ?? false
+                          ? FutureBuilder<User>(
+                              future: DatabaseService.getUser(
+                                  sm.baseSession.creatorId),
+                              builder: (context, snapshot) {
+                                return RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(text: 'by '),
+                                      TextSpan(
+                                          text:
+                                              '${snapshot.data?.name ?? 'Laden...'}',
+                                          style: _theme.textTheme.dark.bodyText1
+                                              .copyWith(
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  fontWeight: FontWeight.w700)),
+                                    ],
+                                    style: _theme.textTheme.dark.bodyText1
+                                        .copyWith(
+                                            color: _theme.colors.dark
+                                                .withOpacity(.54)),
+                                  ),
+                                );
+                              },
+                            )
+                          : SizedBox.shrink(),
+                    ],
                   ),
-                  sm.baseSession?.creatorId?.isNotEmpty ?? false
-                      ? FutureBuilder<User>(
-                          future:
-                              DatabaseService.getUser(sm.baseSession.creatorId),
-                          builder: (context, snapshot) {
-                            return RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(text: 'by '),
-                                  TextSpan(
-                                      text:
-                                          '${snapshot.data?.name ?? 'Laden...'}',
-                                      style: _theme.textTheme.dark.bodyText1
-                                          .copyWith(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              fontWeight: FontWeight.w700)),
-                                ],
-                                style: _theme.textTheme.dark.bodyText1.copyWith(
-                                    color: _theme.colors.dark.withOpacity(.54)),
-                              ),
-                            );
-                          },
-                        )
-                      : SizedBox.shrink(),
-                ],
-              ),
+                ),
+                XMargin(12),
+                if (!sm.isPreview)
+                  Expanded(
+                    flex: 3,
+                    child: sm.buildJoinButton(),
+                  )
+              ],
             ),
-            XMargin(12),
-            if (!sm.isPreview)
-              Expanded(
-                flex: 3,
-                child: sm.buildJoinButton(),
-              )
           ],
         ),
       ),
@@ -416,7 +480,6 @@ class SessionGoal extends StatelessWidget {
           ? FutureBuilder<Campaign>(
               future: sm.campaign,
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return SizedBox.shrink();
                 Color textColor =
                     _theme.correctColorFor(sm.baseSession.secondaryColor);
                 BaseTextTheme textTheme = _theme.textTheme
@@ -447,10 +510,12 @@ class SessionGoal extends StatelessWidget {
                                           TextSpan(
                                               text:
                                                   "${Numeral(session.donationGoalCurrent).value()} "),
-                                          if (campaign.unitSmiley != null &&
-                                              campaign.unitSmiley.isNotEmpty)
+                                          if (campaign?.unitSmiley != null &&
+                                              (campaign
+                                                      ?.unitSmiley?.isNotEmpty ??
+                                                  false))
                                             TextSpan(
-                                                text: "${campaign.unitSmiley}",
+                                                text: "${campaign?.unitSmiley}",
                                                 style: TextStyle(
                                                     fontSize: 38,
                                                     fontWeight:
@@ -458,7 +523,7 @@ class SessionGoal extends StatelessWidget {
                                           else
                                             TextSpan(
                                                 text:
-                                                    "${campaign.unit ?? "DV"}",
+                                                    "${campaign?.unit ?? "DV"}",
                                                 style: TextStyle(
                                                     fontSize: 22,
                                                     fontWeight:
@@ -492,7 +557,7 @@ class SessionGoal extends StatelessWidget {
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 4.0, horizontal: 12),
                                             child: Text(
-                                                "${campaign?.name ?? ""}",
+                                                "${campaign?.name ?? "Laden..."}",
                                                 style: textTheme.bodyText1),
                                           ),
                                         ),
@@ -542,7 +607,7 @@ class SessionGoal extends StatelessWidget {
                                                 fontWeight: FontWeight.bold)),
                                         TextSpan(
                                             text:
-                                                "${campaign.unitSmiley ?? campaign.unit ?? "DV"}"),
+                                                "${campaign?.unitSmiley ?? campaign?.unit ?? "DV"}"),
                                       ])),
                                 ],
                               )
@@ -581,12 +646,28 @@ class SessionDescription extends StatelessWidget {
                     color: sm.baseSession.primaryColor,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        sm.baseSession.sessionDescription,
-                        style: ThemeManager.of(context)
-                            .textTheme
-                            .correctColorFor(sm.baseSession.primaryColor)
-                            .bodyText2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sm.baseSession.sessionDescription,
+                            style: ThemeManager.of(context)
+                                .textTheme
+                                .correctColorFor(sm.baseSession.primaryColor)
+                                .bodyText2,
+                          ),
+                          if (!sm.isPreview) YMargin(12),
+                          if (!sm.isPreview)
+                            Text(
+                              "Teile diese Session mit deinen Freunden:",
+                              style: ThemeManager.of(context)
+                                  .textTheme
+                                  .correctColorFor(sm.baseSession.primaryColor)
+                                  .bodyText1,
+                            ),
+                          if (!sm.isPreview) YMargin(6),
+                          if (!sm.isPreview) SocialShareList(sm)
+                        ],
                       ),
                     )),
               )),

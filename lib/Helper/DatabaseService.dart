@@ -790,6 +790,10 @@ class DatabaseService {
         .set(session.toMap(), SetOptions(merge: true));
   }
 
+  static Future<void> deleteSession(BaseSession session) {
+    return sessionsCollection.doc(session.id).delete();
+  }
+
   static Future<void> updateSession(UploadableSession session) {
     return sessionsCollection.doc(session.id).update(session.toUpdateMap());
   }
@@ -911,8 +915,12 @@ class DatabaseService {
     });
   }
 
-  static Future<CertifiedSession> getSessionFuture(String sid) async {
-    return CertifiedSession.fromDoc(await sessionsCollection.doc(sid).get());
+  static Future<BaseSession> getSessionFuture(String sid) async {
+    DocumentSnapshot doc = await sessionsCollection.doc(sid).get();
+    print(doc.data()[BaseSession.IS_CERTIFIED]);
+    return (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
+        ? CertifiedSession.fromDoc(doc)
+        : Session.fromDoc(doc);
   }
 
   static Stream<List<SessionMember>> getSessionMembers(String sid,

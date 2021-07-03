@@ -59,9 +59,9 @@ class Helper {
     return "${date.day < 10 ? "0${date.day}" : date.day}.${date.month < 10 ? "0${date.month}" : date.month}.${date.year}";
   }
 
-  static showAlert(BuildContext context, String message,
+  static Future<bool> showAlert(BuildContext context, String message,
       {String title = "Error"}) {
-    showDialog(
+    return showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(
@@ -78,6 +78,35 @@ class Helper {
                       style: TextStyle(
                           color: ThemeManager.of(context).colors.dark),
                     ))
+              ],
+            ));
+  }
+
+  static Future<bool> showWarningAlert(BuildContext context, String message,
+      {String title = "Error", String acceptButton = "OKAY"}) {
+    return showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Constants.radius)),
+              title: Text(title),
+              content: Text(
+                message,
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop<bool>(context, false),
+                    child: Text(
+                      "ABBRECHEN",
+                      style: TextStyle(
+                          color: ThemeManager.of(context).colors.dark),
+                    )),
+                TextButton(
+                    onPressed: () => Navigator.pop<bool>(context, true),
+                    child: Text(
+                      acceptButton,
+                      style: TextStyle(color: Colors.red),
+                    )),
               ],
             ));
   }

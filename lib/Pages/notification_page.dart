@@ -59,6 +59,20 @@ class _NotificationPageState extends State<NotificationPage> {
         initialData: [],
         stream: DatabaseService.getFeed(context.read<UserManager>().uid),
         builder: (context, snapshot) {
+          if (snapshot.data.isEmpty)
+            return SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  YMargin(24),
+                  SvgPicture.asset(
+                    "assets/images/no-news.svg",
+                    height: 200,
+                  ),
+                  YMargin(12),
+                  Text("Noch keine Neuigkeiten!")
+                ],
+              ),
+            );
           return SliverList(
               delegate: SliverChildBuilderDelegate((context, i) {
             FeedObject _fo = snapshot.data[i];

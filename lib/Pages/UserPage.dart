@@ -29,7 +29,7 @@ import 'package:one_d_m/Pages/FollowersListPage.dart';
 import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
 import 'package:one_d_m/Pages/UsersDonationsPage.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:social_share/social_share.dart';
 
 class UserPage extends StatefulWidget {
   User user;
@@ -447,7 +447,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   Future<void> _shareUser(BuildContext context) async {
     if ((user?.name?.isEmpty ?? true)) return;
-    Share.share(
+    SocialShare.shareOptions(
         (await DynamicLinkManager.of(context).createUserLink(user)).toString());
   }
 

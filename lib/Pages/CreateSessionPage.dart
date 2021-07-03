@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:one_d_m/Components/Avatar.dart';
 import 'package:one_d_m/Components/CampaignButton.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
 import 'package:one_d_m/Components/CustomTextField.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
+import 'package:one_d_m/Components/SocialShareList.dart';
 import 'package:one_d_m/Components/UserButton.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -33,53 +36,74 @@ import 'HomePage/ProfilePage.dart';
 
 class CreateSessionPage extends StatelessWidget {
   ThemeManager _theme;
-  BaseSession _baseSession;
+  BaseSessionManager _baseSessionManager;
 
-  CreateSessionPage([this._baseSession]);
+  CreateSessionPage([this._baseSessionManager]);
 
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
     return ChangeNotifierProvider<CreateSessionManager>(
-      create: (context) =>
-          CreateSessionManager(context, baseSession: _baseSession),
+      create: (context) => CreateSessionManager(context,
+          baseSessionManager: _baseSessionManager),
       child: Scaffold(
         backgroundColor: ColorTheme.appBg,
         floatingActionButton:
             Consumer<CreateSessionManager>(builder: (context, csm, child) {
           Color textColor = _theme.correctColorFor(csm.primaryColor);
-          return FloatingActionButton.extended(
-            backgroundColor: csm.primaryColor,
-            label: Text(
-              csm.editMode ? "Updaten" : "Erstellen",
-              style: TextStyle(color: textColor),
-            ),
-            icon: csm.loading
-                ? Container(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(textColor),
-                    ))
-                : Icon(
-                    Icons.done,
-                    color: textColor,
+          return OpenContainer(
+              openBuilder: (context, close) => _CreateSuccessPage(csm),
+              closedColor: csm.primaryColor,
+              closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(48)),
+              closedElevation: 10,
+              closedBuilder: (context, open) {
+                return Container(
+                  height: 50,
+                  child: InkWell(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          csm.loading
+                              ? Container(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    valueColor:
+                                        AlwaysStoppedAnimation(textColor),
+                                  ))
+                              : Icon(
+                                  Icons.done,
+                                  color: textColor,
+                                  size: 24,
+                                ),
+                          XMargin(8),
+                          Flexible(
+                            child: Text(
+                              csm.editMode ? "Updaten" : "Erstellen",
+                              style: TextStyle(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: csm.loading
+                        ? null
+                        : () async {
+                            String res = await csm.createSession();
+
+                            if (res != null)
+                              return ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text(res)));
+                            open();
+                          },
                   ),
-            onPressed: csm.loading
-                ? null
-                : () async {
-                    String res = await Provider.of<CreateSessionManager>(
-                            context,
-                            listen: false)
-                        .createSession();
-
-                    if (res != null)
-                      return Scaffold.of(context)
-                          .showSnackBar(SnackBar(content: Text(res)));
-
-                    Navigator.pop(context);
-                  },
-          );
+                );
+              });
         }),
         body: CustomScrollView(
           slivers: [
@@ -145,7 +169,7 @@ class CreateSessionPage extends StatelessWidget {
             _SessionNameInput(),
             _SessionDescriptionInput(),
             _DonationTarget(),
-            if (_baseSession == null)
+            if (_baseSessionManager == null)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -164,7 +188,7 @@ class CreateSessionPage extends StatelessWidget {
                   ),
                 ),
               ),
-            if (_baseSession == null) _CampaignOptions(),
+            if (_baseSessionManager == null) _CampaignOptions(),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 120,
@@ -186,7 +210,8 @@ class CreateSessionPage extends StatelessWidget {
 
     if (csm.editMode)
       return CachedNetworkImage(
-          imageUrl: csm.baseSession.imgUrl, fit: BoxFit.cover);
+          imageUrl: csm.baseSessionManager.baseSession.imgUrl,
+          fit: BoxFit.cover);
 
     return SafeArea(
       bottom: false,
@@ -328,7 +353,8 @@ class __DonationTargetState extends State<_DonationTarget> {
   void initState() {
     super.initState();
     CreateSessionManager csm = context.read<CreateSessionManager>();
-    if (csm.editMode) _targetAmount = csm.baseSession.donationGoal;
+    if (csm.editMode)
+      _targetAmount = csm.baseSessionManager.baseSession.donationGoal;
   }
 
   @override
@@ -387,12 +413,20 @@ class __DonationTargetState extends State<_DonationTarget> {
                   width: 12,
                 ),
                 Consumer<CreateSessionManager>(
-                  builder: (context, csm, child) => Text(
-                    csm.editMode
-                        ? csm.baseSession.donationUnit
-                        : (csm.selectedCampaign?.unit ?? "DV"),
-                    style: _theme.textTheme.dark.bodyText1,
-                  ),
+                  builder: (context, csm, child) {
+                    Campaign c = csm.selectedCampaign ?? Campaign(unit: "DV");
+                    return FutureBuilder<Campaign>(
+                        initialData: c,
+                        future: csm.editMode
+                            ? csm.baseSessionManager.campaign
+                            : Future.value(c),
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data?.unit ?? "DV",
+                            style: _theme.textTheme.dark.bodyText1,
+                          );
+                        });
+                  },
                 ),
               ],
             )
@@ -478,9 +512,13 @@ class _SessionDescriptionInput extends StatelessWidget {
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
 
-          if (csm.editMode && (_controller.text?.isEmpty ?? true))
-            _controller.text = csm.baseSession.sessionDescription;
+          print(csm.editMode);
 
+          if (csm.editMode && (_controller.text?.isEmpty ?? true))
+            _controller.text =
+                csm.baseSessionManager.baseSession.sessionDescription;
+
+          _controller.text = csm.sessionDescription;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
@@ -537,9 +575,10 @@ class _CampaignOptions extends StatelessWidget {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                   if (csm.editMode) {
                     csm.selectedCampaign = Campaign(
-                        name: csm.baseSession.campaignName,
-                        imgUrl: csm.baseSession.campaignImgUrl,
-                        id: csm.baseSession.campaignId);
+                        name: csm.baseSessionManager.baseSession.campaignName,
+                        imgUrl:
+                            csm.baseSessionManager.baseSession.campaignImgUrl,
+                        id: csm.baseSessionManager.baseSession.campaignId);
                   } else
                     csm.selectedCampaign = campaigns[0];
                 });
@@ -804,5 +843,85 @@ class __SearchPageState<E> extends State<_SearchPage<E>> {
         ],
       ),
     );
+  }
+}
+
+class _CreateSuccessPage extends StatelessWidget {
+  final CreateSessionManager csm;
+  const _CreateSuccessPage(this.csm);
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    print(csm.sessionId);
+    return FutureBuilder<BaseSession>(
+        future: DatabaseService.getSessionFuture(csm.sessionId),
+        builder: (context, snapshot) {
+          return Scaffold(
+            backgroundColor: csm.primaryColor,
+            floatingActionButton: FloatingActionButton(
+                onPressed: snapshot.hasData
+                    ? () {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SessionPage(snapshot.data)),
+                            (route) => route.isFirst);
+                      }
+                    : () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
+                child: Icon(
+                  snapshot.hasData ? Icons.arrow_forward : Icons.close,
+                  color: _theme.correctColorFor(csm.secondaryColor),
+                ),
+                backgroundColor: csm.secondaryColor),
+            body: ClipRect(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      child: Transform.scale(
+                        scale: 2.5,
+                        child: Lottie.asset('assets/anim/anim_start.json',
+                            repeat: false, onLoaded: (composition) {
+                          HapticFeedback.heavyImpact();
+                        }),
+                      ),
+                    ),
+                  ),
+                  YMargin(12),
+                  Text("Deine Session wurde erstellt!",
+                      style: _theme.textTheme
+                          .correctColorFor(csm.primaryColor)
+                          .headline6),
+                  YMargin(6),
+                  Text("Teile sie jetzt mit deinen Freunden:",
+                      style: _theme.textTheme
+                          .correctColorFor(csm.primaryColor)
+                          .bodyText2),
+                  YMargin(12),
+                  Builder(builder: (context) {
+                    if (!snapshot.hasData)
+                      return Container(
+                        width: 25,
+                        height: 25,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(
+                              _theme.correctColorFor(csm.primaryColor)),
+                        ),
+                      );
+                    return SocialShareList(snapshot?.data
+                        ?.manager(context.read<UserManager>().uid));
+                  }),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

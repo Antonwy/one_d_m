@@ -450,8 +450,9 @@ class LongSessionListManager extends ChangeNotifier {
   }
 
   void callQuery() {
+    print("NOW");
     sessionsFuture = DatabaseService.getSessionsFromQuery(textController.text,
-        onlyCertified: tags[0].filtered,
+        onlyCertified: tags[0].filtered ?? false,
         onlySessionsFrom:
             tags[1].filtered ? context.read<UserManager>().uid : null)
       ..whenComplete(() {

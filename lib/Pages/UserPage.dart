@@ -246,7 +246,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                         padding: EdgeInsets.only(
                             left: index == 0 ? 12.0 : 0.0,
                             right: index == sessions.length - 1 ? 12.0 : 0.0),
-                        child: FutureBuilder<CertifiedSession>(
+                        child: FutureBuilder<BaseSession>(
                             future: DatabaseService.getSessionFuture(
                                 sessions[index]),
                             builder: (context, snapshot) {

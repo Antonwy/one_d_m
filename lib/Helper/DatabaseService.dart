@@ -343,7 +343,7 @@ class DatabaseService {
     for (Query query in queries) {
       QuerySnapshot snapshot = await query.get();
       sessions.addAll(snapshot.docs.map((doc) =>
-          doc.data()[BaseSession.IS_CERTIFIED]
+          (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
               ? CertifiedSession.fromDoc(doc)
               : Session.fromDoc(doc)));
     }

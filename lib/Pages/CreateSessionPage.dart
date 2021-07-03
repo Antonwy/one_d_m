@@ -83,6 +83,8 @@ class CreateSessionPage extends StatelessWidget {
                           Flexible(
                             child: Text(
                               csm.editMode ? "Updaten" : "Erstellen",
+                              maxLines: 1,
+                              overflow: TextOverflow.clip,
                               style: TextStyle(
                                   color: textColor,
                                   fontWeight: FontWeight.bold),

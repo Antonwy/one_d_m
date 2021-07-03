@@ -40,70 +40,67 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
   const url = generateUrl(obj);
 
   if (imageType === ImagePrefix.news) {
-    if (resulution === ImageResolutions.high)
+    if (resulution === ImageResolutions.high) {
       await firestore
         .collection(DatabaseConstants.news)
         .doc(id)
-        .set(
-          {
-            image_url: url,
-            blur_hash: await createBlurHash(url),
-          },
-          { merge: true }
-        );
+        .update({
+          image_url: url,
+          blur_hash: await createBlurHash(url),
+        })
+        .catch();
+    }
   } else if (
     imageType === ImagePrefix.session ||
     imageType === ImagePrefix.certified_sessions
   ) {
-    if (resulution === ImageResolutions.high)
+    if (resulution === ImageResolutions.high) {
       await firestore
         .collection(DatabaseConstants.sessions)
         .doc(id)
-        .set(
-          {
-            img_url: url,
-            blur_hash: await createBlurHash(url),
-          },
-          { merge: true }
-        );
+        .update({
+          img_url: url,
+          blur_hash: await createBlurHash(url),
+        })
+        .catch();
+    }
   } else if (imageType === ImagePrefix.campaign) {
-    if (resulution === ImageResolutions.high)
+    if (resulution === ImageResolutions.high) {
       await firestore
         .collection(DatabaseConstants.campaigns)
         .doc(id)
-        .set(
-          {
-            image_url: url,
-            blur_hash: await createBlurHash(url),
-          },
-          { merge: true }
-        );
-    else
-      await firestore.collection(DatabaseConstants.campaigns).doc(id).set(
-        {
+        .set({
+          image_url: url,
+          blur_hash: await createBlurHash(url),
+        })
+        .catch();
+    } else {
+      await firestore
+        .collection(DatabaseConstants.campaigns)
+        .doc(id)
+        .set({
           thumbnail_url: url,
-        },
-        { merge: true }
-      );
+        })
+        .catch();
+    }
   } else if (imageType === ImagePrefix.user) {
     if (resulution === ImageResolutions.high)
       await firestore
         .collection(DatabaseConstants.user)
         .doc(id)
-        .set(
-          {
-            image_url: url,
-            blur_hash: await createBlurHash(url),
-          },
-          { merge: true }
-        );
+        .set({
+          image_url: url,
+          blur_hash: await createBlurHash(url),
+        })
+        .catch();
     else {
-      await firestore.collection(DatabaseConstants.user).doc(id).set(
-        {
+      await firestore
+        .collection(DatabaseConstants.user)
+        .doc(id)
+        .set({
           thumbnail_url: url,
-        },
-        { merge: true }
-      );
+        })
+        .catch();
     }
   }
 });

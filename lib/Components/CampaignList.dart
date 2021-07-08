@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/Components/NativeAd.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/Constants.dart';
 
 import 'CampaignHeader.dart';
 
@@ -58,7 +54,8 @@ class _CampaignListState extends State<CampaignList> {
     }
 
     return SliverList(
-        delegate: SliverChildListDelegate(_buildChildren(widget.campaigns)));
+        delegate: SliverChildListDelegate(_buildChildren(widget.campaigns),
+            addAutomaticKeepAlives: false, addRepaintBoundaries: false));
   }
 
   List<Widget> _buildChildren(List<Campaign> campaigns) {

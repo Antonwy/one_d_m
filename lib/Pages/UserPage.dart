@@ -621,41 +621,44 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   Widget _buildUserImage(BuildContext context,
           {Size size = const Size(88, 88)}) =>
-      CachedNetworkImage(
-        imageUrl: user.imgUrl ?? '',
-        imageBuilder: (context, imageProvider) => Container(
-          height: size.height,
-          width: size.width,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Constants.radius),
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
+      Container(
+        height: size.height,
+        width: size.width,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Constants.radius),
+        ),
+        child: CachedNetworkImage(
+          imageUrl: user.imgUrl ?? '',
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        errorWidget: (_, __, ___) => Container(
-          height: size.height,
-          width: size.width,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Constants.radius),
-            color: ThemeManager.of(context).colors.contrast,
+          errorWidget: (_, __, ___) => Container(
+            height: size.height,
+            width: size.width,
+            decoration: BoxDecoration(
+              color: ThemeManager.of(context).colors.contrast,
+            ),
+            child: Center(
+                child: Icon(
+              Icons.person,
+              color: ThemeManager.of(context).colors.dark,
+            )),
           ),
-          child: Center(
-              child: Icon(
-            Icons.person,
-            color: ThemeManager.of(context).colors.dark,
-          )),
-        ),
-        placeholder: (_, __) => Container(
-          height: size.height,
-          width: size.width,
-          child: user.blurHash == null
-              ? Center(
-                  child: CircularProgressIndicator(),
-                )
-              : BlurHash(hash: user.blurHash),
+          placeholder: (_, __) => Container(
+            height: size.height,
+            width: size.width,
+            child: user.blurHash == null
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : BlurHash(hash: user.blurHash),
+          ),
         ),
       );
 

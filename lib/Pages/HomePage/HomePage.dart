@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Components/NavBar.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
@@ -46,12 +48,14 @@ class HomePageState extends State<HomePage> {
     Future.wait([
       widget.initFuture ?? Future.value(),
       Future.delayed(Duration(seconds: 1))
-    ]).then((v) {
-      _createDialogQueue();
+    ]).then((v) async {
+      await _createDialogQueue();
+      FeatureDiscovery.discoverFeatures(context, DiscoveryHolder.features);
+      print(DiscoveryHolder.features);
     });
   }
 
-  void _createDialogQueue() async {
+  Future<void> _createDialogQueue() async {
     StartupDialogManager sdm = StartupDialogManager(context,
         isFirstStart: context.read<UserManager>().firstSignIn);
     sdm.addDialogToQueue(
@@ -60,7 +64,7 @@ class HomePageState extends State<HomePage> {
     if (await _shouldShowVersionDialog())
       sdm.addDialogToQueue(StartDialogModel(DialogHolder.showUpdateAppDialog));
 
-    sdm.showDialogs();
+    return sdm.showDialogs();
   }
 
   Future<bool> _shouldShowVersionDialog() async {
@@ -116,11 +120,14 @@ class HomePageState extends State<HomePage> {
                 ChangeNotifierProvider(
                     create: (_) => GoalPageManager(),
                     builder: (context, child) => GoalPage()),
-                ProfilePage(
-                  key: profileGlobalKey,
-                  scrollController: _scrollController,
-                  onExploreTapped: () => _changePage(1),
-                ),
+                Provider<Future<void> Function(int)>(
+                    create: (context) => _changePage,
+                    builder: (context, child) {
+                      return ProfilePage(
+                        key: profileGlobalKey,
+                        scrollController: _scrollController,
+                      );
+                    }),
                 // NewsHomePage(() => _changePage(2)),
                 ExplorePage(
                   scrollController: _scrollController,
@@ -135,11 +142,9 @@ class HomePageState extends State<HomePage> {
         ));
   }
 
-  void _changePage(int page) {
-    _pageController
-        .animateToPage(page,
-            duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn)
-        .then((value) {});
+  Future<void> _changePage(int page) async {
+    await _pageController.animateToPage(page,
+        duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
     _resetPageScroll();
   }
 

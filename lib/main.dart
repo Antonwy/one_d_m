@@ -4,6 +4,7 @@ import 'package:catcher/handlers/console_handler.dart';
 import 'package:catcher/handlers/sentry_handler.dart';
 import 'package:catcher/mode/silent_report_mode.dart';
 import 'package:catcher/model/catcher_options.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
@@ -84,18 +85,20 @@ class _ODMAppState extends State<ODMApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        navigatorKey: Catcher.navigatorKey,
-        title: 'One Dollar Movement',
-        debugShowCheckedModeBanner: false,
-        navigatorObservers: [
-          FirebaseAnalyticsObserver(
-              analytics: context.read<FirebaseAnalytics>()),
-        ],
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(brightness: Brightness.light),
-          primarySwatch: Colors.indigo,
-        ),
-        home: PageManagerWidget());
+    return FeatureDiscovery(
+      child: MaterialApp(
+          navigatorKey: Catcher.navigatorKey,
+          title: 'One Dollar Movement',
+          debugShowCheckedModeBanner: false,
+          navigatorObservers: [
+            FirebaseAnalyticsObserver(
+                analytics: context.read<FirebaseAnalytics>()),
+          ],
+          theme: ThemeData(
+            appBarTheme: AppBarTheme(brightness: Brightness.light),
+            primarySwatch: Colors.indigo,
+          ),
+          home: PageManagerWidget()),
+    );
   }
 }

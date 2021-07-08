@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:provider/provider.dart';
 
@@ -55,7 +56,15 @@ class SessionList extends StatelessWidget {
                                   minSessionsToShow: minSessionsToShow,
                                 )
                               : SizedBox.shrink()
-                          : SessionView(snapshot.data[index]),
+                          : index == 0
+                              ? DiscoveryHolder.sessions(
+                                  child: SessionView(snapshot.data[index]),
+                                  tapTarget: Icon(Icons.arrow_forward,
+                                      color: ThemeManager.of(context)
+                                          .colors
+                                          .contrast),
+                                )
+                              : SessionView(snapshot.data[index]),
                     );
                   },
                   itemCount: length == 0 ? length : length + 1,
@@ -225,70 +234,76 @@ class _LongSessionListState extends State<LongSessionList> {
                   elevation: 0,
                   iconTheme: IconThemeData(color: _theme.colors.textOnContrast),
                   automaticallyImplyLeading: false,
+                  titleSpacing: 0,
                   title: Column(
                     children: [
                       Container(
                         width: double.infinity,
                         height: 56,
-                        child: Material(
-                          color: ColorTheme.appBg,
-                          elevation: 1,
-                          borderRadius: BorderRadius.circular(Constants.radius),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 6.0, right: 6),
-                                child: AppBarButton(
-                                  icon: Icons.arrow_back,
-                                  onPressed: () => Navigator.pop(context),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Material(
+                            color: ColorTheme.appBg,
+                            elevation: 1,
+                            borderRadius:
+                                BorderRadius.circular(Constants.radius),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 6.0, right: 6),
+                                  child: AppBarButton(
+                                    icon: Icons.arrow_back,
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                  child: TextField(
-                                controller: _controller,
-                                cursorColor: _theme.colors.dark,
-                                decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: "Suchen"),
-                                style: _theme.textTheme.dark.bodyText1
-                                    .copyWith(fontSize: 18),
-                              )),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: Consumer<LongSessionListManager>(
-                                  builder: (context, lsm, child) {
-                                    if (lsm.loading)
-                                      return AppBarButton(
-                                        child: Container(
-                                          width: 40,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: AspectRatio(
-                                                aspectRatio: 1,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation(
-                                                          _theme.colors.dark),
-                                                )),
+                                Expanded(
+                                    child: TextField(
+                                  controller: _controller,
+                                  cursorColor: _theme.colors.dark,
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "Suchen"),
+                                  style: _theme.textTheme.dark.bodyText1
+                                      .copyWith(fontSize: 18),
+                                )),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6.0),
+                                  child: Consumer<LongSessionListManager>(
+                                    builder: (context, lsm, child) {
+                                      if (lsm.loading)
+                                        return AppBarButton(
+                                          child: Container(
+                                            width: 40,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: AspectRatio(
+                                                  aspectRatio: 1,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation(
+                                                            _theme.colors.dark),
+                                                  )),
+                                            ),
                                           ),
-                                        ),
-                                        onPressed: null,
-                                      );
+                                          onPressed: null,
+                                        );
 
-                                    return AppBarButton(
-                                      icon: lsm.showDeleteAllIcon
-                                          ? Icons.close
-                                          : CupertinoIcons.search,
-                                      onPressed: lsm.showDeleteAllIcon
-                                          ? lsm.deleteText
-                                          : null,
-                                    );
-                                  },
+                                      return AppBarButton(
+                                        icon: lsm.showDeleteAllIcon
+                                            ? Icons.close
+                                            : CupertinoIcons.search,
+                                        onPressed: lsm.showDeleteAllIcon
+                                            ? lsm.deleteText
+                                            : null,
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -302,43 +317,52 @@ class _LongSessionListState extends State<LongSessionList> {
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index) {
                                     FilterTag tag = lsm.tags[index];
-                                    return Material(
-                                      borderRadius: BorderRadius.circular(24),
-                                      color: tag.filtered
-                                          ? _theme.colors.dark
-                                          : ColorTheme.appBg,
-                                      elevation: 1,
-                                      clipBehavior: Clip.antiAlias,
-                                      child: InkWell(
-                                        onTap: () {
-                                          lsm.toggleTag(tag);
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12.0, vertical: 6),
-                                          child: Row(
-                                            children: [
-                                              if (tag.icon != null)
-                                                Icon(
-                                                  tag.icon,
-                                                  size: 14,
-                                                  color: tag.filtered
-                                                      ? tag.iconColor != null
-                                                          ? tag.iconColor
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          left: index == 0 ? 12.0 : 0,
+                                          right: index == lsm.tags.length - 1
+                                              ? 12
+                                              : 0),
+                                      child: Material(
+                                        borderRadius: BorderRadius.circular(24),
+                                        color: tag.filtered
+                                            ? _theme.colors.dark
+                                            : ColorTheme.appBg,
+                                        elevation: 1,
+                                        clipBehavior: Clip.antiAlias,
+                                        child: InkWell(
+                                          onTap: () {
+                                            lsm.toggleTag(tag);
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12.0, vertical: 6),
+                                            child: Row(
+                                              children: [
+                                                if (tag.icon != null)
+                                                  Icon(
+                                                    tag.icon,
+                                                    size: 14,
+                                                    color: tag.filtered
+                                                        ? tag.iconColor != null
+                                                            ? tag.iconColor
+                                                            : _theme.colors
+                                                                .textOnDark
+                                                        : _theme.colors.dark,
+                                                  ),
+                                                if (tag.icon != null)
+                                                  XMargin(4),
+                                                Text(
+                                                  tag.tag,
+                                                  style: (tag.filtered
+                                                          ? _theme.textTheme
+                                                              .textOnDark
                                                           : _theme
-                                                              .colors.textOnDark
-                                                      : _theme.colors.dark,
+                                                              .textTheme.dark)
+                                                      .bodyText1,
                                                 ),
-                                              if (tag.icon != null) XMargin(4),
-                                              Text(
-                                                tag.tag,
-                                                style: (tag.filtered
-                                                        ? _theme.textTheme
-                                                            .textOnDark
-                                                        : _theme.textTheme.dark)
-                                                    .bodyText1,
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -421,6 +445,8 @@ class LongSessionListManager extends ChangeNotifier {
         type: FilterTagType.certified),
     FilterTag(
         tag: "Von mir", icon: Icons.person, type: FilterTagType.mySession),
+    FilterTag(
+        tag: "Abgeschloßen", icon: Icons.done, type: FilterTagType.goalReached),
   ];
   bool loading = false;
 
@@ -442,7 +468,10 @@ class LongSessionListManager extends ChangeNotifier {
     callQuery();
   }
 
-  void deleteText() => textController.text = "";
+  void deleteText() {
+    textController.text = "";
+    callQuery();
+  }
 
   void toggleTag(FilterTag tag) {
     tag.filtered = !tag.filtered;
@@ -454,7 +483,8 @@ class LongSessionListManager extends ChangeNotifier {
     sessionsFuture = DatabaseService.getSessionsFromQuery(textController.text,
         onlyCertified: tags[0].filtered ?? false,
         onlySessionsFrom:
-            tags[1].filtered ? context.read<UserManager>().uid : null)
+            tags[1].filtered ? context.read<UserManager>().uid : null,
+        goalReached: tags[2].filtered ?? false)
       ..whenComplete(() {
         loading = false;
         notifyListeners();
@@ -464,7 +494,7 @@ class LongSessionListManager extends ChangeNotifier {
   }
 }
 
-enum FilterTagType { certified, mySession }
+enum FilterTagType { certified, mySession, goalReached }
 
 class FilterTag {
   final String tag;
@@ -478,6 +508,7 @@ class FilterTag {
 
   factory FilterTag.certified() => FilterTag(type: FilterTagType.certified);
   factory FilterTag.mySessions() => FilterTag(type: FilterTagType.mySession);
+  factory FilterTag.goalReached() => FilterTag(type: FilterTagType.mySession);
 
   @override
   bool operator ==(Object other) {
@@ -521,17 +552,37 @@ class SessionView extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 10,
-                  child: CachedNetworkImage(
-                    imageUrl: session?.imgUrl ?? "",
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => session?.blurHash != null
-                        ? BlurHash(hash: session.blurHash)
-                        : Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation(textColor),
-                            ),
-                          ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: session?.imgUrl ?? "",
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => session?.blurHash != null
+                            ? BlurHash(hash: session.blurHash)
+                            : Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation(textColor),
+                                ),
+                              ),
+                      ),
+                      if (session?.reachedGoal ?? false)
+                        Material(
+                            color: Colors.black45,
+                            child: Center(
+                              child: Material(
+                                  color: _theme.colors.contrast,
+                                  shape: CircleBorder(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.done,
+                                      color: _theme.colors.textOnContrast,
+                                    ),
+                                  )),
+                            ))
+                    ],
                   ),
                 ),
                 Flexible(
@@ -567,7 +618,9 @@ class SessionView extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.fromLTRB(8, 0, 14, 0),
                         child: Row(
-                          children: session?.donationUnit == null
+                          children: session?.donationUnit == null ||
+                                  session?.donationGoalCurrent == null ||
+                                  session?.donationGoal == null
                               ? [
                                   Text(
                                     "0%",

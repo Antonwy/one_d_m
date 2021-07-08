@@ -1,11 +1,8 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/DynamicLinkManager.dart';
 import 'package:one_d_m/Helper/ShareImage.dart';
-import 'package:provider/provider.dart';
 
 import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Provider/SessionManager.dart';
@@ -34,7 +31,7 @@ abstract class BaseSession implements Comparable<BaseSession> {
       sortImportance;
   final DateTime createdAt;
   final Color primaryColor, secondaryColor;
-  final bool isCertified;
+  final bool isCertified, reachedGoal;
 
   BaseSession(
       {this.campaignImgUrl,
@@ -57,7 +54,8 @@ abstract class BaseSession implements Comparable<BaseSession> {
       this.primaryColor,
       this.secondaryColor,
       this.isCertified = true,
-      this.sortImportance = 0});
+      this.sortImportance = 0,
+      this.reachedGoal = false});
 
   BaseSession.fromDoc(DocumentSnapshot doc)
       : creatorId = doc.data()[CREATOR_ID],
@@ -84,7 +82,8 @@ abstract class BaseSession implements Comparable<BaseSession> {
             : ColorTheme.darkblue,
         blurHash = doc.data()[BLUR_HASH],
         isCertified = doc.data()[IS_CERTIFIED] ?? true,
-        sortImportance = doc.data()[SORT_IMPORTANCE];
+        sortImportance = doc.data()[SORT_IMPORTANCE],
+        reachedGoal = doc.data()[REACHED_GOAL] ?? false;
 
   static List<BaseSession> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) {
@@ -115,6 +114,7 @@ abstract class BaseSession implements Comparable<BaseSession> {
       DONATION_UNIT_EFFECT = "donation_unit_effect",
       SORT_IMPORTANCE = "sort_importance",
       IS_CERTIFIED = "is_certified",
+      REACHED_GOAL = "reached_goal",
       IMG_URL = "img_url";
 
   BaseSessionManager manager(String uid);
@@ -132,6 +132,16 @@ abstract class BaseSession implements Comparable<BaseSession> {
 
   @override
   int compareTo(BaseSession other) {
+    if (this.reachedGoal && other.reachedGoal) {
+      int thisDonDiff = this.donationGoal - this.donationGoalCurrent;
+      int otherDonDiff = other.donationGoal - other.donationGoalCurrent;
+
+      return otherDonDiff.compareTo(thisDonDiff);
+    }
+
+    if (this.reachedGoal) return 1;
+    if (other.reachedGoal) return -1;
+
     if (this.isCertified && other.isCertified) {
       int sCompare = other.sortImportance.compareTo(this.sortImportance);
       return sCompare == 0 ? other.name.compareTo(this.name) : sCompare;

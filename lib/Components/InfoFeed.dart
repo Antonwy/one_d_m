@@ -1,12 +1,14 @@
 import 'dart:math';
 import 'dart:io' show Platform;
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:intl/intl.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Helper/AdBalance.dart';
 import 'package:one_d_m/Helper/AdManager.dart';
 import 'package:one_d_m/Helper/ColorTheme.dart';
@@ -404,37 +406,44 @@ class _PlayButtonState extends State<PlayButton>
   @override
   Widget build(BuildContext context) {
     _theme = ThemeManager.of(context);
-    return ScaleTransition(
-      scale: Tween<double>(begin: 1.0, end: 1.1).animate(_curvedAnimation),
-      child: SlideTransition(
-        position: Tween<Offset>(begin: Offset.zero, end: Offset(0, -.08))
-            .animate(_curvedAnimation),
-        child: Material(
-          borderRadius: BorderRadius.circular(Constants.radius),
-          clipBehavior: Clip.antiAlias,
-          color: _theme.colors.dark,
-          elevation: 12,
-          child: InkWell(
-            onTap: _buttonClick,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buttonIcon(),
-                    YMargin(4),
-                    _buttonText(),
-                  ],
-                ),
-              ),
-            ),
+    return DiscoveryHolder.showAd(
+      maxDVs: _maxDVs,
+      tapTarget: _button(),
+      next: () async {
+        context.read<Future<void> Function(int)>()(2);
+        return true;
+      },
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 1.0, end: 1.1).animate(_curvedAnimation),
+        child: SlideTransition(
+          position: Tween<Offset>(begin: Offset.zero, end: Offset(0, -.08))
+              .animate(_curvedAnimation),
+          child: Material(
+            borderRadius: BorderRadius.circular(Constants.radius),
+            clipBehavior: Clip.antiAlias,
+            color: _theme.colors.dark,
+            elevation: 12,
+            child: InkWell(onTap: _buttonClick, child: _button()),
           ),
         ),
       ),
     );
   }
+
+  Widget _button() => AspectRatio(
+        aspectRatio: 1,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buttonIcon(),
+              YMargin(4),
+              _buttonText(),
+            ],
+          ),
+        ),
+      );
 
   String _pushMsgTitle() {
     if (done) return "Das wars für heute. Vielen Dank für deine Aktivität!";

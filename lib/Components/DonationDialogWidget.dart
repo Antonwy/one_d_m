@@ -4,9 +4,11 @@ import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -32,6 +34,8 @@ import 'package:one_d_m/Pages/OrganisationPage.dart';
 import 'package:one_d_m/chart/circle_painter.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
+
+import 'DiscoveryHolder.dart';
 
 class DonationDialogWidget extends StatefulWidget {
   final Function close;
@@ -103,6 +107,11 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
     context
         .read<FirebaseAnalytics>()
         .setCurrentScreen(screenName: "Donation Dialog");
+
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      FeatureDiscovery.discoverFeatures(
+          context, DiscoveryHolder.donationDialogFeatures);
+    });
 
     super.initState();
   }
@@ -231,46 +240,60 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                         children: [
                                           Expanded(
                                               flex: 1,
-                                              child: MaterialButton(
-                                                clipBehavior: Clip.antiAlias,
-                                                shape: CircleBorder(),
-                                                elevation: 0,
-                                                onPressed: () {},
-                                                color: Helper.hexToColor(
-                                                    '#e2e2e2'),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(2.0),
-                                                  child: IconButton(
-                                                      icon: Text(
-                                                        "-",
-                                                        style: TextStyle(
-                                                            fontSize: 28,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w300),
-                                                      ),
-                                                      color: _bTheme.dark,
-                                                      onPressed: () {
-                                                        if (_selectedValue >
-                                                                0 &&
-                                                            _selectedValue >
-                                                                widget.campaign
-                                                                    .dvController) {
-                                                          HapticFeedback
-                                                              .heavyImpact();
-                                                          setState(() {
-                                                            _selectedValue -=
-                                                                widget.campaign
-                                                                    .dvController;
-                                                            ddm.amount =
-                                                                _selectedValue
-                                                                    .toInt();
-                                                            _switchRiveAnimation(
-                                                                _selectedValue);
-                                                          });
-                                                        }
-                                                      }),
+                                              child:
+                                                  DiscoveryHolder.donationSub(
+                                                tapTarget: Text(
+                                                  "-",
+                                                  style: TextStyle(
+                                                      color: _bTheme.contrast,
+                                                      fontSize: 28,
+                                                      fontWeight:
+                                                          FontWeight.w300),
+                                                ),
+                                                child: MaterialButton(
+                                                  clipBehavior: Clip.antiAlias,
+                                                  shape: CircleBorder(),
+                                                  elevation: 0,
+                                                  onPressed: () {},
+                                                  color: Helper.hexToColor(
+                                                      '#e2e2e2'),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            2.0),
+                                                    child: IconButton(
+                                                        icon: Text(
+                                                          "-",
+                                                          style: TextStyle(
+                                                              fontSize: 28,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300),
+                                                        ),
+                                                        color: _bTheme.dark,
+                                                        onPressed: () {
+                                                          if (_selectedValue >
+                                                                  0 &&
+                                                              _selectedValue >
+                                                                  widget
+                                                                      .campaign
+                                                                      .dvController) {
+                                                            HapticFeedback
+                                                                .heavyImpact();
+                                                            setState(() {
+                                                              _selectedValue -=
+                                                                  widget
+                                                                      .campaign
+                                                                      .dvController;
+                                                              ddm.amount =
+                                                                  _selectedValue
+                                                                      .toInt();
+                                                              _switchRiveAnimation(
+                                                                  _selectedValue);
+                                                            });
+                                                          }
+                                                        }),
+                                                  ),
                                                 ),
                                               )),
                                           Expanded(
@@ -286,45 +309,55 @@ class _DonationDialogWidgetState extends State<DonationDialogWidget>
                                               )),
                                           Expanded(
                                               flex: 1,
-                                              child: MaterialButton(
-                                                clipBehavior: Clip.antiAlias,
-                                                shape: CircleBorder(),
-                                                color: _bTheme.dark,
-                                                elevation: 0,
-                                                onPressed: () {},
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(2.0),
-                                                  child: IconButton(
-                                                      icon: Icon(Icons.add),
-                                                      color: _bTheme.light,
-                                                      onPressed: () {
-                                                        if ((ddm?.adBalance
-                                                                    ?.dcBalance ??
-                                                                0) >=
-                                                            _selectedValue +
-                                                                widget.campaign
-                                                                    .dvController) {
-                                                          HapticFeedback
-                                                              .heavyImpact();
-                                                          setState(() {
-                                                            _selectedValue +=
-                                                                widget.campaign
-                                                                    .dvController;
-                                                            ddm.amount =
-                                                                _selectedValue
-                                                                    .toInt();
-                                                            _switchRiveAnimation(
-                                                                _selectedValue);
-                                                          });
-                                                        } else {
-                                                          Helper.showAlert(
-                                                              context,
-                                                              "Du musst mehr DVs sammeln um weiter spenden zu können.",
-                                                              title:
-                                                                  "Zu wenig DVs!");
-                                                        }
-                                                      }),
+                                              child:
+                                                  DiscoveryHolder.donationAdd(
+                                                tapTarget: Icon(
+                                                  Icons.add,
+                                                  color: _bTheme.contrast,
+                                                ),
+                                                child: MaterialButton(
+                                                  clipBehavior: Clip.antiAlias,
+                                                  shape: CircleBorder(),
+                                                  color: _bTheme.dark,
+                                                  elevation: 0,
+                                                  onPressed: () {},
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            2.0),
+                                                    child: IconButton(
+                                                        icon: Icon(Icons.add),
+                                                        color: _bTheme.light,
+                                                        onPressed: () {
+                                                          if ((ddm?.adBalance
+                                                                      ?.dcBalance ??
+                                                                  0) >=
+                                                              _selectedValue +
+                                                                  widget
+                                                                      .campaign
+                                                                      .dvController) {
+                                                            HapticFeedback
+                                                                .heavyImpact();
+                                                            setState(() {
+                                                              _selectedValue +=
+                                                                  widget
+                                                                      .campaign
+                                                                      .dvController;
+                                                              ddm.amount =
+                                                                  _selectedValue
+                                                                      .toInt();
+                                                              _switchRiveAnimation(
+                                                                  _selectedValue);
+                                                            });
+                                                          } else {
+                                                            Helper.showAlert(
+                                                                context,
+                                                                "Du musst mehr DVs sammeln um weiter spenden zu können.",
+                                                                title:
+                                                                    "Zu wenig DVs!");
+                                                          }
+                                                        }),
+                                                  ),
                                                 ),
                                               ))
                                         ],
@@ -592,47 +625,53 @@ class DonationButton extends StatelessWidget {
     ddm = Provider.of<DonationDialogManager>(context);
     this.context = context;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
-      child: OfflineBuilder(
-          child: Container(),
-          connectivityBuilder: (c, connection, child) {
-            bool connected = connection != ConnectivityResult.none;
-            return MaterialButton(
-              minWidth: 170,
-              height: 50,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Constants.radius)),
-              elevation: 0,
-              color: _bTheme.dark,
-              disabledColor: Colors.grey,
-              onPressed: ddm.amount != null &&
-                          ddm.amount != 0 &&
-                          ddm.amount <= ddm.adBalance?.dcBalance ??
-                      0
-                  ? connected
-                      ? _donate
-                      : () {
-                          Helper.showConnectionSnackBar(context);
-                        }
-                  : null,
-              child: ddm.loading
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(Colors.white),
-                        ),
-                      ],
-                    )
-                  : Text(
-                      "Support!",
-                      style: _theme.accentTextTheme.button
-                          .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-            );
-          }),
+    return DiscoveryHolder.supportButton(
+      tapTarget: Icon(
+        Icons.euro,
+        color: _bTheme.contrast,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.0),
+        child: OfflineBuilder(
+            child: Container(),
+            connectivityBuilder: (c, connection, child) {
+              bool connected = connection != ConnectivityResult.none;
+              return MaterialButton(
+                minWidth: 170,
+                height: 50,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(Constants.radius)),
+                elevation: 0,
+                color: _bTheme.dark,
+                disabledColor: Colors.grey,
+                onPressed: ddm.amount != null &&
+                            ddm.amount != 0 &&
+                            ddm.amount <= ddm.adBalance?.dcBalance ??
+                        0
+                    ? connected
+                        ? _donate
+                        : () {
+                            Helper.showConnectionSnackBar(context);
+                          }
+                    : null,
+                child: ddm.loading
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        "Support!",
+                        style: _theme.accentTextTheme.button.copyWith(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+              );
+            }),
+      ),
     );
   }
 

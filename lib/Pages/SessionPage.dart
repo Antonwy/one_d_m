@@ -1,13 +1,13 @@
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/InfoFeed.dart';
@@ -58,6 +58,10 @@ class _SessionPageState extends State<SessionPage> {
   void initState() {
     super.initState();
     manager = widget.session.manager(context.read<UserManager>().uid);
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      FeatureDiscovery.discoverFeatures(
+          context, DiscoveryHolder.sessionCampaignFeatures);
+    });
   }
 
   @override
@@ -83,42 +87,48 @@ class FloatingDonationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return OfflineBuilder(
-        child: Container(),
-        connectivityBuilder: (context, connection, child) {
-          bool _connected = connection != ConnectivityResult.none;
-          return Consumer2<UserManager, BaseSessionManager>(
-            builder: (context, um, sm, child) {
-              if (sm.isPreview) return SizedBox.shrink();
+    return DiscoveryHolder.donateButton(
+      tapTarget: Icon(
+        Icons.arrow_forward,
+        color: _theme.colors.contrast,
+      ),
+      child: OfflineBuilder(
+          child: Container(),
+          connectivityBuilder: (context, connection, child) {
+            bool _connected = connection != ConnectivityResult.none;
+            return Consumer2<UserManager, BaseSessionManager>(
+              builder: (context, um, sm, child) {
+                if (sm.isPreview) return SizedBox.shrink();
 
-              bool _active = _connected && sm.baseSession?.campaignId != null;
-              Color textColor = _theme.correctColorFor(
-                  sm.baseSession.secondaryColor ?? _theme.colors.dark);
-              return FloatingActionButton.extended(
-                  onPressed: _active
-                      ? () async {
-                          BottomDialog bd = BottomDialog(context);
-                          bd.show(DonationDialogWidget(
-                            campaign: await sm.campaign,
-                            user: um.user,
-                            context: context,
-                            close: bd.close,
-                            sessionId: sm.baseSession.id,
-                            uid: um.uid,
-                          ));
-                        }
-                      : null,
-                  label: Text(
-                    "Unterstützen",
-                    style:
-                        TextStyle(color: _active ? textColor : Colors.white60),
-                  ),
-                  backgroundColor: _active
-                      ? sm.baseSession.secondaryColor ?? _theme.colors.dark
-                      : Colors.grey);
-            },
-          );
-        });
+                bool _active = _connected && sm.baseSession?.campaignId != null;
+                Color textColor = _theme.correctColorFor(
+                    sm.baseSession.secondaryColor ?? _theme.colors.dark);
+                return FloatingActionButton.extended(
+                    onPressed: _active
+                        ? () async {
+                            BottomDialog bd = BottomDialog(context);
+                            bd.show(DonationDialogWidget(
+                              campaign: await sm.campaign,
+                              user: um.user,
+                              context: context,
+                              close: bd.close,
+                              sessionId: sm.baseSession.id,
+                              uid: um.uid,
+                            ));
+                          }
+                        : null,
+                    label: Text(
+                      "Unterstützen",
+                      style: TextStyle(
+                          color: _active ? textColor : Colors.white60),
+                    ),
+                    backgroundColor: _active
+                        ? sm.baseSession.secondaryColor ?? _theme.colors.dark
+                        : Colors.grey);
+              },
+            );
+          }),
+    );
   }
 }
 
@@ -150,27 +160,33 @@ class SessionTitleImage extends StatelessWidget {
                         bool isCreator = um.uid == sm?.baseSession?.creatorId;
                         return Row(
                           children: [
-                            AppBarButton(
-                              elevation: 10,
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                          title: Text(
-                                              "${sm.baseSession.name} teilen"),
-                                          content: SocialShareList(
-                                            sm,
-                                            onClicked: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      Constants.radius)),
-                                        ));
-                              },
-                              icon: CupertinoIcons.share,
+                            DiscoveryHolder.shareButton(
+                              tapTarget: Icon(
+                                CupertinoIcons.share,
+                                color: ThemeManager.of(context).colors.contrast,
+                              ),
+                              child: AppBarButton(
+                                elevation: 10,
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                            title: Text(
+                                                "${sm.baseSession.name} teilen"),
+                                            content: SocialShareList(
+                                              sm,
+                                              onClicked: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        Constants.radius)),
+                                          ));
+                                },
+                                icon: CupertinoIcons.share,
+                              ),
                             ),
                             if (isCreator) XMargin(8),
                             if (isCreator)

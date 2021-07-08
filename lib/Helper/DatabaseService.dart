@@ -20,7 +20,6 @@ import 'package:one_d_m/Helper/SessionMessage.dart';
 import 'package:one_d_m/Helper/Statistics.dart';
 import 'package:one_d_m/Helper/Suggestion.dart';
 import 'package:one_d_m/Helper/UserCharge.dart';
-// import 'package:stripe_payment/stripe_payment.dart';
 
 import 'Campaign.dart';
 import 'Donation.dart';
@@ -316,7 +315,9 @@ class DatabaseService {
   }
 
   static Future<List<BaseSession>> getSessionsFromQuery(String query,
-      {bool onlyCertified = false, String onlySessionsFrom}) async {
+      {bool onlyCertified = false,
+      String onlySessionsFrom,
+      bool goalReached = false}) async {
     Set<BaseSession> sessions = Set();
 
     List<Query> queries = [];
@@ -324,23 +325,27 @@ class DatabaseService {
     queries.add(_filterQuery(
         queryString: query,
         onlyCertified: onlyCertified,
-        onlySessionsFrom: onlySessionsFrom));
+        onlySessionsFrom: onlySessionsFrom,
+        goalReached: goalReached));
 
     if (query.isNotEmpty) {
       if (query[0].toUpperCase() == query[0]) {
         queries.add(_filterQuery(
             queryString: "${query[0].toLowerCase()}${query.substring(1)}",
             onlyCertified: onlyCertified,
-            onlySessionsFrom: onlySessionsFrom));
+            onlySessionsFrom: onlySessionsFrom,
+            goalReached: goalReached));
       } else {
         queries.add(_filterQuery(
             queryString: "${query[0].toUpperCase()}${query.substring(1)}",
             onlyCertified: onlyCertified,
-            onlySessionsFrom: onlySessionsFrom));
+            onlySessionsFrom: onlySessionsFrom,
+            goalReached: goalReached));
       }
     }
 
     for (Query query in queries) {
+      print(query.parameters);
       QuerySnapshot snapshot = await query.get();
       sessions.addAll(snapshot.docs.map((doc) =>
           (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
@@ -354,7 +359,10 @@ class DatabaseService {
   }
 
   static Query _filterQuery(
-      {String queryString, bool onlyCertified, String onlySessionsFrom}) {
+      {String queryString,
+      bool onlyCertified,
+      String onlySessionsFrom,
+      bool goalReached}) {
     Query query = sessionsCollection;
 
     if (queryString.isNotEmpty)
@@ -365,6 +373,8 @@ class DatabaseService {
       query = query.where(BaseSession.IS_CERTIFIED, isEqualTo: true);
     if (onlySessionsFrom?.isNotEmpty ?? false)
       query = query.where(BaseSession.CREATOR_ID, isEqualTo: onlySessionsFrom);
+    if (goalReached)
+      query = query.where(BaseSession.REACHED_GOAL, isEqualTo: true);
 
     return query = query.limit(20);
   }

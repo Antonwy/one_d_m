@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/Components/CampaignList.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Components/SearchPage.dart';
 import 'package:one_d_m/Components/SessionList.dart';
 import 'package:one_d_m/Helper/Campaign.dart';
@@ -72,17 +73,23 @@ class _ExplorePageState extends State<ExplorePage>
                                   builder: (context) => FindFriendsPage()));
                         }),
                     XMargin(6),
-                    AppBarButton(
-                        icon: Icons.add,
-                        color: _theme.colors.dark,
-                        iconColor: _theme.colors.textOnDark,
-                        text: "Session erstellen",
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CreateSessionPage()));
-                        }),
+                    DiscoveryHolder.createSession(
+                      tapTarget: Icon(
+                        Icons.add,
+                        color: _theme.colors.contrast,
+                      ),
+                      child: AppBarButton(
+                          icon: Icons.add,
+                          color: _theme.colors.dark,
+                          iconColor: _theme.colors.textOnDark,
+                          text: "Session erstellen",
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CreateSessionPage()));
+                          }),
+                    ),
                   ],
                 ),
               ),
@@ -98,9 +105,15 @@ class _ExplorePageState extends State<ExplorePage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Projekte',
-                    style: Theme.of(context).textTheme.headline6,
+                  DiscoveryHolder.projectHome(
+                    tapTarget: Icon(
+                      Icons.done,
+                      color: _theme.colors.contrast,
+                    ),
+                    child: Text(
+                      'Projekte',
+                      style: _theme.textTheme.dark.headline6,
+                    ),
                   ),
                   AppBarButton(
                     hint: _categoryId != 100 ? 1 : 0,

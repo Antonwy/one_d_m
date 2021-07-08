@@ -35,12 +35,10 @@ import 'package:one_d_m/Pages/notification_page.dart';
 import '../DailyReportPage.dart';
 
 class ProfilePage extends StatefulWidget {
-  final VoidCallback onExploreTapped;
   final ScrollController scrollController;
 
   const ProfilePage({
     Key key,
-    this.onExploreTapped,
     this.scrollController,
   }) : super(key: key);
 
@@ -56,12 +54,6 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   bool _visible = true;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

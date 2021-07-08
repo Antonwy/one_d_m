@@ -2,15 +2,18 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/Components/BottomDialog.dart';
 import 'package:one_d_m/Components/CustomOpenContainer.dart';
+import 'package:one_d_m/Components/DiscoveryHolder.dart';
 import 'package:one_d_m/Components/DonationDialogWidget.dart';
 import 'package:one_d_m/Components/DonationWidget.dart';
 import 'package:one_d_m/Components/NewsPost.dart';
@@ -86,6 +89,11 @@ class _NewCampaignPageState extends State<NewCampaignPage>
             ? "Campaign Page"
             : "${widget.campaign.name} Page");
 
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      FeatureDiscovery.discoverFeatures(
+          context, DiscoveryHolder.sessionCampaignFeatures);
+    });
+
     super.initState();
   }
 
@@ -119,30 +127,36 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                   connectivityBuilder: (context, connection, child) {
                     bool activated = connection != ConnectivityResult.none;
                     return Consumer<UserManager>(builder: (context, um, child) {
-                      return FloatingActionButton.extended(
-                          backgroundColor:
-                              activated ? _bTheme.dark : Colors.grey,
-                          label: Text("Unterstützen",
-                              style: TextStyle(color: _bTheme.textOnDark)),
-                          onPressed: activated &&
-                                  snapshot.connectionState ==
-                                      ConnectionState.active &&
-                                  snapshot.hasData
-                              ? () {
-                                  print(snapshot);
-                                  BottomDialog bd = BottomDialog(context);
-                                  bd.show(DonationDialogWidget(
-                                    campaign: snapshot.data,
-                                    uid: um.uid,
-                                    user: um.user,
-                                    context: context,
-                                    close: bd.close,
-                                    controller: _scrollController,
-                                  ));
-                                }
-                              : () {
-                                  Helper.showConnectionSnackBar(context);
-                                });
+                      return DiscoveryHolder.donateButton(
+                        tapTarget: Icon(
+                          Icons.arrow_forward,
+                          color: _bTheme.contrast,
+                        ),
+                        child: FloatingActionButton.extended(
+                            backgroundColor:
+                                activated ? _bTheme.dark : Colors.grey,
+                            label: Text("Unterstützen",
+                                style: TextStyle(color: _bTheme.textOnDark)),
+                            onPressed: activated &&
+                                    snapshot.connectionState ==
+                                        ConnectionState.active &&
+                                    snapshot.hasData
+                                ? () {
+                                    print(snapshot);
+                                    BottomDialog bd = BottomDialog(context);
+                                    bd.show(DonationDialogWidget(
+                                      campaign: snapshot.data,
+                                      uid: um.uid,
+                                      user: um.user,
+                                      context: context,
+                                      close: bd.close,
+                                      controller: _scrollController,
+                                    ));
+                                  }
+                                : () {
+                                    Helper.showConnectionSnackBar(context);
+                                  }),
+                      );
                     });
                   }),
               body: CustomScrollView(controller: _scrollController, slivers: [
@@ -219,11 +233,17 @@ class _NewCampaignPageState extends State<NewCampaignPage>
                                       icon: Icons.arrow_back),
                                   Row(
                                     children: [
-                                      Center(
-                                        child: AppBarButton(
-                                            icon: CupertinoIcons.share,
-                                            elevation: 10,
-                                            onPressed: _shareCampaign),
+                                      DiscoveryHolder.shareButton(
+                                        tapTarget: Icon(
+                                          CupertinoIcons.share,
+                                          color: _bTheme.contrast,
+                                        ),
+                                        child: Center(
+                                          child: AppBarButton(
+                                              icon: CupertinoIcons.share,
+                                              elevation: 10,
+                                              onPressed: _shareCampaign),
+                                        ),
                                       ),
                                       XMargin(6),
                                       FutureBuilder<Organisation>(

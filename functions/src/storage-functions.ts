@@ -69,7 +69,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
       await firestore
         .collection(DatabaseConstants.campaigns)
         .doc(id)
-        .set({
+        .update({
           image_url: url,
           blur_hash: await createBlurHash(url),
         })
@@ -78,7 +78,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
       await firestore
         .collection(DatabaseConstants.campaigns)
         .doc(id)
-        .set({
+        .update({
           thumbnail_url: url,
         })
         .catch();
@@ -88,7 +88,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
       await firestore
         .collection(DatabaseConstants.user)
         .doc(id)
-        .set({
+        .update({
           image_url: url,
           blur_hash: await createBlurHash(url),
         })
@@ -97,7 +97,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
       await firestore
         .collection(DatabaseConstants.user)
         .doc(id)
-        .set({
+        .update({
           thumbnail_url: url,
         })
         .catch();

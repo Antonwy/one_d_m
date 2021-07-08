@@ -6,10 +6,7 @@ import 'package:one_d_m/Helper/ColorTheme.dart';
 import 'package:one_d_m/Helper/Constants.dart';
 import 'package:one_d_m/Helper/DatabaseService.dart';
 import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
 import 'package:one_d_m/Pages/HomePage/ProfilePage.dart';
-import 'package:provider/provider.dart';
 
 import 'NativeAd.dart';
 import 'NewsPost.dart';
@@ -34,7 +31,8 @@ class PostFeed extends StatelessWidget {
           }
 
           return SliverList(
-              delegate: SliverChildListDelegate(_buildPostWidgets(post)));
+              delegate: SliverChildListDelegate(_buildPostWidgets(post),
+                  addAutomaticKeepAlives: false, addRepaintBoundaries: false));
         });
   }
 

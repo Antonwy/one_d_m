@@ -31,6 +31,8 @@ export class DatabaseConstants {
   static readonly sessions: string = 'sessions';
   static readonly session_members: string = 'session_members';
   static readonly session_invites: string = 'session_invites';
+  static readonly sessions_info: string = 'sessions_info';
+  static readonly session_count: string = 'session_count';
   static readonly id: string = 'id';
   static readonly goals: string = 'goals';
   static readonly insgesamt: string = 'Insgesamt';

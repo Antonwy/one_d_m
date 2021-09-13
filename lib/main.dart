@@ -1,62 +1,50 @@
 import 'dart:io';
-import 'package:catcher/core/catcher.dart';
-import 'package:catcher/handlers/console_handler.dart';
-import 'package:catcher/handlers/sentry_handler.dart';
-import 'package:catcher/mode/silent_report_mode.dart';
-import 'package:catcher/model/catcher_options.dart';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/AdManager.dart';
-import 'package:one_d_m/Helper/NativeAds.dart';
-import 'package:one_d_m/Helper/PushNotificationService.dart';
-import 'package:one_d_m/Helper/RemoteConfigManager.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Helper/UserManager.dart';
+import 'package:one_d_m/not_used/push_notification_service.dart';
+import 'package:one_d_m/provider/statistics_manager.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
+import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:stripe_payment/stripe_payment.dart';
 import 'Helper/Constants.dart';
-import 'Pages/PageManagerWidget.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import 'api/api.dart';
+import 'components/page_manager_widget.dart';
+import 'helper/ad_manager.dart';
+import 'helper/native_ads.dart';
+import 'provider/remote_config_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await Hive.initFlutter();
+  await Api().init();
 
   timeago.setLocaleMessages('de', timeago.DeMessages());
 
-  /// Debug configuration with dialog report mode and console handler. It will show dialog and once user accepts it, error will be shown   /// in console.
-  CatcherOptions debugOptions =
-      CatcherOptions(SilentReportMode(), [ConsoleHandler()]);
-
-  /// Release configuration. Same as above, but once user accepts dialog, user will be prompted to send email with crash to support.
-  CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
-    SentryHandler(SentryClient(SentryOptions(
-        dsn:
-            'https://a7d6cef66d684048a5b9e4e4c6f10bbc@o508671.ingest.sentry.io/5601525')))
-  ]);
-
-  Catcher(
-      rootWidget: MultiProvider(providers: [
-        ChangeNotifierProvider(create: (context) => UserManager.instance()),
-        ChangeNotifierProvider(create: (context) => ThemeManager(context)),
-        Provider(
-          create: (context) => PushNotificationService(context),
-        ),
-        Provider(
-          create: (context) => RemoteConfigManager(),
-        ),
-        Provider(
-          create: (context) => FirebaseAnalytics(),
-        )
-      ], child: ODMApp()),
-      debugConfig: debugOptions,
-      releaseConfig: releaseOptions);
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => UserManager.instance()),
+    ChangeNotifierProvider(create: (context) => ThemeManager(context)),
+    ChangeNotifierProvider(create: (context) => StatisticsManager()),
+    Provider(
+      create: (context) => PushNotificationService(context),
+    ),
+    Provider(
+      create: (context) => RemoteConfigManager(),
+    ),
+    Provider(
+      create: (context) => FirebaseAnalytics(),
+    )
+  ], child: ODMApp()));
 }
 
 class ODMApp extends StatefulWidget {
@@ -87,7 +75,6 @@ class _ODMAppState extends State<ODMApp> {
   Widget build(BuildContext context) {
     return FeatureDiscovery(
       child: MaterialApp(
-          navigatorKey: Catcher.navigatorKey,
           title: 'One Dollar Movement',
           debugShowCheckedModeBanner: false,
           navigatorObservers: [

@@ -10,6 +10,7 @@ import {
   ImageResolutions,
   ImageSuffix,
 } from './database-constants';
+import { addDv } from './api';
 
 const stripe = new Stripe(functions.config().stripe.token, {
   apiVersion: '2020-03-02',
@@ -65,6 +66,20 @@ exports.onCreateUser = functions.firestore
 exports.onDeleteAuthUser = functions.auth.user().onDelete(async (u) => {
   await deleteUser(u.uid);
 });
+
+exports.onUpdateUserBalance = functions.firestore
+  .document(`${DatabaseConstants.user}/{userId}/ad_data/{docId}`)
+  .onUpdate(async (snapshot, context) => {
+    const oldValue = snapshot.before.data(),
+      newValue = snapshot.after.data();
+
+    const diffValue = newValue.dc_balance - oldValue.dc_balance;
+    console.log(diffValue);
+
+    if (diffValue > 0) {
+      await addDv(diffValue, context.auth?.uid ?? context.params.userId);
+    }
+  });
 
 exports.onUpdateUser = functions.firestore
   .document(`${DatabaseConstants.user}/{userId}`)

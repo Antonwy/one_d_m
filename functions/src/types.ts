@@ -9,6 +9,8 @@ export interface DonationType {
   anonym: boolean;
   useDCs?: boolean;
   session_id?: string | null;
+  already_inserted?: boolean;
+  id?: string;
 }
 
 export interface UserType {
@@ -37,6 +39,9 @@ export interface CampaignType {
   description: string;
   image_url: string;
   short_description: string;
+  short_video_url?: string | null;
+  long_video_url?: string | null;
+  dv_animation?: string | null;
   subscribed_count: number;
   target_amount: number;
   title: string;

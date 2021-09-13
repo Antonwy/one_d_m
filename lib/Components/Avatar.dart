@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
 
 class Avatar extends StatefulWidget {
   final String imageUrl;

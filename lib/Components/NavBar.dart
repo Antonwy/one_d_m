@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/NavBarManager.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/helper/helper.dart';
+import 'package:one_d_m/provider/navbar_manager.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 class NavBar extends StatefulWidget {
@@ -16,7 +17,7 @@ class NavBar extends StatefulWidget {
 
 class _NavBarState extends State<NavBar> {
   List<IconData> _iconList = [
-    CupertinoIcons.checkmark_seal,
+    // CupertinoIcons.checkmark_seal,
     Icons.home_rounded,
     Icons.public
   ];
@@ -55,11 +56,12 @@ class _NavBarState extends State<NavBar> {
                 Positioned.fill(
                   child: Center(
                     child: Container(
-                      width: _mq.size.width * 0.75,
+                      width: _mq.size.width * 0.6,
                       child: Consumer<NavBarManager>(
                           builder: (context, npm, child) {
                         return Align(
-                          alignment: Alignment(npm.position - 1, 0),
+                          alignment: Alignment(
+                              Helper.mapValue(npm.position, 0, 1, -1, 1), 0),
                           child: Container(
                             height: 40,
                             width: 40,
@@ -77,12 +79,11 @@ class _NavBarState extends State<NavBar> {
                     _npm = npm;
                     return Center(
                       child: Container(
-                        width: _mq.size.width * .75,
+                        width: _mq.size.width * .6,
                         height: _mq.size.height,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: _generateIcons(),
-                        ),
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: _generateIcons()),
                       ),
                     );
                   }),
@@ -95,11 +96,7 @@ class _NavBarState extends State<NavBar> {
 
   List<Widget> _generateIcons() {
     List<Widget> icons = [];
-    List<Alignment> alignments = [
-      Alignment.centerLeft,
-      Alignment.center,
-      Alignment.centerRight
-    ];
+    List<Alignment> alignments = [Alignment.centerLeft, Alignment.centerRight];
 
     for (int i = 0; i < _iconList.length; i++) {
       icons.add(Expanded(
@@ -112,7 +109,7 @@ class _NavBarState extends State<NavBar> {
             height: double.infinity,
             color: Colors.transparent,
             margin:
-                EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 2 ? 8 : 0),
+                EdgeInsets.only(left: i == 0 ? 8 : 0, right: i == 1 ? 8 : 0),
             child: Container(
               child: Opacity(
                 opacity: Tween<double>(begin: 1.0, end: .5)

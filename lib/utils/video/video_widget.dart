@@ -5,8 +5,11 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
+import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/components/warning_icon.dart';
+import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoWidget extends StatefulWidget {
@@ -14,6 +17,7 @@ class VideoWidget extends StatefulWidget {
   final bool play, muted;
   final ImageProvider image;
   final void Function() toggleMuted;
+  final void Function() onVideoLoaded, onVideoLoadingError;
   final double height;
 
   const VideoWidget(
@@ -25,7 +29,9 @@ class VideoWidget extends StatefulWidget {
       this.imageUrl,
       this.image,
       this.height,
-      this.blurHash})
+      this.blurHash,
+      this.onVideoLoaded,
+      this.onVideoLoadingError})
       : super(key: key);
 
   @override
@@ -37,7 +43,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   ChewieController _chewieController;
   Future<void> _initializeVideoPlayerFuture;
   bool _muted;
-  bool _isVideoLoaded = false;
+  bool _isVideoLoaded = false, _errorLoading = false;
 
   @override
   void initState() {
@@ -52,12 +58,14 @@ class _VideoWidgetState extends State<VideoWidget> {
               videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
           _initializeVideoPlayerFuture = _controller.initialize().then((_) {
             // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-            setState(() {});
             if (widget.play) {
               _controller.play();
               _controller.setLooping(true);
               _controller.setVolume(_muted ? 0 : 1);
             }
+          }).catchError((e) {
+            print("CATCHED ERROR: $e");
+            _errorLoading = true;
           });
         }
       });
@@ -94,6 +102,13 @@ class _VideoWidgetState extends State<VideoWidget> {
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (widget?.onVideoLoaded != null && !_errorLoading)
+            widget?.onVideoLoaded();
+          if (_errorLoading && widget?.onVideoLoadingError != null)
+            widget?.onVideoLoadingError();
+
+          if (_errorLoading) return _VideoError();
+
           _controller.setVolume(_muted ? 0 : 1);
           _chewieController = ChewieController(
               videoPlayerController: _controller,
@@ -189,29 +204,104 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 }
 
+class _VideoError extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          WarningIcon(),
+          YMargin(12),
+          Text(
+            "Video konnte nicht geladen werden!",
+            style: ThemeManager.of(context).textTheme.dark.bodyText2,
+          )
+        ],
+      ),
+    );
+  }
+}
+
 class MuteButton extends StatelessWidget {
-  final bool muted;
+  final bool muted, loading, error, hide;
   final void Function() toggle;
 
-  const MuteButton({Key key, this.muted, this.toggle}) : super(key: key);
+  MuteButton(
+      {Key key,
+      this.muted,
+      this.toggle,
+      this.loading = false,
+      this.error = false,
+      this.hide = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      clipBehavior: Clip.antiAlias,
-      shape: CircleBorder(),
-      color: ThemeManager.of(context).colors.dark.withOpacity(.8),
-      child: InkWell(
-        onTap: toggle,
-        child: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Icon(
-            muted ? Icons.volume_off : Icons.volume_up,
-            color: Colors.white,
-            size: 14,
+    return AnimatedOpacity(
+      duration: Duration(milliseconds: 250),
+      opacity: opacity(),
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        shape: error
+            ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))
+            : CircleBorder(),
+        color: ThemeManager.of(context).colors.dark.withOpacity(.8),
+        child: InkWell(
+          onTap: toggle,
+          child: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: buildChild(context),
           ),
         ),
       ),
+    );
+  }
+
+  double opacity() {
+    if (loading) return 1;
+    if (error) return 1;
+
+    return hide ? 0 : 1;
+  }
+
+  Widget buildChild(BuildContext context) {
+    if (error)
+      return Row(
+        children: [
+          Icon(
+            Icons.warning,
+            color: Colors.white,
+            size: 14,
+          ),
+          XMargin(6),
+          Text("Video konnte nicht geladen werden!",
+              style: ThemeManager.of(context)
+                  .textTheme
+                  .textOnDark
+                  .caption
+                  .copyWith(color: Colors.white))
+        ],
+      );
+
+    if (loading)
+      return LoadingIndicator(
+        color: Colors.white,
+        size: 10,
+        strokeWidth: 1.5,
+      );
+
+    IconData data = Icons.volume_off;
+
+    if (!muted) data = Icons.volume_up;
+
+    return Icon(
+      data,
+      color: Colors.white,
+      size: 14,
     );
   }
 }

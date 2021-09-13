@@ -1,13 +1,12 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/PushNotification.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
-
-import 'Constants.dart';
+import 'package:one_d_m/components/push_notification.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
+import 'constants.dart';
 
 class Helper {
   static Color hexToColor(String hexCode) {
+    if (hexCode == null) return null;
     hexCode = hexCode.toUpperCase().replaceAll("#", "");
     if (hexCode.length == 6) {
       hexCode = "FF" + hexCode;
@@ -127,5 +126,15 @@ class Helper {
         body: "Stelle eine Verbindung zum Internet her.",
         icon: Icons.wifi_off);
     return PushNotification.of(context).show(content);
+  }
+
+  static List<T> castList<T>(List list) {
+    if (list == null) return <T>[];
+    return List<T>.from(list);
+  }
+
+  static List<Map<String, dynamic>> castJson(List list) {
+    if (list == null) return <Map<String, dynamic>>[];
+    return List.from(list.map((e) => Map<String, dynamic>.from(e)));
   }
 }

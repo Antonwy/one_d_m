@@ -223,6 +223,15 @@ exports.onCreateSession = functions.firestore
       .set({
         id: sessionId,
       });
+
+    // increment session count
+    await firestore
+      .collection(DatabaseConstants.statistics)
+      .doc(DatabaseConstants.sessions_info)
+      .set({
+        [DatabaseConstants.session_count]:
+          admin.firestore.FieldValue.increment(1),
+      });
   });
 
 exports.onDeleteSession = functions.firestore
@@ -231,7 +240,7 @@ exports.onDeleteSession = functions.firestore
     const bucket = admin.storage().bucket();
     const sessionId = context.params.sessionId;
     console.log(snapshot.data());
-    const isCertified = snapshot.data()?.is_certified ?? true;
+    //const isCertified = snapshot.data()?.is_certified ?? true;
 
     // delete session from users
     const members = await firestore
@@ -290,29 +299,25 @@ exports.onDeleteSession = functions.firestore
         functions.logger.info(err);
       });
 
-    if (isCertified) {
-      await bucket
-        .deleteFiles({
-          prefix: `certified_sessions/certified_session_${sessionId}/`,
-        })
-        .then(() => {
-          functions.logger.info('Certified Session Files deleted successfully');
-        })
-        .catch((e) => {
-          functions.logger.info(e);
-        });
-    } else {
-      await bucket
-        .deleteFiles({
-          prefix: `sessions/session_${sessionId}/`,
-        })
-        .then(() => {
-          functions.logger.info('Session Files deleted successfully');
-        })
-        .catch((e) => {
-          functions.logger.info(e);
-        });
-    }
+    await bucket
+      .deleteFiles({
+        prefix: `sessions/session_${sessionId}/`,
+      })
+      .then(() => {
+        functions.logger.info('Session Files deleted successfully');
+      })
+      .catch((e) => {
+        functions.logger.info(e);
+      });
+
+    // decrement session count
+    await firestore
+      .collection(DatabaseConstants.statistics)
+      .doc(DatabaseConstants.sessions_info)
+      .set({
+        [DatabaseConstants.session_count]:
+          admin.firestore.FieldValue.increment(-1),
+      });
   });
 
 exports.joinCertifiedSession = functions.https.onCall(async (req, res) => {

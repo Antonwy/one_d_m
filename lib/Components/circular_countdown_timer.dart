@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Helper/Helper.dart';
+import '../Helper/Helper.dart';
 import 'custom_timer_painter.dart';
 
 /// Create a Circular Countdown Timer.

@@ -8,6 +8,7 @@ import {
   StorageConstants,
 } from './database-constants';
 import { createBlurHash } from './http-functions';
+import { getToken, updateAccount } from './api';
 
 const firestore = admin.firestore();
 
@@ -84,23 +85,30 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         .catch();
     }
   } else if (imageType === ImagePrefix.user) {
-    if (resulution === ImageResolutions.high)
+    const idToken = await getToken(id);
+    if (resulution === ImageResolutions.high) {
+      const toUpdateUser = {
+        image_url: url,
+        blur_hash: await createBlurHash(url),
+      };
+
       await firestore
         .collection(DatabaseConstants.user)
         .doc(id)
-        .update({
-          image_url: url,
-          blur_hash: await createBlurHash(url),
-        })
+        .update(toUpdateUser)
         .catch();
-    else {
+
+      await updateAccount(toUpdateUser, idToken);
+    } else {
+      const toUpdateUser = {
+        thumbnail_url: url,
+      };
       await firestore
         .collection(DatabaseConstants.user)
         .doc(id)
-        .update({
-          thumbnail_url: url,
-        })
+        .update(toUpdateUser)
         .catch();
+      await updateAccount(toUpdateUser, idToken);
     }
   }
 });

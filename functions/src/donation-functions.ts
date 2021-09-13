@@ -2,17 +2,35 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { DonationType, ChargesType, CampaignType, SessionType } from './types';
 import { DatabaseConstants } from './database-constants';
+import { createDonation } from './api';
 
 const firestore = admin.firestore();
 const increment = admin.firestore.FieldValue.increment;
 
 exports.onCreateDonation = functions
   .region('europe-west3')
+  .runWith({ timeoutSeconds: 180 })
   .firestore.document(`${DatabaseConstants.donations}/{donationId}`)
   .onCreate(async (snapshot, context) => {
     if (snapshot.data() === undefined) return;
 
     const donation: DonationType = snapshot.data() as DonationType;
+
+    console.log(context.params.donationId);
+
+    try {
+      if (!donation.already_inserted && donation.user_id)
+        await createDonation(
+          {
+            ...donation,
+            already_inserted: true,
+            id: context.params.donationId,
+          },
+          donation.user_id
+        );
+    } catch (error) {
+      console.log(error);
+    }
 
     // update the donation amount of the user that created the donation
     await firestore
@@ -195,9 +213,8 @@ exports.onCreateDonation = functions
     console.log(`Start logging donation ${snapshot.id}`);
 
     const donDate: Date = donation.created_at.toDate();
-    const formattedDate: string = `${donDate.getDate()}.${
-      donDate.getMonth() + 1
-    }.${donDate.getFullYear()}`;
+    const formattedDate: string = `${donDate.getDate()}.${donDate.getMonth() +
+      1}.${donDate.getFullYear()}`;
 
     if (
       campaign !== undefined &&

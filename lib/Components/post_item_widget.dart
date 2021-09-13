@@ -2,23 +2,22 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/Components/CustomOpenContainer.dart';
-import 'package:one_d_m/Components/NewsPost.dart';
-import 'package:one_d_m/Helper/Campaign.dart';
-import 'package:one_d_m/Helper/ColorTheme.dart';
-import 'package:one_d_m/Helper/Constants.dart';
-import 'package:one_d_m/Helper/DatabaseService.dart';
-import 'package:one_d_m/Helper/News.dart';
-import 'package:one_d_m/Helper/Session.dart';
-import 'package:one_d_m/Helper/ThemeManager.dart';
-import 'package:one_d_m/Helper/keep_alive_stream.dart';
-import 'package:one_d_m/Helper/margin.dart';
-import 'package:one_d_m/Pages/CertifiedSessionPage.dart';
-import 'package:one_d_m/Pages/NewCampaignPage.dart';
-import 'package:one_d_m/Pages/SessionPage.dart';
+import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/helper/constants.dart';
+import 'package:one_d_m/helper/database_service.dart';
+import 'package:one_d_m/models/campaign_models/campaign.dart';
+import 'package:one_d_m/models/news.dart';
+import 'package:one_d_m/models/session_models/certified_session.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/utils/timeline.dart';
+import 'package:one_d_m/views/campaigns/campaign_page.dart';
+import 'package:one_d_m/views/sessions/session_page.dart';
 
-import 'NativeAd.dart';
+import 'custom_open_container.dart';
+import 'keep_alive_stream.dart';
+import 'margin.dart';
+import 'native_ad.dart';
+import 'news_post.dart';
 
 abstract class PostItem {
   Widget buildHeading(BuildContext context);
@@ -53,7 +52,7 @@ class HeadingItem implements PostItem {
                   ? SessionPage(
                       snapshot.data,
                     )
-                  : NewCampaignPage(
+                  : CampaignPage(
                       campaign,
                       scrollController: scrollController,
                     ),
@@ -92,8 +91,7 @@ class HeadingItem implements PostItem {
                             style: _theme.textTheme.dark.headline6
                                 .copyWith(fontWeight: FontWeight.w600)),
                         isSession
-                            ? AutoSizeText(
-                                'Unterstützt ${session.campaignName}',
+                            ? AutoSizeText('Unterstützt NOT FOUND',
                                 maxLines: 1,
                                 softWrap: true,
                                 style: _theme.textTheme.dark
@@ -129,7 +127,6 @@ class PostContentItem extends StatefulWidget implements PostItem {
 
   @override
   Widget buildPosts(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return KeepAliveStreamBuilder(
       stream: post,
       builder: (_, snapshot) {

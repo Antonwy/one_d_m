@@ -11,6 +11,7 @@ import {
 
 const firestore = admin.firestore();
 const increment = admin.firestore.FieldValue.increment;
+const bucket = admin.storage().bucket();
 
 exports.onCreateCampaign = functions.firestore
   .document(`${DatabaseConstants.campaigns}/{campaignId}`)
@@ -133,7 +134,6 @@ exports.onDeleteCampaign = functions.firestore
         functions.logger.info(e);
       });
     // deleting images of campaign
-    const bucket = admin.storage().bucket();
     await bucket
       .deleteFiles({ prefix: `campaigns/campaign_${campaignId}/` })
       .then(() => {
@@ -167,7 +167,13 @@ exports.onUpdateCampaign = functions.firestore
     const before: CampaignType = snapshot.before.data() as CampaignType;
     const after: CampaignType = snapshot.after.data() as CampaignType;
 
-    if (before.title !== after.title || before.image_url !== after.image_url) {
+    if (
+      before.title !== after.title ||
+      before.image_url !== after.image_url ||
+      before.short_video_url !== after.short_video_url ||
+      before.long_video_url !== after.long_video_url ||
+      before.dv_animation !== after.dv_animation
+    ) {
       const updateValue = {
         campaign_name: after.title,
         campaign_img_url: after.image_url,
@@ -193,7 +199,46 @@ exports.onUpdateCampaign = functions.firestore
       for await (const doc of toUpdateNewsQuery.docs) {
         await doc.ref.update(updateValue);
       }
-      // delete old image_url
+
+      // delete old short_video_url
+      if (before.short_video_url && after.short_video_url === null) {
+        console.log('Short video was deleted!');
+        const path =
+          'campaigns/campaign_' +
+          campaignId +
+          '/campaign_short_video_' +
+          campaignId;
+        await bucket.deleteFiles({
+          prefix: path,
+        });
+      }
+
+      // delete old long_video_url
+      if (before.long_video_url && after.long_video_url === null) {
+        console.log('Long video was deleted!');
+        const path =
+          'campaigns/campaign_' +
+          campaignId +
+          '/campaign_long_video_' +
+          campaignId;
+        await bucket.deleteFiles({
+          prefix: path,
+        });
+      }
+
+      // delete old dv_animation
+      if (before.dv_animation && after.dv_animation === null) {
+        console.log('Rive animation was deleted!');
+        const path =
+          'campaigns/campaign_' +
+          campaignId +
+          '/campaign_rive_anim_' +
+          campaignId;
+        await bucket.deleteFiles({
+          prefix: path,
+        });
+      }
+
       if (
         before.image_url !== undefined &&
         before.image_url !== after.image_url &&
@@ -201,8 +246,8 @@ exports.onUpdateCampaign = functions.firestore
           `${ImageResolutions.high}${ImageSuffix.dottJpg}`
         )
       ) {
+        // delete old image_url
         functions.logger.info('Delete image of campaign');
-        const bucket = admin.storage().bucket();
         const image_path =
           'campaigns/campaign_' + campaignId + '/campaign_' + campaignId + '_0';
         await bucket.deleteFiles({

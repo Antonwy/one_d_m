@@ -48,20 +48,21 @@ class Donation {
       this.username});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
-    return Donation(doc.data()[AMOUNT],
-        campaignId: doc.data()[CAMPAIGNID],
-        alternativeCampaignId: doc.data()[ALTERNATIVECAMPAIGNID],
-        userId: doc.data()[USERID],
-        campaignImgUrl: doc.data()[CAMPAIGNIMGURL],
-        campaignName: doc.data()[CAMPAIGNNAME],
-        anonym: doc.data()[ISANONYM] ?? false,
-        createdAt: (doc.data()[CREATEDAT] as Timestamp).toDate(),
-        useDCs: doc.data()[USEDCS] ?? false,
-        sessionId: doc.data()[SESSION_ID],
-        donationUnit: DonationUnit.fromMap(doc.data()),
-        userImageUrl: doc.data()['image_url'],
-        userBlurHash: doc.data()['blur_hash'],
-        username: doc.data()['username']);
+    Map<String, dynamic> data = doc.data();
+    return Donation(data[AMOUNT],
+        campaignId: data[CAMPAIGNID],
+        alternativeCampaignId: data[ALTERNATIVECAMPAIGNID],
+        userId: data[USERID],
+        campaignImgUrl: data[CAMPAIGNIMGURL],
+        campaignName: data[CAMPAIGNNAME],
+        anonym: data[ISANONYM] ?? false,
+        createdAt: (data[CREATEDAT] as Timestamp).toDate(),
+        useDCs: data[USEDCS] ?? false,
+        sessionId: data[SESSION_ID],
+        donationUnit: DonationUnit.fromMap(data),
+        userImageUrl: data['image_url'],
+        userBlurHash: data['blur_hash'],
+        username: data['username']);
   }
 
   Donation.fromJson(Map<String, dynamic> map)

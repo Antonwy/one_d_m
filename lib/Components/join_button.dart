@@ -13,8 +13,8 @@ class JoinButton extends StatefulWidget {
       this.joinOrLeave,
       this.subscribedColor,
       this.notSubscribedColor,
-      this.subscribedString = "BEITRETEN",
-      this.notSubscribedString = "VERLASSEN",
+      this.subscribedString = "Beitreten",
+      this.notSubscribedString = "Verlassen",
       this.subscribed = false})
       : super(key: key);
 
@@ -37,31 +37,39 @@ class _JoinButtonState extends State<JoinButton> {
         : widget.subscribedString;
 
     if (widget.joinOrLeave == null) {
-      background = Colors.grey;
+      background = Colors.grey[300];
       title = "Laden...";
     }
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-      ),
-      child: _loading
-          ? Container(
-              width: 18,
-              height: 18,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 3.0,
-                  valueColor: AlwaysStoppedAnimation(
-                      _theme.correctColorFor(background)),
+    return MaterialButton(
+      color: background,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      child: AnimatedSize(
+        duration: Duration(milliseconds: 250),
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 250),
+          child: _loading
+              ? Container(
+                  width: 18,
+                  height: 18,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.0,
+                      valueColor: AlwaysStoppedAnimation(
+                          _theme.correctColorFor(background)),
+                    ),
+                  ))
+              : Text(
+                  title,
+                  style: _theme.textTheme
+                      .correctColorFor(background)
+                      .bodyText2
+                      .copyWith(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
-              ))
-          : AutoSizeText(
-              title,
-              maxLines: 1,
-              style: _theme.textTheme.correctColorFor(background).bodyText1,
-            ),
+        ),
+      ),
       onPressed: widget.joinOrLeave != null
           ? () async {
               setState(() {

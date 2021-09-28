@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/components/campaign_header.dart';
 import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/donation_widget.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
 import 'package:one_d_m/components/user_follow_button.dart';
@@ -91,7 +92,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     _headerHeight = _staticHeight + mq.padding.top;
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorTheme.appBg,
         body: ChangeNotifierProvider<UserPageManager>(
             create: (context) => UserPageManager(widget.user, um.uid),
             builder: (context, snapshot) {
@@ -123,9 +124,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                     SizedBox(
                                       height: 20,
                                     ),
-                                    CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation(
-                                            ColorTheme.blue)),
+                                    LoadingIndicator(),
                                     SizedBox(
                                       height: 10,
                                     ),

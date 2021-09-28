@@ -432,15 +432,8 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
       Uint8List list = await fileInfo.file.readAsBytes();
       ByteData data = ByteData.view(list.buffer);
       final List<RiveFile> _riveFiles =
-          List.generate(amount, (i) => RiveFile());
+          List.generate(amount, (i) => RiveFile.import(data));
 
-      bool _failedImporting = false;
-
-      for (RiveFile _rFile in _riveFiles) {
-        if (!_rFile.import(data)) _failedImporting = true;
-      }
-
-      if (_failedImporting) return null;
       return _riveFiles.map((r) => r.mainArtboard).toList();
     } catch (e) {
       print(e);

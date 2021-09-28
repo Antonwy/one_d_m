@@ -28,6 +28,28 @@ class CampaignManager extends ChangeNotifier {
     });
   }
 
+  CampaignManager.copy(
+      {this.baseCampaign,
+      this.tabController,
+      this.campaign,
+      this.campaignStream,
+      this.loadingCampaign,
+      this.subscribed,
+      this.fromCache,
+      this.subscribedCount,
+      this.tabIndex});
+
+  CampaignManager copyCM() => CampaignManager.copy(
+      baseCampaign: baseCampaign,
+      tabController: tabController,
+      campaign: campaign,
+      campaignStream: campaignStream,
+      loadingCampaign: loadingCampaign,
+      fromCache: fromCache,
+      subscribed: subscribed,
+      subscribedCount: subscribedCount,
+      tabIndex: tabIndex);
+
   Future<void> initData() async {
     await for (StreamResult<Campaign> result in campaignStream) {
       campaign = result.data;

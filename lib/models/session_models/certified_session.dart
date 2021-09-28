@@ -5,7 +5,7 @@ class CertifiedSession extends Session {
   final String videoUrl;
 
   CertifiedSession.fromDoc(DocumentSnapshot doc)
-      : videoUrl = doc.data()[VIDEO_URL],
+      : videoUrl = (doc.data() as Map<String, dynamic>)[VIDEO_URL],
         super.fromDoc(doc);
 
   CertifiedSession.fromJson(Map<String, dynamic> map)

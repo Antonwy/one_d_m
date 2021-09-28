@@ -271,9 +271,8 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> _saveToken() async {
-    final FirebaseMessaging _fMessaging = FirebaseMessaging();
     try {
-      String token = await _fMessaging.getToken();
+      String token = await FirebaseMessaging.instance.getToken();
       print("Saving device token: $token");
       await Api().account().saveDeviceToken(token);
     } catch (e) {

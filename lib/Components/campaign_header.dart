@@ -1,23 +1,13 @@
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/components/video_or_image.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
-import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
-import 'package:provider/provider.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-
-import 'bottom_dialog.dart';
 import 'margin.dart';
 
 class CampaignHeader extends StatefulWidget {
@@ -37,94 +27,118 @@ class CampaignHeader extends StatefulWidget {
 class _CampaignHeaderState extends State<CampaignHeader> {
   @override
   Widget build(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
     ThemeManager _theme = ThemeManager.of(context);
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
-        child: Material(
-          clipBehavior: Clip.antiAlias,
-          borderRadius: BorderRadius.circular(Constants.radius),
-          elevation: 1,
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CampaignPage(widget.campaign)));
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  height: 260,
-                  child: VideoOrImage(
-                    imageUrl: widget.campaign?.imgUrl,
-                    videoUrl: widget.campaign?.shortVideoUrl,
-                    blurHash: widget.campaign?.blurHash,
-                    alwaysMuted: true,
+        child: Hero(
+          tag: "${widget.campaign.id}-container",
+          child: Material(
+            elevation: 1,
+            color: ColorTheme.appBg,
+            borderRadius: BorderRadius.circular(Constants.radius),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        barrierColor: Colors.black26,
+                        pageBuilder: (context, anim1, anim2) => CampaignPage(
+                              widget.campaign,
+                            ),
+                        transitionDuration: Duration(milliseconds: 500),
+                        reverseTransitionDuration: Duration(milliseconds: 500),
+                        transitionsBuilder: (context, anim1, anim2, child) =>
+                            child));
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    height: 260,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(Constants.radius)),
+                      child: VideoOrImage(
+                        imageUrl: widget.campaign?.imgUrl,
+                        videoUrl: widget.campaign?.shortVideoUrl,
+                        blurHash: widget.campaign?.blurHash,
+                        alwaysMuted: true,
+                      ),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: [
-                          Expanded(
-                              child: AutoSizeText(
-                            widget.campaign.name,
-                            style: textTheme.headline6,
-                            maxLines: 1,
-                          )),
-                          XMargin(12),
-                          Material(
-                              clipBehavior: Clip.antiAlias,
-                              color: _theme.colors.dark,
-                              borderRadius: BorderRadius.circular(20),
-                              child: InkWell(
-                                onTap: () async {
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 220,
+                              height: 22,
+                              child: FittedBox(
+                                alignment: Alignment.centerLeft,
+                                fit: BoxFit.contain,
+                                child: Text(
+                                  widget.campaign.name,
+                                  style:
+                                      _theme.textTheme.dark.bodyText1.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                            MaterialButton(
+                                color: _theme.colors.dark,
+                                height: 30,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24)),
+                                onPressed: () async {
                                   await _donate(context, widget.campaign);
                                 },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 12),
-                                  child: Text(
-                                    "Unterstützen",
-                                    style: _theme.textTheme.textOnDark.bodyText1
-                                        .copyWith(
-                                      fontSize: 11,
-                                    ),
+                                elevation: 0,
+                                highlightElevation: 1,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                child: Text(
+                                  "Unterstützen",
+                                  style: _theme.textTheme.textOnDark.bodyText1
+                                      .copyWith(
+                                    fontSize: 11,
                                   ),
-                                ),
-                              ))
-                        ],
-                      ),
-                      YMargin(8),
-                      widget.campaign.tags == null
-                          ? Text("${widget.campaign?.shortDescription ?? ""}")
-                          : Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: [
-                                CampaignTag(
-                                    text: getFirstTag(),
-                                    color: _theme.colors.dark,
-                                    textColor: _theme.colors.textOnDark,
-                                    icon: Icons.info,
-                                    bold: true),
-                                for (String tag in widget.campaign?.tags ?? [])
-                                  if (tag.isNotEmpty) CampaignTag(text: tag)
-                              ],
-                            ),
-                      // widget.campaign.shortDescription == null
-                      //     ? Container()
-                      //     : Text(widget.campaign.shortDescription),
-                    ],
-                  ),
-                )
-              ],
+                                )),
+                          ],
+                        ),
+                        YMargin(8),
+                        widget.campaign.tags == null
+                            ? Text("${widget.campaign?.shortDescription ?? ""}")
+                            : Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  CampaignTag(
+                                      text: getFirstTag(),
+                                      color: _theme.colors.dark,
+                                      textColor: _theme.colors.textOnDark,
+                                      icon: Icons.info,
+                                      bold: true),
+                                  for (String tag
+                                      in widget.campaign?.tags ?? [])
+                                    if (tag.isNotEmpty) CampaignTag(text: tag)
+                                ],
+                              ),
+                        // widget.campaign.shortDescription == null
+                        //     ? Container()
+                        //     : Text(widget.campaign.shortDescription),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ));

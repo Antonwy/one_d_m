@@ -5,13 +5,13 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/components/campaigns/campaign_page_header.dart';
 import 'package:one_d_m/components/campaigns/campaign_sessions.dart';
 import 'package:one_d_m/components/campaigns/campaign_tags.dart';
 import 'package:one_d_m/components/campaigns/campaign_title_and_subscribe.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/components/shuttles/campaign_shuttle.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/helper.dart';
@@ -25,6 +25,7 @@ import 'package:one_d_m/views/campaigns/campaign_description.dart';
 import 'package:one_d_m/views/campaigns/campaign_news.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 
 class CampaignPage extends StatefulWidget {
   BaseCampaign baseCampaign;
@@ -39,8 +40,6 @@ class CampaignPage extends StatefulWidget {
 
 class CampaignPageState extends State<CampaignPage>
     with SingleTickerProviderStateMixin {
-  TextTheme _textTheme;
-  BaseTheme _bTheme;
   ScrollController _scrollController;
   TabController _tabController;
   Campaign campaign;
@@ -71,104 +70,202 @@ class CampaignPageState extends State<CampaignPage>
 
   @override
   Widget build(BuildContext context) {
-    _textTheme = Theme.of(context).textTheme;
-    _bTheme = ThemeManager.of(context).colors;
+    ThemeManager _theme = ThemeManager.of(context);
     return ChangeNotifierProvider<CampaignManager>(
         create: (context) =>
             CampaignManager(widget.baseCampaign, tabController: _tabController),
         builder: (context, child) {
-          return Scaffold(
-              backgroundColor: ColorTheme.appBg,
-              floatingActionButton: OfflineBuilder(
-                  child: Container(),
-                  connectivityBuilder: (context, connection, child) {
-                    bool activated = connection != ConnectivityResult.none;
-                    return Consumer2<UserManager, CampaignManager>(
-                        builder: (context, um, cm, child) =>
-                            DiscoveryHolder.donateButton(
-                              tapTarget: Icon(
-                                Icons.arrow_forward,
-                                color: _bTheme.contrast,
-                              ),
-                              child: FloatingActionButton.extended(
-                                  backgroundColor:
-                                      activated ? _bTheme.dark : Colors.grey,
-                                  label: Text("Unterstützen",
-                                      style:
-                                          TextStyle(color: _bTheme.textOnDark)),
-                                  onPressed: !cm.loadingCampaign && activated
-                                      ? () {
-                                          DonationDialog.show(context,
-                                              campaignId:
-                                                  widget.baseCampaign.id);
-                                        }
-                                      : () {
-                                          Helper.showConnectionSnackBar(
-                                              context);
-                                        }),
-                            ));
-                  }),
-              body: CustomScrollView(controller: _scrollController, slivers: [
-                CampaignPageHeader(),
-                CampaignTitleAndSubscribe(),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  sliver: SliverToBoxAdapter(
-                    child: Container(
-                      height: 90,
-                      child: Consumer<CampaignManager>(
-                          builder: (context, cm, child) => Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  _StatCollumn(
-                                      value: ((cm.baseCampaign?.amount ?? 0.0) /
-                                              (cm.baseCampaign?.unit?.value ??
-                                                  1.0))
-                                          .round(),
-                                      description:
-                                          "${cm.baseCampaign?.unit?.name ?? "Donation Votes"}"),
-                                  XMargin(6),
-                                  _StatCollumn(
-                                      value: cm.subscribedCount,
-                                      description: "Abonnenten",
-                                      isDark: true),
-                                ],
-                              )),
+          return Hero(
+            tag: "${widget.baseCampaign.id}-container",
+            flightShuttleBuilder:
+                (flightContext, anim, direction, fromContext, toContext) =>
+                    campaignShuttle(anim, direction, fromContext, toContext,
+                        _theme, _CampaignPageBottom()),
+            child: Scaffold(
+                backgroundColor: ColorTheme.appBg,
+                body: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomScrollView(
+                          controller: _scrollController,
+                          slivers: [
+                            CampaignPageHeader(),
+                            CampaignTitleAndSubscribe(),
+                            _CampaignPageBottom()
+                          ]),
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(child: CampaignTags()),
-                SliverToBoxAdapter(
-                  child: Divider(),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  sliver: SliverToBoxAdapter(
-                    child: TabBar(
-                      controller: _tabController,
-                      indicatorColor: _bTheme.contrast,
-                      indicatorWeight: 3,
-                      labelColor: _bTheme.dark,
-                      unselectedLabelColor: _bTheme.dark.withOpacity(.5),
-                      unselectedLabelStyle:
-                          TextStyle(fontWeight: FontWeight.w500),
-                      labelStyle: TextStyle(fontWeight: FontWeight.w700),
-                      tabs: _buildTabs(),
-                    ),
-                  ),
-                ),
-                Consumer<CampaignManager>(
-                    builder: (context, cm, child) => [
-                          CampaignDescription(),
-                          CampaignNews(),
-                          CampaignSessions(),
-                        ][cm.tabIndex]),
-                SliverToBoxAdapter(
-                  child: YMargin(100),
-                )
-              ]));
+                    Positioned(
+                        bottom: 0, right: 0, left: 0, child: _DonationBottom())
+                  ],
+                )),
+          );
         });
+  }
+}
+
+class _DonationBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    double bottPad = MediaQuery.of(context).padding.bottom;
+    return Container(
+      height: bottPad == 0 ? 76 : bottPad + 64,
+      color: _theme.colors.contrast,
+      child: Column(
+        children: [
+          Divider(height: 1.2, thickness: 1.2),
+          Expanded(
+            child: Padding(
+              padding:
+                  EdgeInsets.fromLTRB(12, 12, 12, bottPad == 0 ? 12 : bottPad),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      alignment: Alignment.centerLeft,
+                      child: Consumer<CampaignManager>(
+                          builder: (context, cm, child) {
+                        return cm.baseCampaign.unit.name != "DVs"
+                            ? RichText(
+                                text: TextSpan(
+                                    style: _theme
+                                        .textTheme.textOnContrast.bodyText1,
+                                    children: [
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text:
+                                              "Ein ${cm.baseCampaign.unit.singular ?? cm.baseCampaign.unit.name} ${cm.baseCampaign.unit.smiley ?? ''}\n"),
+                                      TextSpan(text: "entspricht "),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text:
+                                              "${cm.baseCampaign.unit.value} "),
+                                      TextSpan(text: "DVs!"),
+                                    ]),
+                              )
+                            : RichText(
+                                text: TextSpan(
+                                    style: _theme
+                                        .textTheme.textOnContrast.bodyText1,
+                                    children: [
+                                      TextSpan(text: "Unterstütze\n"),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text: "${cm.baseCampaign.name}\n"),
+                                      TextSpan(text: "schon ab "),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text: "5 "),
+                                      TextSpan(text: "Cent!"),
+                                    ]),
+                              );
+                      }),
+                    ),
+                  ),
+                  XMargin(16),
+                  Consumer2<UserManager, CampaignManager>(
+                      builder: (context, um, cm, child) =>
+                          DiscoveryHolder.donateButton(
+                            tapTarget: Icon(
+                              Icons.arrow_forward,
+                              color: _theme.colors.contrast,
+                            ),
+                            child: FloatingActionButton.extended(
+                                heroTag: null,
+                                backgroundColor: _theme.colors.dark,
+                                label: Text("Unterstützen",
+                                    style: TextStyle(
+                                        color: _theme.colors.textOnDark)),
+                                onPressed: (!cm.loadingCampaign)
+                                    ? () {
+                                        DonationDialog.show(context,
+                                            campaignId: cm.baseCampaign.id);
+                                      }
+                                    : () {
+                                        Helper.showConnectionSnackBar(context);
+                                      }),
+                          ))
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CampaignPageBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ThemeManager _theme = ThemeManager.of(context);
+    return MultiSliver(children: [
+      SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        sliver: SliverToBoxAdapter(
+          child: Container(
+            height: 90,
+            child: Consumer<CampaignManager>(
+                builder: (context, cm, child) => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        _StatCollumn(
+                            value: ((cm.baseCampaign?.amount ?? 0.0) /
+                                    (cm.baseCampaign?.unit?.value ?? 1.0))
+                                .round(),
+                            description:
+                                "${cm.baseCampaign?.unit?.name ?? "Donation Votes"}"),
+                        XMargin(6),
+                        _StatCollumn(
+                            value: cm.subscribedCount,
+                            description: "Abonnenten",
+                            isDark: true),
+                      ],
+                    )),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(child: CampaignTags()),
+      SliverToBoxAdapter(
+        child: Divider(),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        sliver: SliverToBoxAdapter(
+          child: Consumer<CampaignManager>(builder: (context, cm, child) {
+            return TabBar(
+              controller: cm.tabController,
+              indicatorColor: _theme.colors.contrast,
+              indicatorWeight: 3,
+              labelColor: _theme.colors.dark,
+              unselectedLabelColor: _theme.colors.dark.withOpacity(.5),
+              unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500),
+              labelStyle: TextStyle(fontWeight: FontWeight.w700),
+              tabs: _buildTabs(),
+            );
+          }),
+        ),
+      ),
+      Consumer<CampaignManager>(
+          builder: (context, cm, child) => [
+                CampaignDescription(),
+                CampaignNews(),
+                CampaignSessions(),
+              ][cm.tabIndex]),
+      SliverToBoxAdapter(
+        child: YMargin(100),
+      )
+    ]);
   }
 
   List<Widget> _buildTabs() => [

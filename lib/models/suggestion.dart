@@ -35,29 +35,30 @@ class Suggestion {
       this.textOnSecondary});
 
   factory Suggestion.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data();
     return Suggestion(
-      title: doc.data()[TITLE],
-      subTitle: doc.data()[SUBTITLE],
-      doneTitle: doc.data()[DONE_TITLE],
-      doneSubTitle: doc.data()[DONE_SUBTITLE],
-      campaignId: doc.data()[CAMPAIGN_ID],
-      campaignName: doc.data()[CAMPAIGN_NAME],
-      animationUrl: doc.data()[ANIMATION_URL],
-      amountPerDonation: doc.data()[AMOUNT_PER_DONATION],
-      amount: doc.data()[AMOUNT],
-      visible: doc.data()[VISIBLE] ?? false,
-      onlyAdmins: doc.data()[ONLY_ADMINS] ?? false,
-      primaryColor: doc.data()[PRIMARY_COLOR] != null
-          ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
+      title: data[TITLE],
+      subTitle: data[SUBTITLE],
+      doneTitle: data[DONE_TITLE],
+      doneSubTitle: data[DONE_SUBTITLE],
+      campaignId: data[CAMPAIGN_ID],
+      campaignName: data[CAMPAIGN_NAME],
+      animationUrl: data[ANIMATION_URL],
+      amountPerDonation: data[AMOUNT_PER_DONATION],
+      amount: data[AMOUNT],
+      visible: data[VISIBLE] ?? false,
+      onlyAdmins: data[ONLY_ADMINS] ?? false,
+      primaryColor: data[PRIMARY_COLOR] != null
+          ? Helper.hexToColor(data[PRIMARY_COLOR])
           : null,
-      secondaryColor: doc.data()[SECONDARY_COLOR] != null
-          ? Helper.hexToColor(doc.data()[SECONDARY_COLOR])
+      secondaryColor: data[SECONDARY_COLOR] != null
+          ? Helper.hexToColor(data[SECONDARY_COLOR])
           : null,
-      textOnPrimary: doc.data()[TEXT_ON_PRIMARY] != null
-          ? Helper.hexToColor(doc.data()[TEXT_ON_PRIMARY])
+      textOnPrimary: data[TEXT_ON_PRIMARY] != null
+          ? Helper.hexToColor(data[TEXT_ON_PRIMARY])
           : null,
-      textOnSecondary: doc.data()[TEXT_ON_SECONDARY] != null
-          ? Helper.hexToColor(doc.data()[TEXT_ON_SECONDARY])
+      textOnSecondary: data[TEXT_ON_SECONDARY] != null
+          ? Helper.hexToColor(data[TEXT_ON_SECONDARY])
           : null,
     );
   }

@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/api/api.dart';
@@ -11,12 +11,9 @@ import 'package:one_d_m/helper/ad_manager.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/helper/numeral.dart';
-import 'package:one_d_m/models/ad_balance.dart';
 import 'package:one_d_m/models/statistics.dart';
-import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -252,10 +249,11 @@ class PlayButton extends StatefulWidget {
 class _PlayButtonState extends State<PlayButton>
     with SingleTickerProviderStateMixin {
   int _alreadyCollectedCoins = 0, _maxDVs;
-  bool _loadingAd = true;
+  bool _loadingAd = false;
   AnimationController _controller;
   ThemeManager _theme;
   Animation<double> _curvedAnimation;
+  InterstitialAd _ad;
 
   @override
   void initState() {
@@ -289,61 +287,60 @@ class _PlayButtonState extends State<PlayButton>
     _controller.forward();
 
     _initStorage();
-
-    _initAds();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Future<void> _preloadAd([bool show = false]) async {
+    await InterstitialAd.load(
+        adUnitId: AdManager.rewardedAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (ad) {
+          print("AD LOADED");
+          print(ad);
+
+          _ad = ad;
+
+          if (show) _showAd();
+        }, onAdFailedToLoad: (e) {
+          print("FAILED LOADING AD");
+
+          print(e.message);
+        }));
   }
 
-  void _initAds() {
-    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event,
-        {String rewardType, int rewardAmount}) async {
-      if (event == RewardedVideoAdEvent.loaded) {
-        if (mounted && _loadingAd) {
-          RewardedVideoAd.instance.show();
-        }
-      } else if (event == RewardedVideoAdEvent.rewarded) {
-        print('REWARD');
+  Future<void> _showAd() async {
+    if (_ad == null) await _preloadAd(true);
+
+    _ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) =>
+          print('$ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+
+        PushNotification.of(context).show(NotificationContent(
+            title: "Das hat leider nicht funktioniert.",
+            body:
+                "Momentan haben wir leider keine Werbung die wir dir zeigen können.",
+            icon: Icons.error_outline));
+        setState(() {
+          _loadingAd = false;
+        });
+
+        ad.dispose();
+      },
+      onAdImpression: (InterstitialAd ad) {
         _adViewed();
-      } else if (event == RewardedVideoAdEvent.closed ||
-          event == RewardedVideoAdEvent.completed) {
-        _loadAd(show: false);
-      }
-      setState(() {
-        _loadingAd = false;
-      });
-    };
-    _loadAd(show: false).then((value) => print('loadAd() -> $value'));
-  }
-
-  Future<bool> _loadAd({bool show: true}) {
-    setState(() {
-      _loadingAd = show;
-    });
-
-    return RewardedVideoAd.instance.load(
-      adUnitId: AdManager.rewardedAdUnitId,
+        print('$ad impression occurred.');
+        ad.dispose();
+      },
     );
-  }
 
-  Future<void> _showIfAlreadyAvailable() async {
-    try {
-      await RewardedVideoAd.instance.show();
-    } catch (err) {
-      PushNotification.of(context).show(NotificationContent(
-          title: "Das hat leider nicht funktioniert.",
-          body:
-              "Momentan haben wir leider keine Werbung die wir dir zeigen können.",
-          icon: Icons.error_outline));
-      print("Ad Error: $err");
-      setState(() {
-        _loadingAd = false;
-      });
-    }
+    await _ad.show();
+    _ad = null;
+    await _preloadAd();
   }
 
   void _initStorage() async {
@@ -374,7 +371,6 @@ class _PlayButtonState extends State<PlayButton>
 
   void _adViewed() async {
     _collectCoin();
-    String uid = context.read<UserManager>().uid;
     context.read<FirebaseAnalytics>().logEvent(name: "Reward earned");
     await Api().account().addDvs();
 
@@ -452,8 +448,7 @@ class _PlayButtonState extends State<PlayButton>
       return;
     }
 
-    await _loadAd(show: true);
-    await _showIfAlreadyAvailable();
+    _showAd();
   }
 
   Widget _buttonText() {

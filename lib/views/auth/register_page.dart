@@ -96,10 +96,16 @@ class _RegisterPageState extends State<RegisterPage> {
                                     clipBehavior: Clip.antiAlias,
                                     child: InkWell(
                                         onTap: () async {
-                                          _profileImage =
-                                              await ImagePicker.pickImage(
+                                          ImagePicker _picker = ImagePicker();
+                                          XFile pickedImage =
+                                              await _picker.pickImage(
                                                   source: ImageSource.gallery);
-                                          setState(() {});
+
+                                          if (pickedImage != null) {
+                                            _profileImage =
+                                                File(pickedImage.path);
+                                            setState(() {});
+                                          }
                                         },
                                         child: _profileImage != null
                                             ? Image.file(
@@ -376,7 +382,8 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      ContactManager.uploadPhoneNumbers(await ContactManager.phoneNumberList());
+      ContactManager cm = ContactManager();
+      cm.uploadPhoneNumbers(await cm.phoneNumberList());
     } on PermissionException catch (e) {
       print(e);
     }

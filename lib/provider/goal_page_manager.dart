@@ -53,13 +53,14 @@ class Goal {
       this.unit});
 
   factory Goal.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data();
     return Goal(
         id: doc.id,
-        name: doc.data()[NAME] ?? doc.id,
-        unitSmiley: doc.data()[UNIT_SMILEY],
-        unit: doc.data()[UNIT] ?? doc.id,
-        currentValue: doc.data()[CURRENT_VALUE] ?? 0,
-        description: doc.data()[DESCRIPTION],
+        name: data[NAME] ?? doc.id,
+        unitSmiley: data[UNIT_SMILEY],
+        unit: data[UNIT] ?? doc.id,
+        currentValue: data[CURRENT_VALUE] ?? 0,
+        description: data[DESCRIPTION],
         checkpoints: DatabaseService.getCheckpointsOfGoal(doc.id));
   }
 
@@ -85,10 +86,9 @@ class GoalCheckpoint {
   GoalCheckpoint({this.pending, this.done, this.value});
 
   factory GoalCheckpoint.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data();
     return GoalCheckpoint(
-        pending: doc.data()[PENDING],
-        done: doc.data()[DONE],
-        value: doc.data()[VALUE] ?? 0);
+        pending: data[PENDING], done: data[DONE], value: data[VALUE] ?? 0);
   }
 
   static List<GoalCheckpoint> fromQuerySnapshot(QuerySnapshot qs) {

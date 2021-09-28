@@ -1,31 +1,21 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/video_or_image.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
-import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/news.dart';
-import 'package:one_d_m/models/session_models/certified_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
-import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
-import 'package:provider/provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:visibility_detector/visibility_detector.dart';
-
 import 'animated_future_builder.dart';
-import 'bottom_dialog.dart';
 import 'custom_open_container.dart';
 import 'donation_widget.dart';
 

@@ -8,4 +8,10 @@ class StatisticsEndpoint extends ApiEndpoint<Statistics> {
   Future<Statistics> home() {
     return this.addRoute('home').getOne();
   }
+
+  @override
+  StatisticsEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return StatisticsEndpoint(finalRoute);
+  }
 }

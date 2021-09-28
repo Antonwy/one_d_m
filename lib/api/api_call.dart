@@ -11,38 +11,39 @@ class ApiCall<T> {
   final ApiEndpoint endpoint;
   final bool useCache, autoFormat, useCacheFirst;
   Exception exception;
-  Future<String> userToken;
+  Future<String>? userToken;
 
   ApiCall(this.endpoint,
       {this.useCache = true,
       this.autoFormat = true,
-      this.useCacheFirst = false}) {
-    this.exception = ApiException(endpoint: endpoint.route);
+      this.useCacheFirst = false})
+      : exception = ApiException(endpoint: endpoint.route) {
     userToken = updateUserToken();
   }
 
   String _buildQuery() {
-    if (endpoint.query.isEmpty) return "";
+    if (endpoint.query == null || (endpoint.query?.isEmpty ?? true)) return "";
+
     return "?" +
-        endpoint.query.entries
+        endpoint.query!.entries
             .map((e) => e.key + "=" + e.value.toString())
             .join("&");
   }
 
   Future _requestAndDecode() async {
-    Box box = Api.box;
+    Box? box = Api.box;
 
     if (box == null) await Api().init();
 
     String query = _buildQuery();
-    String url = endpoint.baseUrl + query;
+    Uri url = Uri.parse(endpoint.baseUrl.toString() + query);
     String boxKey = endpoint.route + query;
 
     bool usedCache = false;
     http.Response res;
     bool containsKey = box?.containsKey(boxKey) ?? false;
 
-    if (useCacheFirst && containsKey) return box.get(boxKey);
+    if (box != null && useCacheFirst && containsKey) return box.get(boxKey);
 
     if (useCache && containsKey) {
       try {
@@ -63,7 +64,7 @@ class ApiCall<T> {
 
     if (usedCache) print("USED CACHE TO FETCH $boxKey");
 
-    if (res.statusCode == 200 && res.body == 'used cache') {
+    if (box != null && res.statusCode == 200 && res.body == 'used cache') {
       return box.get(boxKey);
     }
 
@@ -73,15 +74,18 @@ class ApiCall<T> {
       return jsonData;
     }
 
-    if (containsKey) return box.get(boxKey);
+    if (box != null && containsKey) return box.get(boxKey);
 
     throwExceptionFromBody(res.body);
   }
 
   Stream<StreamResult> _requestAndDecodeStream() async* {
-    Box box = Api.box;
+    Box? box = Api.box;
+
+    if (box == null) await Api().init();
+
     String query = _buildQuery();
-    String url = endpoint.baseUrl + query;
+    Uri url = Uri.parse(endpoint.baseUrl.toString() + query);
     String boxKey = endpoint.route + query;
 
     http.Response res;
@@ -89,7 +93,8 @@ class ApiCall<T> {
     // await Future.delayed(Duration(seconds: 2));
     bool containsKey = box?.containsKey(boxKey) ?? false;
 
-    if (containsKey) yield StreamResult(fromCache: true, data: box.get(boxKey));
+    if (box != null && containsKey)
+      yield StreamResult(fromCache: true, data: box.get(boxKey));
 
     await userToken;
 
@@ -97,7 +102,7 @@ class ApiCall<T> {
 
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
-      await box.put(boxKey, jsonData);
+      if (box != null) await box.put(boxKey, jsonData);
       yield StreamResult(fromCache: false, data: jsonData);
     } else {
       throwExceptionFromBody(res.body);
@@ -110,8 +115,12 @@ class ApiCall<T> {
     res = res.map<StreamResult<List<T>>>((val) {
       List<Map<String, dynamic>> lMap = List<Map<String, dynamic>>.from(
           val.data.map((v) => Map<String, dynamic>.from(v)));
-      return StreamResult<List<T>>(
-          fromCache: val.fromCache, data: endpoint.listFormatter(lMap));
+
+      if (endpoint.listFormatter != null)
+        return StreamResult<List<T>>(
+            fromCache: val.fromCache, data: endpoint.listFormatter(lMap));
+      else
+        throw new Exception("Specify a list formatter!");
     });
 
     return res;

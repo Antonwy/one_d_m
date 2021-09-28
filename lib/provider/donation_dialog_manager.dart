@@ -107,15 +107,13 @@ class DonationDialogManager extends ChangeNotifier {
       Uint8List list = await fileInfo.file.readAsBytes();
       ByteData byteData = ByteData.view(list.buffer);
 
-      final file = RiveFile();
+      final file = RiveFile.import(byteData);
 
-      if (file.import(byteData)) {
-        final artboard = file.mainArtboard;
+      final artboard = file.mainArtboard;
 
-        artboard
-            .addController(riveController = SimpleAnimation(currentAnimation));
-        return artboard;
-      }
+      artboard
+          .addController(riveController = SimpleAnimation(currentAnimation));
+      return artboard;
     } catch (e) {
       print(e);
     }

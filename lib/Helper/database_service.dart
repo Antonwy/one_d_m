@@ -116,7 +116,8 @@ class DatabaseService {
 
   static Future<bool> checkIfUserHasAlreadyAnAccount(String uid) async {
     DocumentSnapshot ds = await userCollection.doc(uid).get();
-    return ds.exists && ds.data().containsKey(User.NAME);
+    return ds.exists &&
+        (ds.data() as Map<String, dynamic>).containsKey(User.NAME);
   }
 
   static Future<bool> checkUsernameAvailable(String username) async {
@@ -347,7 +348,8 @@ class DatabaseService {
       print(query.parameters);
       QuerySnapshot snapshot = await query.get();
       sessions.addAll(snapshot.docs.map((doc) =>
-          (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
+          ((doc.data() as Map<String, dynamic>)[BaseSession.IS_CERTIFIED] ??
+                  true)
               ? CertifiedSession.fromDoc(doc)
               : Session.fromDoc(doc)));
     }
@@ -865,7 +867,7 @@ class DatabaseService {
 
   static Stream<BaseSession> getSession(String sid) {
     return sessionsCollection.doc(sid).snapshots().map((doc) =>
-        (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
+        ((doc.data() as Map<String, dynamic>)[BaseSession.IS_CERTIFIED] ?? true)
             ? CertifiedSession.fromDoc(doc)
             : Session.fromDoc(doc));
   }
@@ -930,8 +932,9 @@ class DatabaseService {
 
   static Future<BaseSession> getSessionFuture(String sid) async {
     DocumentSnapshot doc = await sessionsCollection.doc(sid).get();
-    print(doc.data()[BaseSession.IS_CERTIFIED]);
-    return (doc.data()[BaseSession.IS_CERTIFIED] ?? true)
+    print((doc.data() as Map<String, dynamic>)[BaseSession.IS_CERTIFIED]);
+    return ((doc.data() as Map<String, dynamic>)[BaseSession.IS_CERTIFIED] ??
+            true)
         ? CertifiedSession.fromDoc(doc)
         : Session.fromDoc(doc);
   }
@@ -1032,7 +1035,7 @@ class DatabaseService {
         .map((doc) {
       if (!doc.exists) return false;
       if (doc.data().containsKey(DEVICE_TOKEN)) {
-        String token = doc.data()[DEVICE_TOKEN];
+        String token = (doc.data() as Map<String, dynamic>)[DEVICE_TOKEN];
 
         if (token == null || token.isEmpty) return false;
         return true;
@@ -1046,8 +1049,8 @@ class DatabaseService {
           await userCollection.doc(uid).collection(PRIVATEDATA).doc(DATA).get();
       if (!doc.exists) return false;
       if (doc.data() == null) return false;
-      if (doc.data().containsKey(DEVICE_TOKEN)) {
-        String token = doc.data()[DEVICE_TOKEN];
+      if ((doc.data() as Map<String, dynamic>).containsKey(DEVICE_TOKEN)) {
+        String token = (doc.data() as Map<String, dynamic>)[DEVICE_TOKEN];
         if (token == null || token.isEmpty) return false;
         return true;
       }
@@ -1059,7 +1062,8 @@ class DatabaseService {
   }
 
   static Future<String> getFeedbackUrl() async {
-    return (await statisticsCollection.doc(FEEDBACK).get()).data()[URL];
+    return ((await statisticsCollection.doc(FEEDBACK).get()).data()
+        as Map<String, dynamic>)[URL];
   }
 
   static Future<DailyReport> getDailyReportFuture([DateTime date]) async {

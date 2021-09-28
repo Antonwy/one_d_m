@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/components/user_button.dart';
 import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/helper/contact_manager.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -41,6 +42,22 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
     context
         .read<FirebaseAnalytics>()
         .setCurrentScreen(screenName: "Find Friends Page");
+
+    getContacts();
+  }
+
+  Future<void> getContacts() async {
+    try {
+      ContactManager cm = ContactManager();
+      if (!(await cm.hasPermission())) {
+        PermissionStatus status = await cm.getPermission();
+        print(status);
+        if (status != PermissionStatus.granted) return;
+      }
+      print(await cm.phoneNumberList());
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -272,50 +289,5 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
         ]),
       ),
     );
-  }
-
-  Future<void> _getContacts() async {
-    final PermissionStatus permissionStatus = await _getPermission();
-    if (permissionStatus != PermissionStatus.granted) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(
-              "Bitte erteile uns die Berechtigung deine Kontakte zu lesen.")));
-      return;
-    } else {
-      Iterable<Contact> contacts = await ContactsService.getContacts();
-
-      Set<String> numbers = HashSet();
-
-      for (Contact c in contacts) {
-        List<String> contactNumbers =
-            c.phones.map((item) => item.value).toList();
-        numbers.addAll(contactNumbers);
-        List<String> tempContactNumbers = List.of(contactNumbers);
-
-        for (String number in tempContactNumbers) {
-          if (number.startsWith("+49")) {
-            numbers.add(number.replaceFirst("+49", "0"));
-          } else if (number.startsWith("0")) {
-            numbers.add(number.replaceFirst("0", "+49"));
-          } else {
-            numbers.remove(number);
-          }
-        }
-      }
-
-      DatabaseService.callFindFriends(numbers.toList());
-    }
-  }
-
-  Future<PermissionStatus> _getPermission() async {
-    final PermissionStatus permission = await Permission.contacts.status;
-    if (permission != PermissionStatus.granted) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.contacts].request();
-      return permissionStatus[Permission.contacts] ??
-          PermissionStatus.undetermined;
-    } else {
-      return permission;
-    }
   }
 }

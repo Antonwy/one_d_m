@@ -74,7 +74,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void didUpdateWidget(VideoWidget oldWidget) {
-    if (_controller?.value?.initialized == true) {
+    if (_controller?.value?.isInitialized == true) {
       if (oldWidget.play != widget.play) {
         if (widget.play) {
           _controller.play();
@@ -163,10 +163,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         placeholder: (context, url) => widget.blurHash != null
             ? BlurHash(hash: widget.blurHash)
             : Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(
-                      ThemeManager.of(context).colors.dark),
-                ),
+                child: LoadingIndicator(),
               ),
       );
 
@@ -175,10 +172,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       width: 64,
       color: ColorTheme.appBg,
       child: Center(
-        child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation(ThemeManager.of(context).colors.dark),
-        ),
+        child: LoadingIndicator(),
       ),
     );
   }

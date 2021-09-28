@@ -29,11 +29,16 @@ class CampaignTitleAndSubscribe extends StatelessWidget {
                 children: [
                   SizedBox(
                       width: 220,
-                      child: AutoSizeText(
-                        cm.baseCampaign?.name ?? "Laden...",
-                        maxLines: 1,
-                        style: _theme.textTheme.dark.headline5
-                            .copyWith(fontWeight: FontWeight.w700),
+                      height: 30,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          cm.baseCampaign?.name ?? "Laden...",
+                          maxLines: 1,
+                          style: _theme.textTheme.dark.bodyText1
+                              .copyWith(fontWeight: FontWeight.w700),
+                        ),
                       )),
                   InkWell(
                     onTap: cm.loadingCampaign
@@ -46,6 +51,7 @@ class CampaignTitleAndSubscribe extends StatelessWidget {
                                         cm.campaign.organization)));
                           },
                     child: RichText(
+                      maxLines: 1,
                       text: TextSpan(
                         children: [
                           TextSpan(text: 'by '),
@@ -67,22 +73,19 @@ class CampaignTitleAndSubscribe extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              flex: 3,
-              child: Consumer<UserManager>(builder: (context, um, child) {
-                return um.uid == cm.baseCampaign?.adminId &&
-                        cm.baseCampaign?.adminId != null &&
-                        (cm.baseCampaign?.adminId?.isNotEmpty ?? false)
-                    ? _createPostButton(_theme, cm.baseCampaign)
-                    : Builder(builder: (context) {
-                        return JoinButton(
-                            joinOrLeave: cm.loadingCampaign
-                                ? null
-                                : (val) => cm.leaveOrJoinCampaign(val, context),
-                            subscribed: cm.subscribed);
-                      });
-              }),
-            ),
+            Consumer<UserManager>(builder: (context, um, child) {
+              return um.uid == cm.baseCampaign?.adminId &&
+                      cm.baseCampaign?.adminId != null &&
+                      (cm.baseCampaign?.adminId?.isNotEmpty ?? false)
+                  ? _createPostButton(_theme, cm.baseCampaign)
+                  : Builder(builder: (context) {
+                      return JoinButton(
+                          joinOrLeave: cm.loadingCampaign
+                              ? null
+                              : (val) => cm.leaveOrJoinCampaign(val, context),
+                          subscribed: cm.subscribed);
+                    });
+            }),
           ],
         ),
       ),

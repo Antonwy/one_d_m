@@ -76,21 +76,22 @@ class News {
   }
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
+    Map<String, dynamic> data = snapshot.data();
     return News(
         id: snapshot.id,
-        campaignId: snapshot.data()[CAMPAIGNID],
-        title: snapshot.data()[TITLE],
-        text: snapshot.data()[TEXT],
-        shortText: snapshot.data()[SHORTTEXT],
-        campaignName: snapshot.data()[CAMPAIGNNAME],
-        campaignImgUrl: snapshot.data()[CAMPAIGNIMGURL],
-        sessionId: snapshot.data()[SESSION_ID],
-        imageUrl: snapshot.data()[IMAGEURL],
-        videoUrl: snapshot.data()[VIDEO_URL],
-        userId: snapshot.data()[USERID],
-        createdAt: (snapshot.data()[CREATEDAT] as Timestamp).toDate(),
-        blurHash: snapshot.data()[BLUR_HASH],
-        showInMainfeed: snapshot.data()[SHOW_IN_MAINFEED]);
+        campaignId: data[CAMPAIGNID],
+        title: data[TITLE],
+        text: data[TEXT],
+        shortText: data[SHORTTEXT],
+        campaignName: data[CAMPAIGNNAME],
+        campaignImgUrl: data[CAMPAIGNIMGURL],
+        sessionId: data[SESSION_ID],
+        imageUrl: data[IMAGEURL],
+        videoUrl: data[VIDEO_URL],
+        userId: data[USERID],
+        createdAt: (data[CREATEDAT] as Timestamp).toDate(),
+        blurHash: data[BLUR_HASH],
+        showInMainfeed: data[SHOW_IN_MAINFEED]);
   }
 
   News.fromJson(Map<String, dynamic> map)

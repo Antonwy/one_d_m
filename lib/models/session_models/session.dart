@@ -31,7 +31,7 @@ class Session extends BaseSession {
         campaignThumbnailUrl = "",
         donations = [],
         videoUrl = null,
-        super.fromDoc(doc);
+        super.fromJson(doc.data());
 
   Session.fromJson(Map<String, dynamic> map)
       : members = SessionMember.listFromJson(Helper.castJson(map[MEMBERS])),

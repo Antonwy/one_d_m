@@ -10,13 +10,14 @@ class AdBalance {
   AdBalance({this.activityScore, this.dcBalance, this.gift, this.giftMessage});
 
   factory AdBalance.fromSnapshot(DocumentSnapshot snapshot) {
-    if (snapshot.data == null || !snapshot.exists) return AdBalance.zero();
+    if (snapshot.data() == null || !snapshot.exists) return AdBalance.zero();
+    Map<String, dynamic> data = snapshot.data();
+
     return AdBalance(
-      activityScore:
-          (snapshot.data()[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
-      dcBalance: (snapshot.data()[DC_BALANCE] as num)?.toInt(),
-      gift: snapshot.data()[GIFT] ?? 0,
-      giftMessage: snapshot.data()[GIFT_MESSAGE] ?? DEFAULT_MESSAGE,
+      activityScore: (data[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
+      dcBalance: (data[DC_BALANCE] as num)?.toInt(),
+      gift: data[GIFT] ?? 0,
+      giftMessage: data[GIFT_MESSAGE] ?? DEFAULT_MESSAGE,
     );
   }
 

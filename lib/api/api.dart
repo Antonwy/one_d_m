@@ -17,10 +17,10 @@ import 'package:one_d_m/models/user.dart';
 
 class Api {
   static final Api _api = Api._internal();
-  static String userToken;
-  static Box box;
-  static final String url =
-      "http://localhost:3000" ?? "https://one-dollar-movement.appspot.com";
+  static String? userToken;
+  static Box? box;
+  static final Uri url = Uri.parse(
+      "https://one-dollar-movement.appspot.com" ?? "http://localhost:3000");
 
   factory Api() => _api;
 
@@ -28,7 +28,7 @@ class Api {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
     userToken = await currentUser?.getIdToken();
     if (currentUser != null) box = await Hive.openBox(boxName(currentUser.uid));
-    authHeaders = {'authtoken': userToken};
+    authHeaders = userToken != null ? {'authtoken': userToken!} : {};
   }
 
   Future<void> reInit() async {
@@ -40,13 +40,13 @@ class Api {
         !(await Hive.boxExists(boxName(currentUser.uid))))
       box = await Hive.openBox(boxName(currentUser.uid));
 
-    authHeaders = userToken != null ? {'authtoken': userToken} : {};
+    authHeaders = userToken != null ? {'authtoken': userToken!} : {};
   }
 
   Future<void> disconnect() async {
     userToken = null;
     authHeaders = {};
-    await box.clear();
+    await box?.clear();
   }
 
   String boxName(String uid) => 'api_cache_$uid';
@@ -63,10 +63,11 @@ class Api {
 
   static void updateUserToken(String token) {
     userToken = token;
-    authHeaders = userToken != null ? {'authtoken': userToken} : {};
+    authHeaders = userToken != null ? {'authtoken': userToken!} : {};
   }
 
-  static Map<String, String> authHeaders = {'authtoken': userToken};
+  static Map<String, String> authHeaders =
+      userToken != null ? {'authtoken': userToken!} : {};
   static Map<String, String> bodyHeaders = {
     'Content-Type': 'application/json; charset=UTF-8'
   };

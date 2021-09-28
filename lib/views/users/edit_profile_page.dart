@@ -219,10 +219,12 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   _getImage() async {
-    File file = await ImagePicker.pickImage(source: ImageSource.gallery);
+    ImagePicker _picker = ImagePicker();
+    XFile file = await _picker.pickImage(source: ImageSource.gallery);
+
     setState(() {
       _deletedImage = false;
-      _image = file;
+      _image = file != null ? File(file.path) : null;
     });
   }
 

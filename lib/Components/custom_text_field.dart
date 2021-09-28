@@ -58,8 +58,11 @@ class CustomTextField extends StatelessWidget {
                   color: activeColor.withOpacity(.5),
                 ),
           border: OutlineInputBorder(),
+          focusColor: Colors.red,
           enabledBorder:
               OutlineInputBorder(borderSide: BorderSide(color: activeColor)),
+          focusedBorder:
+              OutlineInputBorder(borderSide: BorderSide(color: focusedColor)),
           hintText: hint,
           labelStyle: TextStyle(color: activeColor),
           labelText: label,

@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/user_button.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
@@ -300,17 +301,11 @@ class RoundedAvatar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Center(
-          child: Container(
-            width: 30,
-            height: 30,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation(backgroundLight
-                  ? _theme.colors.contrast
-                  : _theme.colors.dark),
-            ),
-          ),
-        ),
+            child: LoadingIndicator(
+          color: backgroundLight ? _theme.colors.contrast : _theme.colors.dark,
+          size: 16,
+          strokeWidth: 2.2,
+        )),
       ),
     );
 

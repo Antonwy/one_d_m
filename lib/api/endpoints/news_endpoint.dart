@@ -6,4 +6,10 @@ class NewsEndpoint extends ApiEndpoint<News> {
       : super(route,
             formatter: (v) => News.fromJson(v),
             listFormatter: (l) => News.listFromJson(l));
+
+  @override
+  NewsEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return NewsEndpoint(finalRoute);
+  }
 }

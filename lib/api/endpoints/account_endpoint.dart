@@ -61,4 +61,10 @@ class AccountEndpoint extends ApiEndpoint<User> {
   Future<void> updateMap(Map<String, dynamic> map) {
     return ApiCall(this).put(map);
   }
+
+  @override
+  AccountEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return AccountEndpoint(finalRoute);
+  }
 }

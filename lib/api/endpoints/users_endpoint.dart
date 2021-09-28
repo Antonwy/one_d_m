@@ -17,4 +17,10 @@ class UsersEndpoint extends ApiEndpoint<User> with SubscribableEndpoint {
 
     return res['available'] ?? false;
   }
+
+  @override
+  UsersEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return UsersEndpoint(finalRoute);
+  }
 }

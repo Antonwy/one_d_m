@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -143,7 +142,11 @@ class UserButton extends StatelessWidget {
                                 .copyWith(color: textStyle.color))
                       ],
                     ),
-                    withAddButton ? UserFollowButton() : Container()
+                    withAddButton
+                        ? UserFollowButton(
+                            followerId: id,
+                          )
+                        : Container()
                   ],
                 ),
               ),

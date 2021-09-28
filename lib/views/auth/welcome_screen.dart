@@ -146,8 +146,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (permission != PermissionStatus.granted) {
       final Map<Permission, PermissionStatus> permissionStatus =
           await [Permission.contacts].request();
-      return permissionStatus[Permission.contacts] ??
-          PermissionStatus.undetermined;
+      return permissionStatus[Permission.contacts] ?? PermissionStatus.denied;
     } else {
       return permission;
     }
@@ -160,7 +159,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           await [Permission.notification].request();
 
       return permissionStatus[Permission.notification] ??
-          PermissionStatus.undetermined;
+          PermissionStatus.denied;
     } else {
       return permission;
     }

@@ -6,4 +6,10 @@ class OrganizationsEndpoint extends ApiEndpoint<Organization> {
       : super(route,
             formatter: (v) => Organization.fromJson(v),
             listFormatter: (l) => Organization.listFromJson(l));
+
+  @override
+  OrganizationsEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return OrganizationsEndpoint(finalRoute);
+  }
 }

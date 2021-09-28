@@ -12,6 +12,12 @@ class DonationsEndpoint extends ApiEndpoint<Donation>
   Future<Donation> create(Donation donation) {
     return ApiCall<Donation>(this).post(donation.toMap());
   }
+
+  @override
+  DonationsEndpoint addRoute(String routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd;
+    return DonationsEndpoint(finalRoute);
+  }
 }
 
 class QueriedDonationEndpoint = QueryableEndpoint<Donation>
@@ -20,21 +26,21 @@ class QueriedDonationEndpoint = QueryableEndpoint<Donation>
 mixin DonationEndpointQueries on ApiEndpoint<Donation> {
   QueriedDonationEndpoint user(String uid) {
     return QueriedDonationEndpoint(route,
-        query: {...query, 'user_id': uid},
+        query: {...(query ?? {}), 'user_id': uid},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
   QueriedDonationEndpoint campaign(String cid) {
     return QueriedDonationEndpoint(route,
-        query: {...query, 'campaign_id': cid},
+        query: {...(query ?? {}), 'campaign_id': cid},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
   QueriedDonationEndpoint session(String sid) {
     return QueriedDonationEndpoint(route,
-        query: {...query, 'session_id': sid},
+        query: {...(query ?? {}), 'session_id': sid},
         formatter: formatter,
         listFormatter: listFormatter);
   }

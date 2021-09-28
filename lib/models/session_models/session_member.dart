@@ -13,8 +13,11 @@ class SessionMember {
       this.blurHash,
       this.donatedAmount});
 
-  factory SessionMember.fromDoc(DocumentSnapshot doc) => SessionMember(
-      id: doc.data()[ID], donatedAmount: doc.data()[DONATED_AMOUNT] ?? 0);
+  factory SessionMember.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data();
+    return SessionMember(
+        id: data[ID], donatedAmount: data[DONATED_AMOUNT] ?? 0);
+  }
 
   static List<SessionMember> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) => SessionMember.fromDoc(doc)).toList();

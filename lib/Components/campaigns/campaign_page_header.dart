@@ -21,12 +21,21 @@ class CampaignPageHeader extends StatefulWidget {
 }
 
 class _CampaignPageHeaderState extends State<CampaignPageHeader> {
+  ValueNotifier _show = ValueNotifier<bool>(false);
+
   Future<void> _shareCampaign(CampaignManager cm) async {
     if ((cm.baseCampaign?.name?.isEmpty ?? true) ||
         (cm.baseCampaign?.imgUrl?.isEmpty ?? true)) return;
     SocialShare.shareOptions((await DynamicLinkManager.of(context)
             .createCampaignLink(cm.baseCampaign))
         .toString());
+  }
+
+  @override
+  void initState() {
+    Future.delayed(Duration(milliseconds: 500))
+        .then((value) => _show.value = true);
+    super.initState();
   }
 
   @override
@@ -37,10 +46,13 @@ class _CampaignPageHeaderState extends State<CampaignPageHeader> {
         children: [
           Container(
             height: MediaQuery.of(context).size.width,
-            child: VideoOrImage(
-              imageUrl: cm.baseCampaign?.imgUrl,
-              videoUrl: cm.baseCampaign?.longVideoUrl,
-              blurHash: cm.baseCampaign?.blurHash,
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+              child: VideoOrImage(
+                imageUrl: cm.baseCampaign?.imgUrl,
+                videoUrl: cm.baseCampaign?.longVideoUrl,
+                blurHash: cm.baseCampaign?.blurHash,
+              ),
             ),
           ),
           Positioned(
@@ -97,7 +109,7 @@ class _CampaignPageHeaderState extends State<CampaignPageHeader> {
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
     );

@@ -20,8 +20,8 @@ class FeedDoc {
 
   FeedDoc(this.unseenObjects);
 
-  factory FeedDoc.fromDoc(DocumentSnapshot doc) =>
-      FeedDoc(List.from(doc.data()[UNSEEN_OBJECTS] ?? []));
+  factory FeedDoc.fromDoc(DocumentSnapshot doc) => FeedDoc(
+      List.from((doc.data() as Map<String, dynamic>)[UNSEEN_OBJECTS] ?? []));
 
   factory FeedDoc.zero() => FeedDoc([]);
 
@@ -39,7 +39,8 @@ abstract class FeedObject {
   Widget buildWidget(BuildContext context, {bool highlighted = false});
 
   factory FeedObject.fromDoc(DocumentSnapshot doc) {
-    final feedType = doc.data()[FEED_TYPE];
+    Map<String, dynamic> data = doc.data();
+    final feedType = data[FEED_TYPE];
 
     if (feedType == FOLLOW)
       return FollowNotification.fromDoc(doc);
@@ -49,7 +50,8 @@ abstract class FeedObject {
   }
 
   static DateTime dateFromDoc(DocumentSnapshot doc) =>
-      (doc.data()[FeedObject.CREATED_AT] as Timestamp).toDate();
+      ((doc.data() as Map<String, dynamic>)[FeedObject.CREATED_AT] as Timestamp)
+          .toDate();
 
   static List<FeedObject> fromQuerySnapshot(QuerySnapshot qs) =>
       qs.docs.map((doc) => FeedObject.fromDoc(doc)).toList();
@@ -123,7 +125,8 @@ abstract class Survey<T extends SurveyResult> extends FeedObject {
       : super(createdAt: createdAt, id: id);
 
   static Survey fromDoc(DocumentSnapshot doc) {
-    final surveyType = doc.data()[SURVEY_TYPE];
+    Map<String, dynamic> data = doc.data();
+    final surveyType = data[SURVEY_TYPE];
     print("SURVEY_TYPE == $surveyType");
     if (surveyType == MULTIPLE_CHOICE) return CheckBoxSurvey.fromDoc(doc);
     if (surveyType == SINGLE_CHOICE)
@@ -178,15 +181,17 @@ class SingleAnswerSurvey<T> extends Survey<SingleAnswerSurveyResult<T>> {
 
   factory SingleAnswerSurvey.fromDoc(DocumentSnapshot doc) {
     print("SINGLE ANSWER FROM DOC");
+
+    Map<String, dynamic> data = doc.data();
     return SingleAnswerSurvey(
       createdAt: FeedObject.dateFromDoc(doc),
       id: doc.id,
-      question: doc.data()[Survey.QUESTION],
-      rollout: doc.data()[Survey.ROLLOUT] ?? false,
-      onlyAdmin: doc.data()[Survey.ONLY_ADMINS] ?? false,
-      resultCount: doc.data()[Survey.RESULT_COUNT] ?? 0,
+      question: data[Survey.QUESTION],
+      rollout: data[Survey.ROLLOUT] ?? false,
+      onlyAdmin: data[Survey.ONLY_ADMINS] ?? false,
+      resultCount: data[Survey.RESULT_COUNT] ?? 0,
       evaluation: Map.from(
-        doc.data()[CheckBoxSurvey.EVALUATION] ?? {},
+        data[CheckBoxSurvey.EVALUATION] ?? {},
       ),
     );
   }
@@ -240,16 +245,17 @@ class CheckBoxSurvey extends Survey<CheckBoxSurveyResult> {
 
   factory CheckBoxSurvey.fromDoc(DocumentSnapshot doc,
       {bool isSingleChoice = false}) {
+    Map<String, dynamic> data = doc.data();
     return CheckBoxSurvey(
         createdAt: FeedObject.dateFromDoc(doc),
         id: doc.id,
-        question: doc.data()[Survey.QUESTION],
-        answers: List.from(doc.data()[ANSWERS] ?? []),
-        rollout: doc.data()[Survey.ROLLOUT] ?? false,
-        onlyAdmin: doc.data()[Survey.ONLY_ADMINS] ?? false,
-        resultCount: doc.data()[Survey.RESULT_COUNT] ?? 0,
+        question: data[Survey.QUESTION],
+        answers: List.from(data[ANSWERS] ?? []),
+        rollout: data[Survey.ROLLOUT] ?? false,
+        onlyAdmin: data[Survey.ONLY_ADMINS] ?? false,
+        resultCount: data[Survey.RESULT_COUNT] ?? 0,
         evaluation: Map.from(
-          doc.data()[EVALUATION] ?? {},
+          data[EVALUATION] ?? {},
         ),
         isSingleChoice: isSingleChoice);
   }

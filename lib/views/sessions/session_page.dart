@@ -24,8 +24,9 @@ import 'create_session_page.dart';
 
 class SessionPage extends StatefulWidget {
   final BaseSession session;
+  final ScrollController scrollController;
 
-  SessionPage(this.session);
+  SessionPage(this.session, {this.scrollController});
 
   @override
   _SessionPageState createState() => _SessionPageState();
@@ -48,17 +49,22 @@ class _SessionPageState extends State<SessionPage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<BaseSessionManager>(
         create: (context) => manager,
-        builder: (context, child) => Scaffold(
-              floatingActionButton: FloatingDonationButton(),
-              body: CustomScrollView(slivers: [
-                manager.buildHeading(),
-                manager.buildTitle(),
-                manager.buildGoal(),
-                manager.buildDescription(),
-                manager.buildMembers(),
-                ...manager.buildMore(),
-                SliverToBoxAdapter(child: YMargin(100))
-              ]),
+        builder: (context, child) => Hero(
+              tag: "${widget.session.id}-container",
+              child: Scaffold(
+                floatingActionButton: FloatingDonationButton(),
+                body: CustomScrollView(
+                    controller: widget?.scrollController,
+                    slivers: [
+                      manager.buildHeading(),
+                      manager.buildTitle(),
+                      manager.buildGoal(),
+                      manager.buildDescription(),
+                      manager.buildMembers(),
+                      ...manager.buildMore(),
+                      SliverToBoxAdapter(child: YMargin(100))
+                    ]),
+              ),
             ));
   }
 }
@@ -84,6 +90,7 @@ class FloatingDonationButton extends StatelessWidget {
                 Color textColor = _theme.correctColorFor(
                     sm.baseSession.secondaryColor ?? _theme.colors.dark);
                 return FloatingActionButton.extended(
+                    heroTag: null,
                     onPressed: _active
                         ? () async {
                             DonationDialog.show(

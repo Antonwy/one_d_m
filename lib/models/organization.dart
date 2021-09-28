@@ -18,13 +18,14 @@ class Organization {
       this.website});
 
   factory Organization.fromMap(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data();
     return Organization(
-        name: doc.data()[NAME],
-        imgUrl: doc.data()[IMAGEURL],
-        thumbnailUrl: doc.data()[THUMBNAIL_URL],
+        name: data[NAME],
+        imgUrl: data[IMAGEURL],
+        thumbnailUrl: data[THUMBNAIL_URL],
         id: doc.id,
-        description: doc.data()[DESCRIPTION] ?? "",
-        website: doc.data()[WEBSITE]);
+        description: data[DESCRIPTION] ?? "",
+        website: data[WEBSITE]);
   }
 
   factory Organization.fromJson(Map<String, dynamic> map) {

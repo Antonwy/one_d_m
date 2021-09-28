@@ -33,26 +33,8 @@ class BaseSession {
       this.isCertified = true,
       this.reachedGoal = false});
 
-  BaseSession.fromDoc(DocumentSnapshot doc)
-      : creatorId = doc.data()[CREATOR_ID],
-        id = doc.id,
-        name = doc.data()[SESSION_NAME],
-        createdAt = (doc.data()[CREATED_AT] as Timestamp).toDate(),
-        campaignId = doc.data()[CAMPAIGN_ID],
-        amount = doc.data()[AMOUNT] ?? 0,
-        description = doc.data()[SESSION_DESCRIPTION] ?? "",
-        imgUrl = doc.data()[IMG_URL],
-        donationGoal = doc.data()[DONATION_GOAL] ?? 0,
-        donationUnit = DonationUnit(),
-        primaryColor = doc.data()[PRIMARY_COLOR] != null
-            ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
-            : ColorTheme.wildGreen,
-        secondaryColor = doc.data()[SECONDARY_COLOR] != null
-            ? Helper.hexToColor(doc.data()[SECONDARY_COLOR])
-            : ColorTheme.darkblue,
-        blurHash = doc.data()[BLUR_HASH],
-        isCertified = doc.data()[IS_CERTIFIED] ?? true,
-        reachedGoal = doc.data()[REACHED_GOAL] ?? false;
+  static BaseSession fromDoc(DocumentSnapshot doc) =>
+      BaseSession.fromJson(doc.data());
 
   BaseSession.fromJson(Map<String, dynamic> map)
       : id = map['id'],
@@ -99,7 +81,7 @@ class BaseSession {
 
   static List<BaseSession> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) {
-      return (doc.data()[IS_CERTIFIED] ?? true)
+      return ((doc.data() as Map<String, dynamic>)[IS_CERTIFIED] ?? true)
           ? CertifiedSession.fromDoc(doc)
           : Session.fromDoc(doc);
     }).toList();

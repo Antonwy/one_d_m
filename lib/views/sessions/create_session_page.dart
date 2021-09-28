@@ -390,12 +390,13 @@ class __DonationTargetState extends State<_DonationTarget> {
                     return Material(
                       color: csm.secondaryColor,
                       borderRadius: BorderRadius.circular(12),
-                      child: NumberPicker.horizontal(
-                        initialValue: _targetAmount,
+                      child: NumberPicker(
+                        axis: Axis.horizontal,
+                        value: _targetAmount,
                         minValue: 10,
                         maxValue: 10000,
                         step: step,
-                        listViewHeight: 80,
+                        itemHeight: 80,
                         haptics: true,
                         textStyle: TextStyle(
                             color: _theme

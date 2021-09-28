@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:feature_discovery/feature_discovery.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,6 +21,7 @@ import 'components/page_manager_widget.dart';
 import 'helper/ad_manager.dart';
 import 'helper/native_ads.dart';
 import 'provider/remote_config_manager.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,15 +29,14 @@ void main() async {
   await Hive.initFlutter();
   await Api().init();
 
+  MobileAds.instance.initialize();
+
   timeago.setLocaleMessages('de', timeago.DeMessages());
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => UserManager.instance()),
     ChangeNotifierProvider(create: (context) => ThemeManager(context)),
     ChangeNotifierProvider(create: (context) => StatisticsManager()),
-    Provider(
-      create: (context) => PushNotificationService(context),
-    ),
     Provider(
       create: (context) => RemoteConfigManager(),
     ),
@@ -62,7 +61,6 @@ class _ODMAppState extends State<ODMApp> {
           ThemeHolder.themes[value];
     });
     Platform.isAndroid ? NativeAds.initialize() : null;
-    FirebaseAdMob.instance.initialize(appId: AdManager.appId);
     super.initState();
   }
 

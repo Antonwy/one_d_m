@@ -46,18 +46,18 @@ class User {
       this.blurHash});
 
   static User fromSnapshot(DocumentSnapshot snapshot) {
-    if (snapshot.data == null) return User();
+    if (snapshot.data() == null) return User();
+    Map<String, dynamic> data = snapshot.data();
     return User(
         id: snapshot.id,
-        name: snapshot.data()[User.NAME] ?? "No name",
-        admin: snapshot.data()[User.ADMIN],
-        ghost: snapshot.data()[User.GHOST] ?? false,
-        donatedAmount: snapshot.data()[DONATED_AMOUNT],
-        imgUrl: snapshot.data()[IMAGE_URL],
-        thumbnailUrl: snapshot.data().containsKey(THUMBNAIL_URL)
-            ? snapshot[THUMBNAIL_URL]
-            : null,
-        blurHash: snapshot.data()[BLUR_HASH]);
+        name: data[User.NAME] ?? "No name",
+        admin: data[User.ADMIN],
+        ghost: data[User.GHOST] ?? false,
+        donatedAmount: data[DONATED_AMOUNT],
+        imgUrl: data[IMAGE_URL],
+        thumbnailUrl:
+            data.containsKey(THUMBNAIL_URL) ? snapshot[THUMBNAIL_URL] : null,
+        blurHash: data[BLUR_HASH]);
   }
 
   User.fromJson(Map<String, dynamic> map)

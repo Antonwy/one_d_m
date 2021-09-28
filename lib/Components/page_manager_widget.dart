@@ -23,7 +23,6 @@ class PageManagerWidget extends StatefulWidget {
 class _PageManagerWidgetState extends State<PageManagerWidget> {
   bool _shouldLoad = true;
   UserManager _um;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   StreamSubscription _fmStream;
   HomePage _homePage;
   Future<void> _initAppFuture;
@@ -50,21 +49,14 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     RemoteConfigManager _rcm = context.read<RemoteConfigManager>();
     await _rcm.initialize();
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-        PushNotification.of(context)
-            .show(NotificationContent.fromMessage(message));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-        // TODO optional
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-        // TODO optional
-      },
-    );
+    FirebaseMessaging.onMessage.listen((message) {
+      RemoteNotification notification = message.notification;
+
+      PushNotification.of(context).show(NotificationContent(
+        title: notification.title,
+        body: notification.body,
+      ));
+    });
 
     print("FB-Token: \n${Api.userToken}\n");
   }

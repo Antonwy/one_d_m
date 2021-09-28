@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:number_slide_animation/number_slide_animation_widget.dart';
+import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:one_d_m/components/chart/circle_painter.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';

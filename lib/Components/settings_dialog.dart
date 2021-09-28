@@ -311,7 +311,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         final Map<Permission, PermissionStatus> permissionStatus =
             await [Permission.notification].request();
         PermissionStatus status = permissionStatus[Permission.notification] ??
-            PermissionStatus.undetermined;
+            PermissionStatus.denied;
 
         if (status == PermissionStatus.granted) await _saveToken();
       } else
@@ -322,8 +322,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   Future<void> _saveToken() async {
-    final FirebaseMessaging _fMessaging = FirebaseMessaging();
-    String token = await _fMessaging.getToken();
+    String token = await FirebaseMessaging.instance.getToken();
     await DatabaseService.saveDeviceToken(um.uid, token);
   }
 }

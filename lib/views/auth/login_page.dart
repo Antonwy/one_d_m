@@ -205,8 +205,8 @@ class _LoginPageState extends State<LoginPage> {
       _loading = true;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         try {
-          ContactManager.uploadPhoneNumbers(
-              await ContactManager.phoneNumberList());
+          ContactManager cm = ContactManager();
+          cm.uploadPhoneNumbers(await cm.phoneNumberList());
         } on PermissionException catch (e) {
           print(e);
         }

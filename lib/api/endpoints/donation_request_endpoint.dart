@@ -7,8 +7,8 @@ class DonationRequestEndpoint extends ApiEndpoint<DonationRequest>
       : super(route, formatter: (map) => DonationRequest.fromJson(map));
 
   @override
-  DonationRequestEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  DonationRequestEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return DonationRequestEndpoint(finalRoute);
   }
 }
@@ -17,14 +17,14 @@ class QueriedDonationRequestEndpoint = QueryableEndpoint<DonationRequest>
     with DonationRequestEndpointQueries;
 
 mixin DonationRequestEndpointQueries on ApiEndpoint<DonationRequest> {
-  QueriedDonationRequestEndpoint campaign(String cid) {
+  QueriedDonationRequestEndpoint campaign(String? cid) {
     return QueriedDonationRequestEndpoint(route,
         query: {...(query ?? {}), 'campaign_id': cid},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
-  QueriedDonationRequestEndpoint session(String sid) {
+  QueriedDonationRequestEndpoint session(String? sid) {
     return QueriedDonationRequestEndpoint(route,
         query: {...(query ?? {}), 'session_id': sid},
         formatter: formatter,

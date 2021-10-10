@@ -16,7 +16,7 @@ class News {
       SHOW_IN_MAINFEED = "show_in_mainfeed",
       VIDEO_URL = "video_url";
 
-  final String campaignId,
+  final String? campaignId,
       campaignName,
       campaignImgUrl,
       campaignBlurHash,
@@ -33,8 +33,8 @@ class News {
       videoUrl,
       id,
       blurHash;
-  DateTime createdAt;
-  bool showInMainfeed;
+  DateTime? createdAt;
+  bool? showInMainfeed;
 
   News(
       {this.campaignBlurHash,
@@ -76,7 +76,7 @@ class News {
   }
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
-    Map<String, dynamic> data = snapshot.data();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return News(
         id: snapshot.id,
         campaignId: data[CAMPAIGNID],

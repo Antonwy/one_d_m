@@ -10,7 +10,12 @@ import {
   ImageResolutions,
   ImageSuffix,
 } from './database-constants';
-import { addDv } from './api';
+import {
+  addDv,
+  getToken,
+  updateAccount,
+  deleteUser as deleteUserApi,
+} from './api';
 
 const stripe = new Stripe(functions.config().stripe.token, {
   apiVersion: '2020-03-02',
@@ -56,6 +61,11 @@ exports.onCreateUser = functions.firestore
     await firestore.collection(DatabaseConstants.feed).doc(user.uid).set({
       unseen_objects: [],
     });
+
+    await updateAccount(
+      { stripe_customer_id: customer.id },
+      await getToken(userId)
+    );
 
     return firestore
       .collection(DatabaseConstants.statistics)
@@ -145,6 +155,25 @@ export async function deleteUser(uid: string) {
       );
 
     return;
+  }
+
+  const bucket = admin.storage().bucket();
+  await bucket
+    .deleteFiles({
+      prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${uid}/`,
+    })
+    .then(() => {
+      functions.logger.info('File deleted successfully');
+    })
+    .catch((e) => {
+      functions.logger.info(e);
+    });
+
+  try {
+    console.log('Starting to delete user!');
+    await deleteUserApi(uid);
+  } catch (error) {
+    console.log(error);
   }
 
   // deletion of subscribed_campaigns and subcollections including documents
@@ -300,18 +329,6 @@ export async function deleteUser(uid: string) {
     });
 
   await userRef.delete();
-
-  const bucket = admin.storage().bucket();
-  await bucket
-    .deleteFiles({
-      prefix: `${DatabaseConstants.users}/${ImagePrefix.user}_${uid}/`,
-    })
-    .then(() => {
-      functions.logger.info('File deleted successfully');
-    })
-    .catch((e) => {
-      functions.logger.info(e);
-    });
 
   return 'OK';
 }

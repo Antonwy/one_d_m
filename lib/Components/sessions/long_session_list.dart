@@ -2,20 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/provider/long_session_list_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:provider/provider.dart';
 
 class LongSessionList extends StatefulWidget {
-  final List<BaseSession> sessions;
+  final List<BaseSession?> sessions;
 
   const LongSessionList(this.sessions);
 
@@ -24,7 +21,7 @@ class LongSessionList extends StatefulWidget {
 }
 
 class _LongSessionListState extends State<LongSessionList> {
-  Future<List<BaseSession>> _sessionFuture;
+  Future<List<BaseSession?>>? _sessionFuture;
   TextEditingController _controller = TextEditingController();
 
   @override
@@ -35,9 +32,10 @@ class _LongSessionListState extends State<LongSessionList> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: _theme.colors.contrast,
+      backgroundColor: _theme.primaryColorLight,
+      resizeToAvoidBottomInset: false,
       body: ChangeNotifierProvider<LongSessionListManager>(
           create: (context) => LongSessionListManager(
               sessions: widget.sessions,
@@ -51,7 +49,6 @@ class _LongSessionListState extends State<LongSessionList> {
                   pinned: true,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  iconTheme: IconThemeData(color: _theme.colors.textOnContrast),
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
                   title: Column(
@@ -62,7 +59,7 @@ class _LongSessionListState extends State<LongSessionList> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: Material(
-                            color: ColorTheme.appBg,
+                            color: _theme.cardColor,
                             elevation: 1,
                             borderRadius:
                                 BorderRadius.circular(Constants.radius),
@@ -79,11 +76,10 @@ class _LongSessionListState extends State<LongSessionList> {
                                 Expanded(
                                     child: TextField(
                                   controller: _controller,
-                                  cursorColor: _theme.colors.dark,
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Suchen"),
-                                  style: _theme.textTheme.dark.bodyText1
+                                  style: _theme.textTheme.bodyText1!
                                       .copyWith(fontSize: 18),
                                 )),
                                 Padding(
@@ -97,14 +93,9 @@ class _LongSessionListState extends State<LongSessionList> {
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
-                                              child: AspectRatio(
-                                                  aspectRatio: 1,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation(
-                                                            _theme.colors.dark),
-                                                  )),
+                                              child: Center(
+                                                  child: LoadingIndicator(
+                                                      size: 18)),
                                             ),
                                           ),
                                           onPressed: null,
@@ -129,7 +120,7 @@ class _LongSessionListState extends State<LongSessionList> {
                       YMargin(6),
                       Consumer<LongSessionListManager>(
                           builder: (context, lsm, child) => Container(
-                                height: 28,
+                                height: 35,
                                 child: ListView.separated(
                                   separatorBuilder: (context, index) =>
                                       XMargin(6),
@@ -141,12 +132,13 @@ class _LongSessionListState extends State<LongSessionList> {
                                           left: index == 0 ? 12.0 : 0,
                                           right: index == lsm.tags.length - 1
                                               ? 12
-                                              : 0),
+                                              : 0,
+                                          bottom: 3),
                                       child: Material(
                                         borderRadius: BorderRadius.circular(24),
                                         color: tag.filtered
-                                            ? _theme.colors.dark
-                                            : ColorTheme.appBg,
+                                            ? _theme.colorScheme.secondary
+                                            : _theme.cardColor,
                                         elevation: 1,
                                         clipBehavior: Clip.antiAlias,
                                         child: InkWell(
@@ -165,20 +157,23 @@ class _LongSessionListState extends State<LongSessionList> {
                                                     color: tag.filtered
                                                         ? tag.iconColor != null
                                                             ? tag.iconColor
-                                                            : _theme.colors
-                                                                .textOnDark
-                                                        : _theme.colors.dark,
+                                                            : _theme.colorScheme
+                                                                .onSecondary
+                                                        : _theme.colorScheme
+                                                            .secondary,
                                                   ),
                                                 if (tag.icon != null)
                                                   XMargin(4),
                                                 Text(
-                                                  tag.tag,
-                                                  style: (tag.filtered
-                                                          ? _theme.textTheme
-                                                              .textOnDark
-                                                          : _theme
-                                                              .textTheme.dark)
-                                                      .bodyText1,
+                                                  tag.tag!,
+                                                  style: _theme
+                                                      .textTheme.bodyText1!
+                                                      .copyWith(
+                                                          color: tag.filtered
+                                                              ? _theme
+                                                                  .colorScheme
+                                                                  .onSecondary
+                                                              : null),
                                                 ),
                                               ],
                                             ),
@@ -192,17 +187,17 @@ class _LongSessionListState extends State<LongSessionList> {
                               ))
                     ],
                   ),
-                  toolbarHeight: 100,
+                  toolbarHeight: 110,
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
                   sliver: Consumer<LongSessionListManager>(
                       builder: (context, lsm, child) {
-                    return FutureBuilder<List<BaseSession>>(
+                    return FutureBuilder<List<BaseSession?>>(
                         initialData: widget.sessions,
                         future: lsm.sessionsFuture,
                         builder: (context, snapshot) {
-                          List<BaseSession> sessions = snapshot.data;
+                          List<BaseSession?> sessions = snapshot.data!;
 
                           if (sessions.isEmpty &&
                               snapshot.hasData &&
@@ -219,8 +214,7 @@ class _LongSessionListState extends State<LongSessionList> {
                                     YMargin(12),
                                     Text(
                                       "Keine Sessions gefunden",
-                                      style: _theme
-                                          .textTheme.textOnContrast.bodyText1,
+                                      style: _theme.textTheme.bodyText1,
                                     ),
                                   ],
                                 ),
@@ -237,8 +231,8 @@ class _LongSessionListState extends State<LongSessionList> {
                                       crossAxisSpacing: 6),
                               delegate: SliverChildBuilderDelegate(
                                   (context, index) =>
-                                      SessionView(snapshot.data[index]),
-                                  childCount: snapshot.data.length));
+                                      SessionView(snapshot.data![index]),
+                                  childCount: snapshot.data!.length));
                         });
                   }),
                 )
@@ -252,11 +246,11 @@ class _LongSessionListState extends State<LongSessionList> {
 enum FilterTagType { certified, mySession, goalReached }
 
 class FilterTag {
-  final String tag;
+  final String? tag;
   bool filtered;
-  final IconData icon;
-  final Color iconColor;
-  final FilterTagType type;
+  final IconData? icon;
+  final Color? iconColor;
+  final FilterTagType? type;
 
   FilterTag(
       {this.tag, this.filtered = false, this.icon, this.iconColor, this.type});

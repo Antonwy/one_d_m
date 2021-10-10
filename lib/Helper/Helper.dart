@@ -5,7 +5,7 @@ import 'package:one_d_m/provider/theme_manager.dart';
 import 'constants.dart';
 
 class Helper {
-  static Color hexToColor(String hexCode) {
+  static Color? hexToColor(String? hexCode) {
     if (hexCode == null) return null;
     hexCode = hexCode.toUpperCase().replaceAll("#", "");
     if (hexCode.length == 6) {
@@ -26,7 +26,8 @@ class Helper {
   static Offset getPositionFromKey(GlobalKey key) {
     if (key.currentContext == null) return Offset(0, 0);
 
-    final RenderBox renderBox = key.currentContext.findRenderObject();
+    final RenderBox renderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
     final pos = renderBox.localToGlobal(Offset.zero);
 
     return pos;
@@ -34,14 +35,15 @@ class Helper {
 
   static Offset getCenteredPositionFromKey(GlobalKey key) {
     Offset pos = Helper.getPositionFromKey(key);
-    Size size = Helper.getSizeFromKey(key);
+    Size size = Helper.getSizeFromKey(key)!;
     return Offset(pos.dx + size.width / 2, pos.dy + size.height / 2);
   }
 
-  static Size getSizeFromKey(GlobalKey key) {
+  static Size? getSizeFromKey(GlobalKey key) {
     if (key.currentContext == null) return null;
 
-    final RenderBox containerRenderBox = key.currentContext.findRenderObject();
+    final RenderBox containerRenderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
     return containerRenderBox.size;
   }
 
@@ -58,7 +60,7 @@ class Helper {
     return "${date.day < 10 ? "0${date.day}" : date.day}.${date.month < 10 ? "0${date.month}" : date.month}.${date.year}";
   }
 
-  static Future<bool> showAlert(BuildContext context, String message,
+  static Future<bool?> showAlert(BuildContext context, String message,
       {String title = "Error"}) {
     return showDialog<bool>(
         context: context,
@@ -70,18 +72,16 @@ class Helper {
                 message,
               ),
               actions: [
-                FlatButton(
+                TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       "OKAY",
-                      style: TextStyle(
-                          color: ThemeManager.of(context).colors.dark),
                     ))
               ],
             ));
   }
 
-  static Future<bool> showWarningAlert(BuildContext context, String message,
+  static Future<bool?> showWarningAlert(BuildContext context, String message,
       {String title = "Error", String acceptButton = "OKAY"}) {
     return showDialog<bool>(
         context: context,
@@ -97,8 +97,6 @@ class Helper {
                     onPressed: () => Navigator.pop<bool>(context, false),
                     child: Text(
                       "ABBRECHEN",
-                      style: TextStyle(
-                          color: ThemeManager.of(context).colors.dark),
                     )),
                 TextButton(
                     onPressed: () => Navigator.pop<bool>(context, true),
@@ -128,13 +126,15 @@ class Helper {
     return PushNotification.of(context).show(content);
   }
 
-  static List<T> castList<T>(List list) {
+  static List<T> castList<T>(List? list) {
     if (list == null) return <T>[];
     return List<T>.from(list);
   }
 
-  static List<Map<String, dynamic>> castJson(List list) {
+  static List<Map<String, dynamic>> castJson(List? list) {
     if (list == null) return <Map<String, dynamic>>[];
-    return List.from(list.map((e) => Map<String, dynamic>.from(e)));
+    return List.from(list.map((e) {
+      return Map<String, dynamic>.from(e);
+    }));
   }
 }

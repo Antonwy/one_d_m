@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/info_feed.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/shuttles/session_shuttle.dart';
@@ -12,23 +11,27 @@ import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
 
-class SessionView extends StatelessWidget {
-  final BaseSession session;
+import '../custom_hero.dart';
 
-  SessionView(this.session);
+class SessionView extends StatelessWidget {
+  final BaseSession? session;
+  final bool withHero;
+
+  SessionView(this.session, {this.withHero = true});
 
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    Color textColor =
+    Color? textColor =
         _theme.correctColorFor(session?.secondaryColor ?? _theme.colors.dark);
 
-    double calculatedAmount = session.amount / session.donationUnit.value;
+    double calculatedAmount = session!.amount! / session!.donationUnit.value!;
 
     return Padding(
         padding: const EdgeInsets.all(2.0),
-        child: Hero(
-          tag: "${session.id}-container",
+        child: CustomHero(
+          tag: "${session!.id}-container",
+          disabled: true,
           flightShuttleBuilder: (flightContext, anim, direction, fromContext,
                   toContext) =>
               sessionShuttle(
@@ -42,14 +45,16 @@ class SessionView extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                     context,
-                    PageRouteBuilder(
-                        barrierColor: Colors.black26,
-                        pageBuilder: (context, anim1, anim2) =>
-                            SessionPage(session),
-                        transitionDuration: Duration(milliseconds: 500),
-                        reverseTransitionDuration: Duration(milliseconds: 500),
-                        transitionsBuilder: (context, anim1, anim2, child) =>
-                            child));
+                    MaterialPageRoute(
+                        builder: (context) => SessionPage(session)));
+                // PageRouteBuilder(
+                //     barrierColor: Colors.black26,
+                //     pageBuilder: (context, anim1, anim2) =>
+                //         SessionPage(session),
+                //     transitionDuration: Duration(milliseconds: 500),
+                //     reverseTransitionDuration: Duration(milliseconds: 500),
+                //     transitionsBuilder: (context, anim1, anim2, child) =>
+                //         child));
               },
               child: SizedBox(
                 width: 230,
@@ -61,11 +66,12 @@ class SessionView extends StatelessWidget {
                         fit: StackFit.expand,
                         children: [
                           CachedNetworkImage(
-                            imageUrl: session?.imgUrl ?? "",
+                            imageUrl:
+                                session?.thumbnailUrl ?? session?.imgUrl ?? "",
                             width: double.infinity,
                             fit: BoxFit.cover,
                             placeholder: (_, __) => session?.blurHash != null
-                                ? BlurHash(hash: session.blurHash)
+                                ? BlurHash(hash: session!.blurHash!)
                                 : Center(
                                     child: CircularProgressIndicator(
                                       valueColor:
@@ -111,8 +117,8 @@ class SessionView extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                if (session.isCertified) XMargin(4),
-                                if (session.isCertified)
+                                if (session!.isCertified) XMargin(4),
+                                if (session!.isCertified)
                                   Icon(
                                     Icons.verified,
                                     color: Colors.greenAccent[400],
@@ -145,7 +151,7 @@ class SessionView extends StatelessWidget {
                                     ]
                                   : [
                                       Text(
-                                        "${((calculatedAmount / session.donationGoal) * 100).round()}%",
+                                        "${((calculatedAmount / session!.donationGoal!) * 100).round()}%",
                                         style: _theme.textTheme
                                             .withColor(textColor)
                                             .bodyText2,
@@ -154,7 +160,7 @@ class SessionView extends StatelessWidget {
                                       Expanded(
                                         child: PercentLine(
                                           percent: (calculatedAmount /
-                                                  session.donationGoal)
+                                                  session!.donationGoal!)
                                               .clamp(0.0, 1.0),
                                           height: 8.0,
                                           color: textColor,

@@ -8,11 +8,11 @@ import 'package:provider/provider.dart';
 
 class UserPageManager extends ChangeNotifier {
   User user;
-  bool subscribed = false, isOwnAccount = false;
-  Stream<StreamResult<UserAccount>> userAccountStream;
-  UserAccount userAccount;
-  bool loadingMoreInfo = true, fromCache = true;
-  final String uid;
+  bool? subscribed = false, isOwnAccount = false;
+  late Stream<StreamResult<UserAccount>> userAccountStream;
+  UserAccount? userAccount;
+  bool? loadingMoreInfo = true, fromCache = true;
+  final String? uid;
 
   UserPageManager(this.user, this.uid) {
     initData();
@@ -24,9 +24,9 @@ class UserPageManager extends ChangeNotifier {
 
     await for (StreamResult<UserAccount> res in userAccountStream) {
       userAccount = res.data;
-      user = userAccount;
+      user = userAccount!;
       fromCache = res.fromCache;
-      subscribed = userAccount.subscribed;
+      subscribed = userAccount!.subscribed;
       loadingMoreInfo = false;
       notifyListeners();
     }
@@ -35,13 +35,13 @@ class UserPageManager extends ChangeNotifier {
   Future<void> followOrUnfollowUser(bool follow, BuildContext context) async {
     try {
       if (follow)
-        await Api().users().subscribe(user.id);
+        await Api().users().subscribe(user!.id);
       else
-        await Api().users().unsubscribe(user.id);
+        await Api().users().unsubscribe(user!.id);
 
       await context.read<FirebaseAnalytics>().logEvent(
           name: "${follow ? 'Followed' : 'Unfollowed'} User",
-          parameters: {"user": user.id});
+          parameters: {"user": user!.id});
     } catch (e) {
       print("something went wrong subscribing user!");
       return;

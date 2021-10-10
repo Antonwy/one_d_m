@@ -5,8 +5,8 @@ import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 
 class FollowButton extends StatefulWidget {
-  Future<void> Function() onPressed;
-  bool followed;
+  Future<void> Function()? onPressed;
+  bool? followed;
 
   FollowButton({this.onPressed, this.followed});
 
@@ -20,7 +20,7 @@ class _FollowButtonState extends State<FollowButton> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    BaseTheme? _bTheme = ThemeManager.of(context).colors;
     return OfflineBuilder(
         child: Container(),
         connectivityBuilder: (context, connection, child) {
@@ -39,7 +39,7 @@ class _FollowButtonState extends State<FollowButton> {
                           setState(() {
                             _loading = true;
                           });
-                          await widget.onPressed();
+                          await widget.onPressed!();
                           setState(() {
                             _loading = false;
                           });
@@ -52,23 +52,23 @@ class _FollowButtonState extends State<FollowButton> {
                 height: 56,
                 duration: _duration,
                 color: activated
-                    ? (widget.followed ? _bTheme.contrast : _bTheme.darkerLight)
+                    ? (widget.followed! ? _bTheme!.contrast : _bTheme!.darkerLight)
                     : Colors.grey,
                 child: TweenAnimationBuilder(
                     duration: _duration,
                     tween: Tween<double>(
                         begin: 0,
-                        end: widget.followed ? degreesToRads(45) : 0.0),
-                    builder: (context, value, child) =>
+                        end: widget.followed! ? degreesToRads(45) : 0.0),
+                    builder: (context, dynamic value, child) =>
                         Transform.rotate(angle: value, child: child),
                     child: TweenAnimationBuilder(
                         tween: ColorTween(
-                            begin: _bTheme.dark,
-                            end: widget.followed
+                            begin: _bTheme!.dark,
+                            end: widget.followed!
                                 ? _bTheme.textOnContrast
                                 : _bTheme.dark),
                         duration: _duration,
-                        builder: (context, color, child) => Stack(
+                        builder: (context, dynamic color, child) => Stack(
                               children: <Widget>[
                                 Center(
                                     child: Container(

@@ -13,12 +13,12 @@ import 'custom_open_container.dart';
 import 'donation_widget.dart';
 
 class CampaignButton extends StatelessWidget {
-  final String id;
-  final BaseCampaign campaign;
-  final Color color;
-  final TextStyle textStyle;
+  final String? id;
+  final BaseCampaign? campaign;
+  final Color? color;
+  final TextStyle? textStyle;
   final double elevation;
-  final Function(BaseCampaign) onPressed;
+  final Function(BaseCampaign?)? onPressed;
   final double borderRadius;
 
   CampaignButton(this.id,
@@ -31,7 +31,7 @@ class CampaignButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedFutureBuilder<BaseCampaign>(
+    return AnimatedFutureBuilder<BaseCampaign?>(
         future: campaign == null
             ? Api().campaigns().getOne(id)
             : Future.value(campaign),
@@ -39,12 +39,12 @@ class CampaignButton extends StatelessWidget {
           if (snapshot.hasData)
             return CustomOpenContainer(
               openBuilder: (context, open, scrollController) => CampaignPage(
-                snapshot.data.description == null
+                (snapshot.data!.description == null
                     ? BaseCampaign(
-                        id: campaign.id,
-                        imgUrl: campaign.imgUrl,
-                        name: campaign.name)
-                    : snapshot.data,
+                        id: campaign!.id,
+                        imgUrl: campaign!.imgUrl,
+                        name: campaign!.name)
+                    : snapshot.data)!,
                 scrollController: scrollController,
               ),
               closedColor: color ?? ColorTheme.appBg,
@@ -54,7 +54,7 @@ class CampaignButton extends StatelessWidget {
               closedBuilder: (context, open) => InkWell(
                 onTap: () {
                   if (onPressed != null) {
-                    onPressed(snapshot.data);
+                    onPressed!(snapshot.data);
                     return;
                   }
                   open();
@@ -64,18 +64,18 @@ class CampaignButton extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       RoundedAvatar(
-                        snapshot.data.imgUrl ?? '',
+                        snapshot.data!.imgUrl ?? '',
                         blurHash: campaign?.blurHash,
                       ),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(
-                          "${snapshot.data.name}",
+                          "${snapshot.data!.name}",
                           maxLines: 1,
                           style: Theme.of(context)
                               .textTheme
-                              .bodyText1
-                              .copyWith(color: textStyle.color),
+                              .bodyText1!
+                              .copyWith(color: textStyle!.color),
                         ),
                       )
                     ],

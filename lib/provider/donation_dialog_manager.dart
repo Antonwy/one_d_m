@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/donation.dart';
@@ -17,26 +16,21 @@ import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 
 class DonationDialogManager extends ChangeNotifier {
-  bool _showThankYou = false,
-      _customAmount = false,
-      _anonym = false,
-      _useDCs = true,
-      _hasPaymentMethod = false,
-      _showAnimation = false;
+  bool _showThankYou = false, _showAnimation = false;
 
   // IMPORTANT
-  final String campaignId, sessionId;
-  final BuildContext context;
-  DonationRequest dr;
-  Future<Artboard> artboardFuture;
-  RiveAnimationController riveController;
+  final String? campaignId, sessionId;
+  final BuildContext? context;
+  DonationRequest? dr;
+  Future<Artboard?>? artboardFuture;
+  RiveAnimationController? riveController;
   String currentAnimation = '-0';
-  int _currentAnimationIndex = 0, _amount = 0;
-  Artboard artboardController;
-  bool _loading = false, initialLoading = true, fromCache = true, noConnection;
+  int? _currentAnimationIndex = 0, _amount = 0;
+  Artboard? artboardController;
+  bool? _loading = false, initialLoading = true, fromCache = true, noConnection;
   double _opacity = 0;
 
-  Donation donation;
+  Donation? donation;
 
   DonationDialogManager(
       {this.context,
@@ -48,7 +42,7 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   Future<void> initData() async {
-    if (noConnection) {
+    if (noConnection!) {
       opacity = 1;
       return;
     }
@@ -57,7 +51,7 @@ class DonationDialogManager extends ChangeNotifier {
         : Api().donationRequest().campaign(campaignId);
 
     Future.delayed(Duration(milliseconds: 125)).then((val) {
-      if (initialLoading) opacity = 1;
+      if (initialLoading!) opacity = 1;
     });
 
     int i = 0;
@@ -68,9 +62,9 @@ class DonationDialogManager extends ChangeNotifier {
         dr = sRes.data;
         fromCache = sRes.fromCache;
 
-        if (fromCache) dr.userBalance = 0;
+        if (fromCache!) dr!.userBalance = 0;
 
-        if (dr.animationUrl != null && artboardFuture == null) {
+        if (dr!.animationUrl != null && artboardFuture == null) {
           artboardFuture = _loadAndCacheRive();
           artboardController = await artboardFuture;
         }
@@ -83,7 +77,7 @@ class DonationDialogManager extends ChangeNotifier {
         initialLoading = false;
         _opacity = 1;
 
-        if (dr.userBalance >= dr.unit.value) _amount = dr.unit.value;
+        if (dr!.userBalance! >= dr!.unit.value!) _amount = dr!.unit.value;
 
         notifyListeners();
 
@@ -94,18 +88,22 @@ class DonationDialogManager extends ChangeNotifier {
     }
   }
 
-  Future<Artboard> _loadAndCacheRive() async {
+  Future<Artboard?> _loadAndCacheRive() async {
     try {
       final cacheManager = DefaultCacheManager();
-      FileInfo fileInfo = await cacheManager.getFileFromCache(dr.animationUrl);
+      FileInfo? fileInfo =
+          await cacheManager.getFileFromCache(dr!.animationUrl!);
       // Get video from cache first
 
       if (fileInfo?.file == null) {
-        fileInfo = await cacheManager.downloadFile(dr.animationUrl);
+        fileInfo = await cacheManager.downloadFile(dr!.animationUrl!);
       }
 
-      Uint8List list = await fileInfo.file.readAsBytes();
-      ByteData byteData = ByteData.view(list.buffer);
+      Uint8List? list = await fileInfo?.file.readAsBytes();
+
+      if (list == null) throw new Exception("Couldn't load rive animation!");
+
+      ByteData? byteData = ByteData.view(list.buffer);
 
       final file = RiveFile.import(byteData);
 
@@ -120,8 +118,8 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   void _switchRiveAnimation(String direction) {
-    if (dr.animationUrl != null) {
-      int index = amount ~/ dr.unit.value;
+    if (dr!.animationUrl != null) {
+      int index = amount! ~/ dr!.unit.value!;
       //prevent playing same animation again
       if (_currentAnimationIndex == index || index > 5) return;
 
@@ -129,16 +127,16 @@ class DonationDialogManager extends ChangeNotifier {
       currentAnimation = '$direction$index';
       //change animation name
       print('Current animation: $currentAnimation');
-      if (artboardController == null) return;
+      if (artboardController == null || riveController == null) return;
 
-      artboardController.removeController(riveController);
-      artboardController
+      artboardController!.removeController(riveController!);
+      artboardController!
           .addController(riveController = SimpleAnimation(currentAnimation));
     }
   }
 
   void sub() {
-    int newValue = amount - dr.unit.value;
+    int newValue = amount! - dr!.unit.value!;
     if (newValue >= 0) {
       HapticFeedback.heavyImpact();
       amount = newValue;
@@ -148,31 +146,39 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   void add() {
-    int newValue = amount + dr.unit.value;
-    if (dr.userBalance >= newValue) {
+    int newValue = amount! + dr!.unit.value!;
+    if (dr!.userBalance! >= newValue) {
       HapticFeedback.heavyImpact();
       amount = newValue;
 
       _switchRiveAnimation('+');
     } else {
       Helper.showAlert(
-          context, "Du musst mehr DVs sammeln um weiter spenden zu können.",
+          context!, "Du musst mehr DVs sammeln um weiter spenden zu können.",
           title: "Zu wenig DVs!");
     }
   }
 
   Future<void> donate() async {
-    if (amount > dr.userBalance) return;
+    print("DONATE");
+    if (dr!.userBalance! == 0) {
+      Helper.showAlert(
+          context!, "Du musst mehr DVs sammeln um weiter spenden zu können.",
+          title: "Zu wenig DVs!");
+      return;
+    }
+
+    if (amount! > dr!.userBalance!) return;
 
     Donation donation = Donation(amount,
-        campaignId: dr.campaignId,
-        alternativeCampaignId: dr.campaignId,
-        userId: dr.userId,
-        sessionId: dr.sessionId);
+        campaignId: dr!.campaignId,
+        alternativeCampaignId: dr!.campaignId,
+        userId: dr!.userId,
+        sessionId: dr!.sessionId);
 
-    if (amount >= 100) {
-      bool res = await showDialog<bool>(
-          context: context,
+    if (amount! >= 100) {
+      bool res = await (showDialog<bool>(
+          context: context!,
           builder: (context) => AlertDialog(
                 title: Text("Bist du dir sicher?"),
                 content: Text(
@@ -197,7 +203,7 @@ class DonationDialogManager extends ChangeNotifier {
                         style: TextStyle(color: Colors.blueGrey),
                       )),
                 ],
-              ));
+              )) as FutureOr<bool>);
       if (!res) return;
     }
 
@@ -207,14 +213,14 @@ class DonationDialogManager extends ChangeNotifier {
     // await DatabaseService.donate(donation);
     try {
       this.donation = await Api().donations().create(donation);
-      await context
+      await context!
           .read<FirebaseAnalytics>()
-          ?.logEvent(name: "Donation", parameters: {
+          .logEvent(name: "Donation", parameters: {
         "amount": donation.amount,
         "campaign": donation.campaignName,
-        "session": donation?.sessionId ?? ""
+        "session": donation.sessionId ?? ""
       });
-      await context.read<UserManager>().reloadUser();
+      await context!.read<UserManager>().reloadUser();
     } catch (e) {
       print("ERROR");
       print(e);
@@ -230,9 +236,9 @@ class DonationDialogManager extends ChangeNotifier {
     opacity = 1;
   }
 
-  int get amount => _amount;
+  int? get amount => _amount;
 
-  set amount(int a) {
+  set amount(int? a) {
     _amount = a;
     notifyListeners();
   }
@@ -244,9 +250,9 @@ class DonationDialogManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get loading => _loading;
+  bool? get loading => _loading;
 
-  set loading(bool l) {
+  set loading(bool? l) {
     _loading = l;
     notifyListeners();
   }

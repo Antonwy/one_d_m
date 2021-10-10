@@ -7,21 +7,21 @@ import 'categories_list.dart';
 
 class CategoryDialog {
   final BuildContext context;
-  final int initialIndex;
+  final int? initialIndex;
 
   CategoryDialog(this.context, this.initialIndex);
 
-  factory CategoryDialog.of(BuildContext context, {int initialIndex = 100}) =>
+  factory CategoryDialog.of(BuildContext context, {int? initialIndex = 100}) =>
       CategoryDialog(context, initialIndex);
 
-  Future<int> show() {
+  Future<int?> show() {
     return Navigator.of(context)
         .push<int>(_CategoryDialogRoute<int>(initialIndex));
   }
 }
 
 class _CategoryDialogRoute<T> extends PageRouteBuilder<T> {
-  _CategoryDialogRoute(int initIndex)
+  _CategoryDialogRoute(int? initIndex)
       : super(
           transitionDuration: Duration(milliseconds: 250),
           opaque: false,
@@ -34,7 +34,7 @@ class _CategoryDialogRoute<T> extends PageRouteBuilder<T> {
               color: ColorTween(
                       begin: Colors.black.withOpacity(0.0),
                       end: Colors.black.withOpacity(.38))
-                  .animate(curvedAnim)
+                  .animate(curvedAnim as Animation<double>)
                   .value,
               child: SlideTransition(
                   position:
@@ -53,14 +53,14 @@ class _CategoryDialogRoute<T> extends PageRouteBuilder<T> {
 }
 
 class _CategoryDialogWidget extends StatelessWidget {
-  int _categoryIndex;
-  final int _initCategory;
+  int? _categoryIndex;
+  final int? _initCategory;
 
   _CategoryDialogWidget(this._categoryIndex) : _initCategory = _categoryIndex;
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     return Stack(
       children: [
         GestureDetector(
@@ -78,9 +78,7 @@ class _CategoryDialogWidget extends StatelessWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Material(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(Constants.radius),
+              child: Card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,17 +89,14 @@ class _CategoryDialogWidget extends StatelessWidget {
                         children: [
                           Text(
                             "Wähle Kategorie",
-                            style: _theme.textTheme.dark.bodyText1,
+                            style: _theme.textTheme.bodyText1,
                           ),
                           ElevatedButton(
                             onPressed: () {
                               Navigator.pop<int>(context, _categoryIndex);
                             },
-                            child: Text("FILTERN",
-                                style: TextStyle(
-                                    color: _theme.colors.textOnContrast)),
-                            style: ElevatedButton.styleFrom(
-                              primary: _theme.colors.contrast,
+                            child: Text(
+                              "FILTERN",
                             ),
                           ),
                         ],

@@ -1,9 +1,9 @@
 import 'package:one_d_m/models/donation.dart';
 
 class SessionDonation {
-  final int amount;
-  final String userId, userBlurHash, userImageUrl, userThumbnailUrl, username;
-  final DateTime createdAt;
+  final int? amount;
+  final String? userId, userBlurHash, userImageUrl, userThumbnailUrl, username;
+  final DateTime? createdAt;
 
   SessionDonation(
       {this.amount,
@@ -24,7 +24,7 @@ class SessionDonation {
         createdAt = DateTime.tryParse(map[Donation.CREATEDAT]);
 
   static List<SessionDonation> listFromJson(List<Map<String, dynamic>> list) {
-    return list?.map((val) => SessionDonation.fromJson(val))?.toList() ?? [];
+    return list.map((val) => SessionDonation.fromJson(val)).toList();
   }
 
   static const String USER_BLUR_HASH = "user_blur_hash",

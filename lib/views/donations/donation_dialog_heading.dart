@@ -7,7 +7,6 @@ import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/donation_request.dart';
 import 'package:one_d_m/provider/donation_dialog_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import 'package:flutter/src/painting/gradient.dart' as paint;
@@ -15,14 +14,12 @@ import 'package:flutter/src/painting/gradient.dart' as paint;
 class DonationDialogHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
 
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      DonationRequest dr = ddm.dr;
+      DonationRequest? dr = ddm.dr;
 
-      Widget widget;
-
-      if (ddm.initialLoading)
+      if (ddm.initialLoading!)
         return Container(
           width: double.infinity,
           height: 220,
@@ -32,8 +29,8 @@ class DonationDialogHeading extends StatelessWidget {
           )),
         );
 
-      if (dr.animationUrl != null)
-        return FutureBuilder<Artboard>(
+      if (dr!.animationUrl != null)
+        return FutureBuilder<Artboard?>(
             future: ddm.artboardFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData)
@@ -54,14 +51,14 @@ class DonationDialogHeading extends StatelessWidget {
                         ? SizedBox.shrink()
                         : Rive(
                             fit: BoxFit.fitWidth,
-                            artboard: ddm.artboardController,
+                            artboard: ddm.artboardController!,
                           )),
               );
             });
 
-      String blurHash = dr?.sessionBlurHash ?? dr?.campaignBlurHash;
-      String imageUrl = dr?.sessionImageUrl ?? dr?.campaignImageUrl;
-      String name = dr?.sessionName ?? dr?.campaignName;
+      String? blurHash = dr.sessionBlurHash ?? dr.campaignBlurHash;
+      String? imageUrl = dr.sessionImageUrl ?? dr.campaignImageUrl;
+      String? name = dr.sessionName ?? dr.campaignName;
 
       return LayoutBuilder(builder: (context, constraints) {
         return ClipRRect(
@@ -72,7 +69,7 @@ class DonationDialogHeading extends StatelessWidget {
               CachedNetworkImage(
                 height: 220,
                 width: double.infinity,
-                imageUrl: imageUrl,
+                imageUrl: imageUrl!,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => blurHash != null
                     ? BlurHash(hash: blurHash)
@@ -95,8 +92,8 @@ class DonationDialogHeading extends StatelessWidget {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                          ColorTheme.appBg,
-                          ColorTheme.appBg.withOpacity(0)
+                          _theme.cardColor,
+                          _theme.cardColor.withOpacity(0)
                         ])),
                   )),
               Positioned(
@@ -109,11 +106,11 @@ class DonationDialogHeading extends StatelessWidget {
                     Container(
                       width: constraints.maxWidth,
                       child: AutoSizeText(
-                        name,
+                        name!,
                         maxLines: 1,
                         softWrap: true,
                         overflow: TextOverflow.ellipsis,
-                        style: _theme.textTheme.dark.headline5.copyWith(
+                        style: _theme.textTheme.headline5!.copyWith(
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
                         ),
@@ -121,7 +118,7 @@ class DonationDialogHeading extends StatelessWidget {
                     ),
                     Text(
                       'by ${dr.organizationName}',
-                      style: _theme.textTheme.dark.bodyText2.copyWith(
+                      style: _theme.textTheme.bodyText2!.copyWith(
                         fontSize: 13,
                       ),
                     ),

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 
 class FaqPage extends StatelessWidget {
-  TextTheme _textTheme;
+  late TextTheme _textTheme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: ColorTheme.whiteBlue,
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backgroundColor: ColorTheme.whiteBlue,
-            iconTheme: IconThemeData(color: ColorTheme.blue),
             elevation: 0,
+            backgroundColor: Colors.transparent,
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -34,18 +33,15 @@ class FaqPage extends StatelessWidget {
                   ),
                   Text(
                     "One Dollar Movement",
-                    style:
-                        _textTheme.bodyText1.copyWith(color: ColorTheme.blue),
+                    style: _textTheme.bodyText1!,
                   ),
                   Text(
                     "FAQ",
-                    style: _textTheme.headline6
-                        .copyWith(color: ColorTheme.blue, fontSize: 28),
+                    style: _textTheme.headline6!.copyWith(fontSize: 28),
                   ),
                   Text(
                     "Häufig gestellte Fragen.",
-                    style: _textTheme.caption
-                        .copyWith(color: ColorTheme.blue.withOpacity(.6)),
+                    style: _textTheme.caption!.withOpacity(.6),
                   ),
                 ],
               ),
@@ -54,25 +50,18 @@ class FaqPage extends StatelessWidget {
           SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
             Faq faq = Faq.faqs[index];
-            return Theme(
-              data: ThemeData(
-                  accentColor: ColorTheme.blue,
-                  unselectedWidgetColor: ColorTheme.blue.withOpacity(.5)),
-              child: ExpansionTile(
-                title: Text(
-                  faq.question,
-                  style: TextStyle(color: ColorTheme.blue),
-                ),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Text(
-                      faq.answer,
-                      style: TextStyle(color: ColorTheme.blue.withOpacity(.7)),
-                    ),
-                  )
-                ],
+            return ExpansionTile(
+              title: Text(
+                faq.question,
               ),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Text(
+                    faq.answer,
+                  ),
+                )
+              ],
             );
           }, childCount: Faq.faqs.length))
         ],

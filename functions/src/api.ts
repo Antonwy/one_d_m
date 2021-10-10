@@ -15,6 +15,32 @@ export const updateAccount = async (toUpdate: {}, token: string) => {
   console.log('Api Res: ' + res.data);
 };
 
+export const updateDatabase = async (
+  route: string,
+  toUpdate: {},
+  token: string
+) => {
+  console.log("Sending 'PUT' request to: " + apiUrl + '/' + route);
+  console.log('Using auth token: ' + token);
+  const res = await axios.put(apiUrl + '/' + route, toUpdate, {
+    headers: { 'Content-Type': 'application/json', authtoken: token },
+  });
+
+  console.log('Api Res: ' + res.data);
+};
+
+export const deleteUser = async (uid: string) => {
+  const token = await getToken(uid);
+
+  console.log("Sending 'DELETE' request to: " + apiUrl + '/users/' + uid);
+  console.log('Using auth token: ' + token);
+  const res = await axios.delete(apiUrl + '/users/' + uid, {
+    headers: { 'Content-Type': 'application/json', authtoken: token },
+  });
+
+  console.log('Api Res: ' + res.data);
+};
+
 export const getToken = async (uid: string) => {
   console.log('Creating custom token....');
   const customToken = await admin.auth().createCustomToken(uid);

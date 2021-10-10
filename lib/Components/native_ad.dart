@@ -5,9 +5,9 @@ import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 
 class NewsNativeAd extends StatelessWidget {
-  final String id;
+  final String? id;
 
-  const NewsNativeAd({Key key, this.id}) : super(key: key);
+  const NewsNativeAd({Key? key, this.id}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +65,9 @@ class ExploreNativeAd extends StatelessWidget {
 
 class NativeAdView extends StatefulWidget {
   const NativeAdView({
-    Key key,
-    @required this.adUnitId,
-    @required this.layoutName,
+    Key? key,
+    required this.adUnitId,
+    required this.layoutName,
     this.onAdImpression,
     this.onAdLeftApplication,
     this.onAdClicked,
@@ -79,15 +79,15 @@ class NativeAdView extends StatefulWidget {
 
   final String layoutName;
 
-  final Function() onAdImpression;
+  final Function()? onAdImpression;
 
-  final Function() onAdLeftApplication;
+  final Function()? onAdLeftApplication;
 
-  final Function() onAdClicked;
+  final Function()? onAdClicked;
 
-  final Function(Map<String, dynamic>) onAdFailedToLoad;
+  final Function(Map<String, dynamic>)? onAdFailedToLoad;
 
-  final Function(double) onAdLoaded;
+  final Function(double?)? onAdLoaded;
 
   @override
   State<StatefulWidget> createState() => _NativeAdViewState();
@@ -95,7 +95,7 @@ class NativeAdView extends StatefulWidget {
 
 class _NativeAdViewState extends State<NativeAdView>
     with AutomaticKeepAliveClientMixin {
-  double height = 600;
+  double? height = 600;
   bool failed = false;
 
   @override
@@ -141,32 +141,32 @@ class _NativeAdViewState extends State<NativeAdView>
     return Container();
   }
 
-  void _onAdLoaded(double height) {
+  void _onAdLoaded(double? height) {
     setState(() => this.height = height);
-    widget.onAdLoaded(height);
+    widget.onAdLoaded!(height);
   }
 
   void _onAdFailed(Map<String, dynamic> error) {
     setState(() => failed = true);
-    widget.onAdFailedToLoad(error);
+    widget.onAdFailedToLoad!(error);
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onAdImpression':
-        widget.onAdImpression();
+        widget.onAdImpression!();
         break;
       case 'onAdLeftApplication':
-        widget.onAdLeftApplication();
+        widget.onAdLeftApplication!();
         break;
       case 'onAdClicked':
-        widget.onAdClicked();
+        widget.onAdClicked!();
         break;
       case 'onAdFailedToLoad':
         _onAdFailed(Map<String, dynamic>.from(call.arguments));
         break;
       case 'onAdLoaded':
-        _onAdLoaded(call.arguments as double);
+        _onAdLoaded(call.arguments as double?);
         break;
     }
   }

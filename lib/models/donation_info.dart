@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DonationInfo {
-  final int dailyAmount,
+  final int? dailyAmount,
       dailyAmountTarget,
       monthlyAmount,
       monthlyAmountTarget,

@@ -5,28 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/components/campaign_header.dart';
-import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
 import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/components/users/user_header.dart';
-import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/database_service.dart';
+import 'package:one_d_m/components/users/vertical_user_button.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/provider/user_page_manager.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
   User user;
-  ScrollController scrollController;
+  ScrollController? scrollController;
 
   UserPage(this.user, {this.scrollController});
 
@@ -35,21 +32,21 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
-  UserManager um;
-  MediaQueryData mq;
+  late UserManager um;
+  late MediaQueryData mq;
 
-  ScrollController _scrollController;
-  AnimationController _controller;
-  AnimationController _transitionController;
+  late ScrollController _scrollController;
+  late AnimationController _controller;
+  late AnimationController _transitionController;
 
-  double _staticHeight;
+  late double _staticHeight;
   static final double _staticHeaderTop = 76;
 
-  double _headerHeight, _scrollOffset = 0.0;
+  double? _headerHeight, _scrollOffset = 0.0;
 
-  User user;
+  User? user;
 
-  Future<List<String>> mySessions;
+  Future<List<String>>? mySessions;
 
   @override
   void initState() {
@@ -71,7 +68,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         setState(() {
           _scrollOffset = _scrollController.offset;
           _controller.value =
-              Helper.mapValue(_scrollOffset, 0, _headerHeight - 76, 0, 1);
+              Helper.mapValue(_scrollOffset, 0, _headerHeight! - 76, 0, 1);
         });
       });
   }
@@ -88,11 +85,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     um = Provider.of<UserManager>(context);
     mq = MediaQuery.of(context);
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     _staticHeight = mq.size.height * .55;
     _headerHeight = _staticHeight + mq.padding.top;
 
     return Scaffold(
-        backgroundColor: ColorTheme.appBg,
         body: ChangeNotifierProvider<UserPageManager>(
             create: (context) => UserPageManager(widget.user, um.uid),
             builder: (context, snapshot) {
@@ -107,23 +104,21 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                           _OtherUsersRecommendations(),
                           Consumer<UserPageManager>(
                               builder: (context, upm, child) {
-                            return (!upm.loadingMoreInfo)
+                            return (!upm.loadingMoreInfo!)
                                 ? _buildCampaignSessions(
-                                    upm.userAccount.subscribedSessions)
+                                    upm.userAccount!.subscribedSessions)
                                 : SliverToBoxAdapter(
                                     child: SizedBox.shrink(),
                                   );
                           }),
                           Consumer<UserPageManager>(
                               builder: (context, upm, child) {
-                            if (upm.loadingMoreInfo)
+                            if (upm.loadingMoreInfo!)
                               return SliverToBoxAdapter(
                                 child: Center(
                                     child: Column(
                                   children: <Widget>[
-                                    SizedBox(
-                                      height: 20,
-                                    ),
+                                    YMargin(24),
                                     LoadingIndicator(),
                                     SizedBox(
                                       height: 10,
@@ -133,17 +128,17 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                                 )),
                               );
 
-                            if (upm.userAccount.subscribedCampaigns.isEmpty)
+                            if (upm.userAccount!.subscribedCampaigns.isEmpty)
                               return SliverToBoxAdapter(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     SizedBox(
-                                      height: 25,
+                                      height: 32,
                                     ),
                                     SvgPicture.asset(
                                       "assets/images/no-news.svg",
-                                      height: 200,
+                                      height: 120,
                                     ),
                                     SizedBox(
                                       height: 20,
@@ -166,7 +161,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                             return SliverList(
                               delegate: SliverChildListDelegate(
                                   _generateChildren(
-                                      upm.userAccount.subscribedCampaigns)),
+                                      upm.userAccount!.subscribedCampaigns)),
                             );
                           }),
                         ],
@@ -175,9 +170,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   String buildNotFoundString(UserPageManager upm) {
-    String name = upm.uid == upm.user.id ? 'Du' : upm.user.name;
+    String? name = upm.uid == upm.user.id ? 'Du' : upm.user.name;
     String verb = upm.uid == upm.user.id ? "hast" : "hat";
-    String projectSession = upm.userAccount.subscribedSessions.isEmpty
+    String projectSession = upm.userAccount!.subscribedSessions.isEmpty
         ? 'Projekte und Sessions'
         : "Projekte";
     return "$name $verb noch keine $projectSession abonniert!";
@@ -194,7 +189,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                   Padding(
                     padding: const EdgeInsets.only(left: 12.0),
                     child: Text("Sessions",
-                        style: Theme.of(context).textTheme.headline6.copyWith(
+                        style: Theme.of(context).textTheme.headline6!.copyWith(
                               fontWeight: FontWeight.w600,
                             )),
                   ),
@@ -227,7 +222,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     list.add(Padding(
       padding: const EdgeInsets.only(left: 10.0, bottom: 10, top: 20),
       child: Text("Unterstützte Projekte (${campaigns.length})",
-          style: Theme.of(context).textTheme.headline6.copyWith(
+          style: Theme.of(context).textTheme.headline6!.copyWith(
                 fontWeight: FontWeight.w600,
               )),
     ));
@@ -251,15 +246,15 @@ class _OtherUsersRecommendations extends StatefulWidget {
 
 class __OtherUsersRecommendationsState
     extends State<_OtherUsersRecommendations> {
-  ThemeManager _theme;
+  late ThemeData _theme;
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
 
     return Consumer<UserPageManager>(builder: (context, upm, child) {
-      if (!upm.loadingMoreInfo) {
-        List<User> followers = upm.userAccount.followingUsers;
+      if (!upm.loadingMoreInfo!) {
+        List<User> followers = upm.userAccount!.followingUsers;
         if (followers.isEmpty) return SliverToBoxAdapter();
         return SliverPadding(
           padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
@@ -267,109 +262,50 @@ class __OtherUsersRecommendationsState
             child: Material(
               elevation: 1,
               borderRadius: BorderRadius.circular(6),
-              color: _theme.colors.contrast,
               clipBehavior: Clip.antiAlias,
-              child: Theme(
-                data: ThemeData(
-                    accentColor: _theme.colors.textOnContrast,
-                    unselectedWidgetColor:
-                        _theme.colors.textOnContrast.withOpacity(.8)),
-                child: ExpansionTile(
-                    initiallyExpanded: true,
-                    title: RichText(
-                      text: TextSpan(
-                          style: _theme.textTheme.textOnContrast.bodyText2,
-                          children: [
-                            TextSpan(text: "Personen denen "),
-                            TextSpan(
-                                text: "${upm.user.name} ",
-                                style: _theme.textTheme.textOnContrast.bodyText1
-                                    .copyWith(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "folgt:"),
-                          ]),
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          height: 150,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) => Padding(
-                              padding: EdgeInsets.only(
-                                  left: index == 0 ? 12 : 0,
-                                  right: index == followers?.length ?? 1 - 1
-                                      ? 12
-                                      : 0),
-                              child: _RecommendationUser(followers[index]),
-                            ),
-                            itemCount: followers?.length,
+              child: ExpansionTile(
+                  initiallyExpanded: true,
+                  iconColor: _theme.darkMode ? Colors.white : Colors.black,
+                  collapsedIconColor:
+                      _theme.darkMode ? Colors.white : Colors.black,
+                  title: RichText(
+                    text:
+                        TextSpan(style: _theme.textTheme.bodyText2, children: [
+                      TextSpan(text: "Personen denen "),
+                      TextSpan(
+                          text: "${upm.user.name} ",
+                          style: _theme.textTheme.bodyText1!
+                              .copyWith(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "folgt:"),
+                    ]),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Container(
+                        height: 140,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          separatorBuilder: (context, index) => XMargin(6),
+                          itemBuilder: (context, index) => Padding(
+                            padding: EdgeInsets.only(
+                                left: index == 0 ? 12 : 0,
+                                right: index == (followers.length ?? 1) - 1
+                                    ? 12
+                                    : 0,
+                                bottom: 4),
+                            child: VerticalUserButton(followers[index]),
                           ),
+                          itemCount: followers.length,
                         ),
                       ),
-                    ]),
-              ),
+                    ),
+                  ]),
             ),
           ),
         );
       }
       return SliverToBoxAdapter();
     });
-  }
-}
-
-class _RecommendationUser extends StatelessWidget {
-  final User user;
-
-  const _RecommendationUser(this.user);
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
-    return Container(
-      width: 108,
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: CustomOpenContainer(
-          openBuilder: (context, close, scrollController) => UserPage(
-            user,
-            scrollController: scrollController,
-          ),
-          tappable: user != null,
-          closedElevation: 0,
-          closedColor: Colors.white.withOpacity(.45),
-          closedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Constants.radius)),
-          closedBuilder: (context, open) => Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                RoundedAvatar(
-                  user?.imgUrl,
-                  blurHash: user?.imgUrl,
-                  color: _theme.colors.dark,
-                  iconColor: _theme.colors.contrast,
-                  height: 30,
-                ),
-                YMargin(6),
-                Container(
-                  width: 76,
-                  height: 20,
-                  child: Center(
-                    child: AutoSizeText(user?.name ?? "Laden...",
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        style: _theme.textTheme.dark.headline6
-                            .copyWith(fontSize: 14)),
-                  ),
-                ),
-                YMargin(6),
-                UserFollowButton(followerId: user?.id, user: user),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

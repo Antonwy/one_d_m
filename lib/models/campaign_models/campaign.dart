@@ -7,14 +7,14 @@ import 'package:one_d_m/models/session_models/base_session.dart';
 import 'base_campaign.dart';
 
 class Campaign extends BaseCampaign {
-  final bool subscribed;
+  final bool? subscribed;
   final int memberCount;
   final Organization organization;
   final List<BaseSession> sessions;
   final List<News> news;
 
   static Campaign fromSnapshot(DocumentSnapshot snapshot) =>
-      BaseCampaign.fromSnapshot(snapshot);
+      BaseCampaign.fromSnapshot(snapshot) as Campaign;
 
   Campaign.fromJson(Map<String, dynamic> map)
       : subscribed = map['subscribed'],

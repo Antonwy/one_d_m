@@ -5,6 +5,7 @@ import 'package:one_d_m/api/endpoints/account_endpoint.dart';
 import 'package:one_d_m/api/endpoints/campaigns_endpoint.dart';
 import 'package:one_d_m/api/endpoints/donation_request_endpoint.dart';
 import 'package:one_d_m/api/endpoints/donations_endpoint.dart';
+import 'package:one_d_m/api/endpoints/contacts_endpoint.dart';
 import 'package:one_d_m/api/endpoints/news_endpoint.dart';
 import 'package:one_d_m/api/endpoints/organizations_endpoint.dart';
 import 'package:one_d_m/api/endpoints/search_endpoint.dart';
@@ -14,13 +15,17 @@ import 'package:one_d_m/api/endpoints/users_endpoint.dart';
 import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/models/search_result.dart';
 import 'package:one_d_m/models/user.dart';
+import 'package:one_d_m/provider/api_manager.dart';
 
 class Api {
   static final Api _api = Api._internal();
   static String? userToken;
   static Box? box;
-  static final Uri url = Uri.parse(
-      "https://one-dollar-movement.appspot.com" ?? "http://localhost:3000");
+  static final Uri url = Uri.parse("https://one-dollar-movement.appspot.com" ??
+      "http://192.168.178.109:3000" ??
+      "http://localhost:3000");
+
+  static late ApiManager manager;
 
   factory Api() => _api;
 
@@ -60,6 +65,7 @@ class Api {
   NewsEndpoint news() => NewsEndpoint();
   DonationRequestEndpoint donationRequest() => DonationRequestEndpoint();
   StatisticsEndpoint statistics() => StatisticsEndpoint();
+  ContactsEndpoint contacts() => ContactsEndpoint();
 
   static void updateUserToken(String token) {
     userToken = token;
@@ -72,11 +78,11 @@ class Api {
     'Content-Type': 'application/json; charset=UTF-8'
   };
 
-  Future<User> getAccount() {
+  Future<User?> getAccount() {
     return account().getOne();
   }
 
-  Future<SearchResult> search(String query) {
+  Future<SearchResult?> search(String query) {
     return ApiCall<SearchResult>(SearchEndpoint("search?query=$query"))
         .getOne();
   }

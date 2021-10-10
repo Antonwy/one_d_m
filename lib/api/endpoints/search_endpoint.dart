@@ -6,8 +6,8 @@ class SearchEndpoint extends ApiEndpoint<SearchResult> {
       : super(route, formatter: (v) => SearchResult.fromJson(v));
 
   @override
-  SearchEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  SearchEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return SearchEndpoint(finalRoute);
   }
 }

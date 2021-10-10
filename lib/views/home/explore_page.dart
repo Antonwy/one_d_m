@@ -6,10 +6,11 @@ import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/campaign_list.dart';
 import 'package:one_d_m/components/category_dialog.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/sessions_list.dart';
+import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/speed_scroll_physics.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/general/search_page.dart';
@@ -18,9 +19,9 @@ import 'package:one_d_m/views/sessions/create_session_page.dart';
 import 'package:one_d_m/views/users/find_friends_page.dart';
 
 class ExplorePage extends StatefulWidget {
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
 
-  const ExplorePage({Key key, this.scrollController}) : super(key: key);
+  const ExplorePage({Key? key, this.scrollController}) : super(key: key);
 
   @override
   _ExplorePageState createState() => _ExplorePageState();
@@ -28,10 +29,9 @@ class ExplorePage extends StatefulWidget {
 
 class _ExplorePageState extends State<ExplorePage>
     with AutomaticKeepAliveClientMixin {
-  TextTheme textTheme;
-  ThemeManager _theme;
-  int _categoryId = 100;
-  Stream<StreamResult<List<BaseCampaign>>> _campaignsStream;
+  late ThemeData theme;
+  int? _categoryId = 100;
+  Stream<StreamResult<List<BaseCampaign?>>>? _campaignsStream;
 
   @override
   void initState() {
@@ -42,17 +42,14 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   Widget build(BuildContext context) {
-    textTheme = Theme.of(context).textTheme;
-    _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: ColorTheme.appBg,
       body: CustomScrollView(
         controller: widget.scrollController,
-        physics: CustomPageViewScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
-            backgroundColor: ColorTheme.appBg,
+            backgroundColor: _theme.backgroundColor,
             centerTitle: false,
             automaticallyImplyLeading: false,
             pinned: true,
@@ -62,11 +59,12 @@ class _ExplorePageState extends State<ExplorePage>
                 child: Row(
                   children: [
                     Expanded(
-                      child:
-                          AutoSizeText("Entdecken", style: textTheme.headline6),
+                      child: AutoSizeText("Entdecken",
+                          style: _theme.textTheme.headline6),
                     ),
                     AppBarButton(
                         icon: CupertinoIcons.search,
+                        color: _theme.backgroundColor,
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -75,6 +73,7 @@ class _ExplorePageState extends State<ExplorePage>
                         }),
                     AppBarButton(
                         icon: CupertinoIcons.person_add,
+                        color: _theme.backgroundColor,
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -85,13 +84,13 @@ class _ExplorePageState extends State<ExplorePage>
                     DiscoveryHolder.createSession(
                       tapTarget: Icon(
                         Icons.add,
-                        color: _theme.colors.contrast,
+                        color: _theme.colorScheme.onPrimary,
                       ),
                       child: AppBarButton(
                           icon: Icons.add,
-                          color: _theme.colors.dark,
-                          iconColor: _theme.colors.textOnDark,
                           text: "Session erstellen",
+                          iconColor: _theme.colorScheme.onSecondary,
+                          color: _theme.colorScheme.secondary,
                           onPressed: () {
                             Navigator.push(
                                 context,
@@ -117,18 +116,19 @@ class _ExplorePageState extends State<ExplorePage>
                   DiscoveryHolder.projectHome(
                     tapTarget: Icon(
                       Icons.done,
-                      color: _theme.colors.contrast,
+                      color: _theme.colorScheme.onPrimary,
                     ),
                     child: Text(
                       'Projekte',
-                      style: _theme.textTheme.dark.headline6,
+                      style: _theme.textTheme.headline6,
                     ),
                   ),
                   AppBarButton(
                     hint: _categoryId != 100 ? 1 : 0,
                     icon: Icons.filter_alt_rounded,
+                    color: _theme.backgroundColor,
                     onPressed: () async {
-                      int resIndex = await CategoryDialog.of(context,
+                      int? resIndex = await CategoryDialog.of(context,
                               initialIndex: _categoryId)
                           .show();
                       setState(() {
@@ -146,38 +146,37 @@ class _ExplorePageState extends State<ExplorePage>
               ),
             ),
           ),
-          StreamBuilder<StreamResult<List<BaseCampaign>>>(
+          StreamBuilder<StreamResult<List<BaseCampaign?>>>(
               stream: _campaignsStream,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return CampaignList(
-                    campaigns: snapshot.data.data,
+                    campaigns: snapshot.data!.data,
                   );
                 }
 
                 return SliverToBoxAdapter(
                   child: Center(
-                      child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20,
-                      ),
-                      snapshot.hasError
-                          ? Icon(Icons.error)
-                          : CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation(ColorTheme.blue),
-                            ),
-                      SizedBox(
-                        height: 18,
-                      ),
-                      Text(
-                        snapshot.hasError
-                            ? "Ein Fehler ist aufgetreten!\nVersuche es später erneut."
-                            : "Lade Projekte",
-                        textAlign: TextAlign.center,
-                      )
-                    ],
+                      child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        snapshot.hasError ? WarningIcon() : LoadingIndicator(),
+                        SizedBox(
+                          height: 18,
+                        ),
+                        Text(
+                          snapshot.hasError
+                              ? "Beim Laden der Projekte ist ein Fehler ist aufgetreten!\nVersuche es später erneut."
+                              : "Lade Projekte",
+                          style: _theme.textTheme.caption,
+                          textAlign: TextAlign.center,
+                        )
+                      ],
+                    ),
                   )),
                 );
               })

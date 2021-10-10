@@ -1,19 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:one_d_m/helper/helper.dart';
+
+import 'gift.dart';
 
 class User {
-  String email,
-      name,
+  String? email,
       password,
-      id,
       phoneNumber,
       imgUrl,
       thumbnailUrl,
       blurHash,
       stripeCustomerId,
       deviceToken;
+
+  String id, name;
   int donatedAmount, dvBalance;
   bool admin, ghost;
-  final bool subscribed;
+  final bool? subscribed;
+  final Gift gift;
 
   static const String NAME = "name",
       EMAIL = "email",
@@ -30,24 +34,24 @@ class User {
 
   User(
       {this.email,
-      this.name,
+      required this.name,
       this.password,
-      this.id,
+      required this.id,
       this.subscribed,
       this.donatedAmount = 0,
       this.dvBalance = 0,
       this.phoneNumber,
-      this.admin,
+      this.admin = false,
       this.ghost = false,
       this.stripeCustomerId,
       this.deviceToken,
       this.imgUrl,
       this.thumbnailUrl,
-      this.blurHash});
+      this.blurHash,
+      this.gift = const Gift.zero()});
 
   static User fromSnapshot(DocumentSnapshot snapshot) {
-    if (snapshot.data() == null) return User();
-    Map<String, dynamic> data = snapshot.data();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return User(
         id: snapshot.id,
         name: data[User.NAME] ?? "No name",
@@ -61,20 +65,21 @@ class User {
   }
 
   User.fromJson(Map<String, dynamic> map)
-      : admin = map[ADMIN],
+      : admin = map[ADMIN] ?? false,
         ghost = map[GHOST] ?? false,
         blurHash = map[BLUR_HASH],
         imgUrl = map[IMAGE_URL],
         name = map[NAME] ?? "No name",
         subscribed = map['subscribed'] ?? false,
         thumbnailUrl = map[THUMBNAIL_URL],
-        dvBalance = map[DV_BALANCE],
+        dvBalance = map[DV_BALANCE] ?? 0,
         stripeCustomerId = map[STRIPE_CUSTOMER_ID],
         deviceToken = map[DEVICE_TOKEN],
         email = map[EMAIL],
         phoneNumber = map[PHONE_NUMBER],
         id = map['id'],
-        donatedAmount = map[DONATED_AMOUNT];
+        donatedAmount = map[DONATED_AMOUNT] ?? 0,
+        gift = Gift.fromMap(Map.from(map['gift'] ?? {}));
 
   static List<User> listFromJson(List<Map<String, dynamic>> list) {
     return list.map((ss) => User.fromJson(ss)).toList();

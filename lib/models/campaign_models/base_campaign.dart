@@ -3,9 +3,9 @@ import 'package:one_d_m/helper/helper.dart';
 import '../donation_unit.dart';
 
 class BaseCampaign {
-  final DateTime createdAt;
-  final int amount, categoryId, maxAnimCount;
-  final String name,
+  final DateTime? createdAt;
+  final int? amount, categoryId, maxAnimCount;
+  final String? name,
       description,
       shortDescription,
       dvAnimation,
@@ -17,8 +17,8 @@ class BaseCampaign {
       shortVideoUrl,
       longVideoUrl,
       blurHash;
-  final List<String> moreImages, donationEffects, effects, tags;
-  final DonationUnit unit;
+  final List<String>? moreImages, donationEffects, effects, tags;
+  final DonationUnit? unit;
 
   static final String ID = "id",
       NAME = "title",
@@ -70,7 +70,7 @@ class BaseCampaign {
       this.blurHash});
 
   static BaseCampaign fromSnapshot(DocumentSnapshot snapshot) =>
-      BaseCampaign.fromJson(snapshot.data());
+      BaseCampaign.fromJson(snapshot.data() as Map<String, dynamic>);
 
   BaseCampaign.fromJson(Map<String, dynamic> map)
       : id = map['id'],

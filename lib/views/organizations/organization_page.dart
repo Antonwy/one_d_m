@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/campaign_header.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
@@ -10,9 +11,9 @@ import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrganizationPage extends StatelessWidget {
-  Organization organization;
-  ThemeData _theme;
-  ScrollController scrollController;
+  Organization? organization;
+  late ThemeData _theme;
+  ScrollController? scrollController;
 
   OrganizationPage(this.organization, {this.scrollController});
 
@@ -20,16 +21,13 @@ class OrganizationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: ColorTheme.whiteBlue,
       body: CustomScrollView(
         controller: scrollController,
         slivers: [
           SliverAppBar(
-            backgroundColor: ColorTheme.whiteBlue,
-            iconTheme: IconThemeData(color: ColorTheme.blue),
+            backgroundColor: _theme.backgroundColor,
             title: Text(
-              organization.name,
-              style: TextStyle(color: ThemeManager.of(context).colors.dark),
+              organization!.name!,
             ),
           ),
           SliverToBoxAdapter(
@@ -60,8 +58,8 @@ class OrganizationPage extends StatelessWidget {
                           child: OutlineButton(
                             child: Text("Mehr Informationen"),
                             onPressed: () async {
-                              if (await canLaunch(organization.website)) {
-                                launch(organization.website);
+                              if (await canLaunch(organization!.website!)) {
+                                launch(organization!.website!);
                               }
                             },
                           ),
@@ -76,10 +74,12 @@ class OrganizationPage extends StatelessWidget {
               ),
             ),
           ),
-          FutureBuilder<List<BaseCampaign>>(
-              future: Api().campaigns().organizationId(organization?.id).get(),
+          StreamBuilder<StreamResult<List<BaseCampaign?>>>(
+              stream: Api()
+                  .campaigns()
+                  .organizationId(organization?.id)
+                  .streamGet(),
               builder: (context, snapshot) {
-                print(snapshot);
                 if (!snapshot.hasData)
                   return SliverToBoxAdapter(
                     child: Center(
@@ -88,7 +88,7 @@ class OrganizationPage extends StatelessWidget {
                             child: LoadingIndicator(message: "Lade Projekte"))),
                   );
 
-                if (snapshot.data.isEmpty)
+                if (snapshot.data!.data?.isEmpty ?? true)
                   return SliverToBoxAdapter(
                     child: Center(
                         child: Padding(
@@ -102,9 +102,9 @@ class OrganizationPage extends StatelessWidget {
                   sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                           (context, index) => CampaignHeader(
-                                campaign: snapshot.data[index],
-                              ),
-                          childCount: snapshot.data.length)),
+                              campaign: snapshot.data!.data![index]!,
+                              withHero: false),
+                          childCount: snapshot.data!.data!.length)),
                 );
               })
         ],

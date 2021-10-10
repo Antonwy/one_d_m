@@ -3,6 +3,7 @@ import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/models/news.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
@@ -10,14 +11,14 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'news_post.dart';
 
 class PostFeed extends StatefulWidget {
-  const PostFeed({Key key}) : super(key: key);
+  const PostFeed({Key? key}) : super(key: key);
 
   @override
   _PostFeedState createState() => _PostFeedState();
 }
 
 class _PostFeedState extends State<PostFeed> {
-  Stream<StreamResult<List<News>>> _newsStream;
+  Stream<StreamResult<List<News?>>>? _newsStream;
 
   @override
   void initState() {
@@ -27,18 +28,31 @@ class _PostFeedState extends State<PostFeed> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<StreamResult<List<News>>>(
+    return StreamBuilder<StreamResult<List<News?>>>(
         stream: _newsStream,
         builder: (_, snapshot) {
+          if (snapshot.hasError) {
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    WarningIcon(size: 14),
+                    XMargin(6),
+                    Text("News", style: Theme.of(context).textTheme.headline6),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (!snapshot.hasData) {
             return SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    Text("News",
-                        style:
-                            ThemeManager.of(context).textTheme.dark.headline6),
+                    Text("News", style: Theme.of(context).textTheme.headline6),
                     XMargin(12),
                     LoadingIndicator(
                       size: 10,
@@ -50,7 +64,7 @@ class _PostFeedState extends State<PostFeed> {
             );
           }
 
-          List<News> posts = snapshot.data.data ?? [];
+          List<News?> posts = snapshot.data!.data ?? [];
           if (posts.isEmpty) {
             return NoContentProfilePage();
           }
@@ -61,7 +75,7 @@ class _PostFeedState extends State<PostFeed> {
                 child: Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text("News",
-                      style: ThemeManager.of(context).textTheme.dark.headline6),
+                      style: Theme.of(context).textTheme.headline6),
                 ),
               ),
               SliverPadding(

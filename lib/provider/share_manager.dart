@@ -1,13 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/helper/share_image.dart';
 import 'package:one_d_m/helper/shareable.dart';
 import 'package:social_share/social_share.dart';
 
 class ShareItem {
-  final Shareable shareable;
-  final BuildContext context;
-  final String text;
-  final List<String> hashtags;
+  final Shareable? shareable;
+  final BuildContext? context;
+  final String? text;
+  final List<String>? hashtags;
 
   ShareItem({this.shareable, this.context, this.text, this.hashtags});
 }
@@ -18,8 +20,8 @@ class ShareManager {
   ShareManager.of(this.item);
 
   Future<void> share() async {
-    return SocialShare.shareOptions(
-        await item.shareable.getShareUrl(item.context));
+    await SocialShare.shareOptions(
+        await item.shareable!.getShareUrl(item.context));
   }
 
   Future<void> shareFromType(SocialMediaType type) {
@@ -45,42 +47,44 @@ class ShareManager {
   }
 
   Future<void> shareOnInstagram() async {
-    InstagramImages images = await item.shareable.getShareImages(item.context);
-    return SocialShare.shareInstagramStory(images.foreground.path,
+    InstagramImages? images =
+        await item.shareable!.getShareImages(item.context);
+    if (images == null) return;
+    await SocialShare.shareInstagramStory(images.foreground!.path,
         backgroundTopColor: "#ffffff",
         backgroundBottomColor: "#000000",
-        backgroundImagePath: images.background.path,
+        backgroundImagePath: images.background!.path,
         attributionURL:
-            (await item.shareable.getShareUrl(item.context)).toString());
+            (await item.shareable!.getShareUrl(item.context)).toString());
   }
 
   Future<void> shareOnWhatsApp() async {
-    return SocialShare.shareWhatsapp(
-        await item.shareable.getShareUrl(item.context));
+    await SocialShare.shareWhatsapp(
+        await item.shareable!.getShareUrl(item.context));
   }
 
   Future<void> shareOnTelegram() async {
-    return SocialShare.shareTelegram(
-        await item.shareable.getShareUrl(item.context));
+    await SocialShare.shareTelegram(
+        await item.shareable!.getShareUrl(item.context));
   }
 
   Future<void> shareOnTwitter() async {
-    return SocialShare.shareTwitter(item.text,
-        url: await item.shareable.getShareUrl(item.context),
+    await SocialShare.shareTwitter(item.text!,
+        url: await item.shareable!.getShareUrl(item.context),
         hashtags: item.hashtags,
         trailingText: "");
   }
 
   Future<void> shareWithSms() async {
-    return SocialShare.shareSms(item.text,
-        url: await item.shareable.getShareUrl(item.context));
+    await SocialShare.shareSms(item.text!,
+        url: await item.shareable!.getShareUrl(item.context));
   }
 
   Future<void> copyToClipboard() async {
-    String url = await item.shareable.getShareUrl(item.context);
+    String url = await item.shareable!.getShareUrl(item.context);
     await SocialShare.copyToClipboard(url);
     print(url);
-    ScaffoldMessenger.of(item.context)
+    ScaffoldMessenger.of(item.context!)
         .showSnackBar(SnackBar(content: Text("Link kopiert!")));
   }
 }

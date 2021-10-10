@@ -11,7 +11,7 @@ class CampaignsEndpoint extends ApiEndpoint<BaseCampaign>
             formatter: (map) => Campaign.fromJson(map),
             listFormatter: BaseCampaign.listFromJson);
 
-  Future<Campaign> getOne([String? id]) {
+  Future<Campaign?> getOne([String? id]) {
     return id == null
         ? ApiCall<Campaign>(this).getOne()
         : ApiCall<Campaign>(this.addRoute(id)).getOne();
@@ -24,8 +24,8 @@ class CampaignsEndpoint extends ApiEndpoint<BaseCampaign>
   }
 
   @override
-  CampaignsEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  CampaignsEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return CampaignsEndpoint(finalRoute);
   }
 }
@@ -34,14 +34,14 @@ class QueriedCampaignEndpoint = QueryableEndpoint<BaseCampaign>
     with CampaignEndpointQueries;
 
 mixin CampaignEndpointQueries on ApiEndpoint<BaseCampaign> {
-  QueriedCampaignEndpoint organizationId(String oid) {
+  QueriedCampaignEndpoint organizationId(String? oid) {
     return QueriedCampaignEndpoint(route,
         query: {...(query ?? {}), 'organization_id': oid},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
-  QueriedCampaignEndpoint category(int categoryId) {
+  QueriedCampaignEndpoint category(int? categoryId) {
     return QueriedCampaignEndpoint(route,
         query: {...(query ?? {}), 'category_id': categoryId},
         formatter: formatter,

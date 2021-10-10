@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:one_d_m/helper/helper.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/provider/donation_dialog_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 enum DonationAddSubType { add, sub }
@@ -14,20 +12,20 @@ class DonationAddSubButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     bool isAdd = type == DonationAddSubType.add;
-    Color buttonColor =
-        isAdd ? _theme.colors.dark : Helper.hexToColor('#e2e2e2');
+    Color? buttonColor = _theme.primaryColorLight;
 
     return Consumer<DonationDialogManager>(builder: (context, ddm, child) {
-      Color textColor = _theme.correctColorFor(buttonColor);
+      Color? textColor = _theme.correctColorFor(buttonColor);
+
       return MaterialButton(
         clipBehavior: Clip.antiAlias,
         shape: CircleBorder(),
         color: buttonColor,
         disabledColor: buttonColor,
         elevation: 0,
-        onPressed: ddm.loading
+        onPressed: ddm.loading!
             ? null
             : isAdd
                 ? ddm.add

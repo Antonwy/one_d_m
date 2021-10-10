@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.36+126
 
 environment:
-  sdk: '>=2.13.0 <3.0.0'
+  sdk: '>=2.14.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -88,6 +88,7 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   sliver_tools: ^0.2.5
+  keyboard_actions: '^3.3.1+1'
 
 #  video_player:
 #    git:

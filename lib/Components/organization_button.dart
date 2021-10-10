@@ -11,11 +11,11 @@ import 'donation_widget.dart';
 
 class OrganizationButton extends StatelessWidget {
   String id;
-  Organization organization;
-  Color color;
+  Organization? organization;
+  Color? color;
   TextStyle textStyle;
   double elevation;
-  Function(Organization) onPressed;
+  Function(Organization?)? onPressed;
   double borderRadius;
 
   OrganizationButton(this.id,
@@ -37,11 +37,11 @@ class OrganizationButton extends StatelessWidget {
             return CustomOpenContainer(
               openBuilder: (context, open, scrollController) =>
                   OrganizationPage(
-                snapshot.data.description == null
+                snapshot.data!.description == null
                     ? Organization(
-                        id: organization.id,
-                        imgUrl: organization.imgUrl,
-                        name: organization.name)
+                        id: organization!.id,
+                        imgUrl: organization!.imgUrl,
+                        name: organization!.name)
                     : snapshot.data,
                 scrollController: scrollController,
               ),
@@ -52,7 +52,7 @@ class OrganizationButton extends StatelessWidget {
               closedBuilder: (context, open) => InkWell(
                 onTap: () {
                   if (onPressed != null) {
-                    onPressed(snapshot.data);
+                    onPressed!(snapshot.data);
                     return;
                   }
                   open();
@@ -62,17 +62,17 @@ class OrganizationButton extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       RoundedAvatar(
-                        snapshot.data.imgUrl,
+                        snapshot.data!.imgUrl,
                         color: color ?? ColorTheme.appBg,
                       ),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(
-                          "${snapshot.data.name}",
+                          "${snapshot.data!.name}",
                           maxLines: 1,
                           style: Theme.of(context)
                               .textTheme
-                              .bodyText1
+                              .bodyText1!
                               .copyWith(color: textStyle.color),
                         ),
                       )

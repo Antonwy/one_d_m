@@ -14,17 +14,17 @@ class SizeUtil {
   static Map<String, SizeUtil> _keyValues = Map();
 
   static initDesignSize() {
-    getInstance(key: SizeKeyConst.ROUND_ANGLE_KEY).designSize =
+    getInstance(key: SizeKeyConst.ROUND_ANGLE_KEY)!.designSize =
         Size(500.0, 500.0);
-    getInstance(key: SizeKeyConst.REGULAR_POLYGON_KEY).designSize =
+    getInstance(key: SizeKeyConst.REGULAR_POLYGON_KEY)!.designSize =
         Size(500.0, 500.0);
-    getInstance(key: SizeKeyConst.LOGO_KEY).designSize = Size(580, 648.0);
-    getInstance(key: SizeKeyConst.CIRCLE_KEY).designSize = Size(500.0, 500.0);
-    getInstance(key: SizeKeyConst.CIRCLE_TRIANGLE_KEY).designSize =
+    getInstance(key: SizeKeyConst.LOGO_KEY)!.designSize = Size(580, 648.0);
+    getInstance(key: SizeKeyConst.CIRCLE_KEY)!.designSize = Size(500.0, 500.0);
+    getInstance(key: SizeKeyConst.CIRCLE_TRIANGLE_KEY)!.designSize =
         Size(500.0, 500.0);
   }
 
-  static SizeUtil getInstance({key = SizeKeyConst.DEVICE_KEY}) {
+  static SizeUtil? getInstance({key = SizeKeyConst.DEVICE_KEY}) {
     if (_keyValues.containsKey(key)) {
       return _keyValues[key];
     } else {
@@ -33,14 +33,14 @@ class SizeUtil {
     }
   }
 
-  Size _designSize;
+  late Size _designSize;
 
   set designSize(Size size) {
     _designSize = size;
   }
 
   //logic size in device
-  Size _logicalSize;
+  late Size _logicalSize;
 
   //device pixel radio.
 

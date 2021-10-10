@@ -4,6 +4,8 @@ import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/session_models/uploadable_session.dart';
 
+import '../stream_result.dart';
+
 class SessionsEndpoint extends ApiEndpoint<BaseSession>
     with SubscribableEndpoint, SessionEndpointQueries {
   SessionsEndpoint([String route = "sessions"])
@@ -11,7 +13,7 @@ class SessionsEndpoint extends ApiEndpoint<BaseSession>
             formatter: (map) => Session.fromJson(map),
             listFormatter: BaseSession.listFromJson);
 
-  Future<Session> create(UploadableSession session) {
+  Future<Session?> create(UploadableSession session) {
     return ApiCall<Session>(this).post(session.toMap());
   }
 
@@ -25,9 +27,19 @@ class SessionsEndpoint extends ApiEndpoint<BaseSession>
   }
 
   @override
-  SessionsEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  SessionsEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return SessionsEndpoint(finalRoute);
+  }
+
+  Future<Session?> getOne([String? id]) async {
+    if (id != null) return ApiCall<Session>(this.addRoute(id)).getOne();
+    return ApiCall<Session>(this).getOne();
+  }
+
+  Stream<StreamResult<Session>> streamGetOne([String? id]) {
+    if (id != null) return ApiCall<Session>(this.addRoute(id)).streamGetOne();
+    return ApiCall<Session>(this).streamGetOne();
   }
 }
 
@@ -49,7 +61,7 @@ mixin SessionEndpointQueries on ApiEndpoint<BaseSession> {
         listFormatter: listFormatter);
   }
 
-  QueriedSessionEndpoint fromUser(String uid) {
+  QueriedSessionEndpoint fromUser(String? uid) {
     return QueriedSessionEndpoint(route,
         query: {...(query ?? {}), 'creator_id': uid},
         formatter: formatter,

@@ -6,7 +6,7 @@ import 'margin.dart';
 class Empty extends StatelessWidget {
   final String message;
 
-  const Empty({Key key, this.message = "Keine Daten gefunden!"})
+  const Empty({Key? key, this.message = "Keine Daten gefunden!"})
       : super(key: key);
 
   @override

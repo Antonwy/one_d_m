@@ -1,7 +1,7 @@
 import 'api_result.dart';
 
 class ApiSuccess<E> extends ApiResult<E> {
-  ApiSuccess({E data, String message = "Successfull fetched"})
+  ApiSuccess({E? data, String message = "Successfull fetched"})
       : super(data: data, message: message);
 
   @override

@@ -1,27 +1,20 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/components/users/user_page_follow_button.dart';
-import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
-import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/models/user_account.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/provider/user_page_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
-import 'package:one_d_m/views/users/edit_profile_page.dart';
 import 'package:one_d_m/views/users/followers_list_page.dart';
 import 'package:one_d_m/views/users/user_donations_page.dart';
 import 'package:provider/provider.dart';
@@ -29,12 +22,12 @@ import 'package:social_share/social_share.dart';
 
 class UserHeader extends SliverPersistentHeaderDelegate {
   final int index = 0;
-  ThemeManager _theme;
+  late ThemeData _theme;
   double _minExtend = 80.0;
 
   Future<void> _shareUser(BuildContext context) async {
     UserPageManager upm = context.read<UserPageManager>();
-    if ((upm.user?.name?.isEmpty ?? true)) return;
+    if ((upm.user.name.isEmpty ?? true)) return;
     SocialShare.shareOptions(
         (await DynamicLinkManager.of(context).createUserLink(upm.user))
             .toString());
@@ -43,7 +36,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     _minExtend = MediaQuery.of(context).padding.top + 56.0;
     return LayoutBuilder(builder: (context, constraints) {
       final double percentage =
@@ -52,7 +45,6 @@ class UserHeader extends SliverPersistentHeaderDelegate {
       return Container(
         height: constraints.maxHeight,
         child: Material(
-          color: _theme.colors.dark,
           elevation: Tween<double>(begin: 1.0, end: 0.0).transform(percentage),
           child: SafeArea(
             bottom: false,
@@ -75,9 +67,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                                   Consumer<UserPageManager>(
                                       builder: (context, upm, child) {
                                     return Text(
-                                      "${upm.user?.name ?? "Gelöschter Account"}",
+                                      "${upm.user.name}",
                                       style: TextStyle(
-                                          color: Colors.white,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w600),
                                     );
@@ -92,23 +83,14 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                   alignment: WrapAlignment.center,
                   children: <Widget>[
                     AppBar(
-                      leading: IconButton(
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 30,
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      brightness: Brightness.dark,
                       backgroundColor: Colors.transparent,
+                      iconTheme: _theme.iconTheme,
                       elevation: 0,
-                      iconTheme: IconThemeData(color: _theme.colors.textOnDark),
                       actions: [
                         Center(
                           child: AppBarButton(
                             onPressed: () => _shareUser(context),
-                            color: _theme.colors.dark,
-                            iconColor: _theme.colors.textOnDark,
+                            color: _theme.canvasColor,
                             icon: CupertinoIcons.share,
                           ),
                         ),
@@ -137,9 +119,8 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                                 children: [
                                   Consumer<UserPageManager>(
                                     builder: (context, upm, child) => Text(
-                                      "${upm.user?.name ?? "Gelöschter Account"}",
+                                      "${upm.user.name ?? "Gelöschter Account"}",
                                       style: TextStyle(
-                                          color: Colors.white,
                                           fontSize: 28,
                                           fontWeight: FontWeight.w700),
                                     ),
@@ -168,11 +149,11 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                               _waitForLoadedColumn(
                                   text: "Abonnenten",
                                   context: context,
-                                  clickable: (ua) => ua.followedCount > 0,
+                                  clickable: (ua) => ua!.followedCount > 0,
                                   usersFuture: (uid) =>
-                                      Api().account().followed(uid),
+                                      Api().account().followed(uid!),
                                   callback: (ua) =>
-                                      ua.followedCount.toString()),
+                                      ua!.followedCount.toString()),
                               Material(
                                 borderRadius: BorderRadius.circular(5),
                                 clipBehavior: Clip.antiAlias,
@@ -182,7 +163,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                                     onTap: (upm.userAccount?.donatedAmount ==
                                                     null
                                                 ? 0
-                                                : upm.userAccount
+                                                : upm.userAccount!
                                                     .donatedAmount) >
                                             0
                                         ? () {
@@ -204,11 +185,11 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                               _waitForLoadedColumn(
                                   text: "Abonniert",
                                   context: context,
-                                  clickable: (ua) => ua.followingCount > 0,
+                                  clickable: (ua) => ua!.followingCount > 0,
                                   usersFuture: (uid) =>
-                                      Api().account().following(uid),
+                                      Api().account().following(uid!),
                                   callback: (ua) =>
-                                      ua.followingCount.toString())
+                                      ua!.followingCount.toString())
                             ],
                           ),
                         ),
@@ -235,7 +216,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
         ),
         child: Consumer<UserPageManager>(
           builder: (context, upm, child) => CachedNetworkImage(
-            imageUrl: upm.user?.imgUrl ?? '',
+            imageUrl: upm.user.imgUrl ?? '',
             imageBuilder: (context, imageProvider) => Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -248,22 +229,24 @@ class UserHeader extends SliverPersistentHeaderDelegate {
               height: size.height,
               width: size.width,
               decoration: BoxDecoration(
-                color: ThemeManager.of(context).colors.contrast,
+                color: context.theme.primaryColor,
               ),
               child: Center(
                   child: Icon(
                 Icons.person,
-                color: ThemeManager.of(context).colors.dark,
+                color: context.theme.colorScheme.onPrimary,
               )),
             ),
             placeholder: (_, __) => Container(
               height: size.height,
               width: size.width,
-              child: upm.user?.blurHash == null
+              child: upm.user.blurHash == null
                   ? Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: context.theme.primaryColor,
+                      ),
                     )
-                  : BlurHash(hash: upm.user.blurHash),
+                  : BlurHash(hash: upm.user.blurHash!),
             ),
           ),
         ),
@@ -279,39 +262,39 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   double get minExtent => _minExtend;
 
   Widget _waitForLoadedColumn(
-      {String text,
-      BuildContext context,
-      Future<List<User>> Function(String uid) usersFuture,
-      bool Function(UserAccount ua) clickable,
-      String Function(UserAccount ua) callback}) {
+      {String? text,
+      BuildContext? context,
+      Future<List<User?>> Function(String? uid)? usersFuture,
+      bool Function(UserAccount? ua)? clickable,
+      String Function(UserAccount? ua)? callback}) {
     return Consumer<UserPageManager>(
       builder: (context, upm, child) => Material(
         color: Colors.transparent,
         clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(5),
         child: InkWell(
-          onTap: !upm.loadingMoreInfo && clickable(upm.userAccount)
+          onTap: !upm.loadingMoreInfo! && clickable!(upm.userAccount)
               ? () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (c) => FollowersListPage(
                                 title: text,
-                                usersFuture: usersFuture(upm.user.id),
+                                usersFuture: usersFuture!(upm.user.id),
                               )));
                 }
               : null,
           child: _textNumberColumn(
-              number: upm.loadingMoreInfo ? "0" : callback(upm.userAccount),
-              text: text),
+              number: upm.loadingMoreInfo! ? "0" : callback!(upm.userAccount),
+              text: text!),
         ),
       ),
     );
   }
 
   Widget _textNumberColumn(
-      {String text,
-      String number,
+      {required String text,
+      String? number,
       CrossAxisAlignment alignment = CrossAxisAlignment.center}) {
     return Padding(
       padding: EdgeInsets.all(8.0),
@@ -321,14 +304,14 @@ class UserHeader extends SliverPersistentHeaderDelegate {
           AutoSizeText(
             number.toString(),
             maxLines: 1,
-            style: _theme.textTheme.textOnDark.headline6
+            style: _theme.textTheme.headline6!
                 .copyWith(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           const YMargin(4),
           Text(
             text,
-            style: _theme.materialTheme.accentTextTheme.bodyText1.copyWith(
-                color: Colors.white, fontWeight: FontWeight.w400, fontSize: 14),
+            style: _theme.textTheme.bodyText1!
+                .copyWith(fontWeight: FontWeight.w400, fontSize: 14),
           )
         ],
       ),

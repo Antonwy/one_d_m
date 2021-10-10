@@ -9,10 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 class ForceUpdateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: ColorTheme.appBg,
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Container(
@@ -27,12 +26,12 @@ class ForceUpdateScreen extends StatelessWidget {
               ),
               Text(
                 "NEUES UPDATE!",
-                style: _theme.textTheme.dark.headline6,
+                style: _theme.textTheme.headline6,
               ),
               YMargin(12),
               Text(
                 "Wir haben ein neues Update veröffentlicht. Gehe jetzt in den ${Platform.isAndroid ? "PlayStore" : "Appstore"} um es herunterzuladen!",
-                style: _theme.textTheme.dark.bodyText1,
+                style: _theme.textTheme.bodyText1,
                 textAlign: TextAlign.center,
               ),
               YMargin(12),
@@ -42,9 +41,6 @@ class ForceUpdateScreen extends StatelessWidget {
                     launch(Constants.STORE_LINK);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                    primary: _theme.colors.dark,
-                    textStyle: TextStyle(color: _theme.colors.textOnDark)),
                 child: Text("Update herunterladen"),
               ),
             ],

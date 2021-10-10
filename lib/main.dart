@@ -4,7 +4,12 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/not_used/push_notification_service.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/provider/api_manager.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
@@ -18,7 +23,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'api/api.dart';
 import 'components/page_manager_widget.dart';
-import 'helper/ad_manager.dart';
 import 'helper/native_ads.dart';
 import 'provider/remote_config_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -37,6 +41,7 @@ void main() async {
     ChangeNotifierProvider(create: (context) => UserManager.instance()),
     ChangeNotifierProvider(create: (context) => ThemeManager(context)),
     ChangeNotifierProvider(create: (context) => StatisticsManager()),
+    ChangeNotifierProvider(create: (context) => ApiManager()),
     Provider(
       create: (context) => RemoteConfigManager(),
     ),
@@ -57,11 +62,75 @@ class _ODMAppState extends State<ODMApp> {
     // StripePayment.setOptions(
     //     StripeOptions(publishableKey: Constants.STRIPE_LIVE_KEY));
     getThemeIndex().then((value) {
-      ThemeManager.of(context, listen: false).colors =
-          ThemeHolder.themes[value];
+      ThemeManager _tm = ThemeManager.of(context, listen: false);
+
+      if (value == 0) {
+        _tm.colors = ThemeHolder.turqoiseBlue;
+      } else {
+        var brightness = SchedulerBinding.instance!.window.platformBrightness;
+        bool isDarkMode = brightness == Brightness.dark;
+
+        _tm.colors = isDarkMode ? ThemeHolder.dark : ThemeHolder.light;
+      }
     });
     Platform.isAndroid ? NativeAds.initialize() : null;
+
+    Api.manager = context.read<ApiManager>();
+    _precacheImages();
     super.initState();
+  }
+
+  Future<void> _precacheImages() async {
+    print("STARTING PRECACHING IMAGES");
+    final res = await Future.wait([
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_odm_logo.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_session.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_project.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_push.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_contact.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/img_login.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/verify.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(SvgPicture.svgStringDecoder,
+              'assets/images/img_login_register.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/no-news.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+              SvgPicture.svgStringDecoder, 'assets/images/explore.svg'),
+          context),
+      precachePicture(
+          ExactAssetPicture(
+            SvgPicture.svgStringDecoder,
+            "assets/images/welcome-gift.svg",
+          ),
+          context),
+    ]);
+    print("PRECACHED IMAGES");
   }
 
   Future<int> getThemeIndex() async {
@@ -79,10 +148,71 @@ class _ODMAppState extends State<ODMApp> {
             FirebaseAnalyticsObserver(
                 analytics: context.read<FirebaseAnalytics>()),
           ],
+          themeMode: ThemeMode.system,
           theme: ThemeData(
-            appBarTheme: AppBarTheme(brightness: Brightness.light),
-            primarySwatch: Colors.indigo,
-          ),
+              primaryColor: Color.fromARGB(255, 52, 199, 89),
+              primaryColorLight: Colors.grey[200],
+              colorScheme: ColorScheme.light(
+                  primary: Color.fromARGB(255, 52, 199, 89),
+                  onPrimary: Colors.white,
+                  secondary: Color.fromARGB(255, 0, 122, 255),
+                  onSecondary: Colors.white,
+                  onError: Colors.white,
+                  onBackground: Colors.blueGrey[900]!),
+              appBarTheme: AppBarTheme(
+                  systemOverlayStyle: SystemUiOverlayStyle.dark,
+                  backgroundColor: Colors.white,
+                  titleTextStyle: TextStyle(
+                      color: Colors.blueGrey[900]!,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500),
+                  iconTheme: IconThemeData(color: Colors.blueGrey[900]!)),
+              cardColor: Colors.white,
+              cardTheme: CardTheme(
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(Constants.radius)),
+                  clipBehavior: Clip.antiAlias),
+              canvasColor: Colors.grey[200],
+              brightness: Brightness.light,
+              backgroundColor: Colors.white,
+              scaffoldBackgroundColor: Colors.white,
+              errorColor: Color.fromARGB(255, 255, 69, 58),
+              snackBarTheme: SnackBarThemeData(
+                backgroundColor: Color.fromARGB(255, 255, 59, 48),
+                contentTextStyle: TextStyle(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(Constants.radius))),
+              )),
+          darkTheme: ThemeData(
+              primaryColor: Color.fromARGB(255, 48, 209, 88),
+              primaryColorLight: Colors.grey[850],
+              colorScheme: ColorScheme.dark(
+                  primary: Color.fromARGB(255, 48, 209, 88),
+                  onPrimary: Colors.white,
+                  secondary: Color.fromARGB(255, 10, 132, 255),
+                  onSecondary: Colors.white,
+                  onError: Colors.white,
+                  background: Colors.blueGrey[900]!),
+              cardColor: Colors.grey[900],
+              canvasColor: Color.fromARGB(255, 44, 44, 46),
+              cardTheme: CardTheme(
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(Constants.radius)),
+                  clipBehavior: Clip.antiAlias),
+              brightness: Brightness.dark,
+              scaffoldBackgroundColor: Colors.black,
+              backgroundColor: Colors.black,
+              errorColor: Color.fromARGB(255, 255, 69, 58),
+              snackBarTheme: SnackBarThemeData(
+                backgroundColor: Color.fromARGB(255, 255, 69, 58),
+                contentTextStyle: TextStyle(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(Constants.radius))),
+              )),
           home: PageManagerWidget()),
     );
   }

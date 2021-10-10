@@ -18,7 +18,7 @@ Widget sessionShuttle(
     BuildContext toHeroContext,
     ThemeManager _theme,
     Widget bottomWidget) {
-  fromHeroContext?.visitChildElements((element) {
+  fromHeroContext.visitChildElements((element) {
     print(element);
   });
   BaseSessionManager cm = (flightDirection == HeroFlightDirection.push
@@ -26,7 +26,7 @@ Widget sessionShuttle(
           : fromHeroContext)
       .read<BaseSessionManager>();
 
-  BaseSession session = cm.baseSession;
+  BaseSession? session = cm.baseSession;
 
   return AnimatedBuilder(
       animation: animation,
@@ -40,15 +40,16 @@ Widget sessionShuttle(
         Color backgroundColor = ColorTween(
                 begin: session?.secondaryColor ?? _theme.colors.dark,
                 end: ColorTheme.appBg)
-            .evaluate(lateAnim);
+            .evaluate(lateAnim)!;
 
         Color textColor = ColorTween(
                 begin: _theme.correctColorFor(
                     session?.secondaryColor ?? _theme.colors.dark),
                 end: _theme.colors.dark)
-            .evaluate(lateAnim);
+            .evaluate(lateAnim)!;
 
-        double calculatedAmount = session.amount / session.donationUnit.value;
+        double calculatedAmount =
+            session!.amount! / session.donationUnit.value!;
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -64,11 +65,11 @@ Widget sessionShuttle(
                       fit: StackFit.expand,
                       children: [
                         CachedNetworkImage(
-                          imageUrl: session?.imgUrl ?? "",
+                          imageUrl: session.imgUrl ?? "",
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => session?.blurHash != null
-                              ? BlurHash(hash: session.blurHash)
+                          placeholder: (_, __) => session.blurHash != null
+                              ? BlurHash(hash: session.blurHash!)
                               : Center(
                                   child: CircularProgressIndicator(
                                     valueColor:
@@ -76,7 +77,7 @@ Widget sessionShuttle(
                                   ),
                                 ),
                         ),
-                        if (session?.reachedGoal ?? false)
+                        if (session.reachedGoal ?? false)
                           Material(
                               color: Colors.black45,
                               child: Center(
@@ -107,7 +108,7 @@ Widget sessionShuttle(
                             Flexible(
                               flex: 6,
                               child: AutoSizeText(
-                                session?.name ?? "",
+                                session.name ?? "",
                                 style: _theme.textTheme
                                     .withColor(textColor)
                                     .bodyText1,
@@ -128,9 +129,9 @@ Widget sessionShuttle(
                       Padding(
                         padding: EdgeInsets.fromLTRB(8, 0, 14, 0),
                         child: Row(
-                          children: session?.donationUnit == null ||
-                                  session?.amount == null ||
-                                  session?.donationGoal == null
+                          children: session.donationUnit == null ||
+                                  session.amount == null ||
+                                  session.donationGoal == null
                               ? [
                                   Text(
                                     "0%",
@@ -149,7 +150,7 @@ Widget sessionShuttle(
                                 ]
                               : [
                                   Text(
-                                    "${((calculatedAmount / session.donationGoal) * 100).round()}%",
+                                    "${((calculatedAmount / session.donationGoal!) * 100).round()}%",
                                     style: _theme.textTheme
                                         .withColor(textColor)
                                         .bodyText2,
@@ -158,7 +159,7 @@ Widget sessionShuttle(
                                   Expanded(
                                     child: PercentLine(
                                       percent: (calculatedAmount /
-                                              session.donationGoal)
+                                              session.donationGoal!)
                                           .clamp(0.0, 1.0),
                                       height: 8.0,
                                       color: textColor,

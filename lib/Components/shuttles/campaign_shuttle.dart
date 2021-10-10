@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/video_or_image.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
@@ -10,7 +11,7 @@ import 'package:one_d_m/provider/campaign_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:provider/provider.dart';
-
+import '../big_button.dart';
 import '../campaign_header.dart';
 import '../donation_widget.dart';
 import '../margin.dart';
@@ -20,7 +21,7 @@ Widget _buttonShuttle(
     HeroFlightDirection flightDirection,
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
-    ThemeManager _theme) {
+    ThemeData _theme) {
   CampaignManager cm = (flightDirection == HeroFlightDirection.push
           ? toHeroContext
           : fromHeroContext)
@@ -35,20 +36,23 @@ Widget _buttonShuttle(
 
   int show = IntTween(begin: 0, end: 1).evaluate(animation);
 
-  Color toColor =
-      (cm?.subscribed ?? false) ? _theme.colors.contrast : _theme.colors.dark;
-  Color color = ColorTween(
-    begin: _theme.colors.dark,
-    end: toColor,
-  ).evaluate(animation);
+  Color toColor = (cm.subscribed ?? false)
+      ? _theme.primaryColor
+      : _theme.colorScheme.secondary;
 
-  Color toTextColor = (cm?.subscribed ?? false)
-      ? _theme.colors.textOnContrast
-      : _theme.colors.textOnDark;
+  Color color = ColorTween(
+    begin: _theme.colorScheme.secondary,
+    end: toColor,
+  ).evaluate(animation)!;
+
+  Color? toTextColor = (cm.subscribed ?? false)
+      ? _theme.colorScheme.onPrimary
+      : _theme.colorScheme.onSecondary;
+
   Color textColor = ColorTween(
-    begin: _theme.colors.textOnDark,
+    begin: _theme.colorScheme.onSecondary,
     end: toTextColor,
-  ).evaluate(animation);
+  ).evaluate(animation)!;
 
   return ClipRRect(
     borderRadius: BorderRadius.circular(borderRadius),
@@ -67,21 +71,19 @@ Widget _buttonShuttle(
                 duration: Duration(milliseconds: 125),
                 child: Text(
                   show == 1
-                      ? (cm?.subscribed ?? false)
+                      ? (cm.subscribed ?? false)
                           ? "Verlassen"
                           : "Beitreten"
                       : "Unterstützen",
                   style: show == 1
-                      ? _theme.textTheme
-                          .withColor(textColor)
-                          .bodyText2
-                          .copyWith(fontSize: 13, fontWeight: FontWeight.w600)
-                      : _theme.textTheme
-                          .withColor(textColor)
-                          .bodyText1
-                          .copyWith(
-                            fontSize: 11,
-                          ),
+                      ? _theme.textTheme.bodyText2!.copyWith(
+                          color: textColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600)
+                      : _theme.textTheme.bodyText1!.copyWith(
+                          color: textColor,
+                          fontSize: 11,
+                        ),
                 ),
               ),
             ),
@@ -91,7 +93,7 @@ Widget _buttonShuttle(
 }
 
 Widget _titleShuttle(
-    String title, Animation<double> animation, ThemeManager _theme) {
+    String? title, Animation<double> animation, ThemeData _theme) {
   return AnimatedBuilder(
     animation: animation,
     builder: (context, child) {
@@ -102,8 +104,8 @@ Widget _titleShuttle(
           fit: BoxFit.contain,
           alignment: Alignment.centerLeft,
           child: Text(
-            title,
-            style: _theme.textTheme.dark.bodyText1
+            title!,
+            style: _theme.textTheme.bodyText1!
                 .copyWith(fontWeight: FontWeight.w700),
           ),
         ),
@@ -114,7 +116,7 @@ Widget _titleShuttle(
 
 String getFirstTag(BaseCampaign campaign) {
   DonationUnit unit = campaign.unit ?? DonationUnit.defaultUnit;
-  return "${Numeral(((campaign?.amount ?? 0) / (unit.value)).round()).value()} ${unit.name} ${unit.effect}";
+  return "${Numeral(((campaign.amount ?? 0) / unit.value!).round()).value()} ${unit.name} ${unit.effect}";
 }
 
 Widget campaignShuttle(
@@ -122,14 +124,14 @@ Widget campaignShuttle(
     HeroFlightDirection flightDirection,
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
-    ThemeManager _theme,
+    ThemeData _theme,
     Widget bottomWidget) {
   CampaignManager cm = (flightDirection == HeroFlightDirection.push
           ? toHeroContext
           : fromHeroContext)
       .read<CampaignManager>();
 
-  BaseCampaign campaign = cm.baseCampaign;
+  BaseCampaign? campaign = cm.baseCampaign;
 
   return AnimatedBuilder(
       animation: animation,
@@ -138,9 +140,11 @@ Widget campaignShuttle(
             CurvedAnimation(parent: animation, curve: Interval(.8, 1.0));
         return Material(
           elevation: 1,
-          color: ColorTheme.appBg,
           borderRadius: BorderRadius.circular(Constants.radius),
           clipBehavior: Clip.antiAlias,
+          color:
+              ColorTween(begin: _theme.cardColor, end: _theme.backgroundColor)
+                  .evaluate(animation),
           child: Stack(
             children: [
               Positioned.fill(
@@ -191,11 +195,10 @@ Widget campaignShuttle(
                                       elevation: 10,
                                       child: RoundedAvatar(
                                         cm.campaign?.organization
-                                                ?.thumbnailUrl ??
-                                            cm.campaign?.organization?.imgUrl,
+                                                .thumbnailUrl ??
+                                            cm.campaign?.organization.imgUrl,
                                         height: 15,
                                         color: ColorTheme.appBg,
-                                        backgroundLight: true,
                                         loading: cm.loadingCampaign,
                                         fit: BoxFit.contain,
                                         borderRadius: 6,
@@ -223,7 +226,7 @@ Widget campaignShuttle(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   _titleShuttle(
-                                      campaign.name, animation, _theme),
+                                      campaign!.name, animation, _theme),
                                   SizeTransition(
                                     axisAlignment: flightDirection ==
                                             HeroFlightDirection.push
@@ -242,18 +245,17 @@ Widget campaignShuttle(
                                               TextSpan(text: 'by '),
                                               TextSpan(
                                                   text:
-                                                      '${cm?.campaign?.organization?.name ?? 'Laden...'}',
+                                                      '${cm.campaign?.organization.name ?? 'Laden...'}',
                                                   style: _theme
-                                                      .textTheme.dark.bodyText1
+                                                      .textTheme.bodyText1!
                                                       .copyWith(
                                                     fontWeight: FontWeight.w700,
                                                     decoration: TextDecoration
                                                         .underline,
                                                   )),
                                             ],
-                                            style: _theme.textTheme.dark
+                                            style: _theme.textTheme.bodyText1!
                                                 .withOpacity(.54)
-                                                .bodyText1
                                                 .copyWith(
                                                     fontWeight:
                                                         FontWeight.w400),
@@ -284,18 +286,19 @@ Widget campaignShuttle(
                                   curve: Interval(.8, 1.0),
                                   reverseCurve: Interval(.8, 1.0)),
                               child: campaign.tags == null
-                                  ? Text("${campaign?.shortDescription ?? ""}")
+                                  ? Text("${campaign.shortDescription ?? ""}")
                                   : Wrap(
                                       spacing: 6,
                                       runSpacing: 6,
                                       children: [
                                         CampaignTag(
                                             text: getFirstTag(campaign),
-                                            color: _theme.colors.dark,
-                                            textColor: _theme.colors.textOnDark,
+                                            color: _theme.primaryColor,
+                                            textColor:
+                                                _theme.colorScheme.onPrimary,
                                             icon: Icons.info,
                                             bold: true),
-                                        for (String tag in campaign?.tags ?? [])
+                                        for (String tag in campaign.tags ?? [])
                                           if (tag.isNotEmpty)
                                             CampaignTag(text: tag)
                                       ],
@@ -326,7 +329,7 @@ Widget campaignShuttle(
                   child: SlideTransition(
                     position:
                         Tween<Offset>(begin: Offset(0, 1), end: Offset.zero)
-                            .animate(curvedAnim),
+                            .animate(curvedAnim as Animation<double>),
                     child: FadeTransition(
                         opacity: curvedAnim,
                         child: _DonationBottomPlaceholder(cm)),
@@ -344,80 +347,78 @@ class _DonationBottomPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     double bottPad = MediaQuery.of(context).padding.bottom;
     return Container(
       height: bottPad == 0 ? 76 : bottPad + 64,
-      color: _theme.colors.contrast,
-      child: Column(
-        children: [
-          Divider(height: 1.2, thickness: 1.2),
-          Expanded(
-            child: Padding(
-              padding:
-                  EdgeInsets.fromLTRB(12, 12, 12, bottPad == 0 ? 12 : bottPad),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      alignment: Alignment.centerLeft,
-                      child: cm.baseCampaign.unit.name != "DVs"
-                          ? RichText(
-                              text: TextSpan(
-                                  style:
-                                      _theme.textTheme.textOnContrast.bodyText1,
-                                  children: [
-                                    TextSpan(
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                        text:
-                                            "Ein ${cm.baseCampaign.unit.singular ?? cm.baseCampaign.unit.name} ${cm.baseCampaign.unit.smiley ?? ''}\n"),
-                                    TextSpan(text: "entspricht "),
-                                    TextSpan(
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                        text: "${cm.baseCampaign.unit.value} "),
-                                    TextSpan(text: "DVs!"),
-                                  ]),
-                            )
-                          : RichText(
-                              text: TextSpan(
-                                  style:
-                                      _theme.textTheme.textOnContrast.bodyText1,
-                                  children: [
-                                    TextSpan(text: "Unterstütze\n"),
-                                    TextSpan(
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                        text: "${cm.baseCampaign.name}\n"),
-                                    TextSpan(text: "schon ab "),
-                                    TextSpan(
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                        text: "5 "),
-                                    TextSpan(text: "Cent!"),
-                                  ]),
-                            ),
+      child: Material(
+        child: Column(
+          children: [
+            Divider(height: 1.2, thickness: 1.2),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    12, 12, 12, bottPad == 0 ? 12 : bottPad),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        alignment: Alignment.centerLeft,
+                        child: cm.baseCampaign!.unit!.name != "DVs"
+                            ? RichText(
+                                text: TextSpan(
+                                    style: _theme.textTheme.bodyText1,
+                                    children: [
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text:
+                                              "Ein ${cm.baseCampaign!.unit!.singular ?? cm.baseCampaign!.unit!.name} ${cm.baseCampaign!.unit!.smiley ?? ''}\n"),
+                                      TextSpan(text: "entspricht "),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text:
+                                              "${cm.baseCampaign!.unit!.value} "),
+                                      TextSpan(text: "DVs!"),
+                                    ]),
+                              )
+                            : RichText(
+                                text: TextSpan(
+                                    style: _theme.textTheme.bodyText1,
+                                    children: [
+                                      TextSpan(text: "Unterstütze\n"),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text: "${cm.baseCampaign!.name}\n"),
+                                      TextSpan(text: "schon ab "),
+                                      TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                          text: "5 "),
+                                      TextSpan(text: "Cent!"),
+                                    ]),
+                              ),
+                      ),
                     ),
-                  ),
-                  XMargin(16),
-                  FloatingActionButton.extended(
-                      heroTag: null,
-                      backgroundColor: _theme.colors.dark,
-                      label: Text("Unterstützen",
-                          style: TextStyle(color: _theme.colors.textOnDark)),
-                      onPressed: () {})
-                ],
+                    XMargin(16),
+                    BigButton(
+                        color: _theme.colorScheme.secondary,
+                        label: "Unterstützen",
+                        onPressed: () {}),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

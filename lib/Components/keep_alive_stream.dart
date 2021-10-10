@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class KeepAliveStreamBuilder extends StatefulWidget {
-  final Stream stream;
-  final AsyncWidgetBuilder builder;
+  final Stream? stream;
+  final AsyncWidgetBuilder? builder;
 
-  const KeepAliveStreamBuilder({Key key, this.stream, this.builder})
+  const KeepAliveStreamBuilder({Key? key, this.stream, this.builder})
       : super(key: key);
 
   @override
@@ -17,7 +17,7 @@ class _KeepAliveStreamBuilderState extends State<KeepAliveStreamBuilder>
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: widget.stream,
-      builder: widget.builder,
+      builder: widget.builder!,
     );
   }
 

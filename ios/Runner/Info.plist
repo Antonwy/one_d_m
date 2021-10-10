@@ -51,13 +51,21 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>Music</string>
+	<string>Music!</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Calendars</string>
 	<key>NSCameraUsageDescription</key>
 	<string>camera</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This allows us to search for users that are in your contacts and also use our app. We don't safe your contacts, we only compare them with our database. If you allow us to use your contacts, you can find the result in our find friends section.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Always and when in use!</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Can I have location always?</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Older devices need location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Need location when in use</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>microphone</string>
 	<key>NSMotionUsageDescription</key>
@@ -104,5 +112,7 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>kTCCServiceMediaLibrary</key>
+	<string>media</string>
 </dict>
 </plist>

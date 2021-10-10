@@ -10,11 +10,11 @@ import 'donation_widget.dart';
 
 class SessionButton extends StatelessWidget {
   String id;
-  BaseSession session;
-  Color color;
+  BaseSession? session;
+  Color? color;
   TextStyle textStyle;
   double elevation;
-  Function(BaseSession) onPressed;
+  Function(BaseSession?)? onPressed;
   double borderRadius;
 
   SessionButton(this.id,
@@ -36,7 +36,7 @@ class SessionButton extends StatelessWidget {
             return InkWell(
               onTap: () {
                 if (onPressed != null) {
-                  onPressed(snapshot.data);
+                  onPressed!(snapshot.data);
                   return;
                 }
                 Navigator.push(
@@ -53,17 +53,17 @@ class SessionButton extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       RoundedAvatar(
-                        snapshot.data.imgUrl,
+                        snapshot.data!.imgUrl,
                         color: color ?? ColorTheme.appBg,
                       ),
                       SizedBox(width: 10),
                       Expanded(
                         child: AutoSizeText(
-                          "${snapshot.data.name}",
+                          "${snapshot.data!.name}",
                           maxLines: 1,
                           style: Theme.of(context)
                               .textTheme
-                              .bodyText1
+                              .bodyText1!
                               .copyWith(color: textStyle.color),
                         ),
                       )

@@ -1,10 +1,10 @@
 import 'package:one_d_m/helper/helper.dart';
 
 class SearchResult {
-  final List<SearchResultItem> campaigns;
-  final List<SearchResultItem> users;
-  final List<SearchResultItem> organizations;
-  final List<SearchResultItem> sessions;
+  final List<SearchResultItem>? campaigns;
+  final List<SearchResultItem>? users;
+  final List<SearchResultItem>? organizations;
+  final List<SearchResultItem>? sessions;
 
   SearchResult({this.campaigns, this.users, this.organizations, this.sessions});
 
@@ -29,7 +29,7 @@ class SearchResult {
 }
 
 class SearchResultItem {
-  final String blurHash, imageUrl, thumbnailUrl, name, id;
+  final String? blurHash, imageUrl, thumbnailUrl, name, id;
   final SearchResultType type;
 
   SearchResultItem.fromJson(Map<String, dynamic> map, this.type)
@@ -46,7 +46,7 @@ class SearchResultItem {
 
   @override
   String toString() {
-    return "name: " + name;
+    return "name: " + name!;
   }
 }
 

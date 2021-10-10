@@ -3,23 +3,20 @@ import 'dart:collection';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/services.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ContactManager {
   Future<PermissionStatus> getPermission() async {
     final PermissionStatus permission = await Permission.contacts.status;
     if (permission != PermissionStatus.granted) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.contacts].request();
-      return permissionStatus[Permission.contacts] ?? PermissionStatus.denied;
+      return Permission.contacts.request();
     } else {
       return permission;
     }
   }
 
-  Future<bool> hasPermission() async {
-    return (await Permission.contacts.status) == PermissionStatus.granted;
+  Future<bool> hasPermission() {
+    return Permission.contacts.isGranted;
   }
 
   Future<List<String>> phoneNumberList() async {
@@ -30,7 +27,10 @@ class ContactManager {
     Set<String> numbers = HashSet();
 
     for (Contact c in contacts) {
-      List<String> contactNumbers = c.phones.map((item) => item.value).toList();
+      List<String> contactNumbers = c.phones!
+          .where((val) => val.value != null)
+          .map((item) => item.value!)
+          .toList();
       numbers.addAll(contactNumbers);
     }
 
@@ -39,7 +39,7 @@ class ContactManager {
     return numbers.toList();
   }
 
-  Future<void> uploadPhoneNumbers(List<String> numbers) async {
+  Future<void> uploadPhoneNumbers(List<String?> numbers) async {
     try {
       print("UPLOADING");
       await FirebaseFunctions.instance

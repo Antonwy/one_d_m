@@ -11,35 +11,29 @@ class CampaignNews extends StatelessWidget {
   Widget build(BuildContext context) {
     CampaignManager cm = context.watch<CampaignManager>();
 
-    if (cm.loadingCampaign)
-      return SliverToBoxAdapter(
-        child: Center(
-            child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: LoadingIndicator(message: "Lade Neuigkeiten"),
-        )),
-      );
+    if (cm.loadingCampaign!)
+      return Center(
+          child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: LoadingIndicator(message: "Lade Neuigkeiten"),
+      ));
 
-    if (cm.campaign.news.isEmpty)
-      return SliverToBoxAdapter(
+    if (cm.campaign!.news.isEmpty)
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
         child: Empty(
           message: "Für dieses Projekt existieren noch keine Neuigkeiten.",
         ),
       );
 
-    List<News> n = cm.campaign.news;
-    n.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    List<News> n = cm.campaign!.news;
+    n.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
 
-    return SliverPadding(
+    return Padding(
       padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-            (context, i) => NewsPost(
-                  n[i],
-                  withHeader: false,
-                ),
-            childCount: n.length),
-      ),
+      child: Column(
+          children:
+              n.map((news) => NewsPost(news, withHeader: false)).toList()),
     );
   }
 }

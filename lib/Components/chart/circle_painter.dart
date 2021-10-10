@@ -19,11 +19,11 @@ const List<Point> POINT = [Point(100, 100)];
 class CirclePainter extends CustomPainter {
   final double width;
   final double height;
-  List<Color> colors;
+  List<Color>? colors;
 
   CirclePainter(this.width, this.height, {this.startAngle, this.colors});
 
-  final double startAngle;
+  final double? startAngle;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -32,7 +32,7 @@ class CirclePainter extends CustomPainter {
       ..color = BLUE_NORMAL
       ..strokeWidth = 1.0
       ..isAntiAlias = true;
-    paint.color = Colors.grey[900];
+    paint.color = Colors.grey[900]!;
     paint.color = RED_DARK1;
     paint.strokeWidth = 20;
     paint.style = PaintingStyle.stroke;
@@ -52,7 +52,7 @@ class CirclePainter extends CustomPainter {
       ],
       colors: colors,
       paintWidth: 8.0,
-      startAngle: 1.3 * startAngle / radius,
+      startAngle: 1.3 * startAngle! / radius,
       hasEnd: true,
       hasCurrent: false,
       curPaintWidth: 45.0,
@@ -63,10 +63,10 @@ class CirclePainter extends CustomPainter {
   }
 
   void _drawArcGroup(Canvas canvas,
-      {Offset center,
-      double radius,
-      List<double> sources,
-      List<Color> colors,
+      {Offset? center,
+      double? radius,
+      required List<double> sources,
+      List<Color>? colors,
       double startAngle = 0.0,
       double paintWidth = 10.0,
       bool hasEnd = false,
@@ -100,10 +100,10 @@ class CirclePainter extends CustomPainter {
         startA += rd;
         continue;
       }
-      paint.color = colors[i % colors.length];
+      paint.color = colors![i % colors.length];
       paint.strokeWidth = paintWidth;
       _drawArcWithCenter(canvas, paint,
-          center: center, radius: radius, startRadian: startA, sweepRadian: rd);
+          center: center!, radius: radius!, startRadian: startA, sweepRadian: rd);
       startA += rd;
     }
     if (hasEnd) {
@@ -115,7 +115,7 @@ class CirclePainter extends CustomPainter {
           startA += rd;
           continue;
         }
-        paint.color = colors[i % colors.length];
+        paint.color = colors![i % colors.length];
         paint.strokeWidth = paintWidth;
         _drawArcTwoPoint(canvas, paint,
             center: center,
@@ -128,18 +128,18 @@ class CirclePainter extends CustomPainter {
     }
 
     if (hasCurrent) {
-      paint.color = colors[curIndex % colors.length];
+      paint.color = colors![curIndex % colors.length];
       paint.strokeWidth = curPaintWidth;
       paint.style = PaintingStyle.stroke;
       _drawArcWithCenter(canvas, paint,
-          center: center,
-          radius: radius,
+          center: center!,
+          radius: radius!,
           startRadian: curStartAngle,
           sweepRadian: radians[curIndex]);
     }
     if (hasCurrent && hasEnd) {
       var rd = radians[curIndex % radians.length];
-      paint.color = colors[curIndex % colors.length];
+      paint.color = colors![curIndex % colors.length];
       paint.strokeWidth = curPaintWidth;
       paint.style = PaintingStyle.fill;
       _drawArcTwoPoint(canvas, paint,
@@ -155,8 +155,8 @@ class CirclePainter extends CustomPainter {
   void _drawArcWithCenter(
     Canvas canvas,
     Paint paint, {
-    Offset center,
-    double radius,
+    required Offset center,
+    required double radius,
     startRadian = 0.0,
     sweepRadian = pi,
   }) {
@@ -170,8 +170,8 @@ class CirclePainter extends CustomPainter {
   }
 
   void _drawArcTwoPoint(Canvas canvas, Paint paint,
-      {Offset center,
-      double radius,
+      {Offset? center,
+      double? radius,
       startRadian = 0.0,
       sweepRadian = pi,
       hasStartArc = false,
@@ -180,15 +180,15 @@ class CirclePainter extends CustomPainter {
     paint.strokeWidth = smallR;
     if (hasStartArc) {
       var startCenter = LineCircle.radianPoint(
-          Point(center.dx, center.dy), radius, startRadian);
+          Point(center!.dx, center.dy), radius!, startRadian);
       paint.style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(startCenter.x, startCenter.y), smallR, paint);
+      canvas.drawCircle(Offset(startCenter.x as double, startCenter.y as double), smallR, paint);
     }
     if (hasEndArc) {
       var endCenter = LineCircle.radianPoint(
-          Point(center.dx, center.dy), radius, startRadian + sweepRadian);
+          Point(center!.dx, center.dy), radius!, startRadian + sweepRadian);
       paint.style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(endCenter.x, endCenter.y), smallR, paint);
+      canvas.drawCircle(Offset(endCenter.x as double, endCenter.y as double), smallR, paint);
     }
   }
 

@@ -3,6 +3,9 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api_result.dart';
+import 'package:one_d_m/components/big_button.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
+import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/users/find_friends_page.dart';
@@ -16,9 +19,9 @@ class VerifyEmailPage extends StatefulWidget {
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
-  TextTheme _textTheme;
+  TextTheme? _textTheme;
 
-  UserManager _um;
+  late UserManager _um;
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -27,43 +30,50 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   @override
   void initState() {
     super.initState();
+
+    DynamicLinkManager.of(context).initialize();
+
     context
         .read<FirebaseAnalytics>()
         .setCurrentScreen(screenName: "Verify Email Page");
+
+    context.read<UserManager>().sendEmailVerification();
   }
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _um = Provider.of<UserManager>(context);
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
+
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _theme.colors.contrast,
+      backgroundColor: _theme.cardColor,
       appBar: AppBar(
-        backgroundColor: _theme.colors.contrast,
+        backgroundColor: _theme.cardColor,
         elevation: 0,
-        leading: BackButton(
-            color: _theme.colors.textOnContrast,
-            onPressed: () async {
-              await _um.delete();
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (c) => ChooseLoginMethodPage()),
-                  (route) => route.isFirst);
-            }),
+        leading: BackButton(onPressed: () async {
+          try {
+            await _um.delete();
+          } catch (e) {
+            print("Löschen failed!");
+          }
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (c) => ChooseLoginMethodPage()),
+              (route) => route.isFirst);
+        }),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _theme.colors.dark,
         onPressed: _loading
             ? null
             : () async {
                 setState(() {
                   _loading = true;
                 });
-                await _um.fireUser.reload();
-                _um.fireUser = _um.auth.currentUser;
-                if (_um.fireUser.emailVerified) {
+                await _um.fireUser!.reload();
+                _um.fireUser = _um.auth!.currentUser;
+                if (_um.fireUser!.emailVerified) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -71,22 +81,19 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                 afterRegister: true,
                               )));
                 } else
-                  _showSnackBar("Email noch nicht verifiziert.");
+                  _showSnackBar("Email noch nicht verifiziert.", context);
                 setState(() {
                   _loading = false;
                 });
               },
-        child: _loading
-            ? Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(_theme.colors.textOnDark),
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 250),
+          child: _loading
+              ? LoadingIndicator(size: 16)
+              : Icon(
+                  Icons.arrow_forward,
                 ),
-              )
-            : Icon(
-                Icons.arrow_forward,
-                color: _theme.colors.textOnDark,
-              ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -105,7 +112,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             ),
             Text(
               "Um fortzufahren musst du deine Email verifizieren!",
-              style: _theme.textTheme.dark.headline6,
+              style: _theme.textTheme.headline6,
             ),
             SizedBox(
               height: 10,
@@ -113,45 +120,41 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             RichText(
               text: TextSpan(children: [
                 TextSpan(
-                  text: "Dies läuft wie folgt ab: \nWenn du auf ",
+                  text: "Dies läuft wie folgt ab: \n",
                 ),
                 TextSpan(
-                  text: "\"Email senden\" ",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  text: "Wir haben dir eine Email mit einem Link an ",
                 ),
                 TextSpan(
-                  text:
-                      "klickst, schicken wir dir eine Email mit einem Link an ",
-                ),
-                TextSpan(
-                    text: "${_um.fireUser.email}. ",
+                    text: "${_um.fireUser!.email} ",
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 TextSpan(
-                  text:
-                      "Bitte klicke auf den Link um dich zu verifizieren.\nDanach kannst du wieder in die App zurückkehren und auf weiter klicken!",
+                  text: "geschickt.\n\n",
                 ),
-              ], style: _theme.textTheme.dark.bodyText2),
+                TextSpan(
+                  text:
+                      "Bitte klicke auf den Link um dich zu verifizieren.\nDanach kannst du wieder in die App zurückkehren und auf weiter klicken!\n\n",
+                ),
+                TextSpan(
+                  text: "Solltest du keine Email erhalten haben, klicke auf ",
+                ),
+                TextSpan(
+                    text: '"Erneut senden"',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ], style: _theme.textTheme.bodyText2),
             ),
             SizedBox(
               height: 20,
             ),
-            FloatingActionButton.extended(
-              heroTag: "w",
+            BigButton(
               onPressed: () async {
                 ApiResult res = await _um.sendEmailVerification();
+
                 _showSnackBar(
-                    res.hasError() ? res.message : "Email versendet!");
+                    res.hasError() ? res.message! : "Email versendet!",
+                    context);
               },
-              elevation: 2,
-              label: Text(
-                "Email senden",
-                style: TextStyle(color: _theme.colors.textOnDark),
-              ),
-              icon: Icon(
-                Icons.email,
-                color: _theme.colors.textOnDark,
-              ),
-              backgroundColor: _theme.colors.dark,
+              label: "Erneut senden",
             ),
           ],
         ),
@@ -159,7 +162,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     );
   }
 
-  void _showSnackBar(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+  void _showSnackBar(String message, BuildContext context) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 
 class Donation {
-  final int amount;
-  final bool anonym, useDCs;
-  final String id,
+  final int? amount;
+  final bool? anonym, useDCs;
+  final String? id,
       campaignId,
       alternativeCampaignId,
       userId,
@@ -15,8 +15,8 @@ class Donation {
       campaignImgUrl,
       campaignBlurHash,
       sessionId;
-  final DonationUnit donationUnit;
-  final DateTime createdAt;
+  final DonationUnit? donationUnit;
+  final DateTime? createdAt;
 
   static final String AMOUNT = "amount",
       ALTERNATIVECAMPAIGNID = "alternative_campaign_id",
@@ -48,7 +48,7 @@ class Donation {
       this.username});
 
   static Donation fromSnapshot(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Donation(data[AMOUNT],
         campaignId: data[CAMPAIGNID],
         alternativeCampaignId: data[ALTERNATIVECAMPAIGNID],

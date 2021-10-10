@@ -31,7 +31,7 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
   }
 
   Widget _buildLatestSessionsWithPost() {
-    return FutureBuilder<List<BaseSession>>(
+    return FutureBuilder<List<BaseSession?>>(
         future: Api().sessions().get(),
         builder: (_, snapshot) {
           if (!snapshot.hasData) return LoadingIndicator();
@@ -47,10 +47,10 @@ class _RecomendedSessionsState extends State<RecomendedSessions> {
                       padding: EdgeInsets.only(
                           left: index == 0 ? 12 : 0,
                           right:
-                              index == snapshot.data.length - 1 ? 12.0 : 0.0),
-                      child: SessionView(snapshot.data[index]),
+                              index == snapshot.data!.length - 1 ? 12.0 : 0.0),
+                      child: SessionView(snapshot.data![index]),
                     ),
-                itemCount: snapshot.data.length),
+                itemCount: snapshot.data!.length),
           );
         });
   }

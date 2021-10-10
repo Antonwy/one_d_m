@@ -2,14 +2,15 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/user_button.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/donation.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -23,7 +24,7 @@ import 'custom_open_container.dart';
 class DonationWidget extends StatelessWidget {
   final Donation donation;
   final bool campaignPage, withUsername, backgroundLight;
-  Color textColor;
+  Color? textColor;
 
   DonationWidget(this.donation,
       {this.campaignPage = false,
@@ -31,71 +32,57 @@ class DonationWidget extends StatelessWidget {
       this.backgroundLight = true,
       this.textColor});
 
-  TextTheme _textTheme;
+  late TextTheme _textTheme;
 
-  Future _future;
+  Future<User?>? _future;
 
-  MediaQueryData _mq;
+  late MediaQueryData _mq;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _mq = MediaQuery.of(context);
-    if (_future == null) _future = DatabaseService.getUser(donation.userId);
+    if (_future == null) _future = Api().users().getOne(donation.userId);
 
     return campaignPage ? _campaignPage() : _noCampaignPage(context);
   }
 
   Widget _campaignPage() {
-    return FutureBuilder<User>(
+    return FutureBuilder<User?>(
       future: _future,
       builder: (context, snapshot) {
-        User user = snapshot.data;
+        User? user = snapshot.data;
         return CustomOpenContainer(
           openBuilder: (context, close, controller) =>
-              UserPage(user, scrollController: controller),
+              UserPage(user!, scrollController: controller),
           closedElevation: 0,
           closedBuilder: (context, open) => ListTile(
             leading: user == null
                 ? CircularProgressIndicator()
                 : RoundedAvatar(
-                    donation.anonym ? null : user.imgUrl,
-                    backgroundLight: backgroundLight,
+                    donation.anonym! ? null : user.imgUrl,
                   ),
             title: AutoSizeText(
               snapshot.hasData
-                  ? donation.anonym
+                  ? donation.anonym!
                       ? "Anonym"
-                      : "${user.name}"
+                      : "${user!.name}"
                   : "Laden...",
               maxLines: 1,
               style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: textColor ??
-                      (backgroundLight
-                          ? ColorTheme.blue
-                          : ColorTheme.whiteBlue)),
+                fontWeight: FontWeight.w500,
+              ),
             ),
             subtitle: AutoSizeText(
-              "${donation.campaignName} (${timeago.format(donation.createdAt, locale: "de")})",
+              "${donation.campaignName} (${timeago.format(donation.createdAt!, locale: "de")})",
               maxLines: 1,
-              style: TextStyle(
-                  color: textColor ??
-                      (backgroundLight
-                          ? ColorTheme.blue.withOpacity(.7)
-                          : ColorTheme.whiteBlue.withOpacity(.7))),
             ),
             trailing: Text(
-              "${Numeral(donation.amount).value()} DV",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: textColor ??
-                      (backgroundLight
-                          ? ColorTheme.blue
-                          : ColorTheme.whiteBlue)),
+              "${Numeral(donation.amount!).value()} DV",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             onTap: () {
-              if (donation.anonym) return;
+              if (donation.anonym!) return;
               open();
             },
           ),
@@ -122,71 +109,51 @@ class DonationWidget extends StatelessWidget {
         },
         leading: RoundedAvatar(
           donation.campaignImgUrl,
-          backgroundLight: backgroundLight,
         ),
         subtitle: Text(
-          timeago.format(donation.createdAt, locale: "de"),
-          style: TextStyle(
-              color: textColor ??
-                  (backgroundLight
-                      ? ColorTheme.blue.withOpacity(.5)
-                      : ColorTheme.whiteBlue.withOpacity(.5))),
+          timeago.format(donation.createdAt!, locale: "de"),
+          style: context.theme.textTheme.caption,
         ),
-        title: AutoSizeText(donation.campaignName,
+        title: AutoSizeText(donation.campaignName!,
             maxLines: 1,
             style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: textColor ??
-                    (backgroundLight
-                        ? ColorTheme.blue
-                        : ColorTheme.whiteBlue))),
+              fontWeight: FontWeight.w500,
+            )),
         trailing: AutoSizeText(
-          "${Numeral(donation.amount).value()} DV",
+          "${Numeral(donation.amount!).value()} DV",
           style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: textColor ??
-                  (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       );
 
-    return FutureBuilder<User>(
+    return FutureBuilder<User?>(
       future: _future,
       builder: (context, snapshot) {
-        User user = snapshot.data;
+        User? user = snapshot.data;
         return ListTile(
           leading: user == null
-              ? CircularProgressIndicator()
+              ? LoadingIndicator()
               : RoundedAvatar(
                   user.imgUrl,
-                  backgroundLight: backgroundLight,
                 ),
           title: AutoSizeText(
             snapshot.hasData
-                ? donation.anonym
+                ? donation.anonym!
                     ? "Anonym"
-                    : "${user.name}"
+                    : "${user!.name}"
                 : "Laden...",
             maxLines: 1,
             style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: textColor ??
-                    (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
+              fontWeight: FontWeight.w500,
+            ),
           ),
           subtitle: AutoSizeText(
-            "${donation.campaignName} (${timeago.format(donation.createdAt)})",
+            "${donation.campaignName} (${timeago.format(donation.createdAt!)})",
             maxLines: 1,
-            style: TextStyle(
-                color: textColor ??
-                    (backgroundLight
-                        ? ColorTheme.blue.withOpacity(.7)
-                        : ColorTheme.whiteBlue.withOpacity(.7))),
           ),
           trailing: Text(
-            "${Numeral(donation.amount).value()} DV",
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: textColor ??
-                    (backgroundLight ? ColorTheme.blue : ColorTheme.whiteBlue)),
+            "${Numeral(donation.amount!).value()} DV",
           ),
           onTap: () {
             if (!withUsername) {
@@ -199,7 +166,7 @@ class DonationWidget extends StatelessWidget {
                           name: donation.campaignName))));
               return;
             }
-            _showBottomDialog(context, user);
+            _showBottomDialog(context, user!);
           },
         );
       },
@@ -242,17 +209,16 @@ class DonationWidget extends StatelessWidget {
 }
 
 class RoundedAvatar extends StatelessWidget {
-  final String imgUrl, name, blurHash;
-  final bool loading, backgroundLight, deleted;
-  final double height, defaultHeight = 20, borderRadius, elevation;
-  final Color iconColor, color;
+  final String? imgUrl, name, blurHash;
+  final bool? loading, deleted;
+  final double? height, defaultHeight = 20, borderRadius, elevation;
+  final Color? iconColor, color;
   final BoxFit fit;
 
-  ThemeManager _theme;
+  late ThemeData _theme;
 
   RoundedAvatar(this.imgUrl,
       {this.loading = false,
-      this.backgroundLight = true,
       this.height,
       this.elevation = 0,
       this.iconColor,
@@ -265,23 +231,20 @@ class RoundedAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints(
-          minHeight: (height ?? defaultHeight),
-          minWidth: (height ?? defaultHeight),
-          maxHeight: (height ?? defaultHeight) + 25,
-          maxWidth: (height ?? defaultHeight) + 25),
+          minHeight: (height ?? defaultHeight!),
+          minWidth: (height ?? defaultHeight!),
+          maxHeight: (height ?? defaultHeight)! + 25,
+          maxWidth: (height ?? defaultHeight)! + 25),
       child: LayoutBuilder(builder: (context, constraints) {
         return AspectRatio(
           aspectRatio: 1,
           child: Material(
-              elevation: elevation,
-              color: color ??
-                  (backgroundLight
-                      ? _theme.colors.dark
-                      : _theme.colors.darkerLight),
-              borderRadius: BorderRadius.circular(borderRadius),
+              elevation: elevation!,
+              color: color,
+              borderRadius: BorderRadius.circular(borderRadius!),
               clipBehavior: Clip.antiAlias,
               child: _buildImage()),
         );
@@ -290,11 +253,8 @@ class RoundedAvatar extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    if (deleted)
-      return Icon(
-        Icons.delete,
-        color: iconColor ?? _theme.colors.contrast,
-      );
+    if (deleted!)
+      return Icon(Icons.delete, color: iconColor ?? _theme.primaryColor);
 
     Widget _pIndicator = AspectRatio(
       aspectRatio: 1,
@@ -302,7 +262,7 @@ class RoundedAvatar extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Center(
             child: LoadingIndicator(
-          color: backgroundLight ? _theme.colors.contrast : _theme.colors.dark,
+          color: _theme.primaryColor,
           size: 16,
           strokeWidth: 2.2,
         )),
@@ -311,30 +271,30 @@ class RoundedAvatar extends StatelessWidget {
 
     return imgUrl == null
         ? Center(
-            child: loading
+            child: loading!
                 ? _pIndicator
                 : name != null
                     ? Text(
-                        name[0].toUpperCase(),
+                        name![0].toUpperCase(),
                         style: TextStyle(
-                            color: iconColor ?? _theme.colors.contrast,
+                            color: iconColor ?? _theme.primaryColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 20),
                       )
                     : Icon(
                         Icons.person,
-                        color: iconColor ?? _theme.colors.contrast,
+                        color: iconColor ?? _theme.primaryColor,
                       ),
           )
         : CachedNetworkImage(
-            imageUrl: imgUrl,
+            imageUrl: imgUrl!,
             fit: fit,
             errorWidget: (context, error, obj) => Icon(
               Icons.error,
-              color: iconColor ?? _theme.colors.contrast,
+              color: iconColor ?? _theme.primaryColor,
             ),
             placeholder: (context, _) =>
-                blurHash != null ? BlurHash(hash: blurHash) : _pIndicator,
+                blurHash != null ? BlurHash(hash: blurHash!) : _pIndicator,
           );
   }
 }

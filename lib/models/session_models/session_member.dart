@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/models/user.dart';
 
 class SessionMember {
-  final String id, name, imageUrl, thumbnailUrl, blurHash;
-  final int donatedAmount;
+  final String? id, name, imageUrl, thumbnailUrl, blurHash;
+  final int? donatedAmount;
 
   SessionMember(
       {this.id,
@@ -14,7 +14,7 @@ class SessionMember {
       this.donatedAmount});
 
   factory SessionMember.fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return SessionMember(
         id: data[ID], donatedAmount: data[DONATED_AMOUNT] ?? 0);
   }

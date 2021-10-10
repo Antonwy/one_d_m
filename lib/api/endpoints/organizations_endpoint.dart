@@ -8,8 +8,8 @@ class OrganizationsEndpoint extends ApiEndpoint<Organization> {
             listFormatter: (l) => Organization.listFromJson(l));
 
   @override
-  OrganizationsEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  OrganizationsEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return OrganizationsEndpoint(finalRoute);
   }
 }

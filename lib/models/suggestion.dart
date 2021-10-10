@@ -4,15 +4,15 @@ import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 
 class Suggestion {
-  final String title,
+  final String? title,
       subTitle,
       doneTitle,
       doneSubTitle,
       campaignId,
       campaignName,
       animationUrl;
-  Color primaryColor, secondaryColor, textOnPrimary, textOnSecondary;
-  final int amount, amountPerDonation;
+  Color? primaryColor, secondaryColor, textOnPrimary, textOnSecondary;
+  final int? amount, amountPerDonation;
   int donatedToday;
   final bool visible, onlyAdmins;
 
@@ -35,7 +35,7 @@ class Suggestion {
       this.textOnSecondary});
 
   factory Suggestion.fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Suggestion(
       title: data[TITLE],
       subTitle: data[SUBTITLE],
@@ -65,16 +65,16 @@ class Suggestion {
 
   void setDefaultColors(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    if (primaryColor == null) this.primaryColor = _theme.colors.contrast;
+    if (primaryColor == null) this.primaryColor = _theme.colors!.contrast;
     if (secondaryColor == null)
-      this.secondaryColor = _theme.colors.contrast.withOpacity(.5);
+      this.secondaryColor = _theme.colors!.contrast!.withOpacity(.5);
     if (textOnPrimary == null)
-      this.textOnPrimary = _theme.colors.textOnContrast;
+      this.textOnPrimary = _theme.colors!.textOnContrast;
     if (textOnSecondary == null)
-      this.textOnSecondary = _theme.colors.textOnContrast;
+      this.textOnSecondary = _theme.colors!.textOnContrast;
   }
 
-  bool get isDone => donatedToday >= (amount * amountPerDonation);
+  bool get isDone => donatedToday >= (amount! * amountPerDonation!);
 
   static List<Suggestion> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) => Suggestion.fromDoc(doc)).toList();

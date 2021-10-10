@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:one_d_m/api/api_call.dart';
 import 'package:one_d_m/api/endpoints/api_endpoint.dart';
 import 'package:one_d_m/api/stream_result.dart';
@@ -20,33 +22,33 @@ class AccountEndpoint extends ApiEndpoint<User> {
   }
 
   Future<UserAccount> getUserAccount(String uid) async {
-    final map = await ApiCall<Map<String, dynamic>>(this.addRoute(uid),
-            autoFormat: false)
-        .getOne();
+    final map =
+        await ApiCall<Json>(this.addRoute(uid), autoFormat: false).getOne();
     return UserAccount.fromJson(map);
   }
 
   Stream<StreamResult<UserAccount>> getUserAccountStream(String uid) {
-    Stream<StreamResult<Map<String, dynamic>>> stream =
-        ApiCall<Map<String, dynamic>>(this.addRoute(uid), autoFormat: false)
-            .streamGetOne();
+    Stream<StreamResult<Json>> stream =
+        ApiCall<Json>(this.addRoute(uid), autoFormat: false).streamGetOne();
     return stream.map((res) => StreamResult(
-        fromCache: res.fromCache, data: UserAccount.fromJson(res.data)));
+        fromCache: res.fromCache, data: UserAccount.fromJson(res.data!)));
   }
 
   Future<List<User>> following(String uid) {
-    return ApiCall<User>(this.addRoute(uid).addRoute('following')).get();
+    return ApiCall<User>(this.addRoute(uid).addRoute('following'))
+        .get()
+        .then((value) => value as List<User>);
   }
 
-  Future<List<User>> followed(String uid) {
+  Future<List<User?>> followed(String uid) {
     return ApiCall<User>(this.addRoute(uid).addRoute('followed')).get();
   }
 
-  Future<User> create(User user) async {
+  Future<User?> create(User user) async {
     return await ApiCall<User>(this).post(user.toMap());
   }
 
-  Future<void> saveDeviceToken(String token) {
+  Future<void> saveDeviceToken(String? token) {
     return ApiCall(this.addRoute("deviceToken")).put({"device_token": token});
   }
 
@@ -58,13 +60,17 @@ class AccountEndpoint extends ApiEndpoint<User> {
     return ApiCall(this).put(user.toMap());
   }
 
-  Future<void> updateMap(Map<String, dynamic> map) {
+  Future<void> updateMap(Json map) {
     return ApiCall(this).put(map);
   }
 
+  Future<void> collectGift() {
+    return ApiCall(this.addRoute("collectGift")).delete();
+  }
+
   @override
-  AccountEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  AccountEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return AccountEndpoint(finalRoute);
   }
 }

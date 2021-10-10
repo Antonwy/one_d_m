@@ -11,11 +11,11 @@ class AdBalance {
 
   factory AdBalance.fromSnapshot(DocumentSnapshot snapshot) {
     if (snapshot.data() == null || !snapshot.exists) return AdBalance.zero();
-    Map<String, dynamic> data = snapshot.data();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
     return AdBalance(
-      activityScore: (data[ACTIVITY_SCORE] as num)?.toDouble() ?? 0.0,
-      dcBalance: (data[DC_BALANCE] as num)?.toInt(),
+      activityScore: (data[ACTIVITY_SCORE] as num?)?.toDouble() ?? 0.0,
+      dcBalance: (data[DC_BALANCE] as num?)?.toInt(),
       gift: data[GIFT] ?? 0,
       giftMessage: data[GIFT_MESSAGE] ?? DEFAULT_MESSAGE,
     );
@@ -25,7 +25,7 @@ class AdBalance {
     return AdBalance(activityScore: 0, dcBalance: 0, gift: 0);
   }
 
-  final double activityScore;
-  final int dcBalance, gift;
-  final String giftMessage;
+  final double? activityScore;
+  final int? dcBalance, gift;
+  final String? giftMessage;
 }

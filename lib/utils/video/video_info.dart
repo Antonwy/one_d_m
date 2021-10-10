@@ -1,10 +1,10 @@
 class VideoInfo {
-  String videoUrl;
-  String thumbUrl;
-  String coverUrl;
-  double aspectRatio;
-  int uploadedAt;
-  String videoName;
+  String? videoUrl;
+  String? thumbUrl;
+  String? coverUrl;
+  double? aspectRatio;
+  int? uploadedAt;
+  String? videoName;
 
   VideoInfo(
       {this.videoUrl,

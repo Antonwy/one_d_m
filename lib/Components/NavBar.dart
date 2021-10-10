@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/navbar_manager.dart';
@@ -22,15 +23,15 @@ class _NavBarState extends State<NavBar> {
     Icons.public
   ];
 
-  MediaQueryData _mq;
+  late MediaQueryData _mq;
 
-  NavBarManager _npm;
+  NavBarManager? _npm;
 
-  double _openHeight;
+  double? _openHeight;
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    BaseTheme? _bTheme = ThemeManager.of(context).colors;
     _mq = MediaQuery.of(context);
 
     _openHeight = _mq.padding.bottom == 0 ? 75 : 55 + _mq.padding.bottom;
@@ -47,7 +48,7 @@ class _NavBarState extends State<NavBar> {
                     blurRadius: 30,
                     offset: Offset(0, -5)),
               ],
-              color: ColorTheme.appBg,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
           child: Padding(
             padding: EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
@@ -66,7 +67,8 @@ class _NavBarState extends State<NavBar> {
                             height: 40,
                             width: 40,
                             decoration: BoxDecoration(
-                                color: _bTheme.dark, shape: BoxShape.circle),
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle),
                           ),
                         );
                       }),
@@ -83,7 +85,7 @@ class _NavBarState extends State<NavBar> {
                         height: _mq.size.height,
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: _generateIcons()),
+                            children: _generateIcons(context)),
                       ),
                     );
                   }),
@@ -94,7 +96,7 @@ class _NavBarState extends State<NavBar> {
     );
   }
 
-  List<Widget> _generateIcons() {
+  List<Widget> _generateIcons(BuildContext context) {
     List<Widget> icons = [];
     List<Alignment> alignments = [Alignment.centerLeft, Alignment.centerRight];
 
@@ -117,8 +119,11 @@ class _NavBarState extends State<NavBar> {
                 child: Icon(
                   _iconList[i],
                   color: ColorTween(
-                          begin: ColorTheme.navBar,
-                          end: ColorTheme.navBarDisabled)
+                          begin: context.theme.colorScheme.onPrimary,
+                          end: (context.theme.darkMode
+                                  ? Colors.white
+                                  : Colors.black)
+                              .withOpacity(.5))
                       .transform(_getAnimatedValue(i, _npm?.position ?? 1.0)),
                 ),
               ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,6 @@ class GoalPage extends StatefulWidget {
 
 class _GoalPageState extends State<GoalPage>
     with AutomaticKeepAliveClientMixin {
-  ThemeManager _theme;
   GoalPageTabs _currentTab = GoalPageTabs.suggestions;
 
   @override
@@ -44,7 +44,6 @@ class _GoalPageState extends State<GoalPage>
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
     return Scaffold(
       backgroundColor: ColorTheme.appBg,
       body: SingleChildScrollView(
@@ -72,6 +71,7 @@ class _GoalPageState extends State<GoalPage>
                             tab: GoalPageTabs.roadmap),
                       ],
                       onTabChanged: (tab) {
+                        if (tab == null) return;
                         setState(() {
                           _currentTab = tab;
                         });
@@ -112,8 +112,8 @@ class _GoalPageState extends State<GoalPage>
 enum GoalPageTabs { suggestions, roadmap }
 
 class CustomTabInfo {
-  final String name, title, subtitle, assetPath;
-  final GoalPageTabs tab;
+  final String? name, title, subtitle, assetPath;
+  final GoalPageTabs? tab;
 
   CustomTabInfo(
       {this.name, this.title, this.subtitle, this.assetPath, this.tab});
@@ -125,8 +125,8 @@ class _Suggestions extends StatefulWidget {
 }
 
 class __SuggestionsState extends State<_Suggestions> {
-  Stream<List<Donation>> _donationsFromUser;
-  Future<List<Suggestion>> _suggestionsFuture;
+  Stream<List<Donation>>? _donationsFromUser;
+  Future<List<Suggestion>>? _suggestionsFuture;
 
   @override
   void initState() {
@@ -145,12 +145,12 @@ class __SuggestionsState extends State<_Suggestions> {
           stream: _donationsFromUser,
           builder: (context, dSnapshot) {
             List<Donation> todaysDonation = dSnapshot.data ?? [];
-            Map<String, int> donationAmountMap = {};
+            Map<String?, int?> donationAmountMap = {};
 
             for (Donation d in todaysDonation) {
               donationAmountMap.update(
                 d.campaignId,
-                (value) => value + d.amount,
+                (value) => value! + d.amount!,
                 ifAbsent: () => d.amount,
               );
             }
@@ -282,10 +282,11 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
             ),
             YMargin(12),
             StyledText(
-              text: _isDone ? _suggestion.doneTitle : _suggestion.title,
+              text: _isDone ? _suggestion.doneTitle! : _suggestion.title!,
               style: (_isDone
                       ? _theme.textTheme.textOnContrast
-                      : _theme.textTheme.withColor(_suggestion.textOnSecondary))
+                      : _theme.textTheme
+                          .withColor(_suggestion.textOnSecondary!))
                   .headline6
                   .copyWith(
                       fontSize: 25, fontWeight: FontWeight.w400, height: 1.3),
@@ -297,12 +298,13 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
               return Container(
                 width: constraints.maxWidth / 2,
                 child: StyledText(
-                  text:
-                      _isDone ? _suggestion.doneSubTitle : _suggestion.subTitle,
+                  text: _isDone
+                      ? _suggestion.doneSubTitle!
+                      : _suggestion.subTitle!,
                   style: (_isDone
                           ? _theme.textTheme.textOnContrast
                           : _theme.textTheme
-                              .withColor(_suggestion.textOnSecondary))
+                              .withColor(_suggestion.textOnSecondary!))
                       .caption,
                   styles: {
                     'bold': TextStyle(fontWeight: FontWeight.bold),
@@ -330,8 +332,8 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
                           setState(() {
                             _campaigLoading = true;
                           });
-                          Campaign c = await DatabaseService.getCampaign(
-                              _suggestion.campaignId);
+                          Campaign c = await (DatabaseService.getCampaign(
+                              _suggestion.campaignId) as FutureOr<Campaign>);
 
                           if (c == null) {
                             setState(() {
@@ -362,11 +364,11 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
                             ),
                           )
                         : Text(
-                            _suggestion.campaignName,
+                            _suggestion.campaignName!,
                             style: (_isDone
                                     ? _theme.textTheme.textOnDark
                                     : _theme.textTheme
-                                        .withColor(_suggestion.textOnPrimary))
+                                        .withColor(_suggestion.textOnPrimary!))
                                 .bodyText1,
                           ),
                   ),
@@ -396,40 +398,42 @@ class _SuggestionDoneWidget extends StatelessWidget {
 }
 
 class _DonationAnimWidget extends StatefulWidget {
-  final String animUrl;
+  final String? animUrl;
 
-  const _DonationAnimWidget({Key key, this.animUrl}) : super(key: key);
+  const _DonationAnimWidget({Key? key, this.animUrl}) : super(key: key);
 
   @override
   _DonationAnimWidgetState createState() => _DonationAnimWidgetState();
 }
 
 class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
-  Future<List<Artboard>> _futureRives;
-  Stream<AdBalance> _adBalanceStream;
-  Suggestion _suggestion;
+  late Future<List<Artboard>?> _futureRives;
+  Stream<AdBalance>? _adBalanceStream;
+  late Suggestion _suggestion;
 
   @override
   void initState() {
     super.initState();
     _suggestion = context.read<Suggestion>();
 
-    _futureRives = _loadAndCacheRives(_suggestion.amount.clamp(0, 2));
+    _futureRives = _loadAndCacheRives(_suggestion.amount!.clamp(0, 2));
     _adBalanceStream =
         DatabaseService.getAdBalance(context.read<UserManager>().uid);
   }
 
-  Future<List<Artboard>> _loadAndCacheRives(int amount) async {
+  Future<List<Artboard>?> _loadAndCacheRives(int amount) async {
     try {
       final cacheManager = DefaultCacheManager();
-      FileInfo fileInfo = await cacheManager
-          .getFileFromCache(widget.animUrl); // Get video from cache first
+      FileInfo? fileInfo = await cacheManager
+          .getFileFromCache(widget.animUrl!); // Get video from cache first
 
       if (fileInfo?.file == null) {
-        fileInfo = await cacheManager.downloadFile(widget.animUrl);
+        fileInfo = await cacheManager.downloadFile(widget.animUrl!);
       }
 
-      Uint8List list = await fileInfo.file.readAsBytes();
+      Uint8List? list = await fileInfo?.file.readAsBytes();
+      if (list == null) throw new Exception("Couldn't load rive animation!");
+
       ByteData data = ByteData.view(list.buffer);
       final List<RiveFile> _riveFiles =
           List.generate(amount, (i) => RiveFile.import(data));
@@ -440,13 +444,13 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
     }
   }
 
-  BuildContext mContext;
+  BuildContext? mContext;
   bool _rightDone = false;
 
   @override
   Widget build(BuildContext context) {
     mContext = context;
-    return FutureBuilder<List<Artboard>>(
+    return FutureBuilder<List<Artboard>?>(
         future: _futureRives,
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data == null) {
@@ -456,9 +460,9 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
           List<Widget> _riveBoxes = [];
           int amountDonatedTmp = _suggestion.donatedToday, _index = 0;
 
-          print(snapshot.data.length);
+          print(snapshot.data!.length);
 
-          for (Artboard artboard in snapshot.data) {
+          for (Artboard artboard in snapshot.data!) {
             print("inDEX: $_index");
             bool isDone;
             if (_rightDone) {
@@ -467,7 +471,7 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
               else
                 isDone = false;
             } else {
-              isDone = amountDonatedTmp >= _suggestion.amountPerDonation;
+              isDone = amountDonatedTmp >= _suggestion.amountPerDonation!;
             }
 
             print("RightIsDone: $_rightDone, Done: $isDone");
@@ -482,7 +486,7 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
                           return _RiveBox(artboard,
                               isDone: isDone,
                               onPressed: () {
-                                int _i = snapshot.data.indexOf(artboard);
+                                int _i = snapshot.data!.indexOf(artboard);
                                 if (_i > 0) {
                                   print("Setting right done $_i");
                                   _rightDone = true;
@@ -490,15 +494,15 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
                                 _donate();
                               },
                               checkBeforeAnimate: () =>
-                                  s.data.dcBalance >=
-                                  _suggestion.amountPerDonation,
+                                  s.data!.dcBalance! >=
+                                  _suggestion.amountPerDonation!,
                               onError: () => _notEnoughDVs(),
                               shouldAnimate: status != ConnectivityResult.none);
                         });
                   }),
             ));
 
-            amountDonatedTmp -= _suggestion.amountPerDonation;
+            amountDonatedTmp -= _suggestion.amountPerDonation!;
             _index++;
           }
 
@@ -521,12 +525,13 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
     UserManager um = context.read<UserManager>();
 
     Campaign campaign =
-        await DatabaseService.getCampaign(suggestion.campaignId);
+        await (DatabaseService.getCampaign(suggestion.campaignId)
+            as FutureOr<Campaign>);
     if (um.uid == null) return;
 
     AdBalance adBalance = await DatabaseService.getAdBalanceFuture(um.uid);
 
-    if (adBalance.dcBalance < (suggestion.amountPerDonation ?? 1)) {
+    if (adBalance.dcBalance! < (suggestion.amountPerDonation ?? 1)) {
       _notEnoughDVs();
       return;
     }
@@ -537,7 +542,7 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
         campaignImgUrl: campaign.imgUrl,
         userId: um.uid,
         campaignName: campaign.name,
-        anonym: um.user.ghost,
+        anonym: um.user!.ghost,
         useDCs: true);
 
     print("Donating... $donation");
@@ -558,10 +563,10 @@ class _DonationAnimWidgetState extends State<_DonationAnimWidget> {
 
 class _RiveBox extends StatefulWidget {
   final Artboard _artboard;
-  final bool shouldAnimate, isDone;
-  final void Function() onPressed;
-  final bool Function() checkBeforeAnimate;
-  final void Function() onError;
+  final bool? shouldAnimate, isDone;
+  final void Function()? onPressed;
+  final bool Function()? checkBeforeAnimate;
+  final void Function()? onError;
 
   _RiveBox(this._artboard,
       {this.onPressed,
@@ -581,23 +586,23 @@ class __RiveBoxState extends State<_RiveBox> {
   void initState() {
     super.initState();
     widget._artboard
-        .addController(SimpleAnimation(widget.isDone ? "used" : "idle"));
+        .addController(SimpleAnimation(widget.isDone! ? "used" : "idle"));
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        if (_isUsed || !widget.shouldAnimate || widget.isDone) return;
+        if (_isUsed || !widget.shouldAnimate! || widget.isDone!) return;
 
-        if (!widget.checkBeforeAnimate()) {
-          widget.onError();
+        if (!widget.checkBeforeAnimate!()) {
+          widget.onError!();
           return;
         }
 
         widget._artboard.addController(SimpleAnimation("used"));
         _isUsed = true;
-        widget.onPressed();
+        widget.onPressed!();
       },
       child: Rive(
         artboard: widget._artboard,
@@ -609,7 +614,7 @@ class __RiveBoxState extends State<_RiveBox> {
 }
 
 class _Roadmap extends StatelessWidget {
-  ThemeManager _theme;
+  late ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
@@ -632,7 +637,7 @@ class _Roadmap extends StatelessWidget {
         Consumer<GoalPageManager>(
             builder: (context, gpm, child) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: _buildGoalDescription(gpm?.goal),
+                  child: _buildGoalDescription(gpm.goal),
                 )),
         Consumer<GoalPageManager>(
           builder: (context, gpm, child) {
@@ -674,10 +679,10 @@ class _Roadmap extends StatelessWidget {
                         Builder(
                           builder: (context) {
                             bool _reached =
-                                gpm.goal.currentValue >= check.value;
+                                gpm.goal!.currentValue! >= check.value!;
                             Color _color = _reached
                                 ? _theme.colors.dark
-                                : Colors.grey[300];
+                                : Colors.grey[300]!;
                             Color _textColor = _reached
                                 ? _theme.colors.light
                                 : _theme.colors.dark.withOpacity(.7);
@@ -702,7 +707,8 @@ class _Roadmap extends StatelessWidget {
                               ),
                               endChild: _TimelineContent(
                                 checkpoint: check,
-                                reached: gpm.goal.currentValue >= check.value,
+                                reached:
+                                    gpm.goal!.currentValue! >= check.value!,
                                 color: _color,
                                 textColor: _textColor,
                               ),
@@ -719,7 +725,7 @@ class _Roadmap extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalDescription(Goal goal) {
+  Widget _buildGoalDescription(Goal? goal) {
     if (goal == null) return SizedBox.shrink();
 
     if (goal.description?.isEmpty ?? true)
@@ -736,8 +742,8 @@ class _Roadmap extends StatelessWidget {
         ),
       ]));
 
-    if (goal.description.contains("**")) {
-      List<String> splitted = goal.description.split("**");
+    if (goal.description!.contains("**")) {
+      List<String> splitted = goal.description!.split("**");
       return RichText(
           text: TextSpan(style: _theme.textTheme.dark.bodyText2, children: [
         TextSpan(
@@ -785,7 +791,7 @@ class _DropdownButton extends StatelessWidget {
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<Goal>(
-              value: gpm?.goal,
+              value: gpm.goal,
               onChanged: (val) => gpm.goal = val,
               style: _theme.textTheme.textOnContrast.headline6
                   .copyWith(fontSize: 18),
@@ -815,7 +821,7 @@ class _DropdownButton extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 12.0),
                               child: Text(
-                                value.name ?? value.id,
+                                value.name ?? value.id!,
                                 style: _theme.textTheme.textOnContrast.headline6
                                     .copyWith(fontSize: 18),
                               ),
@@ -829,12 +835,12 @@ class _DropdownButton extends StatelessWidget {
 }
 
 class _TimelineContent extends StatelessWidget {
-  final GoalCheckpoint checkpoint;
+  final GoalCheckpoint? checkpoint;
   final bool reached;
-  final Color color, textColor;
+  final Color? color, textColor;
 
   const _TimelineContent(
-      {Key key,
+      {Key? key,
       this.checkpoint,
       this.reached = false,
       this.color,
@@ -844,7 +850,7 @@ class _TimelineContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    BaseTextTheme _textTheme = _theme.textTheme.withColor(textColor);
+    BaseTextTheme _textTheme = _theme.textTheme.withColor(textColor!);
 
     return Card(
       color: color,
@@ -856,18 +862,18 @@ class _TimelineContent extends StatelessWidget {
           children: [
             Consumer<GoalPageManager>(
               builder: (context, gpm, child) => Text(
-                "${checkpoint.value} ${gpm.goal?.unitSmiley ?? gpm.goal?.unit ?? gpm.goal?.name ?? "DV"}",
+                "${checkpoint!.value} ${gpm.goal?.unitSmiley ?? gpm.goal?.unit ?? gpm.goal?.name ?? "DV"}",
                 style: _textTheme.headline6,
               ),
             ),
-            if (checkpoint.pending != null && !reached)
+            if (checkpoint!.pending != null && !reached)
               Text(
-                checkpoint.pending,
+                checkpoint!.pending!,
                 style: _textTheme.bodyText1,
               ),
-            if (checkpoint.done != null && reached)
+            if (checkpoint!.done != null && reached)
               Text(
-                checkpoint.done,
+                checkpoint!.done!,
                 style: _textTheme.bodyText1,
               ),
           ],

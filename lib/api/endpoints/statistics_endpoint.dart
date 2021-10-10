@@ -5,13 +5,13 @@ class StatisticsEndpoint extends ApiEndpoint<Statistics> {
   StatisticsEndpoint([String route = "statistics"])
       : super(route, formatter: (map) => Statistics.fromJson(map));
 
-  Future<Statistics> home() {
+  Future<Statistics?> home() {
     return this.addRoute('home').getOne();
   }
 
   @override
-  StatisticsEndpoint addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  StatisticsEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return StatisticsEndpoint(finalRoute);
   }
 }

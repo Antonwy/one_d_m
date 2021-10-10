@@ -4,19 +4,17 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/donation.dart';
-import 'package:one_d_m/models/donation_info.dart';
-import 'package:one_d_m/models/statistics.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 import 'package:provider/provider.dart';
 
-import 'custom_open_container.dart';
 import 'donation_widget.dart';
 import 'info_feed.dart';
 import 'margin.dart';
@@ -35,7 +33,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
     super.dispose();
   }
 
-  Timer _debounce;
+  Timer? _debounce;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +46,12 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
         builder: (_, snapshot) {
           if (!snapshot.hasData) return SizedBox.shrink();
 
-          if (_debounce?.isActive ?? false) _debounce.cancel();
+          if (_debounce?.isActive ?? false) _debounce!.cancel();
           _debounce = Timer(const Duration(seconds: 30), () {
-            print("DEBOUNCE STATISTICS");
             context.read<StatisticsManager>().refresh();
           });
 
-          List<Donation> d = snapshot.data;
+          List<Donation> d = snapshot.data!;
           if (d.isEmpty) return SizedBox.shrink();
           return ListView.separated(
             controller: _controller,
@@ -73,19 +70,16 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                     children: [
                       Consumer<StatisticsManager>(
                           builder: (context, sm, child) {
-                        int _current = sm.home.donationsToday,
-                            _goal = sm.home.donationGoalToday;
-                        bool dailyTargetDone = _current >= _goal;
+                        int? _current = sm.home!.donationsToday,
+                            _goal = sm.home!.donationGoalToday;
+                        bool dailyTargetDone = _current! >= _goal!;
                         return Container(
                           height: double.infinity,
                           width: 100,
                           child: Material(
+                            color: context.theme.primaryColor,
                             borderRadius:
                                 BorderRadius.circular(Constants.radius + 2),
-                            color: ThemeManager.of(context)
-                                .colors
-                                .contrast
-                                .withOpacity(.6),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
@@ -95,11 +89,15 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                                     "Tagesziel:",
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 12),
+                                        fontSize: 12,
+                                        color: context
+                                            .theme.colorScheme.onPrimary),
                                   ),
                                   YMargin(6),
                                   dailyTargetDone
-                                      ? Icon(Icons.done)
+                                      ? Icon(Icons.done,
+                                          color: context
+                                              .theme.colorScheme.onPrimary)
                                       : DailyGoalWidget(
                                           title:
                                               "${Numeral(_current).value()}/${Numeral(_goal).value()} DV",
@@ -112,7 +110,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                         );
                       }),
                       XMargin(8.0),
-                      _buildDonator(d[index]),
+                      LatestDonator(d[index]),
                     ],
                   ),
                 );
@@ -120,68 +118,78 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                 padding: EdgeInsets.only(
                     left: index == 0 ? 12.0 : 0.0,
                     right: index == d.length - 1 ? 12.0 : 0.0),
-                child: _buildDonator(d[index]),
+                child: LatestDonator(d[index]),
               );
             },
           );
         },
       );
+}
 
-  Widget _buildDonator(Donation donation) => FutureBuilder<User>(
-      future: donation.username != null
-          ? Future.value(User(
-              id: donation.userId,
-              name: donation.username,
-              imgUrl: donation.userImageUrl,
-              blurHash: donation.userBlurHash))
-          : Api().users().getOne(donation.userId),
-      builder: (context, snapshot) {
-        User u = snapshot.data;
-        return Material(
-          clipBehavior: Clip.antiAlias,
-          color: ThemeManager.of(context).colors.contrast.withOpacity(.6),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Constants.radius + 2)),
-          child: InkWell(
-            onTap: snapshot.hasData
-                ? () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (c) => UserPage(snapshot.data)));
-                  }
-                : null,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: RoundedAvatar(
-                    u?.thumbnailUrl ?? u?.imgUrl,
-                    height: 31,
-                    loading: !snapshot.hasData,
-                    name: u?.name,
+class LatestDonator extends StatelessWidget {
+  final Donation donation;
+  const LatestDonator(this.donation);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<User?>(
+        future: donation.username != null
+            ? Future.value(User(
+                id: donation.userId!,
+                name: donation.username!,
+                imgUrl: donation.userImageUrl,
+                blurHash: donation.userBlurHash))
+            : Api().users().getOne(donation.userId),
+        builder: (context, snapshot) {
+          User? u = snapshot.data;
+
+          if (snapshot.hasError) {
+            print(donation.userId);
+          }
+
+          return Material(
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Constants.radius + 2)),
+            child: InkWell(
+              onTap: snapshot.hasData
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (c) => UserPage(snapshot.data!)));
+                    }
+                  : null,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: RoundedAvatar(
+                      u?.thumbnailUrl ?? u?.imgUrl,
+                      height: 31,
+                      loading: !snapshot.hasData,
+                      name: u?.name,
+                    ),
                   ),
-                ),
-                AutoSizeText(buildAmount(donation),
-                    maxLines: 1,
-                    minFontSize: 3,
-                    overflow: TextOverflow.clip,
-                    style: ThemeManager.of(context)
-                        .textTheme
-                        .withColor(Colors.grey[700])
-                        .bodyText1
-                        .copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            height: .99)),
-              ],
+                  AutoSizeText(buildAmount(donation),
+                      maxLines: 1,
+                      minFontSize: 3,
+                      overflow: TextOverflow.clip,
+                      style: context.theme.textTheme.bodyText1
+                          ?.withOpacity(.6)
+                          .copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              height: .99)),
+                ],
+              ),
             ),
-          ),
-        );
-      });
+          );
+        });
+  }
 
   String buildAmount(Donation d) {
-    int amount = (d.amount / (d.donationUnit?.value ?? 1)).round();
+    int amount = (d.amount! / (d.donationUnit?.value ?? 1)).round();
     String unit = d.donationUnit?.smiley ??
         (amount == 1 ? d.donationUnit?.singular : d.donationUnit?.name) ??
         'DV';

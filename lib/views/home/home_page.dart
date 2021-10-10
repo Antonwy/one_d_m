@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
+import 'package:one_d_m/components/connection-widget.dart';
 import 'package:one_d_m/components/dialog_holder.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/navbar.dart';
@@ -11,16 +13,16 @@ import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/provider/navbar_manager.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
+import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'explore_page.dart';
-import 'goal_page.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
-  Future initFuture;
-  HomePage({Key key, this.initFuture}) : super(key: key);
+  Future? initFuture;
+  HomePage({Key? key, this.initFuture}) : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();
@@ -101,7 +103,6 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ColorTheme.appBg,
         body: OfflineBuilder(
             child: Container(),
             connectivityBuilder: (context, connectivity, child) {
@@ -131,6 +132,7 @@ class HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
+                  ConnectionWidget(),
                   ChangeNotifierProvider(
                     create: (context) => NavBarManager(_pageController),
                     child: NavBar(_changePage),
@@ -174,7 +176,7 @@ class StartupDialogManager {
 
   Future showDialogs() async {
     print("SHOWING DIALOGS");
-    while (_dialogQueue.isNotEmpty) {
+    while (_dialogQueue.isNotEmpty && isFirstStart) {
       print("SHOW DIALOG");
       await _showDialog(_dialogQueue.removeAt(0));
       await Future.delayed(Duration(milliseconds: 500));

@@ -10,14 +10,14 @@ class Session extends BaseSession {
   final List<SessionMember> members;
   final List<String> donationEffects;
   final List<SessionDonation> donations;
-  final String animationUrl,
+  final String? animationUrl,
       campaignTitle,
       campaignShortDescription,
       campaignImageUrl,
       campaignThumbnailUrl,
       videoUrl;
   final bool subscribed;
-  final int memberCount;
+  final int? memberCount;
 
   Session.fromDoc(DocumentSnapshot doc)
       : members = [],
@@ -31,7 +31,7 @@ class Session extends BaseSession {
         campaignThumbnailUrl = "",
         donations = [],
         videoUrl = null,
-        super.fromJson(doc.data());
+        super.fromJson(doc.data() as Map<String, dynamic>);
 
   Session.fromJson(Map<String, dynamic> map)
       : members = SessionMember.listFromJson(Helper.castJson(map[MEMBERS])),

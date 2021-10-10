@@ -31,22 +31,22 @@ class FeedDoc {
 }
 
 abstract class FeedObject {
-  final DateTime createdAt;
-  final String id;
+  final DateTime? createdAt;
+  final String? id;
 
   const FeedObject({this.id, this.createdAt});
 
   Widget buildWidget(BuildContext context, {bool highlighted = false});
 
   factory FeedObject.fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     final feedType = data[FEED_TYPE];
 
     if (feedType == FOLLOW)
       return FollowNotification.fromDoc(doc);
     else if (feedType == SURVEY) return SurveyNotification.fromDoc(doc);
 
-    return null;
+    return FollowNotification.fromDoc(doc);
   }
 
   static DateTime dateFromDoc(DocumentSnapshot doc) =>
@@ -68,7 +68,7 @@ class FollowNotification extends FeedObject {
     return _FollowNotificationWidget(this, highlighted);
   }
 
-  FollowNotification({DateTime createdAt, String id})
+  FollowNotification({DateTime? createdAt, String? id})
       : super(createdAt: createdAt, id: id);
 
   factory FollowNotification.fromDoc(DocumentSnapshot doc) =>
@@ -82,7 +82,7 @@ class FollowNotification extends FeedObject {
 }
 
 class SurveyNotification extends FeedObject {
-  const SurveyNotification({String id, DateTime createdAt})
+  const SurveyNotification({String? id, DateTime? createdAt})
       : super(createdAt: createdAt, id: id);
 
   factory SurveyNotification.fromDoc(DocumentSnapshot doc) =>
@@ -93,13 +93,13 @@ class SurveyNotification extends FeedObject {
 
   @override
   Widget buildWidget(BuildContext context, {bool highlighted = false}) {
-    return FutureBuilder<Survey>(
+    return FutureBuilder<Survey?>(
         future: DatabaseService.getSurveyDeleteFromFeedIfNotExists(
             id, context.read<UserManager>().uid),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data != null)
-              return snapshot.data
+              return snapshot.data!
                   .buildWidget(context, highlighted: highlighted);
           }
           return Container();
@@ -108,14 +108,14 @@ class SurveyNotification extends FeedObject {
 }
 
 abstract class Survey<T extends SurveyResult> extends FeedObject {
-  final String question, surveyType;
-  final bool rollout, onlyAdmin;
-  final int resultCount;
-  final T result;
+  final String? question, surveyType;
+  final bool? rollout, onlyAdmin;
+  final int? resultCount;
+  final T? result;
 
   Survey(
-      {String id,
-      DateTime createdAt,
+      {String? id,
+      DateTime? createdAt,
       this.question,
       this.surveyType,
       this.rollout,
@@ -124,8 +124,8 @@ abstract class Survey<T extends SurveyResult> extends FeedObject {
       this.resultCount = 0})
       : super(createdAt: createdAt, id: id);
 
-  static Survey fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+  static Survey? fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     final surveyType = data[SURVEY_TYPE];
     print("SURVEY_TYPE == $surveyType");
     if (surveyType == MULTIPLE_CHOICE) return CheckBoxSurvey.fromDoc(doc);
@@ -138,7 +138,7 @@ abstract class Survey<T extends SurveyResult> extends FeedObject {
   }
 
   Map<String, dynamic> buildResult() {
-    return result.toMap(this);
+    return result!.toMap(this);
   }
 
   Future<void> sendResult(BuildContext context) async {
@@ -159,12 +159,12 @@ abstract class Survey<T extends SurveyResult> extends FeedObject {
 }
 
 class SingleAnswerSurvey<T> extends Survey<SingleAnswerSurveyResult<T>> {
-  final Map<String, int> evaluation;
+  final Map<String, int>? evaluation;
 
   SingleAnswerSurvey(
-      {String id,
-      DateTime createdAt,
-      String question,
+      {String? id,
+      DateTime? createdAt,
+      String? question,
       bool rollout = false,
       bool onlyAdmin = false,
       int resultCount = 0,
@@ -182,7 +182,7 @@ class SingleAnswerSurvey<T> extends Survey<SingleAnswerSurveyResult<T>> {
   factory SingleAnswerSurvey.fromDoc(DocumentSnapshot doc) {
     print("SINGLE ANSWER FROM DOC");
 
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return SingleAnswerSurvey(
       createdAt: FeedObject.dateFromDoc(doc),
       id: doc.id,
@@ -219,18 +219,18 @@ class SingleAnswerSurvey<T> extends Survey<SingleAnswerSurveyResult<T>> {
 }
 
 class CheckBoxSurvey extends Survey<CheckBoxSurveyResult> {
-  final Map<String, int> evaluation;
-  final List<String> answers;
+  final Map<String, int>? evaluation;
+  final List<String>? answers;
   final bool isSingleChoice;
 
   CheckBoxSurvey(
-      {String id,
-      DateTime createdAt,
-      String question,
+      {String? id,
+      DateTime? createdAt,
+      String? question,
       this.answers,
       bool rollout = false,
       bool onlyAdmin = false,
-      int resultCount,
+      int? resultCount,
       this.evaluation,
       this.isSingleChoice = false})
       : super(
@@ -245,7 +245,7 @@ class CheckBoxSurvey extends Survey<CheckBoxSurveyResult> {
 
   factory CheckBoxSurvey.fromDoc(DocumentSnapshot doc,
       {bool isSingleChoice = false}) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return CheckBoxSurvey(
         createdAt: FeedObject.dateFromDoc(doc),
         id: doc.id,
@@ -262,8 +262,8 @@ class CheckBoxSurvey extends Survey<CheckBoxSurveyResult> {
 
   @override
   Widget buildWidget(BuildContext context, {bool highlighted = false}) {
-    if (!rollout ||
-        (onlyAdmin && !(context.read<UserManager>()?.user?.admin ?? false)))
+    if (!rollout! ||
+        (onlyAdmin! && !(context.read<UserManager>().user?.admin ?? false)))
       return SizedBox.shrink();
 
     return _SurveyWrapper<CheckBoxSurvey>(
@@ -285,12 +285,12 @@ abstract class SurveyResult<T> {
   static const String RESULT = "result";
 }
 
-class SingleAnswerSurveyResult<T> extends SurveyResult<T> {
+class SingleAnswerSurveyResult<T> extends SurveyResult<T?> {
   @override
-  T answers;
+  T? answers;
 
   @override
-  void addAnswer(T answer) {
+  void addAnswer(T? answer) {
     answers = answer;
   }
 
@@ -304,8 +304,8 @@ class SingleAnswerSurveyResult<T> extends SurveyResult<T> {
   }
 }
 
-class CheckBoxSurveyResult extends SurveyResult<Map<String, bool>> {
-  Map<String, bool> _answers;
+class CheckBoxSurveyResult extends SurveyResult<Map<String, bool?>?> {
+  Map<String, bool?>? _answers;
   final bool isSingleChoice;
 
   CheckBoxSurveyResult([this.isSingleChoice = false]);
@@ -320,18 +320,18 @@ class CheckBoxSurveyResult extends SurveyResult<Map<String, bool>> {
   }
 
   @override
-  void addAnswer(Map<String, bool> answer) {
+  void addAnswer(Map<String, bool?>? answer) {
     if (isSingleChoice) {
-      _answers.updateAll((key, value) => false);
+      _answers!.updateAll((key, value) => false);
     }
-    _answers.addAll(answer);
+    _answers!.addAll(answer!);
   }
 
   @override
-  Map<String, bool> get answers => _answers;
+  Map<String, bool?>? get answers => _answers;
 
   @override
-  set answers(Map<String, bool> a) {
+  set answers(Map<String, bool?>? a) {
     _answers = a;
   }
 }
@@ -339,7 +339,7 @@ class CheckBoxSurveyResult extends SurveyResult<Map<String, bool>> {
 class _SurveyWrapper<T extends Survey> extends StatefulWidget {
   final Widget child;
   final T survey;
-  const _SurveyWrapper(this.child, {@required this.survey});
+  const _SurveyWrapper(this.child, {required this.survey});
 
   @override
   __SurveyWrapperState<T> createState() => __SurveyWrapperState<T>();
@@ -350,9 +350,9 @@ class __SurveyWrapperState<T extends Survey> extends State<_SurveyWrapper<T>>
   @override
   Widget build(BuildContext context) {
     UserManager um = context.read<UserManager>();
-    if (!widget.survey.rollout ||
-        (widget.survey.onlyAdmin && !(um?.user?.admin ?? false)) ||
-        (widget.survey?.question?.isEmpty ?? true)) return SizedBox.shrink();
+    if (!widget.survey.rollout! ||
+        (widget.survey.onlyAdmin! && !(um.user?.admin ?? false)) ||
+        (widget.survey.question?.isEmpty ?? true)) return SizedBox.shrink();
 
     ThemeManager _theme = ThemeManager.of(context);
     return Provider<T>(
@@ -362,7 +362,7 @@ class __SurveyWrapperState<T extends Survey> extends State<_SurveyWrapper<T>>
           future: DatabaseService.hasContributedToSurvey(
               sid: widget.survey.id, uid: um.uid),
           builder: (context, snapshot) {
-            return snapshot.data
+            return snapshot.data!
                 ? SizedBox.shrink()
                 : Padding(
                     padding: const EdgeInsets.symmetric(
@@ -373,16 +373,17 @@ class __SurveyWrapperState<T extends Survey> extends State<_SurveyWrapper<T>>
                       clipBehavior: Clip.antiAlias,
                       child: Theme(
                         data: ThemeData(
-                            accentColor: _theme.colors.textOnContrast,
                             unselectedWidgetColor:
-                                _theme.colors.textOnContrast.withOpacity(.8)),
+                                _theme.colors.textOnContrast.withOpacity(.8),
+                            colorScheme: ColorScheme.fromSwatch().copyWith(
+                                secondary: _theme.colors!.textOnContrast)),
                         child: ExpansionTile(
                           initiallyExpanded: true,
                           maintainState: true,
                           title: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: Text(
-                              widget.survey?.question ?? "",
+                              widget.survey.question ?? "",
                               style: _theme.textTheme.textOnContrast.headline6
                                   .copyWith(fontSize: 16),
                             ),
@@ -412,7 +413,8 @@ class __YesNoSurveyWidgetState extends State<_YesNoSurveyWidget>
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    SingleAnswerSurvey<bool> survey = context.read<SingleAnswerSurvey<bool>>();
+    SingleAnswerSurvey<bool?> survey =
+        context.read<SingleAnswerSurvey<bool?>>();
     return AnimatedSize(
       vsync: this,
       duration: Duration(milliseconds: 250),
@@ -429,7 +431,7 @@ class __YesNoSurveyWidgetState extends State<_YesNoSurveyWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "JA (${survey.evaluation["true"] ?? 0}/${survey.resultCount})",
+                          "JA (${survey.evaluation!["true"] ?? 0}/${survey.resultCount})",
                           style: _theme.textTheme.textOnContrast.bodyText1,
                         ),
                         YMargin(6),
@@ -443,7 +445,7 @@ class __YesNoSurveyWidgetState extends State<_YesNoSurveyWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "NEIN (${survey.evaluation["false"] ?? 0}/${survey.resultCount})",
+                          "NEIN (${survey.evaluation!["false"] ?? 0}/${survey.resultCount})",
                           style: _theme.textTheme.textOnContrast.bodyText1,
                         ),
                         YMargin(6),
@@ -509,26 +511,28 @@ class __YesNoSurveyWidgetState extends State<_YesNoSurveyWidget>
   }
 
   Widget _progressWidget(
-      {ThemeManager theme, SingleAnswerSurvey<bool> survey, String eval}) {
+      {ThemeManager? theme, SingleAnswerSurvey<bool?>? survey, String? eval}) {
     return Material(
       borderRadius: BorderRadius.circular(10),
       clipBehavior: Clip.antiAlias,
       color: Colors.transparent,
       child: LayoutBuilder(builder: (context, constraints) {
-        double value = survey.resultCount > 0
-            ? ((survey.evaluation[eval] ?? 0) / survey.resultCount)
+        double value = survey!.resultCount! > 0
+            ? ((survey.evaluation![eval!] ?? 0) / survey.resultCount!)
             : 0;
         return LinearProgressIndicator(
             value: value,
-            backgroundColor: theme.colors.textOnContrast.withOpacity(.1),
+            backgroundColor: theme!.colors.textOnContrast.withOpacity(.1),
             valueColor: AlwaysStoppedAnimation(theme.colors.textOnContrast));
       }),
     );
   }
 
   void _clickedValue(
-      {BuildContext context, bool value, SingleAnswerSurvey<bool> survey}) {
-    survey.result.addAnswer(value);
+      {required BuildContext context,
+      bool? value,
+      required SingleAnswerSurvey<bool?> survey}) {
+    survey.result!.addAnswer(value);
     survey.sendResult(context);
     setState(() {
       _done = true;
@@ -593,14 +597,14 @@ class __TextSurveyWidgetState extends State<_TextSurveyWidget>
                       textColor: _theme.colors.textOnContrast,
                       maxLines: 3,
                       onChanged: (text) {
-                        survey.result.addAnswer(text);
+                        survey.result!.addAnswer(text);
                         setState(() {});
                       },
                     ),
                   ),
                   YMargin(6),
                   _SurveyBottomContent<SingleAnswerSurvey<String>>(
-                    active: survey.result.answers?.isNotEmpty ?? false,
+                    active: survey.result!.answers?.isNotEmpty ?? false,
                     onSubmitted: () {
                       setState(() {
                         _done = true;
@@ -629,9 +633,9 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
     ThemeManager _theme = ThemeManager.of(context);
     return Consumer<CheckBoxSurvey>(
       builder: (context, survey, child) {
-        if (survey.result.answers == null) {
-          survey.result.answers = {
-            for (String ans in survey.answers) ans: false
+        if (survey.result!.answers == null) {
+          survey.result!.answers = {
+            for (String ans in survey.answers!) ans: false
           };
         }
 
@@ -644,7 +648,7 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (String answer in survey.result.answers.keys)
+              for (String answer in survey.result!.answers!.keys)
                 AnimatedSwitcher(
                   duration: duration,
                   switchOutCurve: Curves.easeOut,
@@ -655,7 +659,7 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "$answer (${survey.evaluation[answer] ?? 0}/${survey.resultCount})",
+                                "$answer (${survey.evaluation![answer] ?? 0}/${survey.resultCount})",
                                 style:
                                     _theme.textTheme.textOnContrast.bodyText1,
                               ),
@@ -666,9 +670,9 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
                                 color: Colors.transparent,
                                 child: LayoutBuilder(
                                     builder: (context, constraints) {
-                                  double value = survey.resultCount > 0
-                                      ? ((survey.evaluation[answer] ?? 0) /
-                                          survey.resultCount)
+                                  double value = survey.resultCount! > 0
+                                      ? ((survey.evaluation![answer] ?? 0) /
+                                          survey.resultCount!)
                                       : 0;
                                   return LinearProgressIndicator(
                                       value: value,
@@ -683,12 +687,12 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
                           ),
                         )
                       : CheckboxListTile(
-                          value: survey.result.answers[answer],
+                          value: survey.result!.answers![answer],
                           checkColor: _theme.colors.textOnDark,
                           activeColor: _theme.colors.textOnContrast,
                           onChanged: (val) {
                             print(val);
-                            survey.result.addAnswer({answer: val});
+                            survey.result!.addAnswer({answer: val});
                             setState(() {});
                           },
                           title: Text(
@@ -728,10 +732,10 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
 }
 
 class _SurveyBottomContent<T extends Survey> extends StatelessWidget {
-  final void Function() onSubmitted;
+  final void Function()? onSubmitted;
   final bool active;
 
-  const _SurveyBottomContent({Key key, this.onSubmitted, this.active = true})
+  const _SurveyBottomContent({Key? key, this.onSubmitted, this.active = true})
       : super(key: key);
 
   @override
@@ -752,7 +756,7 @@ class _SurveyBottomContent<T extends Survey> extends StatelessWidget {
                 size: 12,
               ),
               label: Text("Abschicken")),
-          Text(timeago.format(_survey.createdAt, locale: "de"),
+          Text(timeago.format(_survey.createdAt!, locale: "de"),
               style: _theme.textTheme.textOnContrast.caption),
         ],
       ),
@@ -762,7 +766,7 @@ class _SurveyBottomContent<T extends Survey> extends StatelessWidget {
   Future<void> _submitResult(BuildContext context, Survey survey) async {
     await DatabaseService.sendSurveyResults(survey,
         uid: context.read<UserManager>().uid);
-    onSubmitted();
+    onSubmitted!();
   }
 }
 
@@ -772,7 +776,7 @@ class _FollowNotificationWidget extends StatelessWidget {
 
   _FollowNotificationWidget(this.notification, this.highlighted);
 
-  ThemeManager _theme;
+  late ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
@@ -782,12 +786,12 @@ class _FollowNotificationWidget extends StatelessWidget {
         builder: (context, snapshot) {
           if (!snapshot.hasData) return _buildLoadingTile();
 
-          User user = snapshot.data;
+          User? user = snapshot.data;
           return ListTile(
             tileColor: highlighted ? _theme.colors.contrast : null,
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => UserPage(user)));
+                  MaterialPageRoute(builder: (context) => UserPage(user!)));
             },
             leading: RoundedAvatar(
               user?.thumbnailUrl ?? user?.imgUrl,
@@ -803,7 +807,7 @@ class _FollowNotificationWidget extends StatelessWidget {
               styles: {"bold": TextStyle(fontWeight: FontWeight.bold)},
             ),
             subtitle: Text(
-              timeago.format(notification.createdAt, locale: "de"),
+              timeago.format(notification.createdAt!, locale: "de"),
             ),
             trailing: UserFollowButton(
               followerId: user?.id,
@@ -817,7 +821,6 @@ class _FollowNotificationWidget extends StatelessWidget {
         leading: RoundedAvatar(
           null,
           loading: true,
-          backgroundLight: true,
         ),
         title: Text(
           "Lade Nutzer...",

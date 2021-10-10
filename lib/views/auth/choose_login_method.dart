@@ -1,7 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api_result.dart';
+import 'package:one_d_m/components/big_button.dart';
+import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
@@ -16,14 +20,15 @@ class ChooseLoginMethodPage extends StatefulWidget {
 }
 
 class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
-  ThemeData _theme;
+  late ThemeData _theme;
   bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
     _theme = Theme.of(context);
+
+    SystemChrome.setSystemUIOverlayStyle(context.systemOverlayStyle);
     return Scaffold(
-      backgroundColor: ColorTheme.whiteBlue,
       body: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(
@@ -35,35 +40,52 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
               height: MediaQuery.of(context).size.height * .25,
             ),
             SizedBox(
-              height: 20,
+              height: 24,
             ),
             Text(
               "Willkommen",
-              style: _theme.textTheme.headline5.copyWith(
-                  color: ColorTheme.blue, fontWeight: FontWeight.bold),
+              style: _theme.textTheme.headline5!
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(
               height: 10,
             ),
             Text(
-              "Logge dich ein, um Mitglied von One Dollar Movement zu werden!",
-              style: _theme.textTheme.subtitle1
-                  .copyWith(color: ColorTheme.blue.withOpacity(.7)),
+              "Registriere dich, um Mitglied von One Dollar Movement zu werden!",
+              style: _theme.textTheme.subtitle1!.withOpacity(.7),
               textAlign: TextAlign.center,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18.0),
-              child: Row(
-                children: <Widget>[
-                  _RoundButton(false,
-                      toPage: LoginPage(), pageColor: ColorTheme.appGrey),
-                  SizedBox(
-                    width: 12,
-                  ),
-                  _RoundButton(true,
-                      toPage: RegisterPage(), pageColor: ColorTheme.blue),
-                ],
+              padding: const EdgeInsets.fromLTRB(0, 28, 0, 6),
+              child: Container(
+                width: 200,
+                child: BigButton(
+                    fontSize: 16,
+                    label: "Registrieren",
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RegisterPage()));
+                    },
+                    color: _theme.colorScheme.secondary),
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Falls du einen account hast: ",
+                    style: _theme.textTheme.caption!),
+                TextButton(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (c) => LoginPage()));
+                    },
+                    child: Text(
+                      "Einloggen",
+                      style: TextStyle(decoration: TextDecoration.underline),
+                    )),
+              ],
             ),
             // SignInWithAppleButton(
             //   onPressed: _appleSignIn,
@@ -119,7 +141,7 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
       setState(() {
         _loading = false;
       });
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(res.message)));
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(res.message!)));
       return;
     }
 
@@ -142,10 +164,10 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
 
 class _RoundButton extends StatelessWidget {
   bool isRegister;
-  Widget toPage;
-  Color pageColor;
+  Widget? toPage;
+  Color? color;
 
-  _RoundButton(this.isRegister, {this.toPage, this.pageColor});
+  _RoundButton(this.isRegister, {this.toPage, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -153,13 +175,13 @@ class _RoundButton extends StatelessWidget {
       child: Container(
         height: 52,
         child: Material(
-          color: isRegister ? ColorTheme.blue : ColorTheme.appGrey,
+          color: color,
           borderRadius: BorderRadius.circular(Constants.radius),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
               Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => toPage));
+                  context, MaterialPageRoute(builder: (context) => toPage!));
             },
             child: Center(
                 child: Padding(
@@ -168,7 +190,7 @@ class _RoundButton extends StatelessWidget {
                 isRegister ? "Registrieren" : "Login",
                 maxLines: 1,
                 style: TextStyle(
-                    color: isRegister ? Colors.white : ColorTheme.blue,
+                    color: context.theme.correctColorFor(color!),
                     fontSize: 18,
                     fontWeight: FontWeight.w600),
               ),

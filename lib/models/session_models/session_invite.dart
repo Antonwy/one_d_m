@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 
 class SessionInvite {
-  final String sessionCreatorId, sessionId, sessionName, sessionDescription;
-  final int donationGoal;
+  final String? sessionCreatorId, sessionId, sessionName, sessionDescription;
+  final int? donationGoal;
 
   SessionInvite(
       {this.sessionCreatorId,
@@ -13,7 +13,7 @@ class SessionInvite {
       this.donationGoal});
 
   factory SessionInvite.fromDoc(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return SessionInvite(
         sessionCreatorId: data[SESSION_CREATOR_ID],
         sessionId: data[ID],

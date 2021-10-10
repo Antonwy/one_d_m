@@ -41,7 +41,7 @@ class _NotificationPageState extends State<NotificationPage> {
         pinned: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Neuigkeiten',
-            style: TextStyle(color: ThemeManager.of(context).colors.dark)),
+            style: TextStyle(color: ThemeManager.of(context).colors!.dark)),
         brightness: Brightness.dark,
         backgroundColor: ColorTheme.appBg,
         iconTheme: IconThemeData(color: ColorTheme.blue),
@@ -53,7 +53,7 @@ class _NotificationPageState extends State<NotificationPage> {
         initialData: [],
         stream: DatabaseService.getFeed(context.read<UserManager>().uid),
         builder: (context, snapshot) {
-          if (snapshot.data.isEmpty)
+          if (snapshot.data!.isEmpty)
             return SliverToBoxAdapter(
               child: Column(
                 children: [
@@ -69,7 +69,7 @@ class _NotificationPageState extends State<NotificationPage> {
             );
           return SliverList(
               delegate: SliverChildBuilderDelegate((context, i) {
-            FeedObject _fo = snapshot.data[i];
+            FeedObject _fo = snapshot.data![i];
             return _fo.buildWidget(context,
                 highlighted: widget.feedDoc.unseenObjects.contains(_fo.id));
           }, childCount: snapshot.data?.length ?? 0));

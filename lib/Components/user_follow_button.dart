@@ -1,22 +1,22 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
-import 'package:one_d_m/helper/database_service.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 
 class UserFollowButton extends StatefulWidget {
-  final String followerId;
-  final User user;
-  final Color color, textColor;
+  final String? followerId;
+  final User? user;
+  final Color? color;
   final double backOpacity;
 
   UserFollowButton({
-    @required this.followerId,
+    required this.followerId,
     this.user,
     this.color,
-    this.textColor,
     this.backOpacity = .5,
   });
 
@@ -26,29 +26,38 @@ class UserFollowButton extends StatefulWidget {
 
 class _UserFollowButtonState extends State<UserFollowButton> {
   bool _loading = false;
-  bool _subscribed;
+  bool? _subscribed;
+  late Color _textColor;
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
+    _textColor = widget.color == null
+        ? _theme.colorScheme.onPrimary
+        : _theme.correctColorFor(widget.color ?? _theme.primaryColor);
     UserManager _um = context.watch<UserManager>();
 
     if (_um.uid == widget.followerId)
-      return Material(
-          clipBehavior: Clip.antiAlias,
-          color: (widget.color ?? _theme.colors.contrast)
-              .withOpacity(widget.backOpacity),
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-            child: Text(
-              "Ich",
-              style: _theme.textTheme.dark.bodyText1
-                  .copyWith(fontSize: 11, color: widget.textColor),
-            ),
-          ));
+      return Container(
+        height: 25,
+        child: Material(
+            clipBehavior: Clip.antiAlias,
+            color: (widget.color ?? _theme.primaryColor),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+              child: FittedBox(
+                child: Text(
+                  "Ich",
+                  style: _theme.textTheme.bodyText1!
+                      .copyWith(fontSize: 11, color: _textColor),
+                ),
+              ),
+            )),
+      );
 
-    return FutureBuilder<User>(
+    return FutureBuilder<User?>(
         future: widget.user == null
             ? Api().users().getOne(widget.followerId)
             : Future.value(widget.user),
@@ -56,56 +65,64 @@ class _UserFollowButtonState extends State<UserFollowButton> {
           if (snapshot.hasData && _subscribed == null)
             _subscribed = snapshot.data?.subscribed;
 
-          return Material(
-              clipBehavior: Clip.antiAlias,
-              color: (widget.color ?? _theme.colors.contrast)
-                  .withOpacity(widget.backOpacity),
-              borderRadius: BorderRadius.circular(20),
-              child: InkWell(
-                onTap: !snapshot.hasData || _loading
-                    ? null
-                    : () async {
-                        setState(() {
-                          _loading = true;
-                        });
+          return Container(
+            height: 25,
+            child: Material(
+                clipBehavior: Clip.antiAlias,
+                color: (widget.color ?? _theme.primaryColor),
+                borderRadius: BorderRadius.circular(20),
+                child: InkWell(
+                  onTap: !snapshot.hasData || _loading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _loading = true;
+                          });
 
-                        try {
-                          await (_subscribed
-                              ? Api().users().unsubscribe(widget.followerId)
-                              : Api().users().subscribe(widget.followerId));
-                          setState(() {
-                            _loading = false;
-                            _subscribed = !_subscribed;
-                          });
-                        } catch (e) {
-                          print(e);
-                          setState(() {
-                            _loading = false;
-                          });
-                        }
-                      },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-                  child: _loading
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Container(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation(_theme.colors.dark),
-                              )),
-                        )
-                      : Text(
-                          (_subscribed ?? false) ? "Entfolgen" : "Folgen",
-                          style: _theme.textTheme.dark.bodyText1
-                              .copyWith(fontSize: 11, color: widget.textColor),
-                        ),
-                ),
-              ));
+                          try {
+                            await (_subscribed!
+                                ? Api().users().unsubscribe(widget.followerId)
+                                : Api().users().subscribe(widget.followerId));
+                            setState(() {
+                              _loading = false;
+                              _subscribed = !_subscribed!;
+                            });
+                          } catch (e) {
+                            print(e);
+                            setState(() {
+                              _loading = false;
+                            });
+                          }
+                        },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 12),
+                    child: AnimatedSize(
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.fastLinearToSlowEaseIn,
+                      child: AnimatedSwitcher(
+                        duration: Duration(milliseconds: 125),
+                        child: _loading
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child:
+                                    LoadingIndicator(size: 12, strokeWidth: 2))
+                            : FittedBox(
+                                child: Text(
+                                  (_subscribed ?? false)
+                                      ? "Entfolgen"
+                                      : "Folgen",
+                                  maxLines: 1,
+                                  style: _theme.textTheme.bodyText1!
+                                      .copyWith(color: _textColor),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                )),
+          );
         });
   }
 }

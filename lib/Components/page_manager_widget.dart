@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/push_notification.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
+import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
@@ -21,12 +23,9 @@ class PageManagerWidget extends StatefulWidget {
 }
 
 class _PageManagerWidgetState extends State<PageManagerWidget> {
-  bool _shouldLoad = true;
-  UserManager _um;
-  StreamSubscription _fmStream;
-  HomePage _homePage;
-  Future<void> _initAppFuture;
-  Future<void> _startupFuture;
+  late HomePage _homePage;
+  late Future<void> _initAppFuture;
+  Future<void>? _startupFuture;
 
   @override
   void initState() {
@@ -39,21 +38,15 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
     );
   }
 
-  @override
-  void dispose() {
-    if (_fmStream != null) _fmStream.cancel();
-    super.dispose();
-  }
-
   Future<void> initializeApp() async {
     RemoteConfigManager _rcm = context.read<RemoteConfigManager>();
     await _rcm.initialize();
 
     FirebaseMessaging.onMessage.listen((message) {
-      RemoteNotification notification = message.notification;
+      RemoteNotification notification = message.notification!;
 
       PushNotification.of(context).show(NotificationContent(
-        title: notification.title,
+        title: notification.title ?? "Neue Nachricht",
         body: notification.body,
       ));
     });
@@ -63,29 +56,23 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _um = Provider.of<UserManager>(context);
+    UmSelector umS = context.select<UserManager, UmSelector>(
+        (value) => UmSelector(value.status, value.uid));
 
-    if (_um.status == Status.NEEDSMOREINFORMATIONS) {
+    if (umS.status == Status.NEEDSMOREINFORMATIONS) {
       return RegisterPage(
         socialSignIn: true,
       );
     }
 
-    if (_um.status == Status.Authenticating ||
-        _um.status == Status.Unauthenticated) {
+    if (umS.status == Status.Authenticating ||
+        umS.status == Status.Unauthenticated) {
       return WelcomeScreen();
     }
 
-    if (_um.status == Status.Unverified) return VerifyEmailPage();
+    if (umS.status == Status.Unverified) return VerifyEmailPage();
 
-    if (!_shouldLoad) {
-      return _homePage;
-    }
-
-    if (_um.status == Status.Authenticated) {
-      _shouldLoad = false;
-    }
-
+    print(umS.status);
     return FutureBuilder(
         future: _startupFuture,
         builder: (context, snapshot) {
@@ -96,7 +83,7 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
 
           return Stack(
             children: <Widget>[
-              _um?.uid == null
+              umS.uid == null
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
@@ -106,6 +93,13 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
           );
         });
   }
+}
+
+class UmSelector {
+  final Status status;
+  final String? uid;
+
+  UmSelector(this.status, this.uid);
 }
 
 class _HideSplash extends StatefulWidget {
@@ -144,7 +138,7 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -162,9 +156,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return Material(
-      color: Colors.white,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -191,7 +183,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
                         curve: Interval(.3, 1.0, curve: Curves.easeOut))),
                 child: AutoSizeText("One Dollar Movement",
                     maxLines: 1,
-                    style: _theme.textTheme.dark.headline5
+                    style: context.theme.textTheme.headline5!
                         .copyWith(fontWeight: FontWeight.w600, fontSize: 24)),
               ),
             ],

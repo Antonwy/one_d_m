@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 
 class PercentIndicator extends StatefulWidget {
-  int currentValue, targetValue;
-  String description;
-  Function onTap;
+  int? currentValue, targetValue;
+  String? description;
+  Function? onTap;
 
   PercentIndicator({
     this.currentValue,
@@ -19,8 +19,8 @@ class PercentIndicator extends StatefulWidget {
 
 class _PercentIndicatorState extends State<PercentIndicator>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Tween<double> _valueTween;
+  AnimationController? _controller;
+  late Tween<double> _valueTween;
 
   @override
   void initState() {
@@ -29,28 +29,28 @@ class _PercentIndicatorState extends State<PercentIndicator>
 
     _valueTween = Tween<double>(begin: 0, end: animatedValue);
 
-    _controller.forward();
+    _controller!.forward();
 
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller!.dispose();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(PercentIndicator oldWidget) {
     if (widget.currentValue != oldWidget.currentValue) {
-      double beginValue = this._valueTween.evaluate(this._controller);
+      double beginValue = this._valueTween.evaluate(this._controller!);
 
       this._valueTween = Tween<double>(
         begin: beginValue,
         end: animatedValue,
       );
 
-      this._controller
+      this._controller!
         ..value = 0
         ..forward();
     }
@@ -59,14 +59,14 @@ class _PercentIndicatorState extends State<PercentIndicator>
   }
 
   double get animatedValue =>
-      widget.currentValue == 0 ? 0 : widget.currentValue / widget.targetValue;
+      widget.currentValue == 0 ? 0 : widget.currentValue! / widget.targetValue!;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         AnimatedBuilder(
-            animation: _controller,
+            animation: _controller!,
             builder: (context, child) {
               return Expanded(
                 child: AspectRatio(
@@ -88,7 +88,7 @@ class _PercentIndicatorState extends State<PercentIndicator>
                           child: CircularProgressIndicator(
                             valueColor:
                                 AlwaysStoppedAnimation(ColorTheme.white),
-                            value: _valueTween.evaluate(_controller),
+                            value: _valueTween.evaluate(_controller!),
                             backgroundColor: Colors.white24,
                           ),
                         ),

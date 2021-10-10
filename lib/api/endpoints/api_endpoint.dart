@@ -18,18 +18,18 @@ abstract class ApiEndpoint<T> {
       this.query = const {}})
       : this.baseUrl = Uri.parse('${Api.url}/$route');
 
-  ApiEndpoint<T> addRoute(String routeToAdd);
+  ApiEndpoint<T> addRoute(String? routeToAdd);
 
-  Future<T> getOne([String? id]) async {
+  Future<T?> getOne([String? id]) async {
     if (id != null) return ApiCall<T>(this.addRoute(id)).getOne();
     return ApiCall<T>(this).getOne();
   }
 
-  Future<List<T>> get() async {
+  Future<List<T?>> get() async {
     return ApiCall<T>(this).get();
   }
 
-  Stream<StreamResult<List<T>>> streamGet() {
+  Stream<StreamResult<List<T?>>> streamGet() {
     return ApiCall<T>(this).streamGet();
   }
 
@@ -40,11 +40,11 @@ abstract class ApiEndpoint<T> {
 }
 
 mixin SubscribableEndpoint<T> on ApiEndpoint<T> {
-  Future<void> subscribe(String sid) async {
+  Future<void> subscribe(String? sid) async {
     return ApiCall(this.addRoute(sid).addRoute('subscribe')).put();
   }
 
-  Future<void> unsubscribe(String sid) async {
+  Future<void> unsubscribe(String? sid) async {
     return ApiCall(this.addRoute(sid).addRoute("unsubscribe")).put();
   }
 }
@@ -58,8 +58,8 @@ class QueryableEndpoint<T> extends ApiEndpoint<T> {
             query: query, formatter: formatter, listFormatter: listFormatter);
 
   @override
-  QueryableEndpoint<T> addRoute(String routeToAdd) {
-    String finalRoute = route + '/' + routeToAdd;
+  QueryableEndpoint<T> addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
     return QueryableEndpoint(finalRoute);
   }
 }

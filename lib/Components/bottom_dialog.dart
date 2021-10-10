@@ -20,16 +20,16 @@ class BottomDialog<T> {
                 open: _notifier, duration: duration, curve: curve)));
   }
 
-  void close([T value]) {
+  void close([T? value]) {
     _notifier.value = false;
   }
 }
 
 class _Dialog<T> extends StatefulWidget {
   final Widget child;
-  final ValueNotifier<bool> open;
-  final Duration duration;
-  final Curve curve;
+  final ValueNotifier<bool>? open;
+  final Duration? duration;
+  final Curve? curve;
 
   _Dialog(this.child, {this.open, this.duration, this.curve});
 
@@ -39,9 +39,9 @@ class _Dialog<T> extends StatefulWidget {
 
 class __DialogState<T> extends State<_Dialog>
     with SingleTickerProviderStateMixin {
-  Size _displaySize;
+  late Size _displaySize;
 
-  AnimationController _controller;
+  late AnimationController _controller;
 
   bool _isOpen = false;
 
@@ -49,8 +49,8 @@ class __DialogState<T> extends State<_Dialog>
   void initState() {
     super.initState();
 
-    widget.open.addListener(() {
-      if (!widget.open.value) close();
+    widget.open!.addListener(() {
+      if (!widget.open!.value) close();
     });
 
     _controller = AnimationController(vsync: this, duration: widget.duration);
@@ -68,13 +68,13 @@ class __DialogState<T> extends State<_Dialog>
   final GlobalKey _childKey = GlobalKey();
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     _controller.value -=
-        details.primaryDelta / (_childHeight ?? details.primaryDelta);
+        details.primaryDelta! / (_childHeight ?? details.primaryDelta!);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -134,7 +134,7 @@ class __DialogState<T> extends State<_Dialog>
               child: CustomSingleChildLayout(
                 delegate: _DialogLayout(CurvedAnimation(
                   parent: _controller,
-                  curve: _isOpen ? Curves.easeOut : widget.curve,
+                  curve: _isOpen ? Curves.easeOut : widget.curve!,
                 ).value),
                 child: GestureDetector(
                   onVerticalDragUpdate: _handleDragUpdate,

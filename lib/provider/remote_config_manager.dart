@@ -8,8 +8,8 @@ class RemoteConfigManager {
   static const String FORCE_UPDATE_BUILD_NUMBER = "force_update_build_number";
   static const int MAX_DVS_PER_DAY_DEFAULT = Constants.DVS_PER_DAY;
 
-  RemoteConfig _remoteConfig;
-  PackageInfo packageInfo;
+  late RemoteConfig _remoteConfig;
+  late PackageInfo packageInfo;
   bool shouldUpdate = false;
   bool forceUpdate = false;
 
@@ -74,8 +74,8 @@ class AppVersion {
   static const AppVersion currentVersion =
       AppVersion(version: "1.0.7", buildNumber: 51);
 
-  final String version;
-  final int buildNumber;
+  final String? version;
+  final int? buildNumber;
 
   const AppVersion({this.version, this.buildNumber});
 
@@ -91,7 +91,7 @@ class AppVersion {
 
   bool mustUpdate(AppVersion minVersion) {
     if (minVersion.version != this.version) return true;
-    if (minVersion.buildNumber > this.buildNumber) return true;
+    if (minVersion.buildNumber! > this.buildNumber!) return true;
     return false;
   }
 }

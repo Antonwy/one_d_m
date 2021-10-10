@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Organization {
-  final String name, imgUrl, thumbnailUrl, id, description, website;
+  final String? name, imgUrl, thumbnailUrl, id, description, website;
 
   static final String NAME = "name",
       IMAGEURL = "image_url",
@@ -18,7 +18,7 @@ class Organization {
       this.website});
 
   factory Organization.fromMap(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Organization(
         name: data[NAME],
         imgUrl: data[IMAGEURL],

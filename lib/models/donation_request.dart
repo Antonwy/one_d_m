@@ -3,7 +3,7 @@ import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 
 class DonationRequest {
-  final String campaignBlurHash,
+  final String? campaignBlurHash,
       campaignImageUrl,
       campaignShortDescription,
       campaignShortVideoUrl,
@@ -21,11 +21,11 @@ class DonationRequest {
       sessionImageUrl,
       sessionName,
       sessionId;
-  int campaignCategoryId, userBalance, sessionDonationGoal;
-  final List<String> donationEffects, campaignEffects, tags;
+  int? campaignCategoryId, userBalance, sessionDonationGoal;
+  final List<String>? donationEffects, campaignEffects, tags;
   final DonationUnit unit;
-  final bool sessionIsCertified;
-  final Color sessionPrimaryColor, sessionSecondaryColor;
+  final bool? sessionIsCertified;
+  final Color? sessionPrimaryColor, sessionSecondaryColor;
 
   DonationRequest.fromJson(Map<String, dynamic> json)
       : campaignBlurHash = json['campaign_blur_hash'],

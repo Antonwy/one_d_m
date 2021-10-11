@@ -5,8 +5,8 @@ class Statistics {
       USERINFO = "users_info",
       CAMPAIGNCOUNT = "campaign_count",
       CAMPAIGNINFO = "campaigns_info";
-  DonationInfo donationStatistics;
-  final int userCount,
+  DonationInfo? donationStatistics;
+  final int? userCount,
       donationCount,
       donationAmountCount,
       campaignCount,

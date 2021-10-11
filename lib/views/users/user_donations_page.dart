@@ -8,7 +8,7 @@ import 'package:one_d_m/models/donation.dart';
 import 'package:one_d_m/models/user.dart';
 
 class UsersDonationsPage extends StatelessWidget {
-  final User user;
+  final User? user;
 
   UsersDonationsPage(this.user);
 
@@ -16,30 +16,26 @@ class UsersDonationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text(
           "Unterstützt",
-          style: TextStyle(color: ColorTheme.blue),
         ),
-        iconTheme: IconThemeData(color: ColorTheme.blue),
-        backgroundColor: ColorTheme.whiteBlue,
-        brightness: Brightness.light,
         elevation: 0,
       ),
-      backgroundColor: ColorTheme.whiteBlue,
       body: Padding(
         padding: const EdgeInsets.only(top: 12.0),
-        child: FutureBuilder<List<Donation>>(
-          future: Api().donations().user(user.id).get(),
+        child: FutureBuilder<List<Donation?>>(
+          future: Api().donations().user(user!.id).get(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
                 itemBuilder: (context, index) {
                   return DonationWidget(
-                    snapshot.data[index],
+                    snapshot.data![index]!,
                     withUsername: false,
                   );
                 },
-                itemCount: snapshot.data.length,
+                itemCount: snapshot.data!.length,
               );
             }
             return Center(

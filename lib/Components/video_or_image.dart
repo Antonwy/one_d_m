@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -8,11 +9,11 @@ import 'package:one_d_m/utils/video/video_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VideoOrImage extends StatefulWidget {
-  final String imageUrl, videoUrl, blurHash;
+  final String? imageUrl, videoUrl, blurHash;
   final bool alwaysMuted;
 
   const VideoOrImage(
-      {Key key,
+      {Key? key,
       this.imageUrl,
       this.videoUrl,
       this.blurHash,
@@ -25,6 +26,7 @@ class VideoOrImage extends StatefulWidget {
 
 class _VideoOrImageState extends State<VideoOrImage> {
   bool isInView = true, _muted = true, _loading = true, _videoError = false;
+  ValueNotifier<double?> progress = ValueNotifier(null);
 
   void _toggleMuted() {
     setState(() {
@@ -34,14 +36,14 @@ class _VideoOrImageState extends State<VideoOrImage> {
 
   @override
   Widget build(BuildContext context) {
-    String videoUrl = widget.videoUrl,
+    String? videoUrl = widget.videoUrl,
         imageUrl = widget.imageUrl,
         blurHash = widget.blurHash;
 
     Widget buildImage() => CachedNetworkImage(
           width: double.infinity,
           height: double.infinity,
-          imageUrl: imageUrl,
+          imageUrl: imageUrl!,
           fit: BoxFit.cover,
           errorWidget: (_, __, ___) => Center(child: _NoImage()),
           placeholder: (context, url) => blurHash != null
@@ -49,7 +51,7 @@ class _VideoOrImageState extends State<VideoOrImage> {
               : Container(
                   height: double.infinity,
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: LoadingIndicator(),
                   ),
                 ),
         );
@@ -105,6 +107,9 @@ class _VideoOrImageState extends State<VideoOrImage> {
             muted: widget.alwaysMuted ? true : _muted,
             toggleMuted: widget.alwaysMuted ? null : _toggleMuted,
             blurHash: blurHash,
+            progress: (DownloadProgress dp) {
+              progress.value = dp.progress ?? 0.0;
+            },
             onVideoLoaded: () async {
               await Future.delayed(Duration(milliseconds: 500));
               if (mounted && _loading)
@@ -137,13 +142,18 @@ class _VideoOrImageState extends State<VideoOrImage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  MuteButton(
-                    loading: _loading,
-                    error: _videoError,
-                    muted: widget.alwaysMuted ? true : _muted,
-                    toggle: widget.alwaysMuted ? null : _toggleMuted,
-                    hide: widget?.alwaysMuted,
-                  )
+                  ValueListenableBuilder<double?>(
+                      valueListenable: progress,
+                      builder: (context, value, child) {
+                        return MuteButton(
+                          progress: value,
+                          loading: _loading,
+                          error: _videoError,
+                          muted: widget.alwaysMuted ? true : _muted,
+                          toggle: widget.alwaysMuted ? null : _toggleMuted,
+                          hide: widget.alwaysMuted,
+                        );
+                      })
                 ],
               ),
             ),

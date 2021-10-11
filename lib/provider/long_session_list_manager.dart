@@ -9,10 +9,10 @@ import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 
 class LongSessionListManager extends ChangeNotifier {
-  final List<BaseSession> sessions;
+  final List<BaseSession?>? sessions;
   final TextEditingController textController;
-  final BuildContext context;
-  Future<List<BaseSession>> sessionsFuture;
+  final BuildContext? context;
+  Future<List<BaseSession?>>? sessionsFuture;
   String _lastText = "";
   List<FilterTag> tags = [
     FilterTag(
@@ -28,7 +28,7 @@ class LongSessionListManager extends ChangeNotifier {
   bool loading = false;
 
   LongSessionListManager(
-      {this.sessions, this.sessionsFuture, this.textController, this.context}) {
+      {this.sessions, this.sessionsFuture, required this.textController, this.context}) {
     textController.addListener(_listenForTextChanges);
   }
 
@@ -60,7 +60,7 @@ class LongSessionListManager extends ChangeNotifier {
 
     if (tags[0].filtered ?? false) seq = seq.isCertified();
     if (tags[1].filtered ?? false)
-      seq = seq.fromUser(context.read<UserManager>().uid);
+      seq = seq.fromUser(context!.read<UserManager>().uid);
     if (tags[2].filtered ?? false) seq = seq.goalReached();
 
     loading = true;

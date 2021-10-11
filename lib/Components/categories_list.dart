@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 
 class CategoriesList extends StatefulWidget {
   final Function(int) onCategoryChanged;
-  final int initialIndex;
+  final int? initialIndex;
 
   CategoriesList(this.onCategoryChanged, {this.initialIndex = 100});
 
@@ -14,7 +13,7 @@ class CategoriesList extends StatefulWidget {
 }
 
 class _CategoriesListState extends State<CategoriesList> {
-  int _selectedCategoryId = 100;
+  int? _selectedCategoryId = 100;
 
   @override
   void initState() {
@@ -60,56 +59,43 @@ class CategoryItem extends StatelessWidget {
   final int index;
   final VoidCallback onPressed;
   final Category category;
-  final bool isSelected, isAddFriendsButton;
+  final bool isSelected;
 
   CategoryItem(
-      {this.index,
-      this.onPressed,
-      this.category,
-      this.isSelected,
-      this.isAddFriendsButton = false});
+      {required this.index,
+      required this.onPressed,
+      required this.category,
+      required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    ThemeData _theme = context.theme;
     return Padding(
       padding: EdgeInsets.only(
           right: index - 1 == Category.categories.length - 1 ? 10 : 0),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 500),
+        duration: Duration(milliseconds: 1000),
         curve: Curves.fastLinearToSlowEaseIn,
-        width: isSelected ? 95 : 80,
-        height: isSelected ? 95 : 80,
+        width: isSelected ? 85 : 80,
+        height: isSelected ? 85 : 80,
         child: AspectRatio(
           aspectRatio: 1,
-          child: Material(
-            borderRadius: BorderRadius.circular(Constants.radius + 2),
-            color: ColorTheme.lightBlue,
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 1000),
+            curve: Curves.fastLinearToSlowEaseIn,
             clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color:
+                        _theme.primaryColor.withOpacity(isSelected ? .35 : 0),
+                    blurRadius: 10)
+              ],
+              borderRadius: BorderRadius.circular(Constants.radius + 2),
+              color: isSelected ? _theme.primaryColor : _theme.canvasColor,
+            ),
             child: Stack(
               children: <Widget>[
-                LayoutBuilder(
-                    builder: (context, constraints) => Center(
-                          child: AnimatedContainer(
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.fastLinearToSlowEaseIn,
-                            width:
-                                constraints.maxWidth * (isSelected ? .8 : 1.0),
-                            height:
-                                constraints.maxHeight * (isSelected ? .8 : 1.0),
-                            decoration: BoxDecoration(
-                                color: isSelected
-                                    ? _bTheme.contrast
-                                    : ColorTheme.lightBlue,
-                                borderRadius:
-                                    BorderRadius.circular(Constants.radius),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: _bTheme.contrast.withOpacity(.8),
-                                      blurRadius: isSelected ? 14 : 0),
-                                ]),
-                          ),
-                        )),
                 Positioned.fill(
                     child: Center(
                         child: AnimatedDefaultTextStyle(
@@ -117,14 +103,15 @@ class CategoryItem extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color:
-                          isSelected ? _bTheme.textOnContrast : _bTheme.dark),
-                  child: isAddFriendsButton
-                      ? Icon(Icons.person_add)
-                      : Text(
-                          category.name,
-                          textAlign: TextAlign.center,
-                        ),
+                      color: isSelected
+                          ? _theme.colorScheme.onPrimary
+                          : (context.theme.darkMode
+                              ? Colors.white
+                              : Colors.black)),
+                  child: Text(
+                    category.name,
+                    textAlign: TextAlign.center,
+                  ),
                 ))),
                 Positioned.fill(
                     child: Material(
@@ -144,7 +131,7 @@ class CategoryItem extends StatelessWidget {
 
 class Category {
   String name;
-  String assetUrl;
+  String? assetUrl;
   int id;
 
   static List<Category> categories = [

@@ -4,7 +4,6 @@ import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
@@ -17,20 +16,20 @@ class SessionGoal extends StatelessWidget {
   Widget build(BuildContext context) {
     BaseSessionManager sm = context.watch<BaseSessionManager>();
     ThemeManager _theme = ThemeManager.of(context);
-    BaseSession baseSession = sm?.baseSession;
+    BaseSession? baseSession = sm.baseSession;
     return SliverToBoxAdapter(
       child: (baseSession?.donationGoal ?? 0) > 0
           ? Builder(builder: (context) {
-              Color textColor =
-                  _theme.correctColorFor(sm.baseSession.secondaryColor);
+              Color? textColor =
+                  _theme.correctColorFor(sm.baseSession!.secondaryColor!);
               BaseTextTheme textTheme = _theme.textTheme
-                  .correctColorFor(sm.baseSession.secondaryColor);
+                  .correctColorFor(sm.baseSession!.secondaryColor!);
 
-              if (!sm.loadingMoreInfo) baseSession = sm.session;
-              String _unit = sm.unit.name;
-              String _smiley = sm.unit.smiley;
+              if (!sm.loadingMoreInfo!) baseSession = sm.session;
+              String? _unit = sm.unit!.name;
+              String? _smiley = sm.unit!.smiley;
 
-              double amount = sm.baseSession.amount / sm.unit.value;
+              double amount = sm.baseSession!.amount! / sm.unit!.value!;
 
               return Padding(
                 padding:
@@ -39,7 +38,7 @@ class SessionGoal extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Material(
-                      color: baseSession.secondaryColor,
+                      color: baseSession!.secondaryColor,
                       borderRadius: BorderRadius.circular(Constants.radius),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -89,8 +88,9 @@ class SessionGoal extends StatelessWidget {
                                 return Container(
                                   width: constraints.maxWidth,
                                   child: PercentLine(
-                                    percent: (amount / baseSession.donationGoal)
-                                        .clamp(0.0, 1.0),
+                                    percent:
+                                        (amount / baseSession!.donationGoal!)
+                                            .clamp(0.0, 1.0),
                                     height: 10.0,
                                     color: textColor,
                                   ),
@@ -102,7 +102,7 @@ class SessionGoal extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "${_formatPercent(baseSession)}% erreicht",
+                                  "${_formatPercent(baseSession!)}% erreicht",
                                   style: textTheme.bodyText1,
                                 ),
                                 RichText(
@@ -114,7 +114,7 @@ class SessionGoal extends StatelessWidget {
                                         text: "Ziel: ",
                                       ),
                                       TextSpan(
-                                          text: "${baseSession.donationGoal} ",
+                                          text: "${baseSession!.donationGoal} ",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(
@@ -136,8 +136,8 @@ class SessionGoal extends StatelessWidget {
 
   String _formatPercent(BaseSession baseSession) {
     double percentValue =
-        ((baseSession.amount / baseSession.donationUnit.value) /
-                baseSession.donationGoal) *
+        ((baseSession.amount! / baseSession.donationUnit.value!) /
+                baseSession.donationGoal!) *
             100;
 
     if (percentValue < 1) return percentValue.toStringAsFixed(2);
@@ -153,9 +153,9 @@ class _SessionGoalCampaign extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     BaseSessionManager sm = context.watch<BaseSessionManager>();
 
-    Color textColor = _theme.correctColorFor(sm.baseSession.secondaryColor);
+    Color textColor = _theme.correctColorFor(sm.baseSession!.secondaryColor!);
     BaseTextTheme textTheme =
-        _theme.textTheme.correctColorFor(sm.baseSession.secondaryColor);
+        _theme.textTheme.correctColorFor(sm.baseSession!.secondaryColor!);
 
     return Container(
       decoration: BoxDecoration(
@@ -166,9 +166,9 @@ class _SessionGoalCampaign extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
-          onTap: !sm.loadingMoreInfo
+          onTap: !sm.loadingMoreInfo!
               ? () {
-                  Session s = sm.session;
+                  Session s = sm.session!;
                   BaseCampaign _campaign = BaseCampaign(
                     id: s.campaignId,
                     name: s.campaignTitle,
@@ -184,7 +184,7 @@ class _SessionGoalCampaign extends StatelessWidget {
               : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12),
-            child: Text(sm.campaignName(), style: textTheme.bodyText1),
+            child: Text(sm.campaignName() ?? "", style: textTheme.bodyText1),
           ),
         ),
       ),

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 
 class Avatar extends StatefulWidget {
-  final String imageUrl;
-  final IconData icon;
-  final Function onTap;
+  final String? imageUrl;
+  final IconData? icon;
+  final Function? onTap;
   final double elevation;
-  final Color color, iconColor;
-  final double radius;
+  final Color? color, iconColor;
+  final double? radius;
 
   Avatar(this.imageUrl,
       {this.icon,
@@ -27,14 +27,14 @@ class _AvatarState extends State<Avatar> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
-    bool _hasImage = widget.imageUrl != null && widget.imageUrl.isNotEmpty;
+    BaseTheme? _bTheme = ThemeManager.of(context).colors;
+    bool _hasImage = widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: widget.onTap as void Function()?,
       child: CircleAvatar(
         radius: widget.radius,
         backgroundImage:
-            _hasImage ? CachedNetworkImageProvider(widget.imageUrl) : null,
+            _hasImage ? CachedNetworkImageProvider(widget.imageUrl!) : null,
         onBackgroundImageError: _hasImage
             ? (exception, stackTrace) {
                 print("ERROR: " + exception.toString());
@@ -43,16 +43,16 @@ class _AvatarState extends State<Avatar> {
                 });
               }
             : null,
-        backgroundColor: widget.color ?? _bTheme.dark,
+        backgroundColor: widget.color ?? _bTheme!.dark,
         child: _hasError
             ? Icon(
                 Icons.error,
-                color: _bTheme.contrast,
+                color: _bTheme!.contrast,
               )
             : !_hasImage
                 ? Icon(
                     widget.icon ?? Icons.person,
-                    color: widget.iconColor ?? _bTheme.contrast,
+                    color: widget.iconColor ?? _bTheme!.contrast,
                   )
                 : Container(),
       ),

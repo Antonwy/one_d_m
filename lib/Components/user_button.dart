@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -12,18 +11,18 @@ import 'package:one_d_m/views/users/user_page.dart';
 import 'donation_widget.dart';
 
 class UserButton extends StatelessWidget {
-  final String id, additionalText;
-  final User user;
-  final Color color, avatarColor;
-  final TextStyle textStyle;
+  final String? id, additionalText;
+  final User? user;
+  final Color? color, avatarColor;
+  final TextStyle? textStyle;
   final double elevation;
   final bool withAddButton;
-  final void Function(User user) onPressed;
+  final void Function(User? user)? onPressed;
 
   UserButton(this.id,
       {this.user,
-      this.color = ColorTheme.appBg,
-      this.avatarColor = ColorTheme.blue,
+      this.color,
+      this.avatarColor,
       this.textStyle = const TextStyle(color: Colors.black),
       this.elevation = 1,
       this.withAddButton = false,
@@ -32,29 +31,29 @@ class UserButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User>(
+    return FutureBuilder<User?>(
         future: user == null ? Api().users().getOne(id) : Future.value(user),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Material(
               borderRadius: BorderRadius.circular(5),
               clipBehavior: Clip.antiAlias,
-              color: color,
+              color: color ?? Theme.of(context).backgroundColor,
               elevation: elevation,
               child: Container(
-                key: Key(id),
+                key: Key(id!),
                 height: 60,
                 child: InkWell(
                   onTap: () {
                     if (onPressed != null) {
-                      onPressed(snapshot.data);
+                      onPressed!(snapshot.data);
                       return;
                     }
 
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UserPage(snapshot.data)));
+                            builder: (context) => UserPage(snapshot.data!)));
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -81,7 +80,7 @@ class UserButton extends StatelessWidget {
                                             TextSpan(children: [
                                               TextSpan(
                                                   text:
-                                                      "${snapshot.data.name ?? "Gelöschter Account"} ",
+                                                      "${snapshot.data!.name} ",
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold)),
@@ -89,11 +88,9 @@ class UserButton extends StatelessWidget {
                                             ]),
                                             maxLines: 1,
                                           )
-                                        : AutoSizeText(
-                                            "${snapshot.data.name ?? "Gelöschter Account"}",
+                                        : AutoSizeText("${snapshot.data!.name}",
                                             maxLines: 1,
                                             style: TextStyle(
-                                                color: textStyle.color,
                                                 fontWeight: FontWeight.w500)),
                                   ),
                                 ),
@@ -120,7 +117,7 @@ class UserButton extends StatelessWidget {
             child: Material(
               borderRadius: BorderRadius.circular(5),
               clipBehavior: Clip.antiAlias,
-              color: color,
+              color: color ?? Theme.of(context).backgroundColor,
               elevation: elevation,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -139,11 +136,10 @@ class UserButton extends StatelessWidget {
                             maxLines: 1,
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyText1
-                                .copyWith(color: textStyle.color))
+                                .bodyText1!
+                                .copyWith(color: textStyle!.color))
                       ],
                     ),
-                    withAddButton ? UserFollowButton() : Container()
                   ],
                 ),
               ),
@@ -154,10 +150,10 @@ class UserButton extends StatelessWidget {
 }
 
 class TurningAddButton extends StatelessWidget {
-  final bool selected;
-  final Function onPressed;
+  final bool? selected;
+  final Function? onPressed;
 
-  const TurningAddButton({Key key, this.selected, this.onPressed})
+  const TurningAddButton({Key? key, this.selected, this.onPressed})
       : super(key: key);
 
   @override
@@ -166,8 +162,8 @@ class TurningAddButton extends StatelessWidget {
     return IconButton(
         icon: TweenAnimationBuilder(
           duration: Duration(milliseconds: 250),
-          tween: Tween<double>(begin: 0, end: selected ? 1 : 0),
-          builder: (context, tween, child) => Transform.rotate(
+          tween: Tween<double>(begin: 0, end: selected! ? 1 : 0),
+          builder: (context, dynamic tween, child) => Transform.rotate(
             angle: tween * Helper.degreesToRads(45),
             child: Material(
               shape: CircleBorder(),
@@ -187,6 +183,6 @@ class TurningAddButton extends StatelessWidget {
             ),
           ),
         ),
-        onPressed: onPressed);
+        onPressed: onPressed as void Function()?);
   }
 }

@@ -1,16 +1,12 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
 import {
   ImageResolutions,
   ImagePrefix,
   ImageSuffix,
-  DatabaseConstants,
   StorageConstants,
 } from './database-constants';
 import { createBlurHash } from './http-functions';
-import { getToken, updateAccount } from './api';
-
-const firestore = admin.firestore();
+import { getToken, updateAccount, updateDatabase } from './api';
 
 type ImageType = 'news' | 'campaign' | 'user';
 type ImageRes = '300x300' | '1080x1920';
@@ -37,52 +33,72 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
     ''
   ) as ImageRes;
   const id = splittedName[1];
+  const adminId = 'LEDHRts56FcRwkGM57D6PJQaMoz1';
 
   const url = generateUrl(obj);
 
   if (imageType === ImagePrefix.news) {
+    const idToken = await getToken(adminId);
     if (resulution === ImageResolutions.high) {
-      await firestore
-        .collection(DatabaseConstants.news)
-        .doc(id)
-        .update({
+      await updateDatabase(
+        'news/' + id,
+        {
           image_url: url,
           blur_hash: await createBlurHash(url),
-        })
-        .catch();
+        },
+        idToken
+      );
+    } else {
+      await updateDatabase(
+        'news/' + id,
+        {
+          thumbnail_url: url,
+        },
+        idToken
+      );
     }
   } else if (
     imageType === ImagePrefix.session ||
     imageType === ImagePrefix.certified_sessions
   ) {
+    const idToken = await getToken(adminId);
     if (resulution === ImageResolutions.high) {
-      await firestore
-        .collection(DatabaseConstants.sessions)
-        .doc(id)
-        .update({
-          img_url: url,
-          blur_hash: await createBlurHash(url),
-        })
-        .catch();
-    }
-  } else if (imageType === ImagePrefix.campaign) {
-    if (resulution === ImageResolutions.high) {
-      await firestore
-        .collection(DatabaseConstants.campaigns)
-        .doc(id)
-        .update({
+      await updateDatabase(
+        'sessions/' + id,
+        {
           image_url: url,
           blur_hash: await createBlurHash(url),
-        })
-        .catch();
+        },
+        idToken
+      );
     } else {
-      await firestore
-        .collection(DatabaseConstants.campaigns)
-        .doc(id)
-        .update({
+      await updateDatabase(
+        'sessions/' + id,
+        {
           thumbnail_url: url,
-        })
-        .catch();
+        },
+        idToken
+      );
+    }
+  } else if (imageType === ImagePrefix.campaign) {
+    const idToken = await getToken(adminId);
+    if (resulution === ImageResolutions.high) {
+      await updateDatabase(
+        'campaigns/' + id,
+        {
+          image_url: url,
+          blur_hash: await createBlurHash(url),
+        },
+        idToken
+      );
+    } else {
+      await updateDatabase(
+        'campaigns/' + id,
+        {
+          thumbnail_url: url,
+        },
+        idToken
+      );
     }
   } else if (imageType === ImagePrefix.user) {
     const idToken = await getToken(id);
@@ -92,22 +108,11 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         blur_hash: await createBlurHash(url),
       };
 
-      await firestore
-        .collection(DatabaseConstants.user)
-        .doc(id)
-        .update(toUpdateUser)
-        .catch();
-
       await updateAccount(toUpdateUser, idToken);
     } else {
       const toUpdateUser = {
         thumbnail_url: url,
       };
-      await firestore
-        .collection(DatabaseConstants.user)
-        .doc(id)
-        .update(toUpdateUser)
-        .catch();
       await updateAccount(toUpdateUser, idToken);
     }
   }

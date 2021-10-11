@@ -6,11 +6,20 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ContactManager {
-  static Future<bool> hasPermission() async {
-    return (await Permission.contacts.status) == PermissionStatus.granted;
+  Future<PermissionStatus> getPermission() async {
+    final PermissionStatus permission = await Permission.contacts.status;
+    if (permission != PermissionStatus.granted) {
+      return Permission.contacts.request();
+    } else {
+      return permission;
+    }
   }
 
-  static Future<List<String>> phoneNumberList() async {
+  Future<bool> hasPermission() {
+    return Permission.contacts.isGranted;
+  }
+
+  Future<List<String>> phoneNumberList() async {
     if (!await hasPermission()) throw PermissionException("Permission denied!");
 
     Iterable<Contact> contacts = await ContactsService.getContacts();
@@ -18,7 +27,10 @@ class ContactManager {
     Set<String> numbers = HashSet();
 
     for (Contact c in contacts) {
-      List<String> contactNumbers = c.phones.map((item) => item.value).toList();
+      List<String> contactNumbers = c.phones!
+          .where((val) => val.value != null)
+          .map((item) => item.value!)
+          .toList();
       numbers.addAll(contactNumbers);
     }
 
@@ -27,7 +39,7 @@ class ContactManager {
     return numbers.toList();
   }
 
-  static Future<void> uploadPhoneNumbers(List<String> numbers) async {
+  Future<void> uploadPhoneNumbers(List<String?> numbers) async {
     try {
       print("UPLOADING");
       await FirebaseFunctions.instance
@@ -38,6 +50,39 @@ class ContactManager {
       print(e);
     }
   }
+
+//   Future<void> _getContacts() async {
+//     final PermissionStatus permissionStatus = await _getPermission();
+//     if (permissionStatus != PermissionStatus.granted) {
+//       _scaffoldKey.currentState.showSnackBar(SnackBar(
+//           content: Text(
+//               "Bitte erteile uns die Berechtigung deine Kontakte zu lesen.")));
+//       return;
+//     } else {
+//       Iterable<Contact> contacts = await ContactsService.getContacts();
+
+//       Set<String> numbers = HashSet();
+
+//       for (Contact c in contacts) {
+//         List<String> contactNumbers =
+//             c.phones.map((item) => item.value).toList();
+//         numbers.addAll(contactNumbers);
+//         List<String> tempContactNumbers = List.of(contactNumbers);
+
+//         for (String number in tempContactNumbers) {
+//           if (number.startsWith("+49")) {
+//             numbers.add(number.replaceFirst("+49", "0"));
+//           } else if (number.startsWith("0")) {
+//             numbers.add(number.replaceFirst("0", "+49"));
+//           } else {
+//             numbers.remove(number);
+//           }
+//         }
+//       }
+
+//       DatabaseService.callFindFriends(numbers.toList());
+//     }
+//   }
 }
 
 class PermissionException implements Exception {

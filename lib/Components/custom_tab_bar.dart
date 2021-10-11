@@ -8,13 +8,13 @@ import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/goal_page.dart';
 
 class CustomTabBar extends StatefulWidget {
-  final void Function(GoalPageTabs) onTabChanged;
+  final void Function(GoalPageTabs?) onTabChanged;
   final List<CustomTabInfo> tabs;
 
   const CustomTabBar({
-    Key key,
-    @required this.onTabChanged,
-    @required this.tabs,
+    Key? key,
+    required this.onTabChanged,
+    required this.tabs,
   }) : super(key: key);
 
   @override
@@ -23,17 +23,17 @@ class CustomTabBar extends StatefulWidget {
 
 class _CustomTabBarState extends State<CustomTabBar> {
   double _position = -1;
-  CustomTabInfo _currentTab;
-  PageController _pageController;
-  ValueNotifier<double> _pageNotifier;
+  late CustomTabInfo _currentTab;
+  PageController? _pageController;
+  late ValueNotifier<double?> _pageNotifier;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
     _pageNotifier = ValueNotifier(0.0);
-    _pageController.addListener(() {
-      _pageNotifier.value = _pageController.page;
+    _pageController!.addListener(() {
+      _pageNotifier.value = _pageController!.page;
     });
     _currentTab = widget.tabs[0];
   }
@@ -52,7 +52,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
               controller: _pageController,
               children: widget.tabs
                   .map((tab) => Image.asset(
-                        tab.assetPath,
+                        tab.assetPath!,
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
@@ -74,9 +74,9 @@ class _CustomTabBarState extends State<CustomTabBar> {
                       1.0
                     ],
                         colors: [
-                      _theme.colors.contrast,
-                      _theme.colors.contrast.withOpacity(0),
-                      _theme.colors.contrast.withOpacity(0)
+                      _theme.colors!.contrast!,
+                      _theme.colors!.contrast!.withOpacity(0),
+                      _theme.colors!.contrast!.withOpacity(0)
                     ])),
               ),
             ),
@@ -88,20 +88,20 @@ class _CustomTabBarState extends State<CustomTabBar> {
                   switchInCurve: Curves.easeIn,
                   switchOutCurve: Curves.easeOut,
                   child: Padding(
-                    key: ValueKey<String>(_currentTab.title),
+                    key: ValueKey<String?>(_currentTab.title),
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AutoSizeText(
-                          _currentTab.title,
-                          style: _theme.textTheme.textOnContrast.headline5
+                          _currentTab.title!,
+                          style: _theme.textTheme.textOnContrast!.headline5
                               .copyWith(fontWeight: FontWeight.w500),
                           maxLines: 1,
                         ),
-                        Text(_currentTab.subtitle,
-                            style: _theme.textTheme.textOnContrast
+                        Text(_currentTab.subtitle!,
+                            style: _theme.textTheme.textOnContrast!
                                 .withOpacity(.75)
                                 .bodyText2),
                       ],
@@ -116,7 +116,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
               right: 0,
               height: 50,
               child: Container(
-                color: _theme.colors.contrast.withOpacity(.3),
+                color: _theme.colors!.contrast!.withOpacity(.3),
               ),
             ),
             Column(
@@ -130,10 +130,10 @@ class _CustomTabBarState extends State<CustomTabBar> {
                         builder: (context, constraints) =>
                             ValueListenableBuilder(
                                 valueListenable: _pageNotifier,
-                                builder: (context, val, child) => Align(
+                                builder: (context, dynamic val, child) => Align(
                                       alignment: Alignment(
                                           Helper.mapValue(val, 0,
-                                              widget.tabs.length - 1, -1, 1),
+                                              widget.tabs.length - 1, -1, 1)!,
                                           0),
                                       child: Container(
                                         height: double.infinity,
@@ -146,7 +146,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
                                                   BorderRadius.circular(
                                                       Constants.radius),
                                               clipBehavior: Clip.antiAlias,
-                                              color: _theme.colors.contrast,
+                                              color: _theme.colors!.contrast,
                                             )),
                                       ),
                                     )),
@@ -168,15 +168,15 @@ class _CustomTabBarState extends State<CustomTabBar> {
                                   duration: Duration(milliseconds: 250),
                                   curve: Curves.easeInOut,
                                   style: _position != (index - 1)
-                                      ? _theme.textTheme.textOnContrast
+                                      ? _theme.textTheme.textOnContrast!
                                           .withOpacity(.7)
                                           .bodyText2
                                       : _theme
-                                          .textTheme.textOnContrast.bodyText1
+                                          .textTheme.textOnContrast!.bodyText1
                                           .copyWith(
                                               fontWeight: FontWeight.w600),
                                   child: Text(
-                                    widget.tabs[index].name,
+                                    widget.tabs[index].name!,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -205,7 +205,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
   }
 
   Future<void> _changePage(int page) {
-    return _pageController.animateToPage(page,
+    return _pageController!.animateToPage(page,
         duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
 }

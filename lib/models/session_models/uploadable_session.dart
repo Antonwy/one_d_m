@@ -10,13 +10,13 @@ import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/user.dart';
 
 class UploadableSession {
-  final BaseCampaign campaign;
-  final List<User> members;
-  final String name, description, creatorId;
-  String imgUrl, id;
-  final int donationGoal;
-  final File image;
-  final Color primaryColor, secondaryColor;
+  final BaseCampaign? campaign;
+  final List<User>? members;
+  final String? name, description, creatorId;
+  String? imgUrl, id;
+  final int? donationGoal;
+  final File? image;
+  final Color? primaryColor, secondaryColor;
 
   UploadableSession({
     this.id,
@@ -34,9 +34,9 @@ class UploadableSession {
 
   Map<String, dynamic> toMap() {
     return {
-      BaseSession.CAMPAIGN_ID: campaign.id,
-      BaseSession.PRIMARY_COLOR: Helper.colorToHex(primaryColor),
-      BaseSession.SECONDARY_COLOR: Helper.colorToHex(secondaryColor),
+      BaseSession.CAMPAIGN_ID: campaign!.id,
+      BaseSession.PRIMARY_COLOR: Helper.colorToHex(primaryColor!),
+      BaseSession.SECONDARY_COLOR: Helper.colorToHex(secondaryColor!),
       BaseSession.SESSION_NAME: name,
       BaseSession.ID: id,
       BaseSession.DONATION_GOAL: donationGoal,
@@ -48,8 +48,8 @@ class UploadableSession {
 
   Map<String, dynamic> toUpdateMap() {
     Map<String, dynamic> map = {
-      BaseSession.PRIMARY_COLOR: Helper.colorToHex(primaryColor),
-      BaseSession.SECONDARY_COLOR: Helper.colorToHex(secondaryColor),
+      BaseSession.PRIMARY_COLOR: Helper.colorToHex(primaryColor!),
+      BaseSession.SECONDARY_COLOR: Helper.colorToHex(secondaryColor!),
       BaseSession.SESSION_NAME: name,
       BaseSession.DONATION_GOAL: donationGoal,
       BaseSession.SESSION_DESCRIPTION: description,
@@ -61,7 +61,7 @@ class UploadableSession {
 
   BaseSession get baseSession => PreviewSession(
       id: "no-id",
-      campaignId: campaign.id,
+      campaignId: campaign!.id,
       name: name,
       donationGoal: donationGoal,
       donationGoalCurrent: 0,

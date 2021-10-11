@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
@@ -36,14 +38,11 @@ class SearchResultsList extends StatelessWidget {
               ),
             );
 
-          SearchResult result = snapshot.data.data;
+          SearchResult result = snapshot.data!.data!;
           return SliverList(
               delegate: SliverChildListDelegate(
             [
-              SizedBox(
-                height: 10,
-              ),
-              result.users.isEmpty
+              result.users!.isEmpty
                   ? Container()
                   : Padding(
                       padding:
@@ -53,11 +52,11 @@ class SearchResultsList extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                     ),
-              ..._buildItems(result.users),
+              ..._buildItems(result.users!),
               SizedBox(
                 height: 10,
               ),
-              result.sessions.isEmpty
+              result.sessions!.isEmpty
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.only(left: 20, bottom: 10),
@@ -66,11 +65,11 @@ class SearchResultsList extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                     ),
-              ..._buildItems(result.sessions),
+              ..._buildItems(result.sessions!),
               SizedBox(
                 height: 10,
               ),
-              result.campaigns.isEmpty
+              result.campaigns!.isEmpty
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.only(left: 20, bottom: 10),
@@ -79,11 +78,11 @@ class SearchResultsList extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                     ),
-              ..._buildItems(result.campaigns),
+              ..._buildItems(result.campaigns!),
               SizedBox(
                 height: 10,
               ),
-              result.organizations.isEmpty
+              result.organizations!.isEmpty
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.only(left: 20, bottom: 10),
@@ -92,7 +91,7 @@ class SearchResultsList extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                     ),
-              ..._buildItems(result.organizations),
+              ..._buildItems(result.organizations!),
               SizedBox(height: 50)
             ],
           ));
@@ -122,8 +121,8 @@ class __SearchItemState extends State<_SearchItem> {
       leading: RoundedAvatar(widget.item.thumbnailUrl ?? widget.item.imageUrl,
           blurHash: widget.item.blurHash, loading: _loading),
       title: Text(
-        widget.item.name,
-        key: Key(widget.item.id),
+        widget.item.name!,
+        key: Key(widget.item.id!),
       ),
       onTap: () async {
         setState(() {
@@ -133,25 +132,25 @@ class __SearchItemState extends State<_SearchItem> {
         Widget page;
         switch (widget.item.type) {
           case SearchResultType.campaigns:
-            Campaign campaign = await Api().campaigns().getOne(widget.item.id);
-            page = CampaignPage(campaign);
+            Campaign? campaign = await Api().campaigns().getOne(widget.item.id);
+            page = CampaignPage(campaign!);
             break;
           case SearchResultType.sessions:
-            Session session = await Api().sessions().getOne(widget.item.id);
-            page = SessionPage(session);
+            Session? session = await (Api().sessions().getOne(widget.item.id));
+            page = SessionPage(session!);
             break;
           case SearchResultType.users:
-            User user = await Api().users().getOne(widget.item.id);
-            page = UserPage(user);
+            User? user = await Api().users().getOne(widget.item.id);
+            page = UserPage(user!);
             break;
           case SearchResultType.organizations:
-            Organization org =
+            Organization? org =
                 await Api().organizations().getOne(widget.item.id);
             page = OrganizationPage(org);
             break;
           default:
-            Campaign campaign = await Api().campaigns().getOne(widget.item.id);
-            page = CampaignPage(campaign);
+            Campaign? campaign = await Api().campaigns().getOne(widget.item.id);
+            page = CampaignPage(campaign!);
         }
 
         setState(() {

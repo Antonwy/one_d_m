@@ -7,6 +7,7 @@ import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/news.dart';
+import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/certified_session.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/utils/timeline.dart';
@@ -26,9 +27,9 @@ abstract class PostItem {
 }
 
 class HeadingItem implements PostItem {
-  final Stream<CertifiedSession> session;
-  final Stream<Campaign> campaign;
-  final bool isSession;
+  final Stream<CertifiedSession>? session;
+  final Stream<Campaign>? campaign;
+  final bool? isSession;
 
   HeadingItem({this.isSession, this.session, this.campaign});
 
@@ -36,24 +37,24 @@ class HeadingItem implements PostItem {
   Widget buildHeading(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
     return KeepAliveStreamBuilder(
-      stream: isSession ? session : campaign,
+      stream: isSession! ? session : campaign,
       builder: (_, snapshot) {
         if (snapshot.hasData) {
-          CertifiedSession session;
-          Campaign campaign;
-          isSession ? session = snapshot.data : campaign = snapshot.data;
+          CertifiedSession? session;
+          Campaign? campaign;
+          isSession! ? session = snapshot.data : campaign = snapshot.data;
           return Container(
             margin: const EdgeInsets.only(
                 bottom: 0.0, left: 12.0, right: 12.0, top: 0),
             child: CustomOpenContainer(
               closedColor: ColorTheme.appBg,
               closedElevation: 0,
-              openBuilder: (context, close, scrollController) => isSession
+              openBuilder: (context, close, scrollController) => isSession!
                   ? SessionPage(
                       snapshot.data,
                     )
                   : CampaignPage(
-                      campaign,
+                      campaign!,
                       scrollController: scrollController,
                     ),
               closedBuilder: (_, open) => Row(
@@ -62,8 +63,9 @@ class HeadingItem implements PostItem {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CachedNetworkImage(
-                    imageUrl:
-                        !isSession ? campaign?.imgUrl : session?.imgUrl ?? '',
+                    imageUrl: (!isSession!
+                        ? campaign?.imgUrl!
+                        : session?.imgUrl ?? '')!,
                     imageBuilder: (context, imageProvider) => Container(
                       height: 58.0,
                       width: 88.0,
@@ -83,18 +85,18 @@ class HeadingItem implements PostItem {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AutoSizeText(
-                            isSession
-                                ? session.name ?? ''
-                                : campaign.name ?? '',
+                            isSession!
+                                ? session!.name ?? ''
+                                : campaign!.name ?? '',
                             maxLines: 1,
                             softWrap: true,
-                            style: _theme.textTheme.dark.headline6
+                            style: _theme.textTheme.dark!.headline6
                                 .copyWith(fontWeight: FontWeight.w600)),
-                        isSession
+                        isSession!
                             ? AutoSizeText('Unterstützt NOT FOUND',
                                 maxLines: 1,
                                 softWrap: true,
-                                style: _theme.textTheme.dark
+                                style: _theme.textTheme.dark!
                                     .withOpacity(.7)
                                     .bodyText1
                                     .copyWith(fontWeight: FontWeight.w400))
@@ -118,7 +120,7 @@ class HeadingItem implements PostItem {
 }
 
 class PostContentItem extends StatefulWidget implements PostItem {
-  final Stream<List<News>> post;
+  final Stream<List<News>>? post;
 
   PostContentItem({this.post});
 
@@ -133,7 +135,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
         if (snapshot.hasData) {
           List<News> news = snapshot.data;
 
-          news.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          news.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
 
           ///limit only to display latest two posts
           List<News> sublist = news.length > 5 ? news.sublist(0, 5) : news;
@@ -194,8 +196,8 @@ class PostContentItem extends StatefulWidget implements PostItem {
             child: CustomPaint(
               foregroundPainter: TimelinePainter(
                 hideDefaultIndicator: false,
-                lineColor: _theme.colors.dark.withOpacity(.2),
-                indicatorColor: _theme.colors.dark,
+                lineColor: _theme.colors!.dark!.withOpacity(.2),
+                indicatorColor: _theme.colors!.dark!,
                 indicatorSize: 8,
                 indicatorStyle: PaintingStyle.fill,
                 isFirst: isFirst,
@@ -230,7 +232,7 @@ class PostContentItem extends StatefulWidget implements PostItem {
                 child: CustomPaint(
                   foregroundPainter: TimelinePainter(
                     hideDefaultIndicator: false,
-                    lineColor: _theme.colors.dark.withOpacity(.2),
+                    lineColor: _theme.colors!.dark!.withOpacity(.2),
                     indicatorColor: Colors.orange,
                     indicatorSize: 8,
                     indicatorStyle: PaintingStyle.fill,
@@ -255,49 +257,50 @@ class PostContentItem extends StatefulWidget implements PostItem {
     return widgets;
   }
 
-  _buildShowMore(BuildContext context, String sessionId) => StreamBuilder(
-      stream: DatabaseService.getSession(sessionId),
-      builder: (context, snapshot) {
-        ThemeManager _theme = ThemeManager.of(context);
-        if (snapshot.hasData) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomOpenContainer(
-                closedColor: _theme.colors.contrast,
-                closedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)),
-                closedElevation: 0,
-                openBuilder: (context, close, scrollController) =>
-                    SessionPage(snapshot.data),
-                closedBuilder: (context, open) => Material(
-                  borderRadius: BorderRadius.circular(6),
-                  color: _theme.colors.contrast,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Zur CertifiedSession',
-                            style:
-                                TextStyle(color: _theme.colors.textOnContrast)),
-                        XMargin(6),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: _theme.colors.textOnContrast,
-                          size: 18,
+  _buildShowMore(BuildContext context, String? sessionId) =>
+      StreamBuilder<BaseSession>(
+          stream: DatabaseService.getSession(sessionId),
+          builder: (context, snapshot) {
+            ThemeManager _theme = ThemeManager.of(context);
+            if (snapshot.hasData) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CustomOpenContainer(
+                    closedColor: _theme.colors!.contrast!,
+                    closedShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6)),
+                    closedElevation: 0,
+                    openBuilder: (context, close, scrollController) =>
+                        SessionPage(snapshot.data),
+                    closedBuilder: (context, open) => Material(
+                      borderRadius: BorderRadius.circular(6),
+                      color: _theme.colors!.contrast,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Zur CertifiedSession',
+                                style: TextStyle(
+                                    color: _theme.colors!.textOnContrast)),
+                            XMargin(6),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: _theme.colors!.textOnContrast,
+                              size: 18,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      });
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          });
 
   @override
   State<StatefulWidget> createState() {

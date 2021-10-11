@@ -34,8 +34,8 @@ extension MyNavigator on BuildContext {
 
 class TransparentRoute extends PageRoute<void> {
   TransparentRoute({
-    @required this.builder,
-    RouteSettings settings,
+    required this.builder,
+    RouteSettings? settings,
   })  : assert(builder != null),
         super(settings: settings, fullscreenDialog: false);
 
@@ -45,10 +45,10 @@ class TransparentRoute extends PageRoute<void> {
   bool get opaque => false;
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get maintainState => true;

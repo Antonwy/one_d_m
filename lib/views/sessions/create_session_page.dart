@@ -12,22 +12,18 @@ import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/api_result.dart';
-import 'package:one_d_m/components/avatar.dart';
 import 'package:one_d_m/components/campaign_button.dart';
 import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/custom_text_field.dart';
+import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/social_share_list.dart';
-import 'package:one_d_m/components/user_button.dart';
-import 'package:one_d_m/helper/color_theme.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
-import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/create_session_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
@@ -38,74 +34,80 @@ import 'package:one_d_m/provider/sessions_manager.dart';
 import 'package:provider/provider.dart';
 
 class CreateSessionPage extends StatelessWidget {
-  ThemeManager _theme;
-  BaseSessionManager _baseSessionManager;
+  late ThemeData _theme;
+  BaseSessionManager? _baseSessionManager;
 
   CreateSessionPage([this._baseSessionManager]);
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return ChangeNotifierProvider<CreateSessionManager>(
       create: (context) => CreateSessionManager(context,
-          baseSessionManager: _baseSessionManager),
+          baseSessionManager: _baseSessionManager, theme: _theme),
       child: Scaffold(
-        backgroundColor: ColorTheme.appBg,
         floatingActionButton:
-            Consumer<CreateSessionManager>(builder: (context, csm, child) {
-          Color textColor = _theme.correctColorFor(csm.primaryColor);
+            Consumer<CreateSessionManager>(builder: (c, csm, child) {
+          Color? textColor = _theme.correctColorFor(csm.primaryColor!);
           return OpenContainer(
               openBuilder: (context, close) => _CreateSuccessPage(csm),
-              closedColor: csm.primaryColor,
+              closedColor: csm.primaryColor!,
               closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(48)),
               closedElevation: 10,
-              closedBuilder: (context, open) {
-                return Container(
-                  height: 50,
-                  child: InkWell(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          csm.loading
-                              ? Container(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    valueColor:
-                                        AlwaysStoppedAnimation(textColor),
-                                  ))
-                              : Icon(
-                                  Icons.done,
-                                  color: textColor,
-                                  size: 24,
-                                ),
-                          XMargin(8),
-                          Flexible(
-                            child: Text(
-                              csm.editMode ? "Updaten" : "Erstellen",
-                              maxLines: 1,
-                              overflow: TextOverflow.clip,
-                              style: TextStyle(
-                                  color: textColor,
-                                  fontWeight: FontWeight.bold),
+              closedBuilder: (c, open) {
+                return AnimatedSize(
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.fastLinearToSlowEaseIn,
+                  child: Container(
+                    height: 50,
+                    child: InkWell(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 500),
+                              child: csm.loading
+                                  ? LoadingIndicator(
+                                      color: textColor,
+                                      size: 16,
+                                      strokeWidth: 3)
+                                  : Icon(
+                                      Icons.done,
+                                      color: textColor,
+                                      size: 24,
+                                    ),
                             ),
-                          ),
-                        ],
+                            XMargin(12),
+                            Flexible(
+                              child: Text(
+                                csm.editMode ? "Updaten" : "Erstellen",
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    onTap: csm.loading
-                        ? null
-                        : () async {
-                            ApiResult res = await csm.createSession();
+                      onTap: csm.loading
+                          ? null
+                          : () async {
+                              ApiResult res = await csm.createSession(context);
 
-                            if (res.hasError())
-                              return ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(res.message)));
-                            open();
-                          },
+                              if (res.hasError()) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(res.message!)));
+                                return;
+                              }
+                              open();
+                            },
+                    ),
                   ),
                 );
               });
@@ -121,17 +123,18 @@ class CreateSessionPage extends StatelessWidget {
                   child: Consumer<CreateSessionManager>(
                     builder: (context, csm, child) {
                       print(csm.image);
-                      Color textColor =
-                          _theme.correctColorFor(csm.secondaryColor);
+                      Color? textColor =
+                          _theme.correctColorFor(csm.secondaryColor!);
                       return Material(
                         color: csm.secondaryColor,
                         child: InkWell(
                           onTap: () async {
                             ImagePicker picker = ImagePicker();
-                            PickedFile file = await picker.getImage(
+                            PickedFile? file = await picker.getImage(
                                 source: ImageSource.gallery);
 
-                            if (file?.path != null) csm.image = File(file.path);
+                            if (file?.path != null)
+                              csm.image = File(file!.path);
                           },
                           child: getTitleImage(csm, textColor),
                         ),
@@ -183,11 +186,11 @@ class CreateSessionPage extends StatelessWidget {
                     children: [
                       Text(
                         "Projekt",
-                        style: _theme.textTheme.dark.headline6,
+                        style: _theme.textTheme.headline6,
                       ),
                       Text(
                         "Wähle ein Projekt, an das während der Session gespendet werden soll.",
-                        style: _theme.textTheme.dark.caption,
+                        style: _theme.textTheme.caption,
                       ),
                     ],
                   ),
@@ -205,17 +208,17 @@ class CreateSessionPage extends StatelessWidget {
     );
   }
 
-  Widget getTitleImage(CreateSessionManager csm, Color textColor) {
+  Widget getTitleImage(CreateSessionManager csm, Color? textColor) {
     if (csm.image != null) {
       return Image.file(
-        csm.image,
+        csm.image!,
         fit: BoxFit.cover,
       );
     }
 
     if (csm.editMode)
       return CachedNetworkImage(
-          imageUrl: csm.baseSessionManager.baseSession.imgUrl,
+          imageUrl: csm.baseSessionManager!.baseSession!.imgUrl!,
           fit: BoxFit.cover);
 
     return SafeArea(
@@ -231,8 +234,8 @@ class CreateSessionPage extends StatelessWidget {
             YMargin(12),
             Text(
               "Wähle ein Titelbild für deine Session aus!",
-              style:
-                  _theme.textTheme.correctColorFor(csm.secondaryColor).caption,
+              style: _theme.textTheme.caption!
+                  .copyWith(color: _theme.correctColorFor(csm.secondaryColor!)),
             ),
           ],
         ),
@@ -242,12 +245,12 @@ class CreateSessionPage extends StatelessWidget {
 }
 
 class _ColorPicker extends StatelessWidget {
-  ThemeManager _theme;
-  BuildContext context;
+  late ThemeData _theme;
+  late BuildContext context;
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     this.context = context;
     return SliverToBoxAdapter(
       child: Padding(
@@ -258,23 +261,23 @@ class _ColorPicker extends StatelessWidget {
             children: [
               Text(
                 "Farben",
-                style: _theme.textTheme.dark.headline6,
+                style: _theme.textTheme.headline6,
               ),
               Text(
                 "Wähle zwei Farben für deine Session.",
-                style: _theme.textTheme.dark.caption,
+                style: _theme.textTheme.caption,
               ),
               YMargin(12),
               Row(
                 children: [
                   _colorWidget(
                       text: "Primary",
-                      color: csm.primaryColor,
+                      color: csm.primaryColor!,
                       onChangeColor: (color) => csm.primaryColor = color),
                   XMargin(12),
                   _colorWidget(
                       text: "Secondary",
-                      color: csm.secondaryColor,
+                      color: csm.secondaryColor!,
                       onChangeColor: (color) => csm.secondaryColor = color)
                 ],
               ),
@@ -286,7 +289,9 @@ class _ColorPicker extends StatelessWidget {
   }
 
   Widget _colorWidget(
-      {String text, Color color, void Function(Color) onChangeColor}) {
+      {required String text,
+      required Color color,
+      void Function(Color)? onChangeColor}) {
     return Expanded(
       child: Material(
         color: color,
@@ -294,11 +299,13 @@ class _ColorPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(Constants.radius),
         child: InkWell(
           onTap: () async {
-            Color mColor = await showDialog<Color>(
+            Color? mColor = await showDialog<Color>(
                 context: context,
                 builder: (context) {
                   Color selectedColor = color;
                   return AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Constants.radius)),
                     contentPadding: const EdgeInsets.all(12),
                     title: Text("Wähle $text color"),
                     content: MaterialColorPicker(
@@ -320,22 +327,22 @@ class _ColorPicker extends StatelessWidget {
                         onPressed: () {
                           Navigator.pop(context, selectedColor);
                         },
-                        child: Text("Auswählen",
-                            style: TextStyle(color: _theme.colors.dark)),
+                        child: Text(
+                          "Auswählen",
+                        ),
                       ),
                     ],
                   );
                 });
-            if (mColor != null) onChangeColor(mColor);
+            if (mColor != null) onChangeColor!(mColor);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 18),
             child: Center(
-              child: Text(text,
-                  style: ThemeData.estimateBrightnessForColor(color) ==
-                          Brightness.dark
-                      ? _theme.textTheme.light.bodyText1
-                      : _theme.textTheme.dark.bodyText1),
+              child: Text(
+                text,
+                style: TextStyle(color: _theme.correctColorFor(color)),
+              ),
             ),
           ),
         ),
@@ -350,21 +357,21 @@ class _DonationTarget extends StatefulWidget {
 }
 
 class __DonationTargetState extends State<_DonationTarget> {
-  ThemeManager _theme;
+  late ThemeData _theme;
 
-  int _targetAmount = 100;
+  int? _targetAmount = 100;
 
   @override
   void initState() {
     super.initState();
     CreateSessionManager csm = context.read<CreateSessionManager>();
     if (csm.editMode)
-      _targetAmount = csm.baseSessionManager.baseSession.donationGoal;
+      _targetAmount = csm.baseSessionManager!.baseSession!.donationGoal;
   }
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
@@ -373,46 +380,50 @@ class __DonationTargetState extends State<_DonationTarget> {
           children: [
             Text(
               "Spendenziel",
-              style: _theme.textTheme.dark.headline6,
+              style: _theme.textTheme.headline6,
             ),
             Text(
               "Überlege dir was das Ziel dieser Session ist.",
-              style: _theme.textTheme.dark.caption,
+              style: _theme.textTheme.caption,
             ),
             SizedBox(
               height: 12,
             ),
             Row(
               children: [
-                Consumer<CreateSessionManager>(
-                  builder: (context, csm, child) {
-                    int step = 10;
-                    return Material(
-                      color: csm.secondaryColor,
-                      borderRadius: BorderRadius.circular(12),
-                      child: NumberPicker.horizontal(
-                        initialValue: _targetAmount,
-                        minValue: 10,
-                        maxValue: 10000,
-                        step: step,
-                        listViewHeight: 80,
-                        haptics: true,
-                        textStyle: TextStyle(
-                            color: _theme
-                                .correctColorFor(csm.secondaryColor)
-                                .withOpacity(.5)),
-                        selectedTextStyle: TextStyle(
-                            color: _theme.correctColorFor(csm.secondaryColor),
-                            fontWeight: FontWeight.bold),
-                        onChanged: (n) {
-                          setState(() {
-                            _targetAmount = n;
-                          });
-                          csm.donationGoal = n;
-                        },
-                      ),
-                    );
-                  },
+                Expanded(
+                  child: Consumer<CreateSessionManager>(
+                    builder: (context, csm, child) {
+                      int step = 10;
+                      return Material(
+                        color: csm.secondaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        child: NumberPicker(
+                          axis: Axis.horizontal,
+                          value: _targetAmount!,
+                          minValue: 10,
+                          maxValue: 10000,
+                          step: step,
+                          itemHeight: 80,
+                          haptics: true,
+                          textStyle: TextStyle(
+                              color: _theme
+                                  .correctColorFor(csm.secondaryColor!)
+                                  .withOpacity(.5)),
+                          selectedTextStyle: TextStyle(
+                              color:
+                                  _theme.correctColorFor(csm.secondaryColor!),
+                              fontWeight: FontWeight.bold),
+                          onChanged: (n) {
+                            setState(() {
+                              _targetAmount = n;
+                            });
+                            csm.donationGoal = n;
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(
                   width: 12,
@@ -421,16 +432,16 @@ class __DonationTargetState extends State<_DonationTarget> {
                   builder: (context, csm, child) {
                     BaseCampaign c = csm.selectedCampaign ??
                         BaseCampaign(unit: DonationUnit(name: 'DV'));
-                    return FutureBuilder<BaseCampaign>(
+                    return FutureBuilder<BaseCampaign?>(
                         initialData: c,
                         future: csm.editMode
                             ? Api().campaigns().getOne(
-                                csm.baseSessionManager.baseSession.campaignId)
+                                csm.baseSessionManager!.baseSession!.campaignId)
                             : Future.value(c),
                         builder: (context, snapshot) {
                           return Text(
                             snapshot.data?.unit?.name ?? "DV",
-                            style: _theme.textTheme.dark.bodyText1,
+                            style: _theme.textTheme.bodyText1,
                           );
                         });
                   },
@@ -445,18 +456,18 @@ class __DonationTargetState extends State<_DonationTarget> {
 }
 
 class _SessionNameInput extends StatelessWidget {
-  ThemeManager _theme;
+  late ThemeData _theme;
 
   TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return SliverToBoxAdapter(
       child: Consumer<UserManager>(
         builder: (context, um, child) {
           String sessionDefaultName =
-              "${um.user.name[0].toUpperCase()}${um.user.name.substring(1)}s Session";
+              "${um.user!.name[0].toUpperCase()}${um.user!.name.substring(1)}s Session";
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
 
@@ -465,7 +476,7 @@ class _SessionNameInput extends StatelessWidget {
             csm.sessionName = sessionDefaultName;
           }
 
-          _controller.text = csm.sessionName;
+          _controller.text = csm.sessionName!;
 
           return Padding(
             padding: const EdgeInsets.all(12),
@@ -474,19 +485,20 @@ class _SessionNameInput extends StatelessWidget {
               children: [
                 Text(
                   "Name",
-                  style: _theme.textTheme.dark.headline6,
+                  style: _theme.textTheme.headline6,
                 ),
                 Text(
                   "Überlege dir einen Namen für deine Session. Standartmäßig verwenden wir: \"$sessionDefaultName\".",
-                  style: _theme.textTheme.dark.caption,
+                  style: _theme.textTheme.caption,
                 ),
                 SizedBox(
                   height: 12,
                 ),
                 CustomTextField(
                   controller: _controller,
-                  focusedColor: _theme.colors.dark,
-                  textColor: _theme.colors.dark,
+                  focusedColor: _theme.colorScheme.onBackground,
+                  textColor: _theme.colorScheme.onBackground,
+                  activeColor: _theme.colorScheme.onBackground.withOpacity(.5),
                   hint: "e.g. Spendenaktion",
                   label: "Session Name",
                   inputFormatter: [
@@ -506,23 +518,24 @@ class _SessionNameInput extends StatelessWidget {
 }
 
 class _SessionDescriptionInput extends StatelessWidget {
-  ThemeManager _theme;
+  late ThemeData _theme;
 
   TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return SliverToBoxAdapter(
       child: Consumer<UserManager>(
         builder: (context, um, child) {
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
 
-          if (csm.editMode && (_controller.text?.isEmpty ?? true))
-            _controller.text = csm.baseSessionManager.baseSession.description;
+          if (csm.editMode && (_controller.text.isEmpty ?? true))
+            _controller.text =
+                csm.baseSessionManager!.baseSession!.description!;
 
-          _controller.text = csm.sessionDescription;
+          _controller.text = csm.sessionDescription!;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
@@ -530,19 +543,20 @@ class _SessionDescriptionInput extends StatelessWidget {
               children: [
                 Text(
                   "Beschreibung",
-                  style: _theme.textTheme.dark.headline6,
+                  style: _theme.textTheme.headline6,
                 ),
                 Text(
                   "Überlege dir eine anregende Beschreibung für deine Session.",
-                  style: _theme.textTheme.dark.caption,
+                  style: _theme.textTheme.caption,
                 ),
                 SizedBox(
                   height: 12,
                 ),
                 CustomTextField(
                   controller: _controller,
-                  focusedColor: _theme.colors.dark,
-                  textColor: _theme.colors.dark,
+                  focusedColor: _theme.colorScheme.onBackground,
+                  textColor: _theme.colorScheme.onBackground,
+                  activeColor: _theme.colorScheme.onBackground.withOpacity(.5),
                   maxLines: 4,
                   maxLength: 200,
                   hint: "e.g. Es war noch nie so wichtig...",
@@ -566,20 +580,20 @@ class _CampaignOptions extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         height: 90,
-        child: FutureBuilder<List<BaseCampaign>>(
+        child: FutureBuilder<List<BaseCampaign?>>(
             future: Api().campaigns().limit(5).get(),
             builder: (context, snapshot) {
-              List<BaseCampaign> campaigns = snapshot.data ?? [];
+              List<BaseCampaign?> campaigns = snapshot.data ?? [];
 
               CreateSessionManager csm =
                   Provider.of<CreateSessionManager>(context, listen: false);
               if (snapshot.hasData &&
                   csm.selectedCampaign == null &&
                   campaigns.isNotEmpty) {
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
                   if (csm.editMode) {
                     csm.selectedCampaign = BaseCampaign(
-                        id: csm.baseSessionManager.baseSession.campaignId);
+                        id: csm.baseSessionManager!.baseSession!.campaignId);
                   } else
                     csm.selectedCampaign = campaigns[0];
                 });
@@ -634,10 +648,10 @@ class _SearchCampaignButton extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1.0,
           child: CustomOpenContainer(
-            closedColor: ColorTheme.appBg,
+            closedColor: context.theme.cardColor,
             openBuilder: (context, close, scrollController) => _SearchPage(
               scrollController: scrollController,
-              onFinished: (List<BaseCampaign> res) {
+              onFinished: (List<BaseCampaign?> res) {
                 csm.selectedCampaign = res[0];
               },
             ),
@@ -653,25 +667,23 @@ class _SearchCampaignButton extends StatelessWidget {
 }
 
 class _HorizontalCampaignView extends StatelessWidget {
-  BaseCampaign campaign;
-  ThemeManager _theme;
+  BaseCampaign? campaign;
+  late ThemeData _theme;
 
   _HorizontalCampaignView(this.campaign);
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
 
     return Consumer<CreateSessionManager>(
       builder: (context, csm, child) {
         bool selected = csm.selectedCampaign == campaign;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Material(
-            borderRadius: BorderRadius.circular(12),
-            color: selected ? csm.secondaryColor : ColorTheme.appBg,
+          child: Card(
+            color: selected ? csm.secondaryColor : null,
             elevation: 1,
-            clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: () {
                 csm.selectedCampaign = campaign;
@@ -680,17 +692,17 @@ class _HorizontalCampaignView extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Row(
                   children: [
-                    Avatar(campaign.imgUrl),
+                    RoundedAvatar(campaign!.imgUrl),
                     SizedBox(
                       width: 12,
                     ),
                     Text(
-                      campaign.name,
+                      campaign!.name!,
                       style: selected
-                          ? _theme.textTheme
-                              .correctColorFor(csm.secondaryColor)
-                              .headline6
-                          : _theme.textTheme.dark.headline6,
+                          ? _theme.textTheme.headline6!.copyWith(
+                              color:
+                                  _theme.correctColorFor(csm.secondaryColor!))
+                          : _theme.textTheme.headline6,
                     ),
                   ],
                 ),
@@ -704,11 +716,11 @@ class _HorizontalCampaignView extends StatelessWidget {
 }
 
 class _SearchPage extends StatefulWidget {
-  final ScrollController scrollController;
-  final void Function(List<BaseCampaign>) onFinished;
+  final ScrollController? scrollController;
+  final void Function(List<BaseCampaign?>)? onFinished;
 
   const _SearchPage({
-    Key key,
+    Key? key,
     this.scrollController,
     this.onFinished,
   }) : super(key: key);
@@ -720,33 +732,31 @@ class _SearchPage extends StatefulWidget {
 class __SearchPageState extends State<_SearchPage> {
   String _query = "";
   BaseCampaign campaign = BaseCampaign();
-  ThemeManager _theme;
-  List<BaseCampaign> _results = [];
-  Timer _debounce;
+  late ThemeData _theme;
+  List<BaseCampaign?> _results = [];
+  Timer? _debounce;
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: ColorTheme.appBg,
       floatingActionButton: Builder(builder: (context) {
         return FloatingActionButton.extended(
           icon: Icon(
             Icons.done,
-            color: _theme.colors.textOnContrast,
           ),
           label: Text(
             "Fertig",
-            style: TextStyle(color: _theme.colors.textOnContrast),
           ),
-          backgroundColor: _theme.colors.contrast,
           onPressed: () {
-            if (_results.isEmpty)
-              return Scaffold.of(context).showSnackBar(SnackBar(
+            if (_results.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(
                       "Du musst mindestens eine Suchergebnis auswählen.")));
+              return;
+            }
 
-            widget.onFinished(_results);
+            widget.onFinished!(_results);
             Navigator.pop(context);
           },
         );
@@ -756,7 +766,7 @@ class __SearchPageState extends State<_SearchPage> {
         slivers: [
           SliverSearchBar(
             onChanged: (text) {
-              if (_debounce?.isActive ?? false) _debounce.cancel();
+              if (_debounce?.isActive ?? false) _debounce!.cancel();
               _debounce = Timer(const Duration(milliseconds: 500), () {
                 setState(() {
                   _query = text;
@@ -769,10 +779,10 @@ class __SearchPageState extends State<_SearchPage> {
               height: 20,
             ),
           ),
-          FutureBuilder<List<BaseCampaign>>(
+          FutureBuilder<List<BaseCampaign?>>(
               future: Api().campaigns().name(_query).limit(10).get(),
               builder: (context, snapshot) {
-                List<BaseCampaign> data = snapshot.data ?? [];
+                List<BaseCampaign?> data = snapshot.data ?? [];
 
                 if (data.isEmpty &&
                     snapshot.connectionState == ConnectionState.waiting)
@@ -816,14 +826,14 @@ class __SearchPageState extends State<_SearchPage> {
                   return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12.0, vertical: 4),
-                      child: CampaignButton((data[index]).id,
+                      child: CampaignButton(data[index]?.id,
                           elevation: selected ? 1 : 0,
                           color: selected
-                              ? _theme.colors.contrast
-                              : ColorTheme.appBg,
+                              ? _theme.colorScheme.primary
+                              : _theme.cardColor,
                           campaign: (data[index]),
                           textStyle: selected
-                              ? TextStyle(color: _theme.colors.textOnContrast)
+                              ? TextStyle(color: _theme.colorScheme.onPrimary)
                               : TextStyle(), onPressed: (c) {
                         if (_results.isEmpty) {
                           _results.add(data[index]);
@@ -847,7 +857,7 @@ class _CreateSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return FutureBuilder<BaseSession>(
+    return FutureBuilder<BaseSession?>(
         future: Api().sessions().getOne(csm.uploadableSession.id),
         builder: (context, snapshot) {
           return Scaffold(
@@ -867,7 +877,7 @@ class _CreateSuccessPage extends StatelessWidget {
                       },
                 child: Icon(
                   snapshot.hasData ? Icons.arrow_forward : Icons.close,
-                  color: _theme.correctColorFor(csm.secondaryColor),
+                  color: _theme.correctColorFor(csm.secondaryColor!),
                 ),
                 backgroundColor: csm.secondaryColor),
             body: ClipRect(
@@ -891,12 +901,12 @@ class _CreateSuccessPage extends StatelessWidget {
                   Text(
                       "Deine Session wurde ${csm.editMode ? "geupdated" : "erstellt"}!",
                       style: _theme.textTheme
-                          .correctColorFor(csm.primaryColor)
+                          .correctColorFor(csm.primaryColor!)
                           .headline6),
                   YMargin(6),
                   Text("Teile sie jetzt mit deinen Freunden:",
                       style: _theme.textTheme
-                          .correctColorFor(csm.primaryColor)
+                          .correctColorFor(csm.primaryColor!)
                           .bodyText2),
                   YMargin(12),
                   Builder(builder: (context) {
@@ -905,7 +915,7 @@ class _CreateSuccessPage extends StatelessWidget {
                         color: csm.secondaryColor,
                         size: 15,
                       );
-                    return SocialShareList(snapshot?.data
+                    return SocialShareList(snapshot.data
                         ?.manager(context.read<UserManager>().uid));
                   }),
                 ],

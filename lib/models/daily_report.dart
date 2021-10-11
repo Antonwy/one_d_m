@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 class DailyReport {
-  final String title, subtitle, text, date, goodbye;
-  final List<WhatWeReached> whatWeReached;
+  final String? title, subtitle, text, date, goodbye;
+  final List<WhatWeReached>? whatWeReached;
 
   const DailyReport(
       {this.title,
@@ -14,8 +13,7 @@ class DailyReport {
       this.goodbye});
 
   factory DailyReport.fromDoc(DocumentSnapshot doc) {
-    if (!doc.exists) return null;
-    Map<String, dynamic> data = doc.data() ?? {};
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>? ?? {};
 
     List<Map<String, dynamic>> wwr = [];
 
@@ -42,8 +40,8 @@ class DailyReport {
 }
 
 class WhatWeReached {
-  final String text;
-  final int value;
+  final String? text;
+  final int? value;
 
   const WhatWeReached({this.text, this.value});
 

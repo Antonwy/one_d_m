@@ -7,8 +7,8 @@ class AnimatedFutureBuilder<E> extends StatelessWidget {
   final Curve curve;
 
   AnimatedFutureBuilder({
-    @required this.future,
-    @required this.builder,
+    required this.future,
+    required this.builder,
     this.duration = const Duration(milliseconds: 500),
     this.curve = Curves.fastLinearToSlowEaseIn,
   });

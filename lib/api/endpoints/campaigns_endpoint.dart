@@ -11,12 +11,22 @@ class CampaignsEndpoint extends ApiEndpoint<BaseCampaign>
             formatter: (map) => Campaign.fromJson(map),
             listFormatter: BaseCampaign.listFromJson);
 
-  Future<Campaign> getOne([String id]) {
-    return ApiCall<Campaign>(this.addRoute(id)).getOne();
+  Future<Campaign?> getOne([String? id]) {
+    return id == null
+        ? ApiCall<Campaign>(this).getOne()
+        : ApiCall<Campaign>(this.addRoute(id)).getOne();
   }
 
-  Stream<StreamResult<Campaign>> streamGetOne([String id]) {
-    return ApiCall<Campaign>(this.addRoute(id)).streamGetOne();
+  Stream<StreamResult<Campaign>> streamGetOne([String? id]) {
+    return id == null
+        ? ApiCall<Campaign>(this).streamGetOne()
+        : ApiCall<Campaign>(this.addRoute(id)).streamGetOne();
+  }
+
+  @override
+  CampaignsEndpoint addRoute(String? routeToAdd) {
+    String finalRoute = route + '/' + routeToAdd!;
+    return CampaignsEndpoint(finalRoute);
   }
 }
 
@@ -24,30 +34,30 @@ class QueriedCampaignEndpoint = QueryableEndpoint<BaseCampaign>
     with CampaignEndpointQueries;
 
 mixin CampaignEndpointQueries on ApiEndpoint<BaseCampaign> {
-  QueriedCampaignEndpoint organizationId(String oid) {
+  QueriedCampaignEndpoint organizationId(String? oid) {
     return QueriedCampaignEndpoint(route,
-        query: {...query, 'organization_id': oid},
+        query: {...(query ?? {}), 'organization_id': oid},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
-  QueriedCampaignEndpoint category(int categoryId) {
+  QueriedCampaignEndpoint category(int? categoryId) {
     return QueriedCampaignEndpoint(route,
-        query: {...query, 'category_id': categoryId},
+        query: {...(query ?? {}), 'category_id': categoryId},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
   QueriedCampaignEndpoint limit(int limit) {
     return QueriedCampaignEndpoint(route,
-        query: {...query, 'limit': limit},
+        query: {...(query ?? {}), 'limit': limit},
         formatter: formatter,
         listFormatter: listFormatter);
   }
 
   QueriedCampaignEndpoint name(String q) {
     return QueriedCampaignEndpoint(route,
-        query: {...query, 'name': q},
+        query: {...(query ?? {}), 'name': q},
         formatter: formatter,
         listFormatter: listFormatter);
   }

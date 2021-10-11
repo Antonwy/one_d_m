@@ -1,22 +1,20 @@
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/ad_manager.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/helper/numeral.dart';
-import 'package:one_d_m/models/ad_balance.dart';
 import 'package:one_d_m/models/statistics.dart';
-import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -44,8 +42,8 @@ class _ChartsPageView extends StatefulWidget {
 }
 
 class _ChartsPageViewState extends State<_ChartsPageView> {
-  ValueNotifier<double> _page;
-  PageIndicatorController _pageController;
+  late ValueNotifier<double> _page;
+  late PageIndicatorController _pageController;
 
   @override
   void initState() {
@@ -53,20 +51,19 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
     _page = ValueNotifier<double>(0.0);
     _pageController = PageIndicatorController()
       ..addListener(() {
-        _page.value = _pageController.page;
+        _page.value = _pageController.page ?? 0.0;
       });
   }
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
+    ThemeData _theme = Theme.of(context);
     return Material(
-      color: _bTheme.contrast,
-      borderRadius: BorderRadius.circular(6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       child: Container(
         height: 120,
         child: Consumer<StatisticsManager>(builder: (context, sm, child) {
-          Statistics statistics = sm.home;
+          Statistics statistics = sm.home!;
           return Column(
             children: <Widget>[
               Expanded(
@@ -120,12 +117,13 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
                 child: InkPageIndicator(
                   gap: 8,
                   padding: 0,
-                  shape: IndicatorShape.circle(4),
-                  inactiveColor: _bTheme.dark.withOpacity(.25),
-                  activeColor: _bTheme.dark,
-                  inkColor: _bTheme.dark,
+                  shape: IndicatorShape.circle(3),
                   pageCount: 3,
                   page: _page,
+                  inactiveColor:
+                      _theme.colorScheme.onBackground.withOpacity(.1),
+                  activeColor: _theme.colorScheme.onBackground,
+                  inkColor: _theme.colorScheme.onBackground,
                 ),
               ),
             ],
@@ -140,27 +138,24 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
 }
 
 class _ColumnStats extends StatelessWidget {
-  final int value;
-  final String desc;
+  final int? value;
+  final String? desc;
 
   _ColumnStats({this.value, this.desc});
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme _bTheme = ThemeManager.of(context).colors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         AutoSizeText(
-          Numeral(value).value(),
-          style: TextStyle(
-              color: _bTheme.dark, fontSize: 32, fontWeight: FontWeight.w600),
+          Numeral(value!).value(),
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600),
         ),
         Text(
-          desc,
-          style: TextStyle(
-              color: _bTheme.dark, fontSize: 12, fontWeight: FontWeight.w400),
+          desc!,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -169,8 +164,8 @@ class _ColumnStats extends StatelessWidget {
 
 class _DCInformation extends StatefulWidget {
   const _DCInformation({
-    Key key,
-    @required this.statistics,
+    Key? key,
+    required this.statistics,
   }) : super(key: key);
 
   final Statistics statistics;
@@ -182,54 +177,51 @@ class _DCInformation extends StatefulWidget {
 class __DCInformationState extends State<_DCInformation> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle(
-      style: TextStyle(color: ThemeManager.of(context).colors.dark),
-      child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: 25.0,
-          ),
-          child: Builder(builder: (context) {
-            UserManager um = context.watch<UserManager>();
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '${um.user?.dvBalance ?? 0}',
-                          style: TextStyle(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                              color: ThemeManager.of(context).colors.dark),
+    return Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+          horizontal: 25.0,
+        ),
+        child: Builder(builder: (context) {
+          UserManager um = context.watch<UserManager>();
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '${um.user?.dvBalance ?? 0}',
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const XMargin(5),
-                        Text('Donation Votes'),
-                      ],
-                    ),
-                    SizedBox(height: 5.0),
-                    AutoSizeText(
-                      'Entspricht ${Currency((um.user?.dvBalance ?? 0) * 5).value()}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
                       ),
+                      const XMargin(5),
+                      Text('Donation Votes'),
+                    ],
+                  ),
+                  SizedBox(height: 5.0),
+                  AutoSizeText(
+                    'Entspricht ${Currency((um.user?.dvBalance ?? 0) * 5).value()}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
                     ),
-                  ],
-                ),
-                PlayButton(
-                  size: 60,
-                )
-              ],
-            );
-          })),
-    );
+                  ),
+                ],
+              ),
+              PlayButton(
+                size: 60,
+              )
+            ],
+          );
+        }));
   }
 
   @override
@@ -237,11 +229,11 @@ class __DCInformationState extends State<_DCInformation> {
 }
 
 class PlayButton extends StatefulWidget {
-  final double size;
-  final bool showLabel;
+  final double? size;
+  final bool? showLabel;
 
   const PlayButton({
-    Key key,
+    Key? key,
     this.size,
     this.showLabel,
   }) : super(key: key);
@@ -251,11 +243,12 @@ class PlayButton extends StatefulWidget {
 
 class _PlayButtonState extends State<PlayButton>
     with SingleTickerProviderStateMixin {
-  int _alreadyCollectedCoins = 0, _maxDVs;
-  bool _loadingAd = true;
-  AnimationController _controller;
-  ThemeManager _theme;
-  Animation<double> _curvedAnimation;
+  int? _alreadyCollectedCoins = 0, _maxDVs;
+  bool _loadingAd = false;
+  late AnimationController _controller;
+  late ThemeData _theme;
+  late Animation<double> _curvedAnimation;
+  InterstitialAd? _ad;
 
   @override
   void initState() {
@@ -289,61 +282,75 @@ class _PlayButtonState extends State<PlayButton>
     _controller.forward();
 
     _initStorage();
-
-    _initAds();
+    _preloadAd();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Future<void> _preloadAd([bool show = false]) async {
+    if (show)
+      setState(() {
+        _loadingAd = true;
+      });
+    await InterstitialAd.load(
+        adUnitId: AdManager.rewardedAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (ad) {
+          print("AD LOADED");
+          print(ad);
+
+          _ad = ad;
+
+          if (show) _showAd();
+        }, onAdFailedToLoad: (e) {
+          print("FAILED LOADING AD");
+
+          print(e.message);
+        }));
+
+    if (show)
+      setState(() {
+        _loadingAd = false;
+      });
   }
 
-  void _initAds() {
-    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event,
-        {String rewardType, int rewardAmount}) async {
-      if (event == RewardedVideoAdEvent.loaded) {
-        if (mounted && _loadingAd) {
-          RewardedVideoAd.instance.show();
-        }
-      } else if (event == RewardedVideoAdEvent.rewarded) {
-        print('REWARD');
+  Future<void> _showAd() async {
+    if (_ad == null) await _preloadAd(true);
+    if (_ad == null) return _showError();
+
+    _ad!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) =>
+          print('$ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+
+        _showError();
+
+        ad.dispose();
+      },
+      onAdImpression: (InterstitialAd ad) {
         _adViewed();
-      } else if (event == RewardedVideoAdEvent.closed ||
-          event == RewardedVideoAdEvent.completed) {
-        _loadAd(show: false);
-      }
-      setState(() {
-        _loadingAd = false;
-      });
-    };
-    _loadAd(show: false).then((value) => print('loadAd() -> $value'));
-  }
-
-  Future<bool> _loadAd({bool show: true}) {
-    setState(() {
-      _loadingAd = show;
-    });
-
-    return RewardedVideoAd.instance.load(
-      adUnitId: AdManager.rewardedAdUnitId,
+        print('$ad impression occurred.');
+        ad.dispose();
+      },
     );
+
+    await _ad!.show();
+    _ad = null;
+    await _preloadAd();
   }
 
-  Future<void> _showIfAlreadyAvailable() async {
-    try {
-      await RewardedVideoAd.instance.show();
-    } catch (err) {
-      PushNotification.of(context).show(NotificationContent(
-          title: "Das hat leider nicht funktioniert.",
-          body:
-              "Momentan haben wir leider keine Werbung die wir dir zeigen können.",
-          icon: Icons.error_outline));
-      print("Ad Error: $err");
-      setState(() {
-        _loadingAd = false;
-      });
-    }
+  void _showError() {
+    PushNotification.of(context).show(NotificationContent(
+        title: "Das hat leider nicht funktioniert.",
+        body:
+            "Momentan haben wir leider keine Werbung die wir dir zeigen können.",
+        icon: Icons.error_outline));
+    setState(() {
+      _loadingAd = false;
+    });
   }
 
   void _initStorage() async {
@@ -351,7 +358,7 @@ class _PlayButtonState extends State<PlayButton>
 
     DateFormat format = DateFormat.yMd();
     String today = format.format(DateTime.now());
-    String _lastTimeResetted =
+    String? _lastTimeResetted =
         _prefs.getString(Constants.LAST_TIME_RESETTED_COINS);
 
     if (_lastTimeResetted == null) {
@@ -374,7 +381,6 @@ class _PlayButtonState extends State<PlayButton>
 
   void _adViewed() async {
     _collectCoin();
-    String uid = context.read<UserManager>().uid;
     context.read<FirebaseAnalytics>().logEvent(name: "Reward earned");
     await Api().account().addDvs();
 
@@ -382,9 +388,11 @@ class _PlayButtonState extends State<PlayButton>
 
     PushNotification.of(context)
         .show(NotificationContent(title: "Neuer DV!", body: _pushMsgTitle()));
+
+    if (done) setState(() {});
   }
 
-  bool get done => _alreadyCollectedCoins >= _maxDVs;
+  bool get done => _alreadyCollectedCoins! >= _maxDVs!;
 
   void _collectCoin() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
@@ -397,12 +405,13 @@ class _PlayButtonState extends State<PlayButton>
 
   @override
   Widget build(BuildContext context) {
-    _theme = ThemeManager.of(context);
+    _theme = Theme.of(context);
+
     return DiscoveryHolder.showAd(
       maxDVs: _maxDVs,
       tapTarget: _button(),
       next: () async {
-        context.read<Future<void> Function(int)>()(2);
+        context.read<Future<void> Function(int)>()(1);
         return true;
       },
       child: ScaleTransition(
@@ -413,8 +422,8 @@ class _PlayButtonState extends State<PlayButton>
           child: Material(
             borderRadius: BorderRadius.circular(Constants.radius),
             clipBehavior: Clip.antiAlias,
-            color: _theme.colors.dark,
-            elevation: 12,
+            color: _theme.colorScheme.secondary,
+            elevation: 8,
             child: InkWell(onTap: _buttonClick, child: _button()),
           ),
         ),
@@ -452,8 +461,7 @@ class _PlayButtonState extends State<PlayButton>
       return;
     }
 
-    await _loadAd(show: true);
-    await _showIfAlreadyAvailable();
+    _showAd();
   }
 
   Widget _buttonText() {
@@ -465,14 +473,14 @@ class _PlayButtonState extends State<PlayButton>
     return AutoSizeText(text,
         maxLines: 1,
         minFontSize: 4,
-        style: TextStyle(fontSize: 6, color: _theme.colors.textOnDark));
+        style: TextStyle(fontSize: 6, color: _theme.colorScheme.onSecondary));
   }
 
   Widget _buttonIcon() {
     if (done)
       return Icon(
         Icons.done_rounded,
-        color: _theme.colors.textOnDark,
+        color: _theme.colorScheme.onSecondary,
       );
 
     if (_loadingAd)
@@ -482,23 +490,23 @@ class _PlayButtonState extends State<PlayButton>
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation(
-            _theme.colors.textOnDark,
+            _theme.colorScheme.onSecondary,
           ),
         ),
       );
 
     return Icon(
-      CupertinoIcons.play,
-      color: _theme.colors.textOnDark,
+      Icons.play_arrow_rounded,
+      color: _theme.colorScheme.onSecondary,
     );
   }
 }
 
 class DailyGoalWidget extends StatelessWidget {
   const DailyGoalWidget({
-    Key key,
-    @required this.title,
-    @required this.percent,
+    Key? key,
+    required this.title,
+    required this.percent,
   }) : super(key: key);
 
   final String title;
@@ -515,11 +523,15 @@ class DailyGoalWidget extends StatelessWidget {
           AutoSizeText(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: context.theme.colorScheme.onPrimary),
             maxLines: 1,
           ),
           YMargin(6),
-          PercentLine(percent: percent),
+          PercentLine(
+              percent: percent, color: context.theme.colorScheme.onPrimary),
         ],
       ),
     );
@@ -528,8 +540,8 @@ class DailyGoalWidget extends StatelessWidget {
 
 class PercentCircle extends StatelessWidget {
   const PercentCircle(
-      {Key key,
-      @required this.percent,
+      {Key? key,
+      required this.percent,
       this.radius = 40,
       this.fontSize = 15,
       this.dark = false})
@@ -569,20 +581,20 @@ class _PercentCirclePainter extends CustomPainter {
   _PercentCirclePainter(this.percent, {this.color = ColorTheme.orange});
 
   final double percent;
-  final Color color;
+  final Color? color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final double strokeWidth = 5;
 
     final Paint backgroundPaint = Paint()
-      ..color = color.withOpacity(0.05)
+      ..color = color!.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     final Paint percentPaint = Paint()
-      ..color = color
+      ..color = color!
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -620,11 +632,11 @@ class _PercentCirclePainter extends CustomPainter {
 
 class PercentLine extends StatelessWidget {
   const PercentLine(
-      {Key key, @required this.percent, this.height = 6.0, this.color})
+      {Key? key, required this.percent, this.height = 6.0, this.color})
       : super(key: key);
 
   final double percent, height;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -642,22 +654,22 @@ class PercentLine extends StatelessWidget {
 
 class _PercentLinePainter extends CustomPainter {
   _PercentLinePainter(
-      {@required this.percent, @required this.height, this.color});
+      {required this.percent, required this.height, this.color});
 
   final double height;
   final double percent;
-  final Color color;
+  final Color? color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint backgroundPaint = Paint()
-      ..color = color.withOpacity(0.1)
+      ..color = color!.withOpacity(0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = height
       ..strokeCap = StrokeCap.round;
 
     final Paint percentPaint = Paint()
-      ..color = color
+      ..color = color!
       ..style = PaintingStyle.stroke
       ..strokeWidth = height
       ..strokeCap = StrokeCap.round;

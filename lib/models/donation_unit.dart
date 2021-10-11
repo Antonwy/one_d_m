@@ -1,6 +1,6 @@
 class DonationUnit {
-  final String name, smiley, effect, singular;
-  final int value;
+  final String? name, smiley, effect, singular;
+  final int? value;
 
   const DonationUnit(
       {this.name = "DVs",

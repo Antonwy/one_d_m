@@ -23,17 +23,17 @@ import 'database_service.dart';
 import 'numeral.dart';
 
 class InstagramImages {
-  final File foreground, background;
+  final File? foreground, background;
 
   InstagramImages({this.foreground, this.background});
 }
 
 class ShareImage {
-  final BuildContext context;
+  final BuildContext? context;
 
   ShareImage.of(this.context);
 
-  Future<File> _createBackgroundImage(Color color, String path) async {
+  Future<File> _createBackgroundImage(Color? color, String path) async {
     Widget widget = Container(
       width: 200,
       height: 400,
@@ -46,22 +46,22 @@ class ShareImage {
     return file.writeAsBytes(pngBytes);
   }
 
-  Future<InstagramImages> createSessionImageFromManager(
+  Future<InstagramImages?> createSessionImageFromManager(
       BaseSessionManager sessionManager) async {
-    Session session = sessionManager.session;
+    Session? session = sessionManager.session;
     if (session == null) return null;
 
     print("Session image url: ${session.imgUrl}");
     print("Campaign image url: ${session.campaignImageUrl}");
 
-    User user = context.read<UserManager>().user;
+    User? user = context!.read<UserManager>().user;
     final List<ImageProvider> images = [
-      CachedNetworkImageProvider(session.imgUrl),
-      CachedNetworkImageProvider(session.campaignImageUrl),
+      CachedNetworkImageProvider(session.imgUrl!),
+      CachedNetworkImageProvider(session.campaignImageUrl!),
     ];
 
     if (user?.imgUrl != null)
-      images.add(CachedNetworkImageProvider(user.imgUrl));
+      images.add(CachedNetworkImageProvider(user!.imgUrl!));
 
     for (ImageProvider imgProv in images) {
       final c = Completer();
@@ -77,25 +77,25 @@ class ShareImage {
     Widget sessionImage = SessionImage(
       session: sessionManager.session,
       user: user,
-      theme: ThemeManager.of(context, listen: false),
-      mq: MediaQuery.of(context),
+      theme: ThemeManager.of(context!, listen: false),
+      mq: MediaQuery.of(context!),
       images: images,
     );
 
     Uint8List screenshot = await ScreenshotController()
         .captureFromWidget(sessionImage, delay: Duration(milliseconds: 500));
 
-    imageCache.clear();
+    imageCache!.clear();
     final directory = (await getApplicationDocumentsDirectory()).path;
 
     String filePath =
-        "$directory/${sessionManager.baseSession.name.replaceAll(" ", "_")}_share.png";
+        "$directory/${sessionManager.baseSession!.name!.replaceAll(" ", "_")}_share.png";
 
     String backgroundFilePath =
-        "$directory/${sessionManager.baseSession.name.replaceAll(" ", "_")}_share_background.png";
+        "$directory/${sessionManager.baseSession!.name!.replaceAll(" ", "_")}_share_background.png";
 
     File backgroundFile = await _createBackgroundImage(
-        sessionManager.baseSession.primaryColor, backgroundFilePath);
+        sessionManager.baseSession!.primaryColor, backgroundFilePath);
     File imgFile = new File(filePath);
 
     return InstagramImages(
@@ -105,21 +105,21 @@ class ShareImage {
 }
 
 class SessionImage extends StatelessWidget {
-  final Session session;
-  final User user;
-  final ThemeManager theme;
-  final MediaQueryData mq;
-  final List<ImageProvider> images;
+  final Session? session;
+  final User? user;
+  final ThemeManager? theme;
+  final MediaQueryData? mq;
+  final List<ImageProvider>? images;
 
   const SessionImage(
       {this.session, this.user, this.theme, this.mq, this.images});
 
   @override
   Widget build(BuildContext c) {
-    ThemeManager _theme = theme;
+    ThemeManager _theme = theme!;
     return Container(
       height: 650,
-      color: session.primaryColor,
+      color: session!.primaryColor,
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
@@ -132,21 +132,21 @@ class SessionImage extends StatelessWidget {
                   elevation: 20,
                   borderRadius: BorderRadius.circular(Constants.radius),
                   clipBehavior: Clip.antiAlias,
-                  color: session.secondaryColor,
+                  color: session!.secondaryColor,
                   child: Builder(builder: (context) {
-                    double size = (mq.size.width - 64) / 2;
+                    double size = (mq!.size.width - 64) / 2;
                     return Column(
                       children: [
                         Row(
                           children: [
                             Image(
-                              image: images[0],
+                              image: images![0],
                               width: size,
                               height: size,
                               fit: BoxFit.cover,
                             ),
                             Image(
-                              image: images[1],
+                              image: images![1],
                               width: size,
                               height: size,
                               fit: BoxFit.cover,
@@ -155,7 +155,7 @@ class SessionImage extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            user?.imgUrl == null && images.length < 2
+                            user?.imgUrl == null && images!.length < 2
                                 ? Container(
                                     width: size,
                                     height: size,
@@ -167,14 +167,14 @@ class SessionImage extends StatelessWidget {
                                           Icons.person,
                                           size: 40,
                                           color: _theme.correctColorFor(
-                                              session.secondaryColor),
+                                              session!.secondaryColor!),
                                         ),
                                         YMargin(6),
                                         Text(
-                                          user.name,
+                                          user!.name!,
                                           style: _theme.textTheme
                                               .correctColorFor(
-                                                  session.secondaryColor)
+                                                  session!.secondaryColor!)!
                                               .bodyText1
                                               .copyWith(
                                                   fontWeight: FontWeight.bold),
@@ -183,7 +183,7 @@ class SessionImage extends StatelessWidget {
                                     ),
                                   )
                                 : Image(
-                                    image: images[2],
+                                    image: images![2],
                                     width: size,
                                     height: size,
                                     fit: BoxFit.cover,
@@ -208,7 +208,7 @@ class SessionImage extends StatelessWidget {
                                       "One\nDollar\nMovement",
                                       style: _theme.textTheme
                                           .correctColorFor(
-                                              session.secondaryColor)
+                                              session!.secondaryColor!)!
                                           .bodyText1
                                           .copyWith(
                                               fontWeight: FontWeight.bold,
@@ -226,29 +226,29 @@ class SessionImage extends StatelessWidget {
             ),
             YMargin(24),
             Text(
-              session.name,
+              session!.name!,
               style: _theme.textTheme
-                  .correctColorFor(session.primaryColor)
+                  .correctColorFor(session!.primaryColor!)!
                   .headline6,
             ),
             StyledText(
               text:
-                  "<b>${session.name}</b> unterstützt <b>${session.campaignTitle}</b>",
+                  "<b>${session!.name}</b> unterstützt <b>${session!.campaignTitle}</b>",
               styles: {'b': TextStyle(fontWeight: FontWeight.bold)},
               style: _theme.textTheme
-                  .correctColorFor(session.primaryColor)
+                  .correctColorFor(session!.primaryColor!)!
                   .caption,
             ),
             YMargin(12),
             Builder(builder: (context) {
-              Color textColor = _theme.correctColorFor(session.secondaryColor);
+              Color? textColor = _theme.correctColorFor(session!.secondaryColor!);
               BaseTextTheme textTheme =
-                  _theme.textTheme.correctColorFor(session.secondaryColor);
+                  _theme.textTheme.correctColorFor(session!.secondaryColor!)!;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Material(
-                    color: session.secondaryColor,
+                    color: session!.secondaryColor,
                     borderRadius: BorderRadius.circular(Constants.radius),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -265,20 +265,20 @@ class SessionImage extends StatelessWidget {
                                     children: [
                                       TextSpan(
                                           text:
-                                              "${Numeral(session.amount).value()} "),
-                                      if (session.donationUnit.smiley != null &&
-                                          session
-                                              .donationUnit.smiley.isNotEmpty)
+                                              "${Numeral(session!.amount!).value()} "),
+                                      if (session!.donationUnit.smiley != null &&
+                                          session!
+                                              .donationUnit.smiley!.isNotEmpty)
                                         TextSpan(
                                             text:
-                                                "${session.donationUnit.smiley}",
+                                                "${session!.donationUnit.smiley}",
                                             style: TextStyle(
                                                 fontSize: 38,
                                                 fontWeight: FontWeight.w300))
                                       else
                                         TextSpan(
                                             text:
-                                                "${session.donationUnit.name ?? "DV"}",
+                                                "${session!.donationUnit.name ?? "DV"}",
                                             style: TextStyle(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w300))
@@ -296,12 +296,12 @@ class SessionImage extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 6.0),
                             child: Builder(builder: (context) {
-                              double width = mq.size.width - 48 - 24;
+                              double width = mq!.size.width - 48 - 24;
                               return Container(
                                 width: width,
                                 child: PercentLine(
                                   percent:
-                                      (session.amount / session.donationGoal)
+                                      (session!.amount! / session!.donationGoal!)
                                           .clamp(0.0, 1.0),
                                   height: 10.0,
                                   color: textColor,
@@ -314,7 +314,7 @@ class SessionImage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "${_formatPercent(session)}% erreicht",
+                                "${_formatPercent(session!)}% erreicht",
                                 style: textTheme.bodyText1,
                               ),
                               RichText(
@@ -326,12 +326,12 @@ class SessionImage extends StatelessWidget {
                                       text: "Ziel: ",
                                     ),
                                     TextSpan(
-                                        text: "${session.donationGoal} ",
+                                        text: "${session!.donationGoal} ",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
                                     TextSpan(
                                         text:
-                                            "${session.donationUnit.smiley ?? session.donationUnit.name ?? "DV"}"),
+                                            "${session!.donationUnit.smiley ?? session!.donationUnit.name ?? "DV"}"),
                                   ])),
                             ],
                           )
@@ -349,7 +349,7 @@ class SessionImage extends StatelessWidget {
   }
 
   String _formatPercent(BaseSession session) {
-    double percentValue = (session.amount / session.donationGoal) * 100;
+    double percentValue = (session.amount! / session.donationGoal!) * 100;
 
     if (percentValue < 1) return percentValue.toStringAsFixed(2);
     if ((percentValue % 1) == 0) return percentValue.toInt().toString();

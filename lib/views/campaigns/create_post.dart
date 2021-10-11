@@ -24,13 +24,13 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  final Campaign campaign;
-  final bool isSession;
-  final BaseSession session;
-  final ScrollController controller;
+  final Campaign? campaign;
+  final bool? isSession;
+  final BaseSession? session;
+  final ScrollController? controller;
 
   const CreatePostScreen(
-      {Key key, this.session, this.controller, this.campaign, this.isSession})
+      {Key? key, this.session, this.controller, this.campaign, this.isSession})
       : super(key: key);
 
   @override
@@ -38,19 +38,19 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-  Size _displaySize;
+  late Size _displaySize;
 
-  ThemeData _theme;
+  late ThemeData _theme;
 
-  UserManager um;
+  late UserManager um;
 
-  TextTheme _accentTextTheme;
+  TextTheme? _accentTextTheme;
 
-  File _image;
+  File? _image;
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  String _postTitle, _postText, _postShortText;
+  String? _postTitle, _postText, _postShortText;
 
   final _newsId = Uuid().v4();
 
@@ -64,7 +64,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   double _progress = 0.0;
   int _videoDuration = 0;
   String _processPhase = '';
-  VideoInfo videoInfo;
+  VideoInfo? videoInfo;
   bool _isVideo = true;
 
   @override
@@ -97,7 +97,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ),
         title: Text(
           'Post erstellen',
-          style: _theme.textTheme.headline6
+          style: _theme.textTheme.headline6!
               .copyWith(fontWeight: FontWeight.w700, fontSize: 24),
         ),
         centerTitle: true,
@@ -134,38 +134,39 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _createNews() async {
-    if (!_formKey.currentState.validate() || _isVideo
+    if (!_formKey.currentState!.validate() || _isVideo
         ? videoInfo == null
         : _image == null) return;
 
-    _formKey.currentState.save();
-    String imgUrl;
+    _formKey.currentState!.save();
+    String? imgUrl;
 
     setState(() {
       _isLoading = true;
     });
 
     if (!_isVideo) {
-      StorageService service = StorageService(file: _image);
+      StorageService service = StorageService(file: _image!);
       imgUrl =
           await service.uploadNewsImage(StorageService.newsImageName(_newsId));
     }
 
     News news = News(
         id: _newsId,
-        sessionId: widget.isSession ? widget.session?.id : '',
-        campaignId:
-            widget.isSession ? widget.session?.campaignId : widget.campaign?.id,
+        sessionId: widget.isSession! ? widget.session?.id : '',
+        campaignId: widget.isSession!
+            ? widget.session?.campaignId
+            : widget.campaign?.id,
         campaignName:
-            widget.isSession ? widget.session?.name : widget.campaign?.name,
+            widget.isSession! ? widget.session?.name : widget.campaign?.name,
         campaignImgUrl: widget.campaign?.imgUrl,
         createdAt: DateTime.now(),
         userId: um.uid,
         title: '',
         text: _postText,
         shortText: _postShortText,
-        videoUrl: _isVideo ? videoInfo.videoUrl : null,
-        imageUrl: _isVideo ? videoInfo.coverUrl : imgUrl,
+        videoUrl: _isVideo ? videoInfo!.videoUrl : null,
+        imageUrl: _isVideo ? videoInfo!.coverUrl : imgUrl,
         showInMainfeed: _showInMainfeed);
 
     DatabaseService.createNews(news).then((value) {
@@ -184,7 +185,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _getImage() async {
-    PickedFile _file =
+    PickedFile? _file =
         await ImagePicker().getImage(source: ImageSource.gallery);
     if (_file == null) return;
     _cropImage(File(_file.path));
@@ -206,11 +207,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ? _getProgressBar()
                     : videoInfo == null
                         ? _buildPlaceholder()
-                        : VideoWidget(url: videoInfo.videoUrl, play: true)
+                        : VideoWidget(url: videoInfo!.videoUrl!, play: true)
                 : _image == null
                     ? _buildPlaceholder()
                     : Image.file(
-                        _image,
+                        _image!,
                         width: _displaySize.width * 85,
                         fit: BoxFit.cover,
                       ),
@@ -221,24 +222,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Widget _textField(
-      {String hint,
+      {String? hint,
       bool multiline = false,
-      Function validator,
-      int maxLength = null,
-      Function onSaved}) {
+      Function? validator,
+      int? maxLength = null,
+      Function? onSaved}) {
     return TextFormField(
       textAlignVertical: TextAlignVertical.top,
-      onSaved: onSaved,
+      onSaved: onSaved as void Function(String?)?,
       maxLines: 7,
       cursorColor: Colors.grey,
-      style: TextStyle(color: ThemeManager.of(context).colors.textOnContrast),
+      style: TextStyle(color: ThemeManager.of(context).colors!.textOnContrast),
       keyboardType: multiline ? TextInputType.multiline : TextInputType.text,
       maxLength: maxLength,
       decoration: InputDecoration(
           alignLabelWithHint: true,
           counterText: "",
           labelStyle: TextStyle(
-              color: ThemeManager.of(context).colors.textOnContrast,
+              color: ThemeManager.of(context).colors!.textOnContrast,
               fontSize: 20,
               fontWeight: FontWeight.w700),
           labelText: hint,
@@ -277,7 +278,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         children: [
           MaterialButton(
             clipBehavior: Clip.antiAlias,
-            color: ThemeManager.of(context).colors.contrast,
+            color: ThemeManager.of(context).colors!.contrast,
             shape: CircleBorder(),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -286,7 +287,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ? Icons.photo_library_rounded
                     : Icons.video_collection_rounded,
                 size: 40,
-                color: ThemeManager.of(context).colors.textOnContrast,
+                color: ThemeManager.of(context).colors!.textOnContrast,
               ),
             ),
             onPressed: () => isPhoto ? _getImage() : _takeVideo(),
@@ -305,7 +306,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         width: 220,
         height: 48,
         child: MaterialButton(
-            color: ThemeManager.of(context).colors.dark,
+            color: ThemeManager.of(context).colors!.dark,
             disabledColor: Colors.grey,
             child: !_isLoading
                 ? Center(
@@ -313,7 +314,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       'Post erstellen',
                       style: Theme.of(context)
                           .accentTextTheme
-                          .button
+                          .button!
                           .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                   )
@@ -405,7 +406,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   void _takeVideo() async {
-    PickedFile videoFile;
+    PickedFile? videoFile;
     if (_imagePickerActive) return;
 
     _imagePickerActive = true;
@@ -429,7 +430,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<Null> _cropImage(File image) async {
-    File croppedFile = await ImageCropper.cropImage(
+    File? croppedFile = await ImageCropper.cropImage(
         sourcePath: image.path,
         aspectRatioPresets: Platform.isAndroid
             ? [

@@ -4,7 +4,7 @@ import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/models/statistics.dart';
 
 class StatisticsManager extends ChangeNotifier {
-  Statistics home;
+  Statistics? home;
 
   StatisticsManager() {
     home = Statistics.zero();

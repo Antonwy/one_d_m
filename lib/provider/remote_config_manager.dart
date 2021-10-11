@@ -8,13 +8,13 @@ class RemoteConfigManager {
   static const String FORCE_UPDATE_BUILD_NUMBER = "force_update_build_number";
   static const int MAX_DVS_PER_DAY_DEFAULT = Constants.DVS_PER_DAY;
 
-  RemoteConfig _remoteConfig;
-  PackageInfo packageInfo;
+  late RemoteConfig _remoteConfig;
+  late PackageInfo packageInfo;
   bool shouldUpdate = false;
   bool forceUpdate = false;
 
   Future initialize() async {
-    _remoteConfig = await RemoteConfig.instance;
+    _remoteConfig = RemoteConfig.instance;
     packageInfo = await PackageInfo.fromPlatform();
     try {
       final Map<String, dynamic> defaults = _createDefaults();
@@ -24,8 +24,6 @@ class RemoteConfigManager {
       shouldUpdate = _checkIfShouldUpdate();
       forceUpdate = _checkIfShouldForceUpdate();
       _printInfos();
-    } on FetchThrottledException catch (e) {
-      print("Remote config fetch throttled: $e");
     } catch (e) {
       print("Unable to fetch remote config, defaults will be used. $e");
     }
@@ -52,8 +50,11 @@ class RemoteConfigManager {
   int _getDefaultBuildNumber() => int.tryParse(packageInfo.buildNumber) ?? 1;
 
   Future fetchAndActivate() async {
-    await _remoteConfig.fetch(expiration: Duration());
-    await _remoteConfig.activateFetched();
+    await _remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(seconds: 10),
+      minimumFetchInterval: Duration(hours: 24),
+    ));
+    await _remoteConfig.fetchAndActivate();
   }
 
   bool _checkIfShouldUpdate() {
@@ -73,8 +74,8 @@ class AppVersion {
   static const AppVersion currentVersion =
       AppVersion(version: "1.0.7", buildNumber: 51);
 
-  final String version;
-  final int buildNumber;
+  final String? version;
+  final int? buildNumber;
 
   const AppVersion({this.version, this.buildNumber});
 
@@ -90,7 +91,7 @@ class AppVersion {
 
   bool mustUpdate(AppVersion minVersion) {
     if (minVersion.version != this.version) return true;
-    if (minVersion.buildNumber > this.buildNumber) return true;
+    if (minVersion.buildNumber! > this.buildNumber!) return true;
     return false;
   }
 }

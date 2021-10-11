@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 /// Flare controls with a default animation to play on initialization.
 class SimpleControls extends FlareControls {
-  final String defaultAnimation;
+  final String? defaultAnimation;
 
   SimpleControls(this.defaultAnimation);
 
@@ -17,7 +17,7 @@ class SimpleControls extends FlareControls {
   void initialize(FlutterActorArtboard artboard) {
     super.initialize(artboard);
     if (defaultAnimation != null) {
-      play(defaultAnimation);
+      play(defaultAnimation!);
     }
   }
 }
@@ -26,14 +26,14 @@ class SimpleControls extends FlareControls {
 /// extended to also load the file from an AssetBundle, but the point is to show
 /// how to easily comopose Flare widgets using existing Flutter functionality.
 class Flare extends StatefulWidget {
-  final String filename;
-  final String campaignId;
-  final String animation;
+  final String? filename;
+  final String? campaignId;
+  final String? animation;
   final BoxFit fit;
   final Alignment alignment;
 
   const Flare(
-      {Key key,
+      {Key? key,
       this.filename,
       this.animation,
       this.fit = BoxFit.contain,
@@ -46,8 +46,8 @@ class Flare extends StatefulWidget {
 }
 
 class _FlareState extends State<Flare> {
-  SimpleControls _controls;
-  File _flareFile;
+  SimpleControls? _controls;
+  File? _flareFile;
   bool _downloaded = false;
 
 
@@ -76,7 +76,7 @@ class _FlareState extends State<Flare> {
   Future _downloadAssets() async {
     try {
       await DownloadAssetsController.startDownload(
-          assetsUrl: widget.filename,
+          assetsUrl: widget.filename!,
           onProgress: (progressValue) {
             _downloaded = false;
             // print('${progressValue}');

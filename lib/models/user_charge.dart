@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserCharge {
-  int amount;
-  String userId;
-  bool error;
+  int? amount;
+  String? userId;
+  bool? error;
 
   static final String AMOUNT = "amount", USER_ID = "user_id", ERROR = "error";
 

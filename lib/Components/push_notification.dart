@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 
@@ -6,7 +7,7 @@ import 'margin.dart';
 
 class PushNotification {
   BuildContext context;
-  OverlayEntry _overlayEntry;
+  late OverlayEntry _overlayEntry;
 
   PushNotification(this.context);
 
@@ -22,7 +23,7 @@ class PushNotification {
       });
     });
 
-    Overlay.of(context).insert(_overlayEntry);
+    Overlay.of(context)!.insert(_overlayEntry);
   }
 }
 
@@ -37,8 +38,8 @@ class PushWidget extends StatefulWidget {
 
 class _PushWidgetState extends State<PushWidget>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  MediaQueryData _mq;
+  late AnimationController _controller;
+  late MediaQueryData _mq;
 
   @override
   void initState() {
@@ -59,11 +60,18 @@ class _PushWidgetState extends State<PushWidget>
   @override
   Widget build(BuildContext context) {
     _mq = MediaQuery.of(context);
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
+
+    Color background =
+        widget.content.isWarning ? _theme.errorColor : _theme.primaryColor;
+    Color textColor = widget.content.isWarning
+        ? _theme.colorScheme.onError
+        : _theme.colorScheme.onPrimary;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        Animation curvedAnim = CurvedAnimation(
+        Animation<double> curvedAnim = CurvedAnimation(
             parent: _controller, curve: Curves.fastLinearToSlowEaseIn);
 
         return Positioned(
@@ -72,24 +80,21 @@ class _PushWidgetState extends State<PushWidget>
                 .value,
             left: 0,
             right: 0,
-            child: Transform.scale(
-                scale:
-                    Tween<double>(begin: 0.8, end: 1).animate(curvedAnim).value,
-                child: child));
+            child: child!);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Material(
-          borderRadius: BorderRadius.circular(Constants.radius),
+          borderRadius: BorderRadius.circular(6),
+          color: background,
           elevation: 1,
-          color: _theme.colors.dark,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Icon(
-                  widget.content?.icon ?? Icons.notification_important,
-                  color: _theme.colors.textOnDark,
+                  widget.content.icon,
+                  color: textColor,
                 ),
                 XMargin(12),
                 Expanded(
@@ -98,21 +103,18 @@ class _PushWidgetState extends State<PushWidget>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        widget.content?.title,
-                        style: Theme.of(context).textTheme.headline6.copyWith(
-                            color: _theme.colors.textOnDark, fontSize: 15),
+                        widget.content.title,
+                        style: _theme.textTheme.headline6!
+                            .copyWith(fontSize: 15, color: textColor),
                       ),
                       (widget.content.body == null ||
-                              widget.content.body.isEmpty)
+                              widget.content.body!.isEmpty)
                           ? Container(
                               width: 0,
                             )
-                          : Text(
-                              widget.content.body,
-                              style: _theme.textTheme.textOnDark
-                                  .withOpacity(.7)
-                                  .bodyText1,
-                            ),
+                          : Text(widget.content.body!,
+                              style: _theme.textTheme.bodyText1!
+                                  .copyWith(color: textColor.withOpacity(.7))),
                     ],
                   ),
                 ),
@@ -126,11 +128,16 @@ class _PushWidgetState extends State<PushWidget>
 }
 
 class NotificationContent {
-  String title, body;
-  IconData icon;
+  final String title;
+  final String? body;
+  final IconData icon;
+  final bool isWarning;
 
   NotificationContent(
-      {this.title, this.body, this.icon = Icons.notification_important});
+      {required this.title,
+      this.body,
+      this.icon = Icons.notification_important,
+      this.isWarning = false});
 
   static NotificationContent fromMessage(Map<String, dynamic> map) {
     Map<String, dynamic> tempMap;

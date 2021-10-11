@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 import 'package:one_d_m/models/user.dart';
@@ -24,9 +25,9 @@ enum Status {
 }
 
 class UserManager extends ChangeNotifier {
-  User _user;
-  firebaseAuth.FirebaseAuth _auth;
-  firebaseAuth.User _fireUser;
+  User? _user;
+  firebaseAuth.FirebaseAuth? _auth;
+  firebaseAuth.User? _fireUser;
   Status _status = Status.Uninitialized;
   // GoogleSignIn _googleSignIn;
   bool firstSignIn = false;
@@ -38,17 +39,17 @@ class UserManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  User get user => _user;
+  User? get user => _user;
 
-  String get uid => _fireUser?.uid;
+  String? get uid => _fireUser?.uid;
 
-  firebaseAuth.User get fireUser => _fireUser;
+  firebaseAuth.User? get fireUser => _fireUser;
 
-  set fireUser(firebaseAuth.User fUser) {
+  set fireUser(firebaseAuth.User? fUser) {
     _fireUser = fUser;
   }
 
-  firebaseAuth.FirebaseAuth get auth => _auth;
+  firebaseAuth.FirebaseAuth? get auth => _auth;
 
   UserManager.instance() {
     // _googleSignIn = GoogleSignIn(scopes: [
@@ -56,10 +57,10 @@ class UserManager extends ChangeNotifier {
     //   'email',
     // ]);
     _auth = firebaseAuth.FirebaseAuth.instance;
-    _auth.authStateChanges().listen(_onAuthStateChanged);
+    _auth!.authStateChanges().listen(_onAuthStateChanged);
   }
 
-  Future<User> getUser() async {
+  Future<User?> getUser() async {
     _user = await Api().getAccount();
     return _user;
   }
@@ -68,7 +69,7 @@ class UserManager extends ChangeNotifier {
     try {
       print("GETTING NEW USER");
       _user = await Api().getAccount();
-      print("NEW USERBALANCE: " + _user.dvBalance.toString());
+      print("NEW USERBALANCE: " + _user!.dvBalance.toString());
       notifyListeners();
     } catch (e) {
       print("RELOAD ERROR");
@@ -77,7 +78,7 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> delete() {
-    return fireUser.delete();
+    return fireUser!.delete();
   }
 
 //   Future<ApiResult<firebaseAuth.User>> signInWithApple() async {
@@ -143,8 +144,8 @@ class UserManager extends ChangeNotifier {
       String email, String password) async {
     try {
       status = Status.Authenticating;
-      firebaseAuth.UserCredential res = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      firebaseAuth.UserCredential res = await _auth!
+          .signInWithEmailAndPassword(email: email, password: password);
 
       await reloadUser();
       status = Status.Authenticated;
@@ -164,11 +165,10 @@ class UserManager extends ChangeNotifier {
       if (image != null) {
         StorageService service = StorageService(file: image);
         user.imgUrl = await service
-            .uploadImage(StorageService.userImageName(fireUser.uid));
+            .uploadImage(StorageService.userImageName(fireUser!.uid));
       }
 
-      user.id = fireUser.uid;
-      await DatabaseService.addUser(user);
+      user.id = fireUser!.uid;
       _user = user;
       _status = Status.Authenticated;
       notifyListeners();
@@ -181,15 +181,32 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> sendEmailVerification() async {
     try {
-      await _fireUser.sendEmailVerification();
+      var actionCodeSettings = firebaseAuth.ActionCodeSettings(
+        url:
+            'https://one-dollar-movement.firebaseapp.com/?email=${_fireUser!.email}',
+        dynamicLinkDomain: 'odm.page.link',
+        androidPackageName: 'com.odm.onedollarmovement',
+        androidInstallApp: true,
+        androidMinimumVersion: '114',
+        iOSBundleId: 'com.odm.onedollarmovement',
+        handleCodeInApp: true,
+      );
+
+      await _fireUser!.sendEmailVerification(actionCodeSettings);
       return ApiSuccess(data: null, message: "Success");
     } on PlatformException catch (e) {
       return ApiError(e.message);
+    } on firebaseAuth.FirebaseAuthException catch (e) {
+      print(e);
+      return ApiError(e.message);
+    } catch (e) {
+      print(e);
+      return ApiError("Email konnte nicht gesendet werden!");
     }
   }
 
   Future<ApiResult> createSocialUserDocument(
-      String username, String phonenumber) async {
+      String username, String? phonenumber) async {
     if (!await DatabaseService.checkUsernameAvailable(username.trim())) {
       return ApiError("Nutzername nicht verfügbar!");
     }
@@ -197,9 +214,9 @@ class UserManager extends ChangeNotifier {
     User user = User(
         phoneNumber: phonenumber,
         name: username.trim(),
-        email: fireUser.email,
-        imgUrl: fireUser.photoURL,
-        id: fireUser.uid);
+        email: fireUser!.email,
+        imgUrl: fireUser!.photoURL,
+        id: fireUser!.uid);
     try {
       await DatabaseService.addUser(user);
       _user = user;
@@ -209,8 +226,11 @@ class UserManager extends ChangeNotifier {
     }
   }
 
-  Future<ApiResult<firebaseAuth.User>> signUp(User user, File image) async {
+  Future<ApiResult<firebaseAuth.User>> signUp(
+      User user, File? image, BuildContext context) async {
     user.name = user.name.trim();
+    StorageStreamResult? streamRes;
+
     try {
       status = Status.Authenticating;
 
@@ -224,34 +244,51 @@ class UserManager extends ChangeNotifier {
       firebaseAuth.UserCredential res;
 
       try {
-        res = await _auth.createUserWithEmailAndPassword(
-            email: user.email, password: user.password);
+        res = await _auth!.createUserWithEmailAndPassword(
+            email: user.email!, password: user.password!);
       } on firebaseAuth.FirebaseAuthException catch (e) {
         status = Status.Unauthenticated;
         return ApiError(e.message);
+      } catch (e) {
+        print(e);
+        return ApiError("Etwas ist schief gelaufen!");
       }
 
       if (image != null) {
-        StorageService service = StorageService(file: image);
-        user.imgUrl = await service
-            .uploadImage(StorageService.userImageName(res.user.uid));
+        try {
+          StorageService service = StorageService(file: image);
+          streamRes = await service.uploadUserImage(
+              StorageService.userImageName(res.user!.uid),
+              context: context);
+
+          user.imgUrl = streamRes.url;
+        } catch (e) {
+          print("COULDN'T Upload image!");
+        }
       }
 
-      await res.user
-          .updateProfile(displayName: user.name, photoURL: user.imgUrl);
+      await res.user!.updateDisplayName(user.name);
 
-      user.id = res.user.uid;
+      await res.user!.updatePhotoURL(user.imgUrl);
+
+      user.id = res.user!.uid;
+
+      if (streamRes != null)
+        streamRes.streamController.add("Erstelle Nutzeraccount...");
       await Api().reInit();
-      User userRes = await Api().account().create(user);
-      // TODO: depreceated
-      await DatabaseService.addUser(user);
+      User? userRes = await Api().account().create(user);
 
       _user = userRes;
+      if (streamRes != null) await streamRes.finish();
       return ApiSuccess(data: res.user);
     } on PlatformException catch (e) {
       _status = Status.Unauthenticated;
+      if (streamRes != null) await streamRes.finish();
       notifyListeners();
       return ApiError(e.message);
+    } catch (e) {
+      if (streamRes != null) await streamRes.finish();
+      return ApiError("Etwas ist schief gelaufen beim registrieren...");
     }
   }
 
@@ -260,7 +297,7 @@ class UserManager extends ChangeNotifier {
     final PermissionStatus permission = await Permission.notification.status;
 
     if (permission == PermissionStatus.granted) {
-      bool hasTurnedOn = user.deviceToken?.isNotEmpty ?? false;
+      bool hasTurnedOn = user!.deviceToken?.isNotEmpty ?? false;
       print("User $uid has notifications turned on: $hasTurnedOn");
       print(hasTurnedOn);
       if (!hasTurnedOn) {
@@ -271,9 +308,8 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> _saveToken() async {
-    final FirebaseMessaging _fMessaging = FirebaseMessaging();
     try {
-      String token = await _fMessaging.getToken();
+      String? token = await FirebaseMessaging.instance.getToken();
       print("Saving device token: $token");
       await Api().account().saveDeviceToken(token);
     } catch (e) {
@@ -283,33 +319,33 @@ class UserManager extends ChangeNotifier {
 
   Future<ApiResult> updateUser(User updatedUser) async {
     updatedUser.name = updatedUser.name.trim();
-    if (updatedUser.name != user.name.trim() &&
+    if (updatedUser.name != user!.name.trim() &&
         !await Api().users().checkIfUsernameIsAvailable(updatedUser.name)) {
       return ApiError("Nutzername gibt es bereits, bitte wähle einen anderen!");
     }
-    user.name = updatedUser.name;
-    user.imgUrl = updatedUser.imgUrl;
-    user.thumbnailUrl = updatedUser.thumbnailUrl;
-    user.phoneNumber = updatedUser.phoneNumber;
+    user!.name = updatedUser.name;
+    user!.imgUrl = updatedUser.imgUrl;
+    user!.thumbnailUrl = updatedUser.thumbnailUrl;
+    user!.phoneNumber = updatedUser.phoneNumber;
     try {
-      await Api().account().update(user);
+      await Api().account().update(user!);
     } catch (e) {
-      return ApiError(e.message);
+      return ApiError(e.toString());
     }
-    await DatabaseService.updateUser(user);
+
     return ApiSuccess();
   }
 
   Future<void> logout() async {
     await Api().account().deleteDeviceToken().catchError((e) => print(e));
-    await _auth.signOut();
+    await _auth!.signOut();
     _user = null;
     Api().disconnect();
     // await _googleSignIn.signOut();
     status = Status.Unauthenticated;
   }
 
-  Future<void> _onAuthStateChanged(firebaseAuth.User firebaseUser) async {
+  Future<void> _onAuthStateChanged(firebaseAuth.User? firebaseUser) async {
     print(firebaseUser);
     if (firebaseUser == null) {
       status = Status.Unauthenticated;
@@ -330,7 +366,7 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<void> resetPassword() {
-    print(_fireUser.email);
-    return _auth.sendPasswordResetEmail(email: _fireUser.email);
+    print(_fireUser!.email);
+    return _auth!.sendPasswordResetEmail(email: _fireUser!.email!);
   }
 }

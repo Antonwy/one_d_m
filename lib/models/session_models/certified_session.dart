@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 
 class CertifiedSession extends Session {
-  final String videoUrl;
+  final String? videoUrl;
 
   CertifiedSession.fromDoc(DocumentSnapshot doc)
-      : videoUrl = doc.data()[VIDEO_URL],
+      : videoUrl = (doc.data() as Map<String, dynamic>)[VIDEO_URL],
         super.fromDoc(doc);
 
   CertifiedSession.fromJson(Map<String, dynamic> map)

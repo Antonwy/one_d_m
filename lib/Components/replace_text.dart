@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 
 class ReplaceText extends StatelessWidget {
-  final String text, value;
-  final TextStyle style, boldStyle;
+  final String? text, value;
+  final TextStyle? style, boldStyle;
   final TextAlign textAlign;
 
   const ReplaceText(
-      {Key key,
-      @required this.text,
-      @required this.value,
+      {Key? key,
+      required this.text,
+      required this.value,
       this.style,
       this.boldStyle,
       this.textAlign = TextAlign.start})
@@ -18,12 +18,12 @@ class ReplaceText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    if (text.contains("**")) {
-      List<String> splitted = text.split("**");
+    if (text!.contains("**")) {
+      List<String> splitted = text!.split("**");
       return RichText(
           textAlign: textAlign,
           text: TextSpan(
-              style: style ?? _theme.textTheme.textOnContrast.bodyText2,
+              style: style ?? _theme.textTheme.textOnContrast!.bodyText2,
               children: [
                 TextSpan(
                   text: splitted[0],
@@ -38,9 +38,9 @@ class ReplaceText extends StatelessWidget {
     }
 
     return Text(
-      text,
+      text!,
       textAlign: textAlign,
-      style: style ?? _theme.textTheme.textOnContrast.bodyText1,
+      style: style ?? _theme.textTheme.textOnContrast!.bodyText1,
     );
   }
 }

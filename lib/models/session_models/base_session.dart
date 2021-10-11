@@ -9,15 +9,23 @@ import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
 
 class BaseSession {
-  final String id, name, creatorId, campaignId, description, imgUrl, blurHash;
-  final int donationGoal, amount;
-  final DateTime createdAt;
-  final Color primaryColor, secondaryColor;
+  final String? id,
+      name,
+      creatorId,
+      campaignId,
+      description,
+      imgUrl,
+      thumbnailUrl,
+      blurHash;
+  final int? donationGoal, amount;
+  final DateTime? createdAt;
+  final Color? primaryColor, secondaryColor;
   final bool isCertified, reachedGoal;
   final DonationUnit donationUnit;
 
   BaseSession(
       {this.imgUrl,
+      this.thumbnailUrl,
       this.donationUnit = DonationUnit.defaultUnit,
       this.blurHash,
       this.amount,
@@ -33,26 +41,8 @@ class BaseSession {
       this.isCertified = true,
       this.reachedGoal = false});
 
-  BaseSession.fromDoc(DocumentSnapshot doc)
-      : creatorId = doc.data()[CREATOR_ID],
-        id = doc.id,
-        name = doc.data()[SESSION_NAME],
-        createdAt = (doc.data()[CREATED_AT] as Timestamp).toDate(),
-        campaignId = doc.data()[CAMPAIGN_ID],
-        amount = doc.data()[AMOUNT] ?? 0,
-        description = doc.data()[SESSION_DESCRIPTION] ?? "",
-        imgUrl = doc.data()[IMG_URL],
-        donationGoal = doc.data()[DONATION_GOAL] ?? 0,
-        donationUnit = DonationUnit(),
-        primaryColor = doc.data()[PRIMARY_COLOR] != null
-            ? Helper.hexToColor(doc.data()[PRIMARY_COLOR])
-            : ColorTheme.wildGreen,
-        secondaryColor = doc.data()[SECONDARY_COLOR] != null
-            ? Helper.hexToColor(doc.data()[SECONDARY_COLOR])
-            : ColorTheme.darkblue,
-        blurHash = doc.data()[BLUR_HASH],
-        isCertified = doc.data()[IS_CERTIFIED] ?? true,
-        reachedGoal = doc.data()[REACHED_GOAL] ?? false;
+  static BaseSession fromDoc(DocumentSnapshot doc) =>
+      BaseSession.fromJson(doc.data() as Map<String, dynamic>);
 
   BaseSession.fromJson(Map<String, dynamic> map)
       : id = map['id'],
@@ -71,6 +61,7 @@ class BaseSession {
         secondaryColor = map[SECONDARY_COLOR] != null
             ? Helper.hexToColor(map[SECONDARY_COLOR])
             : ColorTheme.darkblue,
+        thumbnailUrl = map["thumbnail_url"],
         blurHash = map[BLUR_HASH],
         isCertified = map[IS_CERTIFIED] ?? true,
         reachedGoal = map[REACHED_GOAL] ?? false;
@@ -85,6 +76,7 @@ class BaseSession {
         amount = map[AMOUNT],
         description = map[SESSION_DESCRIPTION],
         imgUrl = map[IMG_URL],
+        thumbnailUrl = map["thumbnail_url"],
         donationGoal = map[DONATION_GOAL] ?? 0,
         donationUnit = unit,
         primaryColor = map[PRIMARY_COLOR] != null
@@ -99,14 +91,14 @@ class BaseSession {
 
   static List<BaseSession> fromQuerySnapshot(QuerySnapshot qs) {
     return qs.docs.map((doc) {
-      return (doc.data()[IS_CERTIFIED] ?? true)
+      return ((doc.data() as Map<String, dynamic>)[IS_CERTIFIED] ?? true)
           ? CertifiedSession.fromDoc(doc)
           : Session.fromDoc(doc);
     }).toList();
   }
 
   static List<BaseSession> listFromJson(List<Map<String, dynamic>> list,
-      [DonationUnit unit]) {
+      [DonationUnit? unit]) {
     return list
         .map((map) => unit == null
             ? BaseSession.fromJson(map)
@@ -114,7 +106,7 @@ class BaseSession {
         .toList();
   }
 
-  BaseSessionManager manager(String uid) {
+  BaseSessionManager manager(String? uid) {
     return this.isCertified
         ? CertifiedSessionManager(session: this, uid: uid)
         : SessionManager(baseSession: this, uid: uid);

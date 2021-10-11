@@ -22,13 +22,15 @@ class NewsHomePage extends StatefulWidget {
 
 class _NewsHomePageState extends State<NewsHomePage>
     with AutomaticKeepAliveClientMixin {
-  TextTheme _textTheme;
-  ThemeManager _theme;
+  late TextTheme _textTheme;
+  late ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
     _theme = ThemeManager.of(context);
+
+    print("NOWWWW");
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -67,7 +69,7 @@ class _NewsHomePageState extends State<NewsHomePage>
                       ),
                     );
 
-                  List<News> news = snapshot.data;
+                  List<News> news = snapshot.data!;
 
                   if (news.isEmpty)
                     return SliverFillRemaining(
@@ -94,9 +96,9 @@ class _NewsHomePageState extends State<NewsHomePage>
                               height: 10,
                             ),
                             RaisedButton(
-                              onPressed: widget.changePage,
-                              color: _theme.colors.contrast,
-                              textColor: _theme.colors.textOnContrast,
+                              onPressed: widget.changePage as void Function()?,
+                              color: _theme.colors!.contrast,
+                              textColor: _theme.colors!.textOnContrast,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6)),
                               child: Text("Zu den Projekten"),

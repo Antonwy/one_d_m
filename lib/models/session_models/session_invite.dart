@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 
 class SessionInvite {
-  final String sessionCreatorId, sessionId, sessionName, sessionDescription;
-  final int donationGoal;
+  final String? sessionCreatorId, sessionId, sessionName, sessionDescription;
+  final int? donationGoal;
 
   SessionInvite(
       {this.sessionCreatorId,
@@ -13,12 +13,13 @@ class SessionInvite {
       this.donationGoal});
 
   factory SessionInvite.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return SessionInvite(
-        sessionCreatorId: doc.data()[SESSION_CREATOR_ID],
-        sessionId: doc.data()[ID],
-        sessionName: doc.data()[SESSION_NAME],
-        sessionDescription: doc.data()[BaseSession.SESSION_DESCRIPTION] ?? "",
-        donationGoal: doc.data()[BaseSession.DONATION_GOAL]);
+        sessionCreatorId: data[SESSION_CREATOR_ID],
+        sessionId: data[ID],
+        sessionName: data[SESSION_NAME],
+        sessionDescription: data[BaseSession.SESSION_DESCRIPTION] ?? "",
+        donationGoal: data[BaseSession.DONATION_GOAL]);
   }
 
   static List<SessionInvite> fromQuerySnapshot(QuerySnapshot qs) {

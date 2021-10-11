@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:number_slide_animation/number_slide_animation_widget.dart';
+import 'package:number_slide_animation/number_slide_animation.dart';
+import 'package:one_d_m/components/big_button.dart';
 import 'package:one_d_m/components/chart/circle_painter.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
@@ -57,26 +59,14 @@ class DonationThankYou extends StatelessWidget {
 class _ContinueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return Container(
       width: double.infinity,
       height: 55,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        elevation: 1,
-        borderRadius: BorderRadius.circular(Constants.radius),
-        color: _theme.colors.dark,
-        child: InkWell(
-          onTap: () => Navigator.pop(
-              context, context.read<DonationDialogManager>().donation),
-          child: Center(
-            child: Text(
-              'WEITER',
-              style: TextStyle(
-                  color: _theme.colors.textOnDark, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
+      child: BigButton(
+        onPressed: () => Navigator.pop(
+            context, context.read<DonationDialogManager>().donation),
+        label: 'WEITER',
+        color: Theme.of(context).canvasColor,
       ),
     );
   }
@@ -85,72 +75,31 @@ class _ContinueButton extends StatelessWidget {
 class _ThanksContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
-    DonationDialogManager ddm = context.read<DonationDialogManager>();
-    bool _showCustomEffect =
-        ddm.dr?.campaignEffects?.where((el) => el.isNotEmpty)?.isNotEmpty ??
-            false;
+    ThemeData _theme = Theme.of(context);
+
     return Material(
       borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
-      color: _theme.colors.contrast,
+      color: _theme.primaryColor,
       elevation: 1,
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: _showCustomEffect
-            ? Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Was deine Spende bewirkt:",
-                      style: _theme.textTheme.textOnContrast.headline6
-                          .copyWith(fontSize: 16),
-                    ),
-                    YMargin(6),
-                    for (String effect in ddm.dr.campaignEffects)
-                      Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('•'),
-                              XMargin(6),
-                              Expanded(
-                                child: Text(
-                                  '$effect',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1
-                                      .copyWith(
-                                          fontSize: 15,
-                                          color: _theme.colors.dark,
-                                          fontWeight: FontWeight.w400),
-                                ),
-                              ),
-                            ],
-                          ),
-                          YMargin(4),
-                        ],
-                      ),
-                  ],
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Weiter so!',
-                    style: _theme.textTheme.textOnContrast.headline6,
-                  ),
-                  SizedBox(
-                    height: 6,
-                  ),
-                  Text(
-                      'Sammle DV, spende sie und löse mit unserer Community globale Probleme!',
-                      style: _theme.textTheme.textOnContrast.bodyText2),
-                ],
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Weiter so!',
+              style: _theme.textTheme.headline6!
+                  .copyWith(color: _theme.colorScheme.onPrimary),
+            ),
+            SizedBox(
+              height: 6,
+            ),
+            Text(
+                'Sammle DV, spende sie und löse mit unserer Community globale Probleme!',
+                style: _theme.textTheme.bodyText2!
+                    .copyWith(color: _theme.colorScheme.onPrimary)),
+          ],
+        ),
       ),
     );
   }
@@ -159,13 +108,12 @@ class _ThanksContent extends StatelessWidget {
 class _ChartContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     return Container(
       height: 240,
       width: MediaQuery.of(context).size.width,
       child: Material(
         borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
-        color: _theme.colors.dark,
         elevation: 1,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -174,7 +122,7 @@ class _ChartContent extends StatelessWidget {
             children: [
               Text(
                 'Was mit deiner Spende passiert:',
-                style: _theme.textTheme.textOnDark.bodyText1,
+                style: _theme.textTheme.bodyText1,
               ),
               YMargin(6),
               Container(
@@ -213,10 +161,10 @@ class _ChartContent extends StatelessWidget {
 class _ReadMore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     DonationDialogManager ddm = context.read<DonationDialogManager>();
     return Material(
-      color: _theme.colors.contrast,
+      color: _theme.primaryColor,
       borderRadius: BorderRadius.circular(Constants.radius),
       elevation: 1,
       child: Column(
@@ -226,26 +174,35 @@ class _ReadMore extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 7),
             child: AutoSizeText(
-              ddm.dr.campaignName,
-              style: _theme.textTheme.textOnContrast.headline6,
+              ddm.dr!.campaignName!,
+              style: _theme.textTheme.headline6!
+                  .copyWith(color: _theme.colorScheme.onPrimary),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: AutoSizeText(
-              ddm.dr.campaignShortDescription,
-              style: _theme.textTheme.textOnContrast.bodyText2,
+              ddm.dr!.campaignShortDescription!,
+              style: _theme.textTheme.bodyText2!
+                  .copyWith(color: _theme.colorScheme.onPrimary),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Divider(),
+          Divider(color: _theme.colorScheme.onPrimary.withOpacity(.2)),
           Padding(
             padding: const EdgeInsets.only(left: 0.0, bottom: 8),
-            child: FlatButton(
-                textColor: _theme.colors.textOnContrast,
-                child: Text('MEHR LESEN'),
-                onPressed: () => Navigator.pop(context, ddm.donation)),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: InkWell(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('MEHR LESEN',
+                        style: _theme.textTheme.bodyText1!
+                            .copyWith(color: _theme.colorScheme.onPrimary)),
+                  ),
+                  onTap: () => Navigator.pop(context, ddm.donation)),
+            ),
           )
         ],
       ),
@@ -262,7 +219,7 @@ class _CampaignImage extends StatelessWidget {
       elevation: 1,
       clipBehavior: Clip.antiAlias,
       child: CachedNetworkImage(
-        imageUrl: ddm.dr.campaignImageUrl,
+        imageUrl: ddm.dr!.campaignImageUrl!,
         imageBuilder: (_, imgProvider) => Container(
           height: 240,
           decoration: BoxDecoration(
@@ -272,8 +229,8 @@ class _CampaignImage extends StatelessWidget {
             ),
           ),
         ),
-        placeholder: (context, url) => ddm.dr.campaignBlurHash != null
-            ? BlurHash(hash: ddm.dr.campaignBlurHash)
+        placeholder: (context, url) => ddm.dr!.campaignBlurHash != null
+            ? BlurHash(hash: ddm.dr!.campaignBlurHash!)
             : LoadingIndicator(),
       ),
     );
@@ -283,12 +240,11 @@ class _CampaignImage extends StatelessWidget {
 class _DonationAmountContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
+    ThemeData _theme = Theme.of(context);
     DonationDialogManager ddm = context.read<DonationDialogManager>();
     return Material(
       elevation: 1,
       borderRadius: BorderRadius.all(Radius.circular(Constants.radius)),
-      color: _theme.colors.dark,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -296,26 +252,25 @@ class _DonationAmountContent extends StatelessWidget {
           children: [
             Wrap(
               children: [
-                Text('Du hast ', style: _theme.textTheme.textOnDark.headline6),
+                Text('Du hast ', style: _theme.textTheme.headline6),
                 NumberSlideAnimation(
-                  number: "${(ddm.amount / ddm.dr.unit.value).round()}",
+                  number: "${(ddm.amount! / ddm.dr!.unit.value!).round()}",
                   duration: const Duration(seconds: 3),
                   curve: Curves.bounceIn,
-                  textStyle: _theme.textTheme.textOnDark.headline6.copyWith(
+                  textStyle: _theme.textTheme.headline6!.copyWith(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline),
                 ),
-                Text(' ${ddm.dr.unit.smiley ?? ddm.dr.unit.name ?? "DV"}',
-                    style: _theme.textTheme.textOnDark.headline6),
-                Text('gespendet!',
-                    style: _theme.textTheme.textOnDark.headline6),
+                Text(' ${ddm.dr!.unit.smiley ?? ddm.dr!.unit.name ?? "DV"}',
+                    style: _theme.textTheme.headline6),
+                Text('gespendet!', style: _theme.textTheme.headline6),
               ],
             ),
             SizedBox(
               height: 5,
             ),
-            Text('Das entspricht ${Currency(ddm.amount * 5).value()}',
-                style: _theme.textTheme.light.withOpacity(.7).bodyText2),
+            Text('Das entspricht ${Currency(ddm.amount! * 5).value()}',
+                style: _theme.textTheme.bodyText2!.withOpacity(.7)),
           ],
         ),
       ),
@@ -329,24 +284,23 @@ class _InfoContent extends StatelessWidget {
     ThemeManager _theme = ThemeManager.of(context);
     DonationDialogManager ddm = context.read<DonationDialogManager>();
 
-    bool withImage = ddm.dr.userImageUrl != null;
+    bool withImage = ddm.dr!.userImageUrl != null;
     return Container(
       height: 200,
       child: Material(
         borderRadius: BorderRadius.circular(Constants.radius),
         elevation: 1,
-        color: _theme.colors.contrast,
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
             withImage
                 ? CachedNetworkImage(
-                    imageUrl: ddm.dr.userImageUrl,
+                    imageUrl: ddm.dr!.userImageUrl!,
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => ddm.dr.userBlurHash != null
-                        ? BlurHash(hash: ddm.dr.userBlurHash)
+                    placeholder: (context, url) => ddm.dr!.userBlurHash != null
+                        ? BlurHash(hash: ddm.dr!.userBlurHash!)
                         : Center(child: LoadingIndicator()))
                 : Positioned(
                     top: 60,
@@ -378,7 +332,7 @@ class _InfoContent extends StatelessWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                              text: "${ddm.dr.username}",
+                              text: "${ddm.dr!.username}",
                               style: (withImage
                                       ? _theme.textTheme.light
                                       : _theme.textTheme.dark)
@@ -409,20 +363,16 @@ class _InfoContent extends StatelessWidget {
 class _ThankTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     DonationDialogManager ddm = context.read<DonationDialogManager>();
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, top: 24),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              'Vielen Dank!',
-              style: _theme.textTheme.dark.headline5,
-            ),
+            child:
+                Text('Vielen Dank!', style: context.theme.textTheme.headline6),
           ),
           Material(
-            color: _theme.colors.dark.withOpacity(.1),
             shape: CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -432,7 +382,6 @@ class _ThankTitle extends StatelessWidget {
                 child: Icon(
                   Icons.close,
                   size: 18,
-                  color: _theme.colors.dark,
                 ),
               ),
             ),
@@ -444,11 +393,11 @@ class _ThankTitle extends StatelessWidget {
 }
 
 class FieldWidget extends StatelessWidget {
-  final String amount;
-  final String title;
-  final Color color;
+  final String? amount;
+  final String? title;
+  final Color? color;
 
-  const FieldWidget({Key key, this.amount, this.title, this.color})
+  const FieldWidget({Key? key, this.amount, this.title, this.color})
       : super(key: key);
 
   @override
@@ -467,20 +416,20 @@ class FieldWidget extends StatelessWidget {
             children: [
               AutoSizeText(
                 '$amount% ',
-                style: Theme.of(context).textTheme.subtitle1.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: ThemeManager.of(context).colors.light),
+                style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
               Expanded(
                 child: AutoSizeText(
-                  title,
+                  title!,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: Theme.of(context).textTheme.subtitle1.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: ThemeManager.of(context).colors.light),
+                  style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                 ),
               )
             ],
@@ -493,8 +442,8 @@ class FieldWidget extends StatelessWidget {
 
 class PercentCircle extends StatelessWidget {
   const PercentCircle({
-    Key key,
-    @required this.percent,
+    Key? key,
+    required this.percent,
     this.radius = 50,
   }) : super(key: key);
 
@@ -503,14 +452,12 @@ class PercentCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return Stack(
       alignment: Alignment.center,
       children: [
         Text(
           '100%',
           style: TextStyle(
-            color: _theme.colors.light,
             fontWeight: FontWeight.w700,
             fontSize: 13.0,
           ),

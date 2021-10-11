@@ -6,9 +6,9 @@ import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'campaign_header.dart';
 
 class CampaignList extends StatefulWidget {
-  List<BaseCampaign> campaigns;
+  List<BaseCampaign?>? campaigns;
 
-  CampaignList({Key key, this.campaigns}) : super(key: key);
+  CampaignList({Key? key, this.campaigns}) : super(key: key);
 
   @override
   _CampaignListState createState() => _CampaignListState();
@@ -27,7 +27,7 @@ class _CampaignListState extends State<CampaignList> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.campaigns.isEmpty) {
+    if (widget.campaigns!.isEmpty) {
       return SliverFillRemaining(
         child: Center(
             child: Padding(
@@ -55,16 +55,16 @@ class _CampaignListState extends State<CampaignList> {
     }
 
     return SliverList(
-        delegate: SliverChildListDelegate(_buildChildren(widget.campaigns),
+        delegate: SliverChildListDelegate(_buildChildren(widget.campaigns!),
             addAutomaticKeepAlives: false, addRepaintBoundaries: false));
   }
 
-  List<Widget> _buildChildren(List<BaseCampaign> campaigns) {
+  List<Widget> _buildChildren(List<BaseCampaign?> campaigns) {
     List<Widget> list = [];
 
-    for (BaseCampaign c in campaigns) {
+    for (BaseCampaign? c in campaigns) {
       list.add(CampaignHeader(
-        campaign: c,
+        campaign: c!,
       ));
     }
 

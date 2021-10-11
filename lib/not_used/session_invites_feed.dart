@@ -10,7 +10,7 @@ import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 
 class SessionInvitesFeed extends StatelessWidget {
-  final List<SessionInvite> invites;
+  final List<SessionInvite>? invites;
 
   SessionInvitesFeed(this.invites);
 
@@ -21,7 +21,7 @@ class SessionInvitesFeed extends StatelessWidget {
           stream: DatabaseService.getSessionInvites(um.uid),
           initialData: invites,
           builder: (context, snapshot) {
-            List<SessionInvite> invites = snapshot.data;
+            List<SessionInvite> invites = snapshot.data!;
             return SliverToBoxAdapter(
                 child: invites.isEmpty
                     ? Container()
@@ -54,7 +54,7 @@ class SessionInvitesFeed extends StatelessWidget {
 
 class _InviteMessage extends StatefulWidget {
   final SessionInvite invite;
-  final bool returnAfter;
+  final bool? returnAfter;
 
   _InviteMessage(this.invite, {this.returnAfter});
 
@@ -63,7 +63,7 @@ class _InviteMessage extends StatefulWidget {
 }
 
 class __InviteMessageState extends State<_InviteMessage> {
-  ThemeManager _theme;
+  late ThemeManager _theme;
   bool _loading = false;
 
   @override
@@ -73,7 +73,7 @@ class __InviteMessageState extends State<_InviteMessage> {
     return FutureBuilder<User>(
         future: DatabaseService.getUser(widget.invite.sessionCreatorId),
         builder: (context, snapshot) {
-          User user = snapshot.data;
+          User? user = snapshot.data;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Material(
@@ -93,7 +93,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                             _loading
                                 ? CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation(
-                                        _theme.colors.contrast),
+                                        _theme.colors!.contrast),
                                   )
                                 : Container(),
                           ],
@@ -105,8 +105,8 @@ class __InviteMessageState extends State<_InviteMessage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.invite.sessionName,
-                              style: _theme.textTheme.dark.bodyText1,
+                              widget.invite.sessionName!,
+                              style: _theme.textTheme.dark!.bodyText1,
                             ),
                             SizedBox(
                               height: 4,
@@ -115,7 +115,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                               user == null
                                   ? "Laden..."
                                   : "${user.name} hat sie zu einer CertifiedSession eingeladen.",
-                              style: _theme.textTheme.dark.caption,
+                              style: _theme.textTheme.dark!.caption,
                             ),
                           ],
                         ),
@@ -134,7 +134,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                             onPressed: _loading
                                 ? null
                                 : () async {
-                                    if (widget.returnAfter)
+                                    if (widget.returnAfter!)
                                       Navigator.pop(context);
                                     else
                                       setState(() {
@@ -157,7 +157,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                             onPressed: _loading
                                 ? null
                                 : () async {
-                                    if (widget.returnAfter)
+                                    if (widget.returnAfter!)
                                       Navigator.pop(context);
                                     else
                                       setState(() {
@@ -165,7 +165,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                                       });
                                     await DatabaseService.declineSessionInvite(
                                         widget.invite);
-                                    if (widget.returnAfter)
+                                    if (widget.returnAfter!)
                                       Navigator.pop(context);
                                   },
                             textColor: Colors.red,

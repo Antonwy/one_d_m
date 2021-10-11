@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 
 class SessionMessage {
   // from UserId, to SessionId
-  final String fromUid, toSid, message;
-  final DateTime createdAt;
+  final String? fromUid, toSid, message;
+  final DateTime? createdAt;
 
   SessionMessage(
-      {@required this.fromUid,
+      {required this.fromUid,
       this.toSid,
-      @required this.message,
+      required this.message,
       this.createdAt});
 
   factory SessionMessage.fromDoc(DocumentSnapshot doc) {

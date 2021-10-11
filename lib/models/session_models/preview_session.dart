@@ -5,20 +5,20 @@ import 'package:one_d_m/models/session_models/uploadable_session.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
 
 class PreviewSession extends BaseSession {
-  final UploadableSession uploadableSession;
+  final UploadableSession? uploadableSession;
 
   PreviewSession(
-      {String id,
-      String campaignId,
-      String name,
-      int donationGoal,
-      int donationGoalCurrent,
-      DonationUnit donationUnit,
-      String description,
-      String creatorId,
-      Color secondaryColor,
-      Color primaryColor,
-      String imgUrl,
+      {String? id,
+      String? campaignId,
+      String? name,
+      int? donationGoal,
+      int? donationGoalCurrent,
+      DonationUnit? donationUnit,
+      String? description,
+      String? creatorId,
+      Color? secondaryColor,
+      Color? primaryColor,
+      String? imgUrl,
       this.uploadableSession})
       : super(
             id: id,
@@ -35,6 +35,6 @@ class PreviewSession extends BaseSession {
             isCertified: false);
 
   @override
-  BaseSessionManager manager(String uid) =>
+  BaseSessionManager manager(String? uid) =>
       PreviewSessionManager(this, uid: uid);
 }

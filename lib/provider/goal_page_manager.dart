@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/helper/database_service.dart';
 
 class GoalPageManager extends ChangeNotifier {
-  Goal _goal;
-  Goal get goal => _goal;
-  set goal(Goal val) {
+  Goal? _goal;
+  Goal? get goal => _goal;
+  set goal(Goal? val) {
     _goal = val;
     notifyListeners();
   }
 
   bool error = false;
 
-  Stream<List<Goal>> goalsStream;
+  Stream<List<Goal>>? goalsStream;
   List<Goal> goals = [];
 
   GoalPageManager() {
@@ -27,7 +27,7 @@ class GoalPageManager extends ChangeNotifier {
     goals = data;
     if (goal == null) _goal = goals.first;
     if (goals.contains(goal))
-      _goal = goals.where((g) => g.name == goal.name).first;
+      _goal = goals.where((g) => g.name == goal!.name).first;
     notifyListeners();
   }
 
@@ -39,9 +39,9 @@ class GoalPageManager extends ChangeNotifier {
 }
 
 class Goal {
-  final int currentValue;
-  final String id, name, description, unitSmiley, unit;
-  final Stream<List<GoalCheckpoint>> checkpoints;
+  final int? currentValue;
+  final String? id, name, description, unitSmiley, unit;
+  final Stream<List<GoalCheckpoint>>? checkpoints;
 
   Goal(
       {this.currentValue,
@@ -53,13 +53,14 @@ class Goal {
       this.unit});
 
   factory Goal.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Goal(
         id: doc.id,
-        name: doc.data()[NAME] ?? doc.id,
-        unitSmiley: doc.data()[UNIT_SMILEY],
-        unit: doc.data()[UNIT] ?? doc.id,
-        currentValue: doc.data()[CURRENT_VALUE] ?? 0,
-        description: doc.data()[DESCRIPTION],
+        name: data[NAME] ?? doc.id,
+        unitSmiley: data[UNIT_SMILEY],
+        unit: data[UNIT] ?? doc.id,
+        currentValue: data[CURRENT_VALUE] ?? 0,
+        description: data[DESCRIPTION],
         checkpoints: DatabaseService.getCheckpointsOfGoal(doc.id));
   }
 
@@ -78,17 +79,16 @@ class Goal {
 }
 
 class GoalCheckpoint {
-  final String pending, done;
-  final int value;
+  final String? pending, done;
+  final int? value;
   TimelinePosition position = TimelinePosition.middle;
 
   GoalCheckpoint({this.pending, this.done, this.value});
 
   factory GoalCheckpoint.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return GoalCheckpoint(
-        pending: doc.data()[PENDING],
-        done: doc.data()[DONE],
-        value: doc.data()[VALUE] ?? 0);
+        pending: data[PENDING], done: data[DONE], value: data[VALUE] ?? 0);
   }
 
   static List<GoalCheckpoint> fromQuerySnapshot(QuerySnapshot qs) {

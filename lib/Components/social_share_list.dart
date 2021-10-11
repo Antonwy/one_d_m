@@ -7,14 +7,14 @@ import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:social_share/social_share.dart';
 
 class SocialShareList extends StatelessWidget {
-  final Shareable shareable;
-  final void Function() onClicked;
+  final Shareable? shareable;
+  final void Function()? onClicked;
 
   const SocialShareList(this.shareable, {this.onClicked});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map>(
+    return FutureBuilder<Map?>(
         initialData: {
           for (SocialMediaType v in [
             SocialMediaType.clipboard,
@@ -26,7 +26,7 @@ class SocialShareList extends StatelessWidget {
         builder: (context, snapshot) {
           return Wrap(
             runSpacing: 8,
-            children: _typesFromMap(snapshot.data)
+            children: _typesFromMap(snapshot.data!)
                 .map((t) => SocialMediaButton(
                       t,
                       shareable: shareable,
@@ -61,8 +61,8 @@ class SocialShareList extends StatelessWidget {
 
 class SocialMediaButton extends StatefulWidget {
   final SocialMediaType type;
-  final Shareable shareable;
-  final void Function() onClicked;
+  final Shareable? shareable;
+  final void Function()? onClicked;
 
   const SocialMediaButton(this.type, {this.shareable, this.onClicked});
 
@@ -75,7 +75,7 @@ class _SocialMediaButtonState extends State<SocialMediaButton> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = _getBackgroundColor();
+    Color? backgroundColor = _getBackgroundColor();
     return Padding(
       padding: const EdgeInsets.only(right: 6),
       child: Material(
@@ -96,7 +96,7 @@ class _SocialMediaButtonState extends State<SocialMediaButton> {
             setState(() {
               _loading = false;
             });
-            if (widget.onClicked != null) widget.onClicked();
+            if (widget.onClicked != null) widget.onClicked!();
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -112,21 +112,24 @@ class _SocialMediaButtonState extends State<SocialMediaButton> {
                       child: CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation(
                               ThemeManager.of(context)
-                                  .correctColorFor(backgroundColor)),
+                                  .correctColorFor(backgroundColor!)),
                           strokeWidth: 3),
                     );
 
                   if (name == "clipboard")
                     return Icon(
                       Icons.copy,
+                      color: Colors.black,
                     );
                   if (name == "sms")
                     return Icon(
                       Icons.sms_rounded,
+                      color: Colors.black,
                     );
                   if (name == "other")
                     return Icon(
                       CupertinoIcons.share,
+                      color: Colors.black,
                     );
 
                   return Image.asset(
@@ -141,7 +144,7 @@ class _SocialMediaButtonState extends State<SocialMediaButton> {
     );
   }
 
-  Color _getBackgroundColor() {
+  Color? _getBackgroundColor() {
     switch (widget.type) {
       case SocialMediaType.instagram:
         return Colors.red[50];

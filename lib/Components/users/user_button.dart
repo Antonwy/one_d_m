@@ -1,14 +1,14 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
-import 'package:one_d_m/components/user_follow_button.dart';
+import 'package:one_d_m/components/users/user_follow_button.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 
-import 'donation_widget.dart';
+import '../donation_widget.dart';
 
 class UserButton extends StatelessWidget {
   final String? id, additionalText;

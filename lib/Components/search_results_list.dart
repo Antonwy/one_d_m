@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/donation_widget.dart';
+import 'package:one_d_m/components/empty.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
@@ -39,6 +40,17 @@ class SearchResultsList extends StatelessWidget {
             );
 
           SearchResult result = snapshot.data!.data!;
+
+          if (result.noData)
+            return SliverFillRemaining(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Empty(
+                  message: "Keine Ergebnisse gefunden!",
+                ),
+              ),
+            );
+
           return SliverList(
               delegate: SliverChildListDelegate(
             [

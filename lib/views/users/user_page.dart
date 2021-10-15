@@ -1,15 +1,12 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/components/campaign_header.dart';
-import 'package:one_d_m/components/donation_widget.dart';
-import 'package:one_d_m/components/loading_indicator.dart';
+import 'package:one_d_m/components/campaigns/campaign_header.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
-import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/components/users/user_header.dart';
 import 'package:one_d_m/components/users/vertical_user_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
@@ -37,7 +34,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   late ScrollController _scrollController;
   late AnimationController _controller;
-  late AnimationController _transitionController;
 
   late double _staticHeight;
   static final double _staticHeaderTop = 76;
@@ -59,10 +55,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
 
-    _transitionController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..forward();
-
     _scrollController = ScrollController()
       ..addListener(() {
         setState(() {
@@ -76,7 +68,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _controller.dispose();
-    _transitionController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -88,6 +79,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     _staticHeight = mq.size.height * .55;
     _headerHeight = _staticHeight + mq.padding.top;
+
+    SystemChrome.setSystemUIOverlayStyle(context.systemOverlayStyle);
 
     return Scaffold(
         body: ChangeNotifierProvider<UserPageManager>(
@@ -104,66 +97,66 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                           _OtherUsersRecommendations(),
                           Consumer<UserPageManager>(
                               builder: (context, upm, child) {
-                            return (!upm.loadingMoreInfo!)
-                                ? _buildCampaignSessions(
-                                    upm.userAccount!.subscribedSessions)
-                                : SliverToBoxAdapter(
-                                    child: SizedBox.shrink(),
-                                  );
-                          }),
-                          Consumer<UserPageManager>(
-                              builder: (context, upm, child) {
-                            if (upm.loadingMoreInfo!)
-                              return SliverToBoxAdapter(
-                                child: Center(
-                                    child: Column(
-                                  children: <Widget>[
-                                    YMargin(24),
-                                    LoadingIndicator(),
-                                    SizedBox(
-                                      height: 10,
+                            return SliverAnimatedOpacity(
+                              duration: Duration(milliseconds: 250),
+                              opacity: upm.loadingMoreInfo ? 0 : 1,
+                              sliver: (!upm.loadingMoreInfo)
+                                  ? _buildCampaignSessions(
+                                      upm.userAccount!.subscribedSessions)
+                                  : SliverToBoxAdapter(
+                                      child: SizedBox.shrink(),
                                     ),
-                                    Text("Laden...")
-                                  ],
-                                )),
-                              );
-
-                            if (upm.userAccount!.subscribedCampaigns.isEmpty)
-                              return SliverToBoxAdapter(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 32,
-                                    ),
-                                    SvgPicture.asset(
-                                      "assets/images/no-news.svg",
-                                      height: 120,
-                                    ),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12.0),
-                                      child: Text(
-                                        buildNotFoundString(upm),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                  ],
-                                ),
-                              );
-
-                            return SliverList(
-                              delegate: SliverChildListDelegate(
-                                  _generateChildren(
-                                      upm.userAccount!.subscribedCampaigns)),
                             );
                           }),
+                          Consumer<UserPageManager>(
+                            builder: (context, upm, child) =>
+                                SliverAnimatedOpacity(
+                              duration: Duration(milliseconds: 250),
+                              opacity: upm.loadingMoreInfo ? 0 : 1,
+                              sliver: child,
+                            ),
+                            child: Consumer<UserPageManager>(
+                                builder: (context, upm, child) {
+                              if (upm.loadingMoreInfo)
+                                return SliverToBoxAdapter();
+
+                              if (upm.userAccount!.subscribedCampaigns.isEmpty)
+                                return SliverToBoxAdapter(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height: 32,
+                                      ),
+                                      SvgPicture.asset(
+                                        "assets/images/no-news.svg",
+                                        height: 120,
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12.0),
+                                        child: Text(
+                                          buildNotFoundString(upm),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                              return SliverList(
+                                delegate: SliverChildListDelegate(
+                                    _generateChildren(
+                                        upm.userAccount!.subscribedCampaigns)),
+                              );
+                            }),
+                          ),
                         ],
                       ));
             }));
@@ -187,7 +180,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                 children: [
                   const YMargin(8),
                   Padding(
-                    padding: const EdgeInsets.only(left: 12.0),
+                    padding: const EdgeInsets.only(left: 12.0, top: 12),
                     child: Text("Sessions",
                         style: Theme.of(context).textTheme.headline6!.copyWith(
                               fontWeight: FontWeight.w600,
@@ -253,59 +246,67 @@ class __OtherUsersRecommendationsState
     _theme = Theme.of(context);
 
     return Consumer<UserPageManager>(builder: (context, upm, child) {
-      if (!upm.loadingMoreInfo!) {
-        List<User> followers = upm.userAccount!.followingUsers;
-        if (followers.isEmpty) return SliverToBoxAdapter();
-        return SliverPadding(
-          padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
-          sliver: SliverToBoxAdapter(
-            child: Material(
-              elevation: 1,
-              borderRadius: BorderRadius.circular(6),
-              clipBehavior: Clip.antiAlias,
-              child: ExpansionTile(
-                  initiallyExpanded: true,
-                  iconColor: _theme.darkMode ? Colors.white : Colors.black,
-                  collapsedIconColor:
-                      _theme.darkMode ? Colors.white : Colors.black,
-                  title: RichText(
-                    text:
-                        TextSpan(style: _theme.textTheme.bodyText2, children: [
-                      TextSpan(text: "Personen denen "),
-                      TextSpan(
-                          text: "${upm.user.name} ",
-                          style: _theme.textTheme.bodyText1!
-                              .copyWith(fontWeight: FontWeight.bold)),
-                      TextSpan(text: "folgt:"),
-                    ]),
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Container(
-                        height: 140,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          separatorBuilder: (context, index) => XMargin(6),
-                          itemBuilder: (context, index) => Padding(
-                            padding: EdgeInsets.only(
-                                left: index == 0 ? 12 : 0,
-                                right: index == (followers.length ?? 1) - 1
-                                    ? 12
-                                    : 0,
-                                bottom: 4),
-                            child: VerticalUserButton(followers[index]),
-                          ),
-                          itemCount: followers.length,
+      List<User> followers = upm.userAccount?.followingUsers ?? [];
+
+      return SliverToBoxAdapter(
+        child: AnimatedOpacity(
+          duration: Duration(milliseconds: 250),
+          opacity: upm.loadingMoreInfo ? 0 : 1,
+          child: upm.loadingMoreInfo || followers.isEmpty
+              ? Container(height: 0)
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 18, 10, 0),
+                  child: Material(
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(6),
+                    clipBehavior: Clip.antiAlias,
+                    child: ExpansionTile(
+                        maintainState: true,
+                        initiallyExpanded: true,
+                        iconColor:
+                            _theme.darkMode ? Colors.white : Colors.black,
+                        collapsedIconColor:
+                            _theme.darkMode ? Colors.white : Colors.black,
+                        title: RichText(
+                          text: TextSpan(
+                              style: _theme.textTheme.bodyText2,
+                              children: [
+                                TextSpan(text: "Personen denen "),
+                                TextSpan(
+                                    text: "${upm.user.name} ",
+                                    style: _theme.textTheme.bodyText1!
+                                        .copyWith(fontWeight: FontWeight.bold)),
+                                TextSpan(text: "folgt:"),
+                              ]),
                         ),
-                      ),
-                    ),
-                  ]),
-            ),
-          ),
-        );
-      }
-      return SliverToBoxAdapter();
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Container(
+                              height: 140,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                separatorBuilder: (context, index) =>
+                                    XMargin(6),
+                                itemBuilder: (context, index) => Padding(
+                                  padding: EdgeInsets.only(
+                                      left: index == 0 ? 12 : 0,
+                                      right:
+                                          index == (followers.length ?? 1) - 1
+                                              ? 12
+                                              : 0,
+                                      bottom: 4),
+                                  child: VerticalUserButton(followers[index]),
+                                ),
+                                itemCount: followers.length,
+                              ),
+                            ),
+                          ),
+                        ]),
+                  ),
+                ),
+        ),
+      );
     });
   }
 }

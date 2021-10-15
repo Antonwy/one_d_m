@@ -11,7 +11,6 @@ import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/donation.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 import 'package:provider/provider.dart';
 
@@ -25,14 +24,6 @@ class LatestDonatorsView extends StatefulWidget {
 }
 
 class _LatestDonatorsViewState extends State<LatestDonatorsView> {
-  final ScrollController _controller = ScrollController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   Timer? _debounce;
 
   @override
@@ -45,6 +36,7 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
         stream: DatabaseService.getLatestDonations(limit: 20),
         builder: (_, snapshot) {
           if (!snapshot.hasData) return SizedBox.shrink();
+          if (snapshot.hasError) return SizedBox.shrink();
 
           if (_debounce?.isActive ?? false) _debounce!.cancel();
           _debounce = Timer(const Duration(seconds: 30), () {
@@ -53,8 +45,8 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
 
           List<Donation> d = snapshot.data!;
           if (d.isEmpty) return SizedBox.shrink();
+
           return ListView.separated(
-            controller: _controller,
             scrollDirection: Axis.horizontal,
             separatorBuilder: (context, index) => SizedBox(
               width: 8,
@@ -70,9 +62,9 @@ class _LatestDonatorsViewState extends State<LatestDonatorsView> {
                     children: [
                       Consumer<StatisticsManager>(
                           builder: (context, sm, child) {
-                        int? _current = sm.home!.donationsToday,
-                            _goal = sm.home!.donationGoalToday;
-                        bool dailyTargetDone = _current! >= _goal!;
+                        int _current = sm.home.donationsToday,
+                            _goal = sm.home.donationGoalToday;
+                        bool dailyTargetDone = _current >= _goal;
                         return Container(
                           height: double.infinity,
                           width: 100,
@@ -135,7 +127,7 @@ class LatestDonator extends StatelessWidget {
     return FutureBuilder<User?>(
         future: donation.username != null
             ? Future.value(User(
-                id: donation.userId!,
+                id: donation.userId ?? "",
                 name: donation.username!,
                 imgUrl: donation.userImageUrl,
                 blurHash: donation.userBlurHash))
@@ -145,6 +137,7 @@ class LatestDonator extends StatelessWidget {
 
           if (snapshot.hasError) {
             print(donation.userId);
+            return SizedBox.shrink();
           }
 
           return Material(
@@ -168,7 +161,7 @@ class LatestDonator extends StatelessWidget {
                       u?.thumbnailUrl ?? u?.imgUrl,
                       height: 31,
                       loading: !snapshot.hasData,
-                      name: u?.name,
+                      name: u?.name ?? "L",
                     ),
                   ),
                   AutoSizeText(buildAmount(donation),
@@ -189,7 +182,7 @@ class LatestDonator extends StatelessWidget {
   }
 
   String buildAmount(Donation d) {
-    int amount = (d.amount! / (d.donationUnit?.value ?? 1)).round();
+    int amount = ((d.amount ?? 1) / (d.donationUnit?.value ?? 1)).round();
     String unit = d.donationUnit?.smiley ??
         (amount == 1 ? d.donationUnit?.singular : d.donationUnit?.name) ??
         'DV';

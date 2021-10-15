@@ -3,7 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
-import 'package:one_d_m/components/campaign_list.dart';
+import 'package:one_d_m/components/campaigns/campaign_list.dart';
+import 'package:one_d_m/components/categories_list.dart';
 import 'package:one_d_m/components/category_dialog.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
@@ -123,16 +124,14 @@ class _ExplorePageState extends State<ExplorePage>
                       style: _theme.textTheme.headline6,
                     ),
                   ),
-                  AppBarButton(
-                    hint: _categoryId != 100 ? 1 : 0,
-                    icon: Icons.filter_alt_rounded,
-                    color: _theme.backgroundColor,
-                    onPressed: () async {
-                      int? resIndex = await CategoryDialog.of(context,
-                              initialIndex: _categoryId)
-                          .show();
+                  PopupMenuButton<int>(
+                    itemBuilder: (context) => Category.categories
+                        .map((cat) => PopupMenuItem<int>(
+                            child: Text(cat.name), value: cat.id))
+                        .toList(),
+                    onSelected: (id) {
                       setState(() {
-                        _categoryId = resIndex;
+                        _categoryId = id;
                         _campaignsStream = _categoryId != 100
                             ? Api()
                                 .campaigns()
@@ -141,6 +140,12 @@ class _ExplorePageState extends State<ExplorePage>
                             : Api().campaigns().streamGet();
                       });
                     },
+                    initialValue: _categoryId,
+                    tooltip: "Wähle Kategorie",
+                    child: AppBarButton(
+                        hint: _categoryId != 100 ? 1 : 0,
+                        icon: Icons.filter_alt_rounded,
+                        color: Colors.transparent),
                   ),
                 ],
               ),

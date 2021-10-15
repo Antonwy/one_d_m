@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
-import 'package:one_d_m/components/keep_alive_stream.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/components/sessions/session_join_button.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
-import 'package:one_d_m/models/news.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
-import 'package:one_d_m/models/session_models/certified_session.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
-import 'package:one_d_m/provider/sessions_manager.dart';
-import 'package:provider/provider.dart';
-import 'database_service.dart';
 
 class RecomendedSessions extends StatefulWidget {
   @override

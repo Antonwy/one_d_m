@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:one_d_m/api/stream_result.dart';
-import 'package:one_d_m/provider/api_manager.dart';
-import 'package:provider/provider.dart';
 
 import 'api.dart';
 import 'endpoints/api_endpoint.dart';
@@ -81,7 +78,7 @@ class ApiCall<T> {
       } catch (e) {
         print(e);
         throw new Exception(
-            "Error occured while getting $boxKey! NO cache available!");
+            "Error occured while getting $boxKey! No cache available!");
       }
     }
 

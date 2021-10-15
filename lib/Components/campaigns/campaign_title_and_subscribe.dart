@@ -8,7 +8,6 @@ import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
-import 'package:one_d_m/views/campaigns/create_post.dart';
 import 'package:one_d_m/views/organizations/organization_page.dart';
 import 'package:provider/provider.dart';
 
@@ -84,24 +83,4 @@ class CampaignTitleAndSubscribe extends StatelessWidget {
       ),
     );
   }
-
-  Widget _createPostButton(ThemeManager _theme, BaseCampaign? baseCampaign) =>
-      CustomOpenContainer(
-        closedShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        closedElevation: 0,
-        openBuilder: (context, close, scrollController) => CreatePostScreen(
-          isSession: false,
-          campaign: baseCampaign as Campaign?,
-          controller: scrollController,
-        ),
-        closedColor: Colors.transparent,
-        closedBuilder: (context, open) => RaisedButton(
-            color: _theme.colors.dark,
-            textColor: _theme.colors.textOnDark,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-            child: AutoSizeText("Post erstellen", maxLines: 1),
-            onPressed: open),
-      );
 }

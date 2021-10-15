@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/components/custom_text_field.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/components/user_follow_button.dart';
+import 'package:one_d_m/components/users/user_follow_button.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/user.dart';

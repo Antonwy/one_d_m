@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/users/user_page_follow_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
@@ -12,7 +13,6 @@ import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/models/user_account.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_page_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:one_d_m/views/users/followers_list_page.dart';
@@ -41,7 +41,6 @@ class UserHeader extends SliverPersistentHeaderDelegate {
     return LayoutBuilder(builder: (context, constraints) {
       final double percentage =
           (constraints.maxHeight - minExtent) / (maxExtent - minExtent);
-      final bool _fullVisible = percentage < 0.5;
       return Container(
         height: constraints.maxHeight,
         child: Material(
@@ -50,35 +49,28 @@ class UserHeader extends SliverPersistentHeaderDelegate {
             bottom: false,
             child: Stack(
               children: [
-                Opacity(
-                    opacity: 1 - percentage,
-                    child: IgnorePointer(
-                      ignoring: !_fullVisible,
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: AnimatedOpacity(
+                      duration: Duration(milliseconds: 250),
+                      opacity: percentage < .05 ? 1.0 : 0.0,
                       child: Container(
                           height: constraints.maxHeight,
                           width: constraints.maxWidth,
                           child: SafeArea(
                               bottom: false,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildUserImage(context, size: Size(35, 35)),
-                                  XMargin(12),
-                                  Consumer<UserPageManager>(
-                                      builder: (context, upm, child) {
-                                    return Text(
-                                      "${upm.user.name}",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600),
-                                    );
-                                  }),
-                                  XMargin(12),
-                                  SizedBox(
-                                      height: 35, child: UserPageFollowButton())
-                                ],
-                              ))),
-                    )),
+                              child: Consumer<UserPageManager>(
+                                  builder: (context, upm, child) {
+                                return Center(
+                                  child: Text(
+                                    "${upm.user.name}",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                );
+                              })))),
+                ),
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: <Widget>[
@@ -97,40 +89,41 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                         XMargin(12)
                       ],
                     ),
-                    IgnorePointer(
-                      ignoring: _fullVisible,
-                      child: Opacity(
-                        opacity: percentage,
-                        child: Transform.translate(
-                          offset: Tween<Offset>(
-                                  begin: Offset(0, _minExtend - maxExtent),
-                                  end: Offset.zero)
-                              .transform(percentage),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              _buildUserImage(context),
-                              const XMargin(15),
-                              Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Consumer<UserPageManager>(
-                                    builder: (context, upm, child) => Text(
-                                      "${upm.user.name ?? "Gelöschter Account"}",
+                    Opacity(
+                      opacity: percentage,
+                      child: Transform.translate(
+                        offset: Tween<Offset>(
+                                begin: Offset(0, _minExtend - maxExtent),
+                                end: Offset.zero)
+                            .transform(percentage),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            _buildUserImage(context),
+                            const XMargin(15),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Consumer<UserPageManager>(
+                                  builder: (context, upm, child) =>
+                                      ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: 150),
+                                    child: AutoSizeText(
+                                      "${upm.user.name}",
+                                      maxLines: 1,
                                       style: TextStyle(
                                           fontSize: 28,
                                           fontWeight: FontWeight.w700),
                                     ),
                                   ),
-                                  const YMargin(10),
-                                  UserPageFollowButton()
-                                ],
-                              )
-                            ],
-                          ),
+                                ),
+                                const YMargin(10),
+                                UserPageFollowButton()
+                              ],
+                            )
+                          ],
                         ),
                       ),
                     ),
@@ -142,7 +135,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                                 end: Offset.zero)
                             .transform(percentage),
                         child: Container(
-                          margin: const EdgeInsets.only(top: 8),
+                          margin: const EdgeInsets.only(top: 12),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
@@ -207,46 +200,47 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   Widget _buildUserImage(BuildContext context,
           {Size size = const Size(88, 88)}) =>
-      Container(
-        height: size.height,
-        width: size.width,
+      Material(
+        elevation: size.width < 50 ? 0 : 10,
+        color: Colors.transparent,
         clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Constants.radius),
-        ),
-        child: Consumer<UserPageManager>(
-          builder: (context, upm, child) => CachedNetworkImage(
-            imageUrl: upm.user.imgUrl ?? '',
-            imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
+        borderRadius:
+            BorderRadius.circular(size.width < 50 ? 6 : Constants.radius),
+        child: Container(
+          height: size.height,
+          width: size.width,
+          child: Consumer<UserPageManager>(
+            builder: (context, upm, child) => CachedNetworkImage(
+              imageUrl: upm.user.imgUrl ?? '',
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            errorWidget: (_, __, ___) => Container(
-              height: size.height,
-              width: size.width,
-              decoration: BoxDecoration(
-                color: context.theme.primaryColor,
+              errorWidget: (_, __, ___) => Container(
+                height: size.height,
+                width: size.width,
+                decoration: BoxDecoration(
+                  color: context.theme.primaryColor,
+                ),
+                child: Center(
+                    child: Icon(
+                  Icons.person,
+                  color: context.theme.colorScheme.onPrimary,
+                )),
               ),
-              child: Center(
-                  child: Icon(
-                Icons.person,
-                color: context.theme.colorScheme.onPrimary,
-              )),
-            ),
-            placeholder: (_, __) => Container(
-              height: size.height,
-              width: size.width,
-              child: upm.user.blurHash == null
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: context.theme.primaryColor,
-                      ),
-                    )
-                  : BlurHash(hash: upm.user.blurHash!),
+              placeholder: (_, __) => Container(
+                height: size.height,
+                width: size.width,
+                child: upm.user.blurHash == null
+                    ? Center(
+                        child: LoadingIndicator(),
+                      )
+                    : BlurHash(hash: upm.user.blurHash!),
+              ),
             ),
           ),
         ),
@@ -256,7 +250,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(SliverPersistentHeaderDelegate _) => true;
 
   @override
-  double get maxExtent => 270.0;
+  double get maxExtent => 280.0;
 
   @override
   double get minExtent => _minExtend;

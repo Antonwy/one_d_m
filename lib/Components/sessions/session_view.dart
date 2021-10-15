@@ -6,6 +6,7 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/components/info_feed.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/shuttles/session_shuttle.dart';
+import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -36,11 +37,10 @@ class SessionView extends StatelessWidget {
                   toContext) =>
               sessionShuttle(
                   anim, direction, fromContext, toContext, _theme, Container()),
-          child: Material(
-            elevation: 1,
+          child: Card(
             color: session?.secondaryColor ?? _theme.colors.dark,
-            borderRadius: BorderRadius.circular(Constants.radius),
-            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Constants.radius)),
             child: InkWell(
               onTap: () {
                 Navigator.push(
@@ -70,6 +70,8 @@ class SessionView extends StatelessWidget {
                                 session?.thumbnailUrl ?? session?.imgUrl ?? "",
                             width: double.infinity,
                             fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) =>
+                                Center(child: WarningIcon()),
                             placeholder: (_, __) => session?.blurHash != null
                                 ? BlurHash(hash: session!.blurHash!)
                                 : Center(

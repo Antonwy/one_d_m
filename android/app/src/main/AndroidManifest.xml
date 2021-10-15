@@ -17,6 +17,8 @@
         <activity android:name="io.flutter.plugins.urllauncher.WebViewActivity" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:exported="false" />
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-6737404453820737~6610538948" />
 
+        <meta-data android:name="applovin.sdk.key" android:value="R83fLyXpdS0ZMXdVWPvN5hZBbqP17_CfLbyxDtyROnEKhrh2mfJaUuc5mneP0bx2-6UztnvgZDIDiH2Fq3WmRl" />
+
         <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.com.shekarmudaliyar.social_share" android:exported="false" android:grantUriPermissions="true" tools:replace="android:authorities">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/filepaths" />
         </provider>

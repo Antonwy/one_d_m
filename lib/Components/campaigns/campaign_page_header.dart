@@ -4,7 +4,6 @@ import 'package:one_d_m/components/video_or_image.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
@@ -74,7 +73,7 @@ class _CampaignPageHeaderState extends State<CampaignPageHeader> {
                     DiscoveryHolder.shareButton(
                       tapTarget: Icon(
                         CupertinoIcons.share,
-                        color: ThemeManager.of(context).colors!.contrast,
+                        color: ThemeManager.of(context).colors.contrast,
                       ),
                       child: Center(
                         child: AppBarButton(
@@ -99,7 +98,7 @@ class _CampaignPageHeaderState extends State<CampaignPageHeader> {
                         cm.campaign?.organization.thumbnailUrl ??
                             cm.campaign?.organization.imgUrl,
                         height: 15,
-                        color: ColorTheme.appBg,
+                        name: cm.campaign?.organization.name ?? "O",
                         loading: cm.loadingCampaign,
                         fit: BoxFit.contain,
                         borderRadius: 6,

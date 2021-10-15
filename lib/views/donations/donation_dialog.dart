@@ -94,11 +94,18 @@ class _DonationDialogState extends State<DonationDialog>
         DonationDialogHeading(),
         Expanded(child: Container()),
         Consumer<DonationDialogManager>(
-          builder: (context, ddm, child) => Text(
-            _buildAmountText(ddm),
-            style: _theme.textTheme.bodyText1!
-                .copyWith(fontSize: 21, fontWeight: FontWeight.bold),
-          ),
+          builder: (context, ddm, child) {
+            String amount = _buildAmountText(ddm);
+            return AnimatedSwitcher(
+              duration: Duration(milliseconds: 250),
+              child: Text(
+                amount,
+                key: Key(amount),
+                style: _theme.textTheme.bodyText1!
+                    .copyWith(fontSize: 21, fontWeight: FontWeight.bold),
+              ),
+            );
+          },
         ),
         const YMargin(5),
         DonationDialogAvailableAmount(),

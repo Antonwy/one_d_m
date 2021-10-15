@@ -1,21 +1,13 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/components/custom_open_container.dart';
-import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/components/user_follow_button.dart';
 import 'package:one_d_m/components/users/vertical_user_button.dart';
-import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/session_models/session_member.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/views/users/user_page.dart';
 import 'package:provider/provider.dart';
 
 class SessionMembers extends StatelessWidget {
@@ -37,7 +29,7 @@ class SessionMembers extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12.0, vertical: 6),
                       child: Text(
-                        "Unterstützer",
+                        "Unterstützer (${Numeral(sm.session?.memberCount ?? 0).value()})",
                         style: _theme.textTheme.bodyText1,
                       ),
                     ),

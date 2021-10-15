@@ -32,6 +32,8 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
     ImageSuffix.dottJpg,
     ''
   ) as ImageRes;
+  const img_count: number =
+    splittedName.length === 4 ? Number(splittedName[2]) : 0;
   const id = splittedName[1];
   const adminId = 'LEDHRts56FcRwkGM57D6PJQaMoz1';
 
@@ -80,7 +82,7 @@ exports.onUploadFile = functions.storage.object().onFinalize(async (obj) => {
         idToken
       );
     }
-  } else if (imageType === ImagePrefix.campaign) {
+  } else if (imageType === ImagePrefix.campaign && img_count === 0) {
     const idToken = await getToken(adminId);
     if (resulution === ImageResolutions.high) {
       await updateDatabase(

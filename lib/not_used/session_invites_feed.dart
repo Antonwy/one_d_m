@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/components/avatar.dart';
+import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/helper/database_service.dart';
-import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/session_models/session_invite.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -89,7 +88,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                         Stack(
                           alignment: Alignment.center,
                           children: [
-                            Avatar(user?.imgUrl),
+                            RoundedAvatar(user?.imgUrl),
                             _loading
                                 ? CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation(

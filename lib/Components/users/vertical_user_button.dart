@@ -6,7 +6,7 @@ import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 
-import '../user_follow_button.dart';
+import 'user_follow_button.dart';
 
 class VerticalUserButton extends StatelessWidget {
   final User user;

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/share_image.dart';
 import 'package:one_d_m/helper/shareable.dart';
 import 'package:social_share/social_share.dart';
@@ -84,8 +85,9 @@ class ShareManager {
     String url = await item.shareable!.getShareUrl(item.context);
     await SocialShare.copyToClipboard(url);
     print(url);
-    ScaffoldMessenger.of(item.context!)
-        .showSnackBar(SnackBar(content: Text("Link kopiert!")));
+    ScaffoldMessenger.of(item.context!).showSnackBar(SnackBar(
+        content: Text("Link kopiert!"),
+        backgroundColor: item.context!.theme.primaryColor));
   }
 }
 

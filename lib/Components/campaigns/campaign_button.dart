@@ -2,15 +2,12 @@ import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 
-import 'animated_future_builder.dart';
-import 'custom_open_container.dart';
-import 'donation_widget.dart';
+import '../custom_open_container.dart';
 
 class CampaignButton extends StatelessWidget {
   final String? id;
@@ -31,7 +28,7 @@ class CampaignButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedFutureBuilder<BaseCampaign?>(
+    return FutureBuilder<BaseCampaign?>(
         future: campaign == null
             ? Api().campaigns().getOne(id)
             : Future.value(campaign),

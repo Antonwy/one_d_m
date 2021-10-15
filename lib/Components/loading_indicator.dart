@@ -5,12 +5,15 @@ class LoadingIndicator extends StatelessWidget {
   final String? message;
   final double? strokeWidth, size, progress;
   final Color? color;
+  final bool loading;
+
   const LoadingIndicator(
       {this.message,
       this.strokeWidth = 4.0,
       this.size,
       this.color,
-      this.progress});
+      this.progress,
+      this.loading = true});
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +33,11 @@ class LoadingIndicator extends StatelessWidget {
         children: [indicator, YMargin(12), Text(message!)],
       );
 
-    return indicator;
+    return AnimatedSwitcher(
+        duration: Duration(milliseconds: 250),
+        child: loading
+            ? indicator
+            : Container(
+                key: Key("no-loading-indicator"), width: size, height: size));
   }
 }

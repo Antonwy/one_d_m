@@ -4,7 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
-import 'package:one_d_m/components/connection-widget.dart';
+import 'package:one_d_m/components/connection_widget.dart';
 import 'package:one_d_m/components/dialog_holder.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/navbar.dart';

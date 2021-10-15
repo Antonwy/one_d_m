@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/components/theme_settings.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
@@ -130,6 +131,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 ),
                 SizedBox(height: 10),
+                ThemeSettings(),
                 _GhostSettings(),
                 ListTile(
                   title: Text("FAQ"),

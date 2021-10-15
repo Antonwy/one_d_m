@@ -27,13 +27,11 @@ class CampaignNews extends StatelessWidget {
       );
 
     List<News> n = cm.campaign!.news;
-    n.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    n.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return Padding(
       padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-      child: Column(
-          children:
-              n.map((news) => NewsPost(news, withHeader: false)).toList()),
+      child: Column(children: n.map((news) => NewsPost(news)).toList()),
     );
   }
 }

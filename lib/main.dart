@@ -64,16 +64,9 @@ class _ODMAppState extends State<ODMApp> {
     getThemeIndex().then((value) {
       ThemeManager _tm = ThemeManager.of(context, listen: false);
 
-      if (value == 0) {
-        _tm.colors = ThemeHolder.turqoiseBlue;
-      } else {
-        var brightness = SchedulerBinding.instance!.window.platformBrightness;
-        bool isDarkMode = brightness == Brightness.dark;
-
-        _tm.colors = isDarkMode ? ThemeHolder.dark : ThemeHolder.light;
-      }
+      _tm.setThemeMode(ThemeMode.values[value], withSave: false);
     });
-    Platform.isAndroid ? NativeAds.initialize() : null;
+    // Platform.isAndroid ? NativeAds.initialize() : null;q
 
     Api.manager = context.read<ApiManager>();
     _precacheImages();
@@ -121,12 +114,14 @@ class _ODMAppState extends State<ODMApp> {
           context),
       precachePicture(
           ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/explore.svg'),
+            SvgPicture.svgStringDecoder,
+            "assets/images/welcome-gift.svg",
+          ),
           context),
       precachePicture(
           ExactAssetPicture(
             SvgPicture.svgStringDecoder,
-            "assets/images/welcome-gift.svg",
+            "assets/images/no-internet.svg",
           ),
           context),
     ]);
@@ -148,7 +143,7 @@ class _ODMAppState extends State<ODMApp> {
             FirebaseAnalyticsObserver(
                 analytics: context.read<FirebaseAnalytics>()),
           ],
-          themeMode: ThemeMode.system,
+          themeMode: context.watch<ThemeManager>().themeMode,
           theme: ThemeData(
               primaryColor: Color.fromARGB(255, 52, 199, 89),
               primaryColorLight: Colors.grey[200],
@@ -170,7 +165,9 @@ class _ODMAppState extends State<ODMApp> {
               cardColor: Colors.white,
               cardTheme: CardTheme(
                   margin: EdgeInsets.zero,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey[200]!),
                       borderRadius: BorderRadius.circular(Constants.radius)),
                   clipBehavior: Clip.antiAlias),
               canvasColor: Colors.grey[200],
@@ -178,13 +175,19 @@ class _ODMAppState extends State<ODMApp> {
               backgroundColor: Colors.white,
               scaffoldBackgroundColor: Colors.white,
               errorColor: Color.fromARGB(255, 255, 69, 58),
+              buttonTheme: ButtonThemeData(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6))),
               snackBarTheme: SnackBarThemeData(
                 backgroundColor: Color.fromARGB(255, 255, 59, 48),
                 contentTextStyle: TextStyle(color: Colors.white),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
                         top: Radius.circular(Constants.radius))),
-              )),
+              ),
+              popupMenuTheme: PopupMenuThemeData(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)))),
           darkTheme: ThemeData(
               primaryColor: Color.fromARGB(255, 48, 209, 88),
               primaryColorLight: Colors.grey[850],
@@ -206,13 +209,19 @@ class _ODMAppState extends State<ODMApp> {
               scaffoldBackgroundColor: Colors.black,
               backgroundColor: Colors.black,
               errorColor: Color.fromARGB(255, 255, 69, 58),
+              buttonTheme: ButtonThemeData(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6))),
               snackBarTheme: SnackBarThemeData(
                 backgroundColor: Color.fromARGB(255, 255, 69, 58),
                 contentTextStyle: TextStyle(color: Colors.white),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
                         top: Radius.circular(Constants.radius))),
-              )),
+              ),
+              popupMenuTheme: PopupMenuThemeData(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)))),
           home: PageManagerWidget()),
     );
   }

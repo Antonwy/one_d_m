@@ -8,7 +8,7 @@ import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
-import 'margin.dart';
+import '../margin.dart';
 
 class CampaignHeader extends StatefulWidget {
   final BaseCampaign campaign;
@@ -33,7 +33,6 @@ class _CampaignHeaderState extends State<CampaignHeader> {
           child: Hero(
             tag: "${widget.campaign.id}-container",
             child: Card(
-              elevation: 1,
               child: InkWell(
                 onTap: () {
                   Navigator.push(
@@ -58,15 +57,11 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                   children: <Widget>[
                     Container(
                       height: 260,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(Constants.radius)),
-                        child: VideoOrImage(
-                          imageUrl: widget.campaign.imgUrl,
-                          videoUrl: widget.campaign.shortVideoUrl,
-                          blurHash: widget.campaign.blurHash,
-                          alwaysMuted: true,
-                        ),
+                      child: VideoOrImage(
+                        imageUrl: widget.campaign.imgUrl,
+                        videoUrl: widget.campaign.shortVideoUrl,
+                        blurHash: widget.campaign.blurHash,
+                        alwaysMuted: true,
                       ),
                     ),
                     Padding(
@@ -104,11 +99,16 @@ class _CampaignHeaderState extends State<CampaignHeader> {
                                   highlightElevation: 1,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
-                                  child: Text(
-                                    "Unterstützen",
-                                    style: _theme.textTheme.bodyText1!.copyWith(
-                                        fontSize: 11,
-                                        color: _theme.colorScheme.onSecondary),
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    child: Text(
+                                      "Unterstützen",
+                                      style: _theme.textTheme.bodyText1!
+                                          .copyWith(
+                                              fontSize: 11,
+                                              color: _theme
+                                                  .colorScheme.onSecondary),
+                                    ),
                                   )),
                             ],
                           ),

@@ -5,7 +5,6 @@ import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/models/news.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'news_post.dart';
@@ -31,8 +30,16 @@ class _PostFeedState extends State<PostFeed> {
     return StreamBuilder<StreamResult<List<News?>>>(
         stream: _newsStream,
         builder: (_, snapshot) {
+          print(snapshot);
+          Widget heading = SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Text("News", style: Theme.of(context).textTheme.headline6),
+            ),
+          );
+
           if (snapshot.hasError) {
-            return SliverToBoxAdapter(
+            heading = SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(12.0),
                 child: Row(
@@ -47,7 +54,7 @@ class _PostFeedState extends State<PostFeed> {
           }
 
           if (!snapshot.hasData) {
-            return SliverToBoxAdapter(
+            heading = SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(12.0),
                 child: Row(
@@ -64,33 +71,32 @@ class _PostFeedState extends State<PostFeed> {
             );
           }
 
-          List<News?> posts = snapshot.data!.data ?? [];
-          if (posts.isEmpty) {
+          List<News?> posts = snapshot.data?.data ?? [];
+          if (snapshot.hasData && posts.isEmpty) {
             return NoContentProfilePage();
           }
 
           return MultiSliver(
             children: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text("News",
-                      style: Theme.of(context).textTheme.headline6),
-                ),
-              ),
+              heading,
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => NewsPost(
-                      posts[index],
-                      withHeader: true,
-                      withDonationButton: true,
-                    ),
-                    addAutomaticKeepAlives: false,
-                    addRepaintBoundaries: false,
-                    childCount: posts.length,
-                  ),
+                sliver: SliverAnimatedOpacity(
+                  duration: Duration(milliseconds: 250),
+                  opacity: snapshot.hasData ? 1 : 0,
+                  sliver: snapshot.hasData
+                      ? SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) => NewsPost(
+                              posts[index]!,
+                              withDonationButton: true,
+                            ),
+                            addAutomaticKeepAlives: false,
+                            addRepaintBoundaries: false,
+                            childCount: posts.length,
+                          ),
+                        )
+                      : SliverToBoxAdapter(),
                 ),
               ),
             ],

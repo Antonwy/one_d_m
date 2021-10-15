@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/components/user_button.dart';
+import 'package:one_d_m/components/users/user_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/contact_manager.dart';

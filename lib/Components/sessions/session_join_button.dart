@@ -17,20 +17,18 @@ class _SessionJoinButtonState extends State<SessionJoinButton> {
   @override
   Widget build(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    return Consumer<BaseSessionManager>(
-      builder: (context, csm, child) => Builder(builder: (context) {
-        bool subscribed = csm.subscribed;
-        Color? background = subscribed
-            ? csm.baseSession!.primaryColor
-            : csm.baseSession!.secondaryColor;
+    return Consumer<BaseSessionManager>(builder: (context, csm, child) {
+      bool subscribed = csm.subscribed;
+      Color? background = subscribed
+          ? csm.baseSession!.primaryColor
+          : csm.baseSession!.secondaryColor;
 
-        return JoinButton(
-          joinOrLeave: (bool val) => csm.leaveOrJoinSession(val, context),
-          subscribed: subscribed,
-          subscribedColor: csm.baseSession!.primaryColor,
-          notSubscribedColor: csm.baseSession!.secondaryColor,
-        );
-      }),
-    );
+      return JoinButton(
+        joinOrLeave: (bool val) => csm.leaveOrJoinSession(val, context),
+        subscribed: subscribed,
+        subscribedColor: csm.baseSession!.primaryColor,
+        notSubscribedColor: csm.baseSession!.secondaryColor,
+      );
+    });
   }
 }

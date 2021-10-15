@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
-import 'package:one_d_m/components/campaign_header.dart';
+import 'package:one_d_m/components/campaigns/campaign_header.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/helper/color_theme.dart';
@@ -52,10 +52,12 @@ class OrganizationPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   organization?.website == null
-                      ? SizedBox.shrink()
+                      ? SizedBox(
+                          height: 12,
+                        )
                       : Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: OutlineButton(
+                          child: OutlinedButton(
                             child: Text("Mehr Informationen"),
                             onPressed: () async {
                               if (await canLaunch(organization!.website!)) {

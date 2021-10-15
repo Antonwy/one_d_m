@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/provider/donation_dialog_manager.dart';
 import 'package:provider/provider.dart';
@@ -11,23 +10,31 @@ class DonationDialogAvailableAmount extends StatelessWidget {
     DonationDialogManager ddm = context.watch<DonationDialogManager>();
     ThemeData _theme = context.theme;
 
-    if (ddm.fromCache!)
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Lade verfügbare DVs...", style: _theme.textTheme.caption),
-          XMargin(12),
-          LoadingIndicator(
-            size: 8,
-            strokeWidth: 1.8,
-          ),
-        ],
-      );
+    String text = ddm.fromCache!
+        ? "Lade verfügbare DVs..."
+        : _buildAvailableAmountText(ddm);
 
-    return Text(
-      _buildAvailableAmountText(ddm),
-      style:
-          _theme.textTheme.bodyText2!.withOpacity(.54).copyWith(fontSize: 12),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          text,
+          style: _theme.textTheme.caption,
+        ),
+        AnimatedSize(
+          duration: Duration(milliseconds: 500),
+          curve: Curves.fastLinearToSlowEaseIn,
+          child: ddm.fromCache!
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: LoadingIndicator(
+                    size: 8,
+                    strokeWidth: 1.8,
+                  ),
+                )
+              : SizedBox.shrink(),
+        ),
+      ],
     );
   }
 

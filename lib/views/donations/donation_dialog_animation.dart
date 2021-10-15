@@ -16,8 +16,8 @@ class DonationAnimationWidget extends StatelessWidget {
         child: AnimatedSwitcher(
             duration: Duration(seconds: 1),
             child: !ddm.showThankYou
-                ? Lottie.asset('assets/anim/anim_start.json', repeat: false,
-                    onLoaded: (composition) {
+                ? Lottie.asset('assets/animations/anim_start.json',
+                    repeat: false, onLoaded: (composition) {
                     HapticFeedback.heavyImpact();
                     Timer(Duration(milliseconds: 1250), () {
                       ddm.showThankYou = true;

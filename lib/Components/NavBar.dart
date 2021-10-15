@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
@@ -38,61 +40,70 @@ class _NavBarState extends State<NavBar> {
 
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Container(
-          height: _openHeight,
-          width: _mq.size.width,
-          decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: ColorTheme.black.withOpacity(.2),
-                    blurRadius: 30,
-                    offset: Offset(0, -5)),
-              ],
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: Center(
-                    child: Container(
-                      width: _mq.size.width * 0.6,
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        child: BackdropFilter(
+          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+              height: _openHeight,
+              width: _mq.size.width,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                      color: ColorTheme.black.withOpacity(.2),
+                      blurRadius: 30,
+                      offset: Offset(0, -5)),
+                ],
+                color: Theme.of(context).cardColor.withOpacity(.75),
+              ),
+              child: Padding(
+                padding:
+                    EdgeInsets.only(bottom: _mq.padding.bottom == 0 ? 0 : 5),
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: Center(
+                        child: Container(
+                          width: _mq.size.width * 0.6,
+                          child: Consumer<NavBarManager>(
+                              builder: (context, npm, child) {
+                            return Align(
+                              alignment: Alignment(
+                                  Helper.mapValue(npm.position, 0, 1, -1, 1),
+                                  0),
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    shape: BoxShape.circle),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(
                       child: Consumer<NavBarManager>(
                           builder: (context, npm, child) {
-                        return Align(
-                          alignment: Alignment(
-                              Helper.mapValue(npm.position, 0, 1, -1, 1), 0),
+                        _npm = npm;
+                        return Center(
                           child: Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                shape: BoxShape.circle),
+                            width: _mq.size.width * .6,
+                            height: _mq.size.height,
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: _generateIcons(context)),
                           ),
                         );
                       }),
                     ),
-                  ),
+                  ],
                 ),
-                Positioned.fill(
-                  child:
-                      Consumer<NavBarManager>(builder: (context, npm, child) {
-                    _npm = npm;
-                    return Center(
-                      child: Container(
-                        width: _mq.size.width * .6,
-                        height: _mq.size.height,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: _generateIcons(context)),
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          )),
+              )),
+        ),
+      ),
     );
   }
 

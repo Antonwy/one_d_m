@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class News {
   static const String CAMPAIGNID = "campaign_id",
       CAMPAIGNNAME = "campaign_name",
-      ORGANISATION_ID = "organisation_id",
+      ORGANIZATIONNAME = "organization_name",
       USERID = "user_id",
       TITLE = "title",
       TEXT = "text",
@@ -13,55 +13,49 @@ class News {
       IMAGEURL = "image_url",
       BLUR_HASH = "blur_hash",
       SESSION_ID = "session_id",
-      SHOW_IN_MAINFEED = "show_in_mainfeed",
       VIDEO_URL = "video_url";
 
-  final String? campaignId,
-      campaignName,
+  final String campaignId, text, id;
+  final String? campaignName,
       campaignImgUrl,
       campaignBlurHash,
       sessionId,
       sessionName,
       sessionImgUrl,
       sessionBlurHash,
-      userId,
-      organisationId,
+      organizationName,
       title,
-      text,
       shortText,
       imageUrl,
       videoUrl,
-      id,
       blurHash;
-  DateTime? createdAt;
-  bool? showInMainfeed;
+  final DateTime createdAt;
+  final bool adminNews;
 
   News(
       {this.campaignBlurHash,
       this.sessionName,
       this.sessionImgUrl,
       this.sessionBlurHash,
-      this.campaignId,
-      this.userId,
-      this.id,
-      this.organisationId,
+      required this.campaignId,
+      required this.id,
       this.title,
-      this.campaignImgUrl,
-      this.text,
+      required this.campaignImgUrl,
+      required this.text,
       this.shortText,
-      this.createdAt,
-      this.campaignName,
+      required this.createdAt,
+      required this.campaignName,
       this.imageUrl,
       this.videoUrl,
       this.sessionId,
       this.blurHash,
-      this.showInMainfeed = true});
+      this.organizationName,
+      this.adminNews = false});
 
   Map<String, dynamic> toMap() {
     return {
       CAMPAIGNID: campaignId,
       CAMPAIGNNAME: campaignName,
-      ORGANISATION_ID: organisationId,
       TITLE: title,
       TEXT: text,
       SHORTTEXT: shortText,
@@ -70,28 +64,25 @@ class News {
       CAMPAIGNIMGURL: campaignImgUrl,
       CREATEDAT: Timestamp.now(),
       SESSION_ID: sessionId,
-      USERID: userId,
-      SHOW_IN_MAINFEED: showInMainfeed
     };
   }
 
   static News fromSnapshot(DocumentSnapshot snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return News(
-        id: snapshot.id,
-        campaignId: data[CAMPAIGNID],
-        title: data[TITLE],
-        text: data[TEXT],
-        shortText: data[SHORTTEXT],
-        campaignName: data[CAMPAIGNNAME],
-        campaignImgUrl: data[CAMPAIGNIMGURL],
-        sessionId: data[SESSION_ID],
-        imageUrl: data[IMAGEURL],
-        videoUrl: data[VIDEO_URL],
-        userId: data[USERID],
-        createdAt: (data[CREATEDAT] as Timestamp).toDate(),
-        blurHash: data[BLUR_HASH],
-        showInMainfeed: data[SHOW_IN_MAINFEED]);
+      id: snapshot.id,
+      campaignId: data[CAMPAIGNID],
+      title: data[TITLE],
+      text: data[TEXT],
+      shortText: data[SHORTTEXT],
+      campaignName: data[CAMPAIGNNAME],
+      campaignImgUrl: data[CAMPAIGNIMGURL],
+      sessionId: data[SESSION_ID],
+      imageUrl: data[IMAGEURL],
+      videoUrl: data[VIDEO_URL],
+      createdAt: (data[CREATEDAT] as Timestamp).toDate(),
+      blurHash: data[BLUR_HASH],
+    );
   }
 
   News.fromJson(Map<String, dynamic> map)
@@ -107,13 +98,12 @@ class News {
         sessionName = map['session_name'],
         sessionImgUrl = map['session_img_url'],
         sessionBlurHash = map['session_blur_hash'],
-        organisationId = map[ORGANISATION_ID],
         imageUrl = map[IMAGEURL],
         videoUrl = map[VIDEO_URL],
-        userId = map[USERID],
-        createdAt = DateTime.tryParse(map[CREATEDAT]),
+        createdAt = DateTime.tryParse(map[CREATEDAT]) ?? DateTime.now(),
         blurHash = map[BLUR_HASH],
-        showInMainfeed = map[SHOW_IN_MAINFEED];
+        organizationName = map[ORGANIZATIONNAME],
+        adminNews = map["admin_news"] ?? false;
 
   static List<News> listFromJson(List<Map<String, dynamic>> list) {
     return list.map((map) => News.fromJson(map)).toList();

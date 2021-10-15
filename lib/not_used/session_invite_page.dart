@@ -22,10 +22,10 @@ class SessionInvitesPage extends StatelessWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.white,
-            iconTheme: IconThemeData(color: _theme.colors!.dark),
+            iconTheme: IconThemeData(color: _theme.colors.dark),
             title: Text(
               "Session Einladungen (${invites!.length})",
-              style: TextStyle(color: _theme.colors!.dark),
+              style: TextStyle(color: _theme.colors.dark),
             ),
           ),
           SessionInvitesFeed(invites),

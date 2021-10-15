@@ -82,16 +82,14 @@ class _SliverSearchBarState extends State<SliverSearchBar> {
           Container(
             width: double.infinity,
             height: 56,
-            child: Material(
-              elevation: 1,
-              borderRadius: BorderRadius.circular(Constants.radius),
+            child: Card(
               child: Row(
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 6.0, right: 6),
                     child: AppBarButton(
                       icon: Icons.arrow_back,
-                      color: _theme.canvasColor,
+                      color: _theme.cardColor,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -105,7 +103,7 @@ class _SliverSearchBarState extends State<SliverSearchBar> {
                   Padding(
                     padding: const EdgeInsets.only(right: 6.0),
                     child: AppBarButton(
-                      color: _theme.canvasColor,
+                      color: _theme.cardColor,
                       icon: _controller.text.isNotEmpty
                           ? Icons.close
                           : CupertinoIcons.search,

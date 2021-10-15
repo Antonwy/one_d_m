@@ -230,7 +230,7 @@ class _CampaignPageBottom extends StatelessWidget {
                         XMargin(6),
                         _StatCollumn(
                             value: cm.subscribedCount,
-                            description: "Abonnenten",
+                            description: "Mitglieder",
                             isDark: true),
                       ],
                     )),

@@ -5,8 +5,8 @@ import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
 
-import 'animated_future_builder.dart';
-import 'donation_widget.dart';
+import '../animated_future_builder.dart';
+import '../donation_widget.dart';
 
 class SessionButton extends StatelessWidget {
   String id;

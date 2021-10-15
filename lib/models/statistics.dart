@@ -1,12 +1,9 @@
-import 'donation_info.dart';
-
 class Statistics {
   static const String USERCOUNT = "user_count",
       USERINFO = "users_info",
       CAMPAIGNCOUNT = "campaign_count",
       CAMPAIGNINFO = "campaigns_info";
-  DonationInfo? donationStatistics;
-  final int? userCount,
+  final int userCount,
       donationCount,
       donationAmountCount,
       campaignCount,
@@ -15,13 +12,13 @@ class Statistics {
       donationGoalToday;
 
   Statistics(
-      {this.userCount,
-      this.campaignCount,
-      this.donationCount,
-      this.donationAmountCount,
-      this.sessionCount,
-      this.donationsToday,
-      this.donationGoalToday});
+      {required this.userCount,
+      required this.campaignCount,
+      required this.donationCount,
+      required this.donationAmountCount,
+      required this.sessionCount,
+      required this.donationsToday,
+      required this.donationGoalToday});
 
   Statistics.fromJson(Map<String, dynamic> map)
       : userCount = map['user_count'],

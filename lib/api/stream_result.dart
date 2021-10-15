@@ -1,6 +1,6 @@
 class StreamResult<T> {
-  final bool? fromCache;
+  final bool fromCache;
   final T? data;
 
-  StreamResult({this.fromCache, this.data});
+  StreamResult({this.fromCache = false, this.data});
 }

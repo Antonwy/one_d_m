@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
+import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
@@ -25,12 +26,13 @@ class SessionHolder extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: OpenContainer(
-            transitionDuration: Duration(milliseconds: 500),
+            transitionDuration: Duration(milliseconds: 400),
             closedShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(Constants.radius)),
             closedColor: _theme.canvasColor,
             openColor: _theme.primaryColorLight,
             openBuilder: (context, close) => LongSessionList(sessions),
+            closedElevation: context.theme.cardTheme.elevation ?? 0,
             closedBuilder: (context, open) =>
                 LayoutBuilder(builder: (context, contraints) {
                   return Wrap(
@@ -86,6 +88,9 @@ class SessionHolder extends StatelessWidget {
                     CachedNetworkImage(
                       imageUrl: session.imgUrl!,
                       fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Center(
+                        child: WarningIcon(),
+                      ),
                       placeholder: (_, __) => session.blurHash != null
                           ? BlurHash(hash: session.blurHash!)
                           : Center(

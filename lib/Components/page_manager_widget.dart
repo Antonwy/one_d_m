@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
+import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/push_notification.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
@@ -83,12 +84,9 @@ class _PageManagerWidgetState extends State<PageManagerWidget> {
 
           return Stack(
             children: <Widget>[
-              umS.uid == null
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : _homePage,
-              _HideSplash(snapshot.connectionState == ConnectionState.done)
+              if (umS.uid != null) _homePage,
+              _HideSplash(snapshot.connectionState == ConnectionState.done &&
+                  umS.uid != null)
             ],
           );
         });

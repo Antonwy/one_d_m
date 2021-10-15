@@ -3,7 +3,6 @@ import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/big_button.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
@@ -16,8 +15,7 @@ import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
-import 'package:one_d_m/utils/video/video_widget.dart';
-import 'package:one_d_m/views/campaigns/create_post.dart';
+import 'package:one_d_m/components/video_widget.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
@@ -422,11 +420,9 @@ class SessionTitle extends StatelessWidget {
                   ),
                   XMargin(12),
                   if (!sm.isPreview)
-                    Container(
-                        width: 100,
-                        child: Align(
-                            alignment: Alignment.centerRight,
-                            child: sm.buildJoinButton()))
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: sm.buildJoinButton())
                 ],
               ),
             ],
@@ -434,32 +430,6 @@ class SessionTitle extends StatelessWidget {
         );
       },
     ));
-  }
-}
-
-class CreatePostButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
-    return Consumer<BaseSessionManager>(
-      builder: (context, sm, child) => ElevatedButton(
-          style:
-              ElevatedButton.styleFrom(primary: sm.baseSession!.primaryColor),
-          child: AutoSizeText("Post erstellen",
-              maxLines: 1,
-              style: _theme.textTheme
-                  .correctColorFor(sm.baseSession!.primaryColor!)
-                  .bodyText1),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CreatePostScreen(
-                          isSession: true,
-                          session: sm.baseSession,
-                        )));
-          }),
-    );
   }
 }
 

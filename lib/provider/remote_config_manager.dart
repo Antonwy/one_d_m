@@ -8,10 +8,14 @@ class RemoteConfigManager {
   static const String FORCE_UPDATE_BUILD_NUMBER = "force_update_build_number";
   static const int MAX_DVS_PER_DAY_DEFAULT = Constants.DVS_PER_DAY;
 
+  static const String AD_NETWORK = "ad_network";
+  static const String AD_NETWORK_DEFAULT = "admob";
+
   late RemoteConfig _remoteConfig;
   late PackageInfo packageInfo;
   bool shouldUpdate = false;
   bool forceUpdate = false;
+  AdNetwork adNetwork = AdNetwork.admob;
 
   Future initialize() async {
     _remoteConfig = RemoteConfig.instance;
@@ -23,6 +27,7 @@ class RemoteConfigManager {
       await fetchAndActivate();
       shouldUpdate = _checkIfShouldUpdate();
       forceUpdate = _checkIfShouldForceUpdate();
+      adNetwork = _getAdNetwork();
       _printInfos();
     } catch (e) {
       print("Unable to fetch remote config, defaults will be used. $e");
@@ -37,6 +42,7 @@ class RemoteConfigManager {
     print("RemoteConfig suggests to update version: $shouldUpdate");
     print("RemoteConfig forces to update version: $shouldUpdate");
     print("Max DVs to collect: ${_remoteConfig.getString(MAX_DVS_PER_DAY)}");
+    print("Uses $adNetwork");
   }
 
   Map<String, dynamic> _createDefaults() {
@@ -44,6 +50,7 @@ class RemoteConfigManager {
       MIN_BUILD_NUMBER: _getDefaultBuildNumber(),
       FORCE_UPDATE_BUILD_NUMBER: 0,
       MAX_DVS_PER_DAY: MAX_DVS_PER_DAY_DEFAULT,
+      AD_NETWORK: AD_NETWORK_DEFAULT,
     };
   }
 
@@ -52,7 +59,7 @@ class RemoteConfigManager {
   Future fetchAndActivate() async {
     await _remoteConfig.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: const Duration(seconds: 10),
-      minimumFetchInterval: Duration(hours: 24),
+      minimumFetchInterval: Duration(hours: 12),
     ));
     await _remoteConfig.fetchAndActivate();
   }
@@ -67,6 +74,13 @@ class RemoteConfigManager {
   }
 
   int get maxDVs => _remoteConfig.getInt(MAX_DVS_PER_DAY);
+
+  AdNetwork _getAdNetwork() {
+    String val = _remoteConfig.getString(AD_NETWORK);
+
+    if (val == "admob") return AdNetwork.admob;
+    return AdNetwork.applovin;
+  }
 }
 
 class AppVersion {
@@ -95,3 +109,5 @@ class AppVersion {
     return false;
   }
 }
+
+enum AdNetwork { admob, applovin }

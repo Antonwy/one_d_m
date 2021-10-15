@@ -22,8 +22,8 @@ class Api {
   static String? userToken;
   static Box? box;
   static final Uri url = Uri.parse("https://one-dollar-movement.appspot.com" ??
-      "http://192.168.178.109:3000" ??
-      "http://localhost:3000");
+      "http://localhost:3000" ??
+      "http://192.168.178.109:3000");
 
   static late ApiManager manager;
 

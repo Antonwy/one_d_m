@@ -5,7 +5,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:one_d_m/api/api.dart';
-import 'package:one_d_m/components/AnimatedElevatedButton.dart';
+import 'package:one_d_m/components/animated-elevated-button.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/info_feed.dart';
 import 'package:one_d_m/components/latest_donaters_view.dart';
@@ -18,9 +18,7 @@ import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/numeral.dart';
-import 'package:one_d_m/helper/recomended_sessions.dart';
-import 'package:one_d_m/helper/speed_scroll_physics.dart';
-import 'package:one_d_m/models/ad_balance.dart';
+import 'package:one_d_m/components/recomended_sessions.dart';
 import 'package:one_d_m/models/daily_report.dart';
 import 'package:one_d_m/models/gift.dart';
 import 'package:one_d_m/models/user.dart';
@@ -52,7 +50,6 @@ class ProfilePageState extends State<ProfilePage>
     return Scaffold(
       body: CustomScrollView(
         controller: widget.scrollController,
-        physics: CustomPageViewScrollPhysics(),
         slivers: <Widget>[
           Consumer<UserManager>(
               builder: (context, um, child) => SliverPersistentHeader(
@@ -265,7 +262,7 @@ class __GiftAvailableState extends State<_GiftAvailable> {
     ThemeData _theme = Theme.of(context);
     UserManager um = context.watch<UserManager>();
 
-    Gift gift = um.user!.gift;
+    Gift gift = um.user?.gift ?? Gift.zero();
     bool showGift = gift.amount > 0;
 
     return AnimatedSize(

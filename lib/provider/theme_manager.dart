@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/helper/color_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Helper/Constants.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +7,18 @@ class ThemeManager extends ChangeNotifier {
   late BaseTheme _currentTheme;
   late ThemeData materialTheme;
   late MyTextTheme textTheme;
+
+  ThemeMode themeMode = ThemeMode.system;
+  Future<void> setThemeMode(ThemeMode mode, {bool withSave = true}) async {
+    themeMode = mode;
+
+    if (withSave) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(Constants.THEME_KEY, mode.index);
+    }
+
+    notifyListeners();
+  }
 
   BaseTheme get colors => _currentTheme;
   set colors(BaseTheme theme) {

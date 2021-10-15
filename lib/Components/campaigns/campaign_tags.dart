@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/components/campaign_header.dart';
+import 'package:one_d_m/components/campaigns/campaign_header.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
 import 'package:provider/provider.dart';
 

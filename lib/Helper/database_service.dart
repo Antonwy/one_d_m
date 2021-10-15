@@ -7,11 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:one_d_m/api/api_error.dart';
 import 'package:one_d_m/api/api_result.dart';
 import 'package:one_d_m/api/api_success.dart';
-import 'package:one_d_m/models/ad_balance.dart';
+import 'package:one_d_m/not_used/ad_balance.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/daily_report.dart';
 import 'package:one_d_m/models/donation.dart';
-import 'package:one_d_m/models/donation_info.dart';
 import 'package:one_d_m/models/feed.dart';
 import 'package:one_d_m/models/news.dart';
 import 'package:one_d_m/models/organization.dart';
@@ -26,7 +25,7 @@ import 'package:one_d_m/models/session_models/uploadable_session.dart';
 import 'package:one_d_m/models/suggestion.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/models/user_charge.dart';
-import 'package:one_d_m/provider/goal_page_manager.dart';
+import 'package:one_d_m/not_used/goal_page_manager.dart';
 
 class DatabaseService {
   static const String CAMPAIGNS = "campaigns",
@@ -513,7 +512,6 @@ class DatabaseService {
 
   static Stream<List<News>> getMainFeedPosts() {
     return newsCollection
-        .where(News.SHOW_IN_MAINFEED, isEqualTo: true)
         .orderBy(News.CREATEDAT, descending: true)
         .snapshots()
         .map((doc) => News.listFromSnapshot(doc.docs));
@@ -629,13 +627,6 @@ class DatabaseService {
         .limit(20)
         .snapshots()
         .map((qs) => Donation.listFromSnapshots(qs.docs));
-  }
-
-  static Stream<DonationInfo> getDonationInfo() {
-    return statisticsCollection
-        .doc(DONATIONINFO)
-        .snapshots()
-        .map((ds) => DonationInfo.fromSnapshot(ds));
   }
 
   static Stream<List<Donation>> getDonationsFromUser(String uid) {

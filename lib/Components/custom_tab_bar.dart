@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/views/home/goal_page.dart';
+import 'package:one_d_m/not_used/goal_page.dart';
 
 class CustomTabBar extends StatefulWidget {
   final void Function(GoalPageTabs?) onTabChanged;

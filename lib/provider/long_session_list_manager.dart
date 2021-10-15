@@ -25,10 +25,14 @@ class LongSessionListManager extends ChangeNotifier {
     FilterTag(
         tag: "Abgeschloßen", icon: Icons.done, type: FilterTagType.goalReached),
   ];
-  bool loading = false;
+
+  bool loading = false, error = false;
 
   LongSessionListManager(
-      {this.sessions, this.sessionsFuture, required this.textController, this.context}) {
+      {this.sessions,
+      this.sessionsFuture,
+      required this.textController,
+      this.context}) {
     textController.addListener(_listenForTextChanges);
   }
 
@@ -56,20 +60,29 @@ class LongSessionListManager extends ChangeNotifier {
   }
 
   Future<void> callQuery() async {
-    QueriedSessionEndpoint seq = Api().sessions().name(textController.text);
+    try {
+      QueriedSessionEndpoint seq = Api().sessions().name(textController.text);
 
-    if (tags[0].filtered ?? false) seq = seq.isCertified();
-    if (tags[1].filtered ?? false)
-      seq = seq.fromUser(context!.read<UserManager>().uid);
-    if (tags[2].filtered ?? false) seq = seq.goalReached();
+      if (tags[0].filtered) seq = seq.isCertified();
+      if (tags[1].filtered)
+        seq = seq.fromUser(context!.read<UserManager>().uid);
+      if (tags[2].filtered) seq = seq.goalReached();
 
-    loading = true;
-    notifyListeners();
+      loading = true;
+      notifyListeners();
 
-    sessionsFuture = seq.get();
-    await sessionsFuture;
+      sessionsFuture = seq.get();
+      await sessionsFuture;
 
-    loading = false;
-    notifyListeners();
+      loading = false;
+      error = false;
+      notifyListeners();
+    } catch (e) {
+      error = true;
+      loading = false;
+      notifyListeners();
+      print(e);
+      print("COULDN'T QUERY!");
+    }
   }
 }

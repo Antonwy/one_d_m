@@ -22,6 +22,12 @@ class SearchResult {
             Helper.castList<Map<String, dynamic>>(map['users']),
             SearchResultType.users);
 
+  bool get noData =>
+      (campaigns?.isEmpty ?? true) &&
+      (users?.isEmpty ?? true) &&
+      (organizations?.isEmpty ?? true) &&
+      (sessions?.isEmpty ?? true);
+
   @override
   String toString() {
     return 'SearchResult(campaigns: $campaigns, users: $users, organizations: $organizations, sessions: $sessions)';

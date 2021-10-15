@@ -26,6 +26,7 @@ class _UserPageFollowButtonState extends State<UserPageFollowButton> {
       if (upm.isOwnAccount!)
         return ElevatedButton(
           style: ElevatedButton.styleFrom(
+            elevation: 0,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           ),

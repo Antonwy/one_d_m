@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
+import 'package:one_d_m/components/no_internet.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
@@ -86,7 +87,7 @@ class _LongSessionListState extends State<LongSessionList> {
                                   padding: const EdgeInsets.only(right: 6.0),
                                   child: Consumer<LongSessionListManager>(
                                     builder: (context, lsm, child) {
-                                      if (lsm.loading)
+                                      if (lsm.loading || lsm.error)
                                         return AppBarButton(
                                           child: Container(
                                             width: 40,
@@ -94,8 +95,12 @@ class _LongSessionListState extends State<LongSessionList> {
                                               padding:
                                                   const EdgeInsets.all(8.0),
                                               child: Center(
-                                                  child: LoadingIndicator(
-                                                      size: 18)),
+                                                  child: lsm.loading
+                                                      ? LoadingIndicator(
+                                                          size: 18)
+                                                      : Icon(Icons.warning,
+                                                          color: _theme
+                                                              .errorColor)),
                                             ),
                                           ),
                                           onPressed: null,
@@ -197,7 +202,14 @@ class _LongSessionListState extends State<LongSessionList> {
                         initialData: widget.sessions,
                         future: lsm.sessionsFuture,
                         builder: (context, snapshot) {
-                          List<BaseSession?> sessions = snapshot.data!;
+                          List<BaseSession?> sessions = snapshot.data ?? [];
+
+                          if (snapshot.hasError)
+                            return SliverToBoxAdapter(
+                              child: Padding(
+                                  padding: const EdgeInsets.only(top: 48.0),
+                                  child: NoInternet()),
+                            );
 
                           if (sessions.isEmpty &&
                               snapshot.hasData &&

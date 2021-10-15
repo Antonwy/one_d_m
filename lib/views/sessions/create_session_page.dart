@@ -12,7 +12,7 @@ import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/api_result.dart';
-import 'package:one_d_m/components/campaign_button.dart';
+import 'package:one_d_m/components/campaigns/campaign_button.dart';
 import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/custom_text_field.dart';
 import 'package:one_d_m/components/donation_widget.dart';
@@ -890,7 +890,7 @@ class _CreateSuccessPage extends StatelessWidget {
                       height: 150,
                       child: Transform.scale(
                         scale: 2.5,
-                        child: Lottie.asset('assets/anim/anim_start.json',
+                        child: Lottie.asset('assets/animations/anim_start.json',
                             repeat: false, onLoaded: (composition) {
                           HapticFeedback.heavyImpact();
                         }),
@@ -909,15 +909,24 @@ class _CreateSuccessPage extends StatelessWidget {
                           .correctColorFor(csm.primaryColor!)
                           .bodyText2),
                   YMargin(12),
-                  Builder(builder: (context) {
-                    if (!snapshot.hasData)
-                      return LoadingIndicator(
-                        color: csm.secondaryColor,
-                        size: 15,
-                      );
-                    return SocialShareList(snapshot.data
-                        ?.manager(context.read<UserManager>().uid));
-                  }),
+                  Builder(
+                      builder: (context) => AnimatedSize(
+                          alignment: Alignment.topCenter,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.fastLinearToSlowEaseIn,
+                          child: AnimatedSwitcher(
+                            duration: Duration(milliseconds: 500),
+                            child: !snapshot.hasData
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 12.0),
+                                    child: LoadingIndicator(
+                                      color: csm.secondaryColor,
+                                      size: 15,
+                                    ),
+                                  )
+                                : SocialShareList(snapshot.data
+                                    ?.manager(context.read<UserManager>().uid)),
+                          ))),
                 ],
               ),
             ),

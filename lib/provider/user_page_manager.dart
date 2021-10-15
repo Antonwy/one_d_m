@@ -11,7 +11,7 @@ class UserPageManager extends ChangeNotifier {
   bool? subscribed = false, isOwnAccount = false;
   late Stream<StreamResult<UserAccount>> userAccountStream;
   UserAccount? userAccount;
-  bool? loadingMoreInfo = true, fromCache = true;
+  bool loadingMoreInfo = true, fromCache = true;
   final String? uid;
 
   UserPageManager(this.user, this.uid) {

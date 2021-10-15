@@ -88,7 +88,7 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   sliver_tools: ^0.2.5
-  keyboard_actions: '^3.3.1+1'
+  flutter_applovin_max: ^2.0.0
 
 #  video_player:
 #    git:
@@ -124,4 +124,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/anim/
+    - assets/animations/

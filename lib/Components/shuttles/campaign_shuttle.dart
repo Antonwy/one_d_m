@@ -12,7 +12,7 @@ import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:provider/provider.dart';
 import '../big_button.dart';
-import '../campaign_header.dart';
+import '../campaigns/campaign_header.dart';
 import '../donation_widget.dart';
 import '../margin.dart';
 
@@ -58,32 +58,34 @@ Widget _buttonShuttle(
     borderRadius: BorderRadius.circular(borderRadius),
     child: Container(
       height: Tween<double>(begin: 30, end: 36).evaluate(animation),
-      child: MaterialButton(
-          onPressed: () {},
+      child: Material(
           color: color,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          child: Opacity(
-            opacity: opacity,
-            child: Center(
-              child: AnimatedSize(
-                duration: Duration(milliseconds: 125),
-                child: Text(
-                  show == 1
-                      ? (cm.subscribed ?? false)
-                          ? "Verlassen"
-                          : "Beitreten"
-                      : "Unterstützen",
-                  style: show == 1
-                      ? _theme.textTheme.bodyText2!.copyWith(
-                          color: textColor,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600)
-                      : _theme.textTheme.bodyText1!.copyWith(
-                          color: textColor,
-                          fontSize: 11,
-                        ),
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            width: Tween<double>(begin: 102, end: 80).evaluate(animation),
+            height: 35,
+            child: Opacity(
+              opacity: opacity,
+              child: Center(
+                child: AnimatedSize(
+                  duration: Duration(milliseconds: 125),
+                  child: Text(
+                    show == 1
+                        ? (cm.subscribed ?? false)
+                            ? "Verlassen"
+                            : "Beitreten"
+                        : "Unterstützen",
+                    style: show == 1
+                        ? _theme.textTheme.bodyText2!.copyWith(
+                            color: textColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)
+                        : _theme.textTheme.bodyText1!.copyWith(
+                            color: textColor,
+                            fontSize: 11,
+                          ),
+                  ),
                 ),
               ),
             ),
@@ -138,10 +140,7 @@ Widget campaignShuttle(
       builder: (context, child) {
         Animation curvedAnim =
             CurvedAnimation(parent: animation, curve: Interval(.8, 1.0));
-        return Material(
-          elevation: 1,
-          borderRadius: BorderRadius.circular(Constants.radius),
-          clipBehavior: Clip.antiAlias,
+        return Card(
           color:
               ColorTween(begin: _theme.cardColor, end: _theme.backgroundColor)
                   .evaluate(animation),
@@ -197,8 +196,9 @@ Widget campaignShuttle(
                                         cm.campaign?.organization
                                                 .thumbnailUrl ??
                                             cm.campaign?.organization.imgUrl,
+                                        name: cm.campaign?.organization.name ??
+                                            "O",
                                         height: 15,
-                                        color: ColorTheme.appBg,
                                         loading: cm.loadingCampaign,
                                         fit: BoxFit.contain,
                                         borderRadius: 6,

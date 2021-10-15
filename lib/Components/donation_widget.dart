@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/components/user_button.dart';
+import 'package:one_d_m/components/users/user_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
@@ -18,7 +18,7 @@ import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'bottom_dialog.dart';
-import 'campaign_button.dart';
+import 'campaigns/campaign_button.dart';
 import 'custom_open_container.dart';
 
 class DonationWidget extends StatelessWidget {

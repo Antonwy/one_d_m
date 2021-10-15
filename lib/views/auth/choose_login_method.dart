@@ -1,13 +1,10 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api_result.dart';
 import 'package:one_d_m/components/big_button.dart';
-import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/views/auth/register_page.dart';
 import 'package:one_d_m/views/home/home_page.dart';
@@ -141,7 +138,8 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
       setState(() {
         _loading = false;
       });
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(res.message!)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(res.message!)));
       return;
     }
 
@@ -159,45 +157,5 @@ class _ChooseLoginMethodPageState extends State<ChooseLoginMethodPage> {
             builder: (context) => RegisterPage(
                   socialSignIn: true,
                 )));
-  }
-}
-
-class _RoundButton extends StatelessWidget {
-  bool isRegister;
-  Widget? toPage;
-  Color? color;
-
-  _RoundButton(this.isRegister, {this.toPage, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 52,
-        child: Material(
-          color: color,
-          borderRadius: BorderRadius.circular(Constants.radius),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => toPage!));
-            },
-            child: Center(
-                child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: AutoSizeText(
-                isRegister ? "Registrieren" : "Login",
-                maxLines: 1,
-                style: TextStyle(
-                    color: context.theme.correctColorFor(color!),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600),
-              ),
-            )),
-          ),
-        ),
-      ),
-    );
   }
 }

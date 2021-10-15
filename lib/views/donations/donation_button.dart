@@ -7,9 +7,9 @@ import 'package:one_d_m/provider/donation_dialog_manager.dart';
 import 'package:provider/provider.dart';
 
 class DonationButton extends StatelessWidget {
-  late ThemeData _theme;
-  late DonationDialogManager ddm;
-  BuildContext? context;
+  late final ThemeData _theme;
+  late final DonationDialogManager ddm;
+  late final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +30,6 @@ class DonationButton extends StatelessWidget {
               bool connected = connection != ConnectivityResult.none;
               Color btnColor =
                   ddm.dr?.sessionPrimaryColor ?? _theme.colorScheme.secondary;
-
-              bool active = ddm.amount != null &&
-                  ddm.amount != 0 &&
-                  ddm.amount! <= (ddm.dr?.userBalance ?? 0);
 
               return Container(
                 width: 150,

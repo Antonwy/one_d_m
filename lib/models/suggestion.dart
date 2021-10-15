@@ -65,13 +65,13 @@ class Suggestion {
 
   void setDefaultColors(BuildContext context) {
     ThemeManager _theme = ThemeManager.of(context);
-    if (primaryColor == null) this.primaryColor = _theme.colors!.contrast;
+    if (primaryColor == null) this.primaryColor = _theme.colors.contrast;
     if (secondaryColor == null)
-      this.secondaryColor = _theme.colors!.contrast!.withOpacity(.5);
+      this.secondaryColor = _theme.colors.contrast.withOpacity(.5);
     if (textOnPrimary == null)
-      this.textOnPrimary = _theme.colors!.textOnContrast;
+      this.textOnPrimary = _theme.colors.textOnContrast;
     if (textOnSecondary == null)
-      this.textOnSecondary = _theme.colors!.textOnContrast;
+      this.textOnSecondary = _theme.colors.textOnContrast;
   }
 
   bool get isDone => donatedToday >= (amount! * amountPerDonation!);

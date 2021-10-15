@@ -18,7 +18,7 @@ class Donation {
   final DonationUnit? donationUnit;
   final DateTime? createdAt;
 
-  static final String AMOUNT = "amount",
+  static const String AMOUNT = "amount",
       ALTERNATIVECAMPAIGNID = "alternative_campaign_id",
       CAMPAIGNID = "campaign_id",
       CAMPAIGNIMGURL = "campaign_image_url",
@@ -103,6 +103,6 @@ class Donation {
 
   @override
   String toString() {
-    return "Amount: ${amount}, Campaign: ${campaignName}, userId: ${userId}, campaignId: ${campaignId}";
+    return "Amount: $amount, Campaign: $campaignName, userId: $userId, campaignId: $campaignId";
   }
 }

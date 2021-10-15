@@ -88,10 +88,10 @@ class BaseTextTheme {
   TextStyle get headline5 => _textTheme.headline5!.copyWith(color: color);
   TextStyle get headline6 => _textTheme.headline6!.copyWith(color: color);
   TextStyle get caption =>
-      _textTheme.caption!.copyWith(color: color!.withOpacity(.6));
+      _textTheme.caption!.copyWith(color: color.withOpacity(.6));
 
   BaseTextTheme withOpacity(double opacity) =>
-      BaseTextTheme(this._textTheme, color!.withOpacity(opacity));
+      BaseTextTheme(this._textTheme, color.withOpacity(opacity));
 }
 
 class BaseTheme {

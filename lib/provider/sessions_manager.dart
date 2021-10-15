@@ -202,7 +202,7 @@ class PreviewSessionManager extends BaseSessionManager {
                 "Schließe die Vorschau um ein Titelbild zu wählen!",
                 style: ThemeManager.of(context)
                     .textTheme
-                    .correctColorFor(baseSession!.secondaryColor!)!
+                    .correctColorFor(baseSession!.secondaryColor!)
                     .caption,
               ),
             ],

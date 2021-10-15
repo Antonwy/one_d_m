@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:one_d_m/components/formatted_text.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 
 class FaqPage extends StatelessWidget {
-  late TextTheme _textTheme;
+  late final TextTheme _textTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class FaqPage extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(18.0),
-                  child: Text(
+                  child: FormattedText(
                     faq.answer,
                   ),
                 )
@@ -78,7 +78,12 @@ class Faq {
         "ODM macht das Unterstützen von wohltätigen Organisationen einfach, schnell und für jeden zugänglich. Dabei haben wir uns für ein werbebasiertes Geschäftsmodell entschieden. Durch jede Ad-Impression erhalten wir Geld von unseren Werbenetzwerken. Das eingenommene Geld wird prozentual, je nach Aktivität, auf die Nutzer verteilt und am Ende des Monats an die von den Nutzern ausgewählten Projekte/ Organisationen überwiesen. Dabei befindet sich das Geld zu keinem Zeitpunkt auf dem Konto der Nutzer. Dadurch werden unnötigen Transaktionen zwischen den Nutzern und One Dollar Movement vermieden."),
     Faq("Sind die Projekte zertifiziert?",
         "Jede Organisation an die auf unserer Plattform gespendet werden kann, ist von uns sorgfältig ausgewählt und zertifiziert worden."),
+    Faq("Wie kann ich euch kontaktieren?",
+        "Schreibe uns einfach eine Email an:\n\n <a href=$emailUrl>anton@one-dollar-movement.com</a>\n\nWir melden uns so bald wie möglich bei dir zurück!"),
   ];
+
+  static String emailUrl =
+      "mailto:anton@one-dollar-movement.com?subject=Fragen%20zur%20App&body=ODM";
 
   Faq(this.question, this.answer);
 }

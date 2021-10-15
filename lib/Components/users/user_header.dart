@@ -27,7 +27,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
 
   Future<void> _shareUser(BuildContext context) async {
     UserPageManager upm = context.read<UserPageManager>();
-    if ((upm.user.name.isEmpty ?? true)) return;
+    if ((upm.user.name.isEmpty)) return;
     SocialShare.shareOptions(
         (await DynamicLinkManager.of(context).createUserLink(upm.user))
             .toString());
@@ -267,7 +267,7 @@ class UserHeader extends SliverPersistentHeaderDelegate {
         clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(5),
         child: InkWell(
-          onTap: !upm.loadingMoreInfo! && clickable!(upm.userAccount)
+          onTap: !upm.loadingMoreInfo && clickable!(upm.userAccount)
               ? () {
                   Navigator.push(
                       context,
@@ -279,17 +279,14 @@ class UserHeader extends SliverPersistentHeaderDelegate {
                 }
               : null,
           child: _textNumberColumn(
-              number: upm.loadingMoreInfo! ? "0" : callback!(upm.userAccount),
+              number: upm.loadingMoreInfo ? "0" : callback!(upm.userAccount),
               text: text!),
         ),
       ),
     );
   }
 
-  Widget _textNumberColumn(
-      {required String text,
-      String? number,
-      CrossAxisAlignment alignment = CrossAxisAlignment.center}) {
+  Widget _textNumberColumn({required String text, String? number}) {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Column(

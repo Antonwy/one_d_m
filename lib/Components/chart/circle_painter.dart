@@ -73,7 +73,7 @@ class CirclePainter extends CustomPainter {
       hasCurrent = false,
       int curIndex = 0,
       curPaintWidth = 12.0}) {
-    assert(sources != null && sources.length > 0);
+    assert(sources.length > 0);
     assert(colors != null && colors.length > 0);
     var paint = Paint()
       ..style = PaintingStyle.fill
@@ -103,7 +103,10 @@ class CirclePainter extends CustomPainter {
       paint.color = colors![i % colors.length];
       paint.strokeWidth = paintWidth;
       _drawArcWithCenter(canvas, paint,
-          center: center!, radius: radius!, startRadian: startA, sweepRadian: rd);
+          center: center!,
+          radius: radius!,
+          startRadian: startA,
+          sweepRadian: rd);
       startA += rd;
     }
     if (hasEnd) {
@@ -182,13 +185,17 @@ class CirclePainter extends CustomPainter {
       var startCenter = LineCircle.radianPoint(
           Point(center!.dx, center.dy), radius!, startRadian);
       paint.style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(startCenter.x as double, startCenter.y as double), smallR, paint);
+      canvas.drawCircle(
+          Offset(startCenter.x as double, startCenter.y as double),
+          smallR,
+          paint);
     }
     if (hasEndArc) {
       var endCenter = LineCircle.radianPoint(
           Point(center!.dx, center.dy), radius!, startRadian + sweepRadian);
       paint.style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(endCenter.x as double, endCenter.y as double), smallR, paint);
+      canvas.drawCircle(
+          Offset(endCenter.x as double, endCenter.y as double), smallR, paint);
     }
   }
 

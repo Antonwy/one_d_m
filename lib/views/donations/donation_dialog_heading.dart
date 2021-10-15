@@ -3,13 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/donation_request.dart';
 import 'package:one_d_m/provider/donation_dialog_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:rive/rive.dart';
-import 'package:flutter/src/painting/gradient.dart' as paint;
+import 'package:rive/rive.dart' as rive;
 
 class DonationDialogHeading extends StatelessWidget {
   @override
@@ -30,7 +28,7 @@ class DonationDialogHeading extends StatelessWidget {
         );
 
       if (dr!.animationUrl != null)
-        return FutureBuilder<Artboard?>(
+        return FutureBuilder<rive.Artboard?>(
             future: ddm.artboardFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData)
@@ -49,7 +47,7 @@ class DonationDialogHeading extends StatelessWidget {
                     height: 220,
                     child: !snapshot.hasData
                         ? SizedBox.shrink()
-                        : Rive(
+                        : rive.Rive(
                             fit: BoxFit.fitWidth,
                             artboard: ddm.artboardController!,
                           )),
@@ -88,7 +86,7 @@ class DonationDialogHeading extends StatelessWidget {
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
-                        gradient: paint.LinearGradient(
+                        gradient: LinearGradient(
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:provider/src/provider.dart';
+import 'package:provider/provider.dart';
 
 extension ThemeModeNames on ThemeMode {
   String get name {

@@ -19,8 +19,8 @@ import 'package:one_d_m/provider/user_page_manager.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
-  User user;
-  ScrollController? scrollController;
+  final User user;
+  final ScrollController? scrollController;
 
   UserPage(this.user, {this.scrollController});
 
@@ -36,7 +36,6 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   late AnimationController _controller;
 
   late double _staticHeight;
-  static final double _staticHeaderTop = 76;
 
   double? _headerHeight, _scrollOffset = 0.0;
 
@@ -291,10 +290,9 @@ class __OtherUsersRecommendationsState
                                 itemBuilder: (context, index) => Padding(
                                   padding: EdgeInsets.only(
                                       left: index == 0 ? 12 : 0,
-                                      right:
-                                          index == (followers.length ?? 1) - 1
-                                              ? 12
-                                              : 0,
+                                      right: index == (followers.length) - 1
+                                          ? 12
+                                          : 0,
                                       bottom: 4),
                                   child: VerticalUserButton(followers[index]),
                                 ),

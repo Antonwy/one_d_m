@@ -10,7 +10,7 @@ class SessionInvitesPage extends StatelessWidget {
   SessionInvitesPage({Key? key, this.invites, this.scrollController})
       : super(key: key);
 
-  late ThemeManager _theme;
+  late final ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {

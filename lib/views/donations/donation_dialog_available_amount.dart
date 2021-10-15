@@ -40,8 +40,8 @@ class DonationDialogAvailableAmount extends StatelessWidget {
 
   String _buildAvailableAmountText(DonationDialogManager ddm) {
     if (ddm.initialLoading!) return "0 DVs verfügbar";
-    int amount = ddm.dr!.userBalance! ~/ ddm.dr!.unit.value!;
+    int amount = ddm.dr!.userBalance! ~/ ddm.dr!.unit.value;
 
-    return '$amount ${(amount == 1 ? ddm.dr!.unit.singular : ddm.dr!.unit.name) ?? 'DV'} verfügbar';
+    return '$amount ${(amount == 1 ? ddm.dr!.unit.singular : ddm.dr!.unit.name)} verfügbar';
   }
 }

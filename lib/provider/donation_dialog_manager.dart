@@ -77,7 +77,7 @@ class DonationDialogManager extends ChangeNotifier {
         initialLoading = false;
         _opacity = 1;
 
-        if (dr!.userBalance! >= dr!.unit.value!) _amount = dr!.unit.value;
+        if (dr!.userBalance! >= dr!.unit.value) _amount = dr!.unit.value;
 
         notifyListeners();
 
@@ -119,7 +119,7 @@ class DonationDialogManager extends ChangeNotifier {
 
   void _switchRiveAnimation(String direction) {
     if (dr!.animationUrl != null) {
-      int index = amount! ~/ dr!.unit.value!;
+      int index = amount! ~/ dr!.unit.value;
       //prevent playing same animation again
       if (_currentAnimationIndex == index || index > 5) return;
 
@@ -136,7 +136,7 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   void sub() {
-    int newValue = amount! - dr!.unit.value!;
+    int newValue = amount! - dr!.unit.value;
     if (newValue >= 0) {
       HapticFeedback.heavyImpact();
       amount = newValue;
@@ -146,7 +146,7 @@ class DonationDialogManager extends ChangeNotifier {
   }
 
   void add() {
-    int newValue = amount! + dr!.unit.value!;
+    int newValue = amount! + dr!.unit.value;
     if (dr!.userBalance! >= newValue) {
       HapticFeedback.heavyImpact();
       amount = newValue;

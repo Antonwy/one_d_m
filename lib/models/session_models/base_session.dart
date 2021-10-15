@@ -137,12 +137,6 @@ class BaseSession {
       IMG_URL = "image_url";
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is BaseSession && other.id == id;
-  }
-
-  @override
   String toString() {
     return 'BaseSession(blurHash: $blurHash, image_url: $imgUrl, createdAt: $createdAt, secondaryColor: $secondaryColor, reachedGoal: $reachedGoal, donationUnit: $donationUnit)';
   }

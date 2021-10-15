@@ -4,7 +4,6 @@ import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/sessions/session_view.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../margin.dart';

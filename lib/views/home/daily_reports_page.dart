@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/daily_report.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 
 class DailyReportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeManager _theme = ThemeManager.of(context);
     return Scaffold(
       body: CustomScrollView(
         slivers: [

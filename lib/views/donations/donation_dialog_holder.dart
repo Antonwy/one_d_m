@@ -3,7 +3,6 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/provider/donation_dialog_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import 'package:provider/provider.dart';
 

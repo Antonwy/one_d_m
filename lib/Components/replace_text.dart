@@ -23,7 +23,7 @@ class ReplaceText extends StatelessWidget {
       return RichText(
           textAlign: textAlign,
           text: TextSpan(
-              style: style ?? _theme.textTheme.textOnContrast!.bodyText2,
+              style: style ?? _theme.textTheme.textOnContrast.bodyText2,
               children: [
                 TextSpan(
                   text: splitted[0],
@@ -40,7 +40,7 @@ class ReplaceText extends StatelessWidget {
     return Text(
       text!,
       textAlign: textAlign,
-      style: style ?? _theme.textTheme.textOnContrast!.bodyText1,
+      style: style ?? _theme.textTheme.textOnContrast.bodyText1,
     );
   }
 }

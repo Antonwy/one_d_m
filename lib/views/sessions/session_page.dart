@@ -6,6 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/big_button.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
+import 'package:one_d_m/components/formatted_text.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/social_share_list.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
@@ -112,14 +113,14 @@ class _DonationBottom extends StatelessWidget {
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold),
                                             text:
-                                                "Ein ${bsm.baseSession!.donationUnit.singular ?? bsm.baseSession!.donationUnit.name ?? "DV"} ${bsm.baseSession!.donationUnit.smiley ?? ''}\n"),
+                                                "Ein ${bsm.baseSession!.donationUnit.singular} ${bsm.baseSession!.donationUnit.smiley ?? ''}\n"),
                                         TextSpan(text: "entspricht "),
                                         TextSpan(
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold),
                                             text:
-                                                "${bsm.baseSession!.donationUnit.value ?? 1} "),
+                                                "${bsm.baseSession!.donationUnit.value} "),
                                         TextSpan(text: "DVs!"),
                                       ]),
                                 )
@@ -325,26 +326,6 @@ class _SessionVideoHeadingState extends State<SessionVideoHeading> {
           toggleMuted: _toggleMuted,
           blurHash: sm.baseSession?.blurHash,
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                false
-                    ? MuteButton(
-                        muted: _muted,
-                        toggle: _toggleMuted,
-                      )
-                    : SizedBox.shrink(),
-                SizedBox.shrink(),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -443,7 +424,7 @@ class SessionDescription extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              FormattedText(
                 sm.baseSession?.description ?? "",
                 style: Theme.of(context).textTheme.bodyText2,
               ),

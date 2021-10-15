@@ -86,8 +86,7 @@ class CustomOpenContainer extends StatefulWidget {
     this.tappable = true,
     this.transitionDuration = const Duration(milliseconds: 300),
     this.transitionType = ContainerTransitionType.fade,
-  })  : assert(closedColor != null),
-        assert(openColor != null),
+  })  : assert(openColor != null),
         assert(closedElevation != null),
         assert(openElevation != null),
         assert(closedShape != null),
@@ -548,7 +547,8 @@ class _OpenContainerRoute extends ModalRoute<void> {
   bool _dragging = false;
 
   ScrollController? _scrollController;
-  VelocityTracker _velocityTracker = VelocityTracker();
+  VelocityTracker _velocityTracker =
+      VelocityTracker.withKind(PointerDeviceKind.touch);
 
   AnimationStatus? _lastAnimationStatus;
   AnimationStatus? _currentAnimationStatus;

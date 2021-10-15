@@ -1,31 +1,21 @@
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ink_page_indicator/ink_page_indicator.dart';
-import 'package:intl/intl.dart';
-import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/play_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/ad_manager.dart';
 import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
-import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/statistics.dart';
-import 'package:one_d_m/provider/remote_config_manager.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'discovery_holder.dart';
 import 'margin.dart';
-import 'push_notification.dart';
 
 class InfoFeed extends StatelessWidget {
   @override
@@ -64,7 +54,7 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       child: Container(
         height: 120,
         child: Consumer<StatisticsManager>(builder: (context, sm, child) {
-          Statistics statistics = sm.home!;
+          Statistics statistics = sm.home;
           return Column(
             children: <Widget>[
               Expanded(
@@ -133,9 +123,6 @@ class _ChartsPageViewState extends State<_ChartsPageView> {
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class _ColumnStats extends StatelessWidget {
@@ -228,9 +215,6 @@ class __DCInformationState extends State<_DCInformation> {
           );
         }));
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class DailyGoalWidget extends StatelessWidget {

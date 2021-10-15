@@ -10,7 +10,6 @@ import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/replace_text.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
@@ -31,7 +30,7 @@ class DonationDialog extends StatefulWidget {
   final Campaign? campaign;
   final Session? session;
   final User? user;
-  int defaultSelectedAmount;
+  final int defaultSelectedAmount;
   final String? sessionId;
   final String? uid, cid;
 
@@ -178,9 +177,9 @@ class _DonationDialogState extends State<DonationDialog>
   String _buildAmountText(DonationDialogManager ddm) {
     if (ddm.initialLoading!) return "Laden...";
 
-    int amount = ddm.amount! ~/ ddm.dr!.unit.value!;
+    int amount = ddm.amount! ~/ ddm.dr!.unit.value;
 
-    return '$amount ${(amount == 1 ? ddm.dr!.unit.singular : ddm.dr!.unit.name) ?? 'DV'}';
+    return '$amount ${(amount == 1 ? ddm.dr!.unit.singular : ddm.dr!.unit.name)}';
   }
 }
 

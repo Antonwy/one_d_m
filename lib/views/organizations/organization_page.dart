@@ -4,16 +4,14 @@ import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/campaigns/campaign_header.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/organization.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrganizationPage extends StatelessWidget {
-  Organization? organization;
-  late ThemeData _theme;
-  ScrollController? scrollController;
+  final Organization? organization;
+  late final ThemeData _theme;
+  final ScrollController? scrollController;
 
   OrganizationPage(this.organization, {this.scrollController});
 

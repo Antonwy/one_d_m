@@ -10,13 +10,13 @@ import 'custom_open_container.dart';
 import 'donation_widget.dart';
 
 class OrganizationButton extends StatelessWidget {
-  String id;
-  Organization? organization;
-  Color? color;
-  TextStyle textStyle;
-  double elevation;
-  Function(Organization?)? onPressed;
-  double borderRadius;
+  final String id;
+  final Organization? organization;
+  final Color? color;
+  final TextStyle textStyle;
+  final double elevation;
+  final Function(Organization?)? onPressed;
+  final double borderRadius;
 
   OrganizationButton(this.id,
       {this.organization,

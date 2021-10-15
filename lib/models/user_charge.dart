@@ -5,7 +5,7 @@ class UserCharge {
   String? userId;
   bool? error;
 
-  static final String AMOUNT = "amount", USER_ID = "user_id", ERROR = "error";
+  static const String AMOUNT = "amount", USER_ID = "user_id", ERROR = "error";
 
   UserCharge({this.amount, this.userId, this.error});
 

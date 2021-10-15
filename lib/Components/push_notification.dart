@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 
 import 'margin.dart';
 
@@ -28,9 +25,10 @@ class PushNotification {
 }
 
 class PushWidget extends StatefulWidget {
-  NotificationContent content;
-  VoidCallback callback;
-  PushWidget(this.content, this.callback);
+  final NotificationContent content;
+  final VoidCallback callback;
+
+  const PushWidget(this.content, this.callback);
 
   @override
   _PushWidgetState createState() => _PushWidgetState();

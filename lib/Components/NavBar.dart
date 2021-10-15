@@ -6,11 +6,10 @@ import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/navbar_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 class NavBar extends StatefulWidget {
-  Function(int) changePage;
+  final Function(int) changePage;
 
   NavBar(this.changePage);
 
@@ -33,7 +32,6 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
-    BaseTheme? _bTheme = ThemeManager.of(context).colors;
     _mq = MediaQuery.of(context);
 
     _openHeight = _mq.padding.bottom == 0 ? 75 : 55 + _mq.padding.bottom;

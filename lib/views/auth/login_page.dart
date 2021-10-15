@@ -9,10 +9,8 @@ import 'package:one_d_m/components/custom_text_field.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/reset_password_dialog.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/contact_manager.dart';
 import 'package:one_d_m/helper/validate.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/auth/verify_email_page.dart';
 import 'package:one_d_m/views/home/home_page.dart';
@@ -24,8 +22,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late TextTheme _textTheme;
-
   String? _password, _email;
 
   bool _loading = false;
@@ -44,7 +40,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    _textTheme = Theme.of(context).textTheme;
     ThemeData _theme = Theme.of(context);
     _um = Provider.of<UserManager>(context);
 

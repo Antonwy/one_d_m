@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 
 import 'campaign_header.dart';
 
 class CampaignList extends StatefulWidget {
-  List<BaseCampaign?>? campaigns;
+  final List<BaseCampaign?>? campaigns;
 
   CampaignList({Key? key, this.campaigns}) : super(key: key);
 

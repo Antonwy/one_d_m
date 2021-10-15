@@ -1,6 +1,5 @@
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 
 typedef DiscoveryNext = Future<bool> Function();
 
@@ -23,7 +22,7 @@ abstract class DiscoveryHolder extends StatelessWidget {
 
   final Widget? child, tapTarget;
   final DiscoveryNext? next;
-  late ThemeData _theme;
+  late final ThemeData _theme;
 
   DiscoveryHolder(
       {Key? key, this.child, this.tapTarget = const Icon(Icons.add), this.next})

@@ -38,10 +38,4 @@ class Campaign extends BaseCampaign {
   String toString() {
     return 'Campaign{name: $name, description: $description, imgUrl: $imgUrl, endDate: $createdAt, amount: $amount, id: $id, authorId: $authorId, tags: $tags}';
   }
-
-  @override
-  bool operator ==(other) {
-    if (other is Campaign) return other.id == this.id;
-    return false;
-  }
 }

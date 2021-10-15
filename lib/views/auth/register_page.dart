@@ -20,9 +20,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'verify_email_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  bool socialSignIn;
+  final bool socialSignIn;
 
-  RegisterPage({this.socialSignIn = false});
+  const RegisterPage({this.socialSignIn = false});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();

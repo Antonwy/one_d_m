@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:one_d_m/components/donation_widget.dart';
 import 'package:one_d_m/components/sessions/session_donation.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/provider/sessions_manager.dart';
@@ -68,13 +67,11 @@ class SessionLastDonations extends StatelessWidget {
   }
 
   String showAmount(int amount, DonationUnit unit) {
-    int unitAmount = (amount / (unit.value ?? 1)).round();
+    int unitAmount = (amount / (unit.value)).round();
     String? unitName = unit.name;
 
     if (unit.smiley != null)
       unitName = unit.smiley;
-    else if (unit.name == null)
-      unitName = "DV";
     else if (unitAmount == 1) unitName = unit.singular;
 
     return "${Numeral(unitAmount).value()} $unitName";

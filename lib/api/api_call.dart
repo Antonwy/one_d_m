@@ -224,10 +224,7 @@ class ApiCall<T> {
   Future<void> put([Json? body]) async {
     await userToken;
     http.Response res = await http.put(endpoint.baseUrl,
-        headers: {
-          ...Api.authHeaders as Map<String, String>,
-          ...Api.bodyHeaders
-        },
+        headers: {...Api.authHeaders, ...Api.bodyHeaders},
         body: body != null ? jsonEncode(body) : null);
 
     if (res.statusCode == 200) return;
@@ -237,8 +234,8 @@ class ApiCall<T> {
 
   Future<void> delete() async {
     await userToken;
-    http.Response res = await http.delete(endpoint.baseUrl,
-        headers: Api.authHeaders as Map<String, String>?);
+    http.Response res =
+        await http.delete(endpoint.baseUrl, headers: Api.authHeaders);
 
     if (res.statusCode == 200) return;
 

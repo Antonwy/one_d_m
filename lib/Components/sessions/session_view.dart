@@ -26,7 +26,7 @@ class SessionView extends StatelessWidget {
     Color? textColor =
         _theme.correctColorFor(session?.secondaryColor ?? _theme.colors.dark);
 
-    double calculatedAmount = session!.amount! / session!.donationUnit.value!;
+    double calculatedAmount = session!.amount! / session!.donationUnit.value;
 
     return Padding(
         padding: const EdgeInsets.all(2.0),

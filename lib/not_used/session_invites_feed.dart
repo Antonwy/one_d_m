@@ -92,7 +92,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                             _loading
                                 ? CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation(
-                                        _theme.colors!.contrast),
+                                        _theme.colors.contrast),
                                   )
                                 : Container(),
                           ],
@@ -105,7 +105,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                           children: [
                             Text(
                               widget.invite.sessionName!,
-                              style: _theme.textTheme.dark!.bodyText1,
+                              style: _theme.textTheme.dark.bodyText1,
                             ),
                             SizedBox(
                               height: 4,
@@ -114,7 +114,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                               user == null
                                   ? "Laden..."
                                   : "${user.name} hat sie zu einer CertifiedSession eingeladen.",
-                              style: _theme.textTheme.dark!.caption,
+                              style: _theme.textTheme.dark.caption,
                             ),
                           ],
                         ),
@@ -127,7 +127,7 @@ class __InviteMessageState extends State<_InviteMessage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
-                          child: OutlineButton.icon(
+                          child: OutlinedButton.icon(
                             icon: Icon(Icons.done),
                             label: Text("Annehmen"),
                             onPressed: _loading
@@ -142,15 +142,13 @@ class __InviteMessageState extends State<_InviteMessage> {
                                     await DatabaseService.acceptSessionInvite(
                                         widget.invite);
                                   },
-                            textColor: Colors.green,
-                            highlightedBorderColor: Colors.green,
                           ),
                         ),
                         SizedBox(
                           width: 12,
                         ),
                         Expanded(
-                          child: OutlineButton.icon(
+                          child: OutlinedButton.icon(
                             icon: Icon(Icons.close),
                             label: Text("Ablehnen"),
                             onPressed: _loading
@@ -167,8 +165,6 @@ class __InviteMessageState extends State<_InviteMessage> {
                                     if (widget.returnAfter!)
                                       Navigator.pop(context);
                                   },
-                            textColor: Colors.red,
-                            highlightedBorderColor: Colors.red,
                           ),
                         ),
                       ],

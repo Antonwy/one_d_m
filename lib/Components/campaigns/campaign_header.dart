@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/video_or_image.dart';
-import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/donation_unit.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import '../margin.dart';
@@ -147,7 +144,7 @@ class _CampaignHeaderState extends State<CampaignHeader> {
 
   String getFirstTag() {
     DonationUnit unit = widget.campaign.unit ?? DonationUnit.defaultUnit;
-    return "${Numeral(((widget.campaign.amount ?? 0) / unit.value!).round()).value()} ${unit.name} ${unit.effect}";
+    return "${Numeral(((widget.campaign.amount ?? 0) / unit.value).round()).value()} ${unit.name} ${unit.effect}";
   }
 
   Future<void> _donate(BuildContext context, BaseCampaign campaign) async {

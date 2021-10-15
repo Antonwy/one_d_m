@@ -1,19 +1,12 @@
-import 'dart:collection';
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/users/user_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/contact_manager.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/contacts.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/home/home_page.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,8 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class FindFriendsPage extends StatefulWidget {
-  bool afterRegister;
-  ScrollController? scrollController;
+  final bool afterRegister;
+  final ScrollController? scrollController;
 
   FindFriendsPage({this.afterRegister = false, this.scrollController});
 

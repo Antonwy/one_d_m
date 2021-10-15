@@ -9,13 +9,13 @@ import '../animated_future_builder.dart';
 import '../donation_widget.dart';
 
 class SessionButton extends StatelessWidget {
-  String id;
-  BaseSession? session;
-  Color? color;
-  TextStyle textStyle;
-  double elevation;
-  Function(BaseSession?)? onPressed;
-  double borderRadius;
+  final String id;
+  final BaseSession? session;
+  final Color? color;
+  final TextStyle textStyle;
+  final double elevation;
+  final Function(BaseSession?)? onPressed;
+  final double borderRadius;
 
   SessionButton(this.id,
       {this.session,

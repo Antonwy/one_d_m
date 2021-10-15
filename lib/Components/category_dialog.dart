@@ -1,7 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 
 import 'categories_list.dart';
 
@@ -52,6 +50,7 @@ class _CategoryDialogRoute<T> extends PageRouteBuilder<T> {
         );
 }
 
+// ignore: must_be_immutable
 class _CategoryDialogWidget extends StatelessWidget {
   int? _categoryIndex;
   final int? _initCategory;

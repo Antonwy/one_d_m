@@ -1,14 +1,9 @@
-import 'dart:io';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/provider/api_manager.dart';
 import 'package:one_d_m/provider/statistics_manager.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
@@ -23,7 +18,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'api/api.dart';
 import 'components/page_manager_widget.dart';
-import 'helper/native_ads.dart';
 import 'provider/remote_config_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -75,56 +69,6 @@ class _ODMAppState extends State<ODMApp> {
 
   Future<void> _precacheImages() async {
     print("STARTING PRECACHING IMAGES");
-    final res = await Future.wait([
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_odm_logo.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_session.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_project.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_push.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_contact.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/img_login.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/verify.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(SvgPicture.svgStringDecoder,
-              'assets/images/img_login_register.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-              SvgPicture.svgStringDecoder, 'assets/images/no-news.svg'),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-            SvgPicture.svgStringDecoder,
-            "assets/images/welcome-gift.svg",
-          ),
-          context),
-      precachePicture(
-          ExactAssetPicture(
-            SvgPicture.svgStringDecoder,
-            "assets/images/no-internet.svg",
-          ),
-          context),
-    ]);
     print("PRECACHED IMAGES");
   }
 

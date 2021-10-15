@@ -51,7 +51,7 @@ class VerticalUserButton extends StatelessWidget {
                   width: 76,
                   height: 20,
                   child: Center(
-                    child: AutoSizeText(user.name ?? "Laden...",
+                    child: AutoSizeText(user.name,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         style: _theme.textTheme.headline6!.copyWith(

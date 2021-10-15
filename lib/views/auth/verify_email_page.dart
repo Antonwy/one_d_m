@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -6,7 +5,6 @@ import 'package:one_d_m/api/api_result.dart';
 import 'package:one_d_m/components/big_button.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/users/find_friends_page.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +17,6 @@ class VerifyEmailPage extends StatefulWidget {
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
-  TextTheme? _textTheme;
-
   late UserManager _um;
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
@@ -42,7 +38,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) {
-    _textTheme = Theme.of(context).textTheme;
     _um = Provider.of<UserManager>(context);
     ThemeData _theme = Theme.of(context);
 

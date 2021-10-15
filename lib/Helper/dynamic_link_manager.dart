@@ -8,18 +8,14 @@ import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/donation.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
-import 'package:one_d_m/models/session_models/certified_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/models/user_account.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
 import 'package:one_d_m/views/users/find_friends_page.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 import 'package:provider/provider.dart';
-
-import 'database_service.dart';
 
 class DynamicLinkManager {
   final BuildContext? context;
@@ -145,7 +141,7 @@ void _handleUri(Uri deepLink, {BuildContext? context}) async {
       await um.fireUser!.reload();
       um.fireUser = um.auth!.currentUser;
 
-      if (um.fireUser?.emailVerified ?? false) {
+      if (um.fireUser!.emailVerified) {
         Navigator.push(
             context,
             MaterialPageRoute(

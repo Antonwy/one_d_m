@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ForceUpdateScreen extends StatelessWidget {

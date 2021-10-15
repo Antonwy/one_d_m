@@ -41,8 +41,7 @@ class _NotificationPageState extends State<NotificationPage> {
         pinned: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Neuigkeiten',
-            style: TextStyle(color: ThemeManager.of(context).colors!.dark)),
-        brightness: Brightness.dark,
+            style: TextStyle(color: ThemeManager.of(context).colors.dark)),
         backgroundColor: ColorTheme.appBg,
         iconTheme: IconThemeData(color: ColorTheme.blue),
       );

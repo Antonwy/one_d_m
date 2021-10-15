@@ -53,10 +53,8 @@ class SessionMembers extends StatelessWidget {
                                     showTargetAmount: true,
                                     color: sm.baseSession?.secondaryColor ??
                                         _theme.primaryColor,
-                                    donationUnit:
-                                        session!.donationUnit.name ?? "DV",
-                                    dvController:
-                                        session.donationUnit.value ?? 1),
+                                    donationUnit: session!.donationUnit.name,
+                                    dvController: session.donationUnit.value),
                               ));
                     } else {
                       return SizedBox.shrink();
@@ -76,7 +74,7 @@ class SessionMemberView extends StatelessWidget {
   final Color? color, avatarColor, avatarBackColor;
   final String donationUnit;
   final int dvController;
-  late ThemeData _theme;
+  late final ThemeData _theme;
 
   SessionMemberView(
       {Key? key,
@@ -102,9 +100,9 @@ class SessionMemberView extends StatelessWidget {
 
         if (unit.smiley != null) return unit.smiley!;
 
-        if (member.donatedAmount == 1) return unit.singular!;
+        if (member.donatedAmount == 1) return unit.singular;
 
-        return unit.name!;
+        return unit.name;
       }
 
       return VerticalUserButton(

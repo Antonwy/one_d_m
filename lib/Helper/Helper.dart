@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/push_notification.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'constants.dart';
 
 class Helper {
@@ -113,7 +112,7 @@ class Helper {
   }
 
   static Future<void> showConnectionSnackBar(BuildContext context) {
-    return Scaffold.of(context)
+    return ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Stelle eine Verbindung her!")))
         .closed;
   }

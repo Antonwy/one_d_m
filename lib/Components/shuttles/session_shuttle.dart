@@ -48,8 +48,7 @@ Widget sessionShuttle(
                 end: _theme.colors.dark)
             .evaluate(lateAnim)!;
 
-        double calculatedAmount =
-            session!.amount! / session.donationUnit.value!;
+        double calculatedAmount = session!.amount! / session.donationUnit.value;
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -77,7 +76,7 @@ Widget sessionShuttle(
                                   ),
                                 ),
                         ),
-                        if (session.reachedGoal ?? false)
+                        if (session.reachedGoal)
                           Material(
                               color: Colors.black45,
                               child: Center(
@@ -129,8 +128,7 @@ Widget sessionShuttle(
                       Padding(
                         padding: EdgeInsets.fromLTRB(8, 0, 14, 0),
                         child: Row(
-                          children: session.donationUnit == null ||
-                                  session.amount == null ||
+                          children: session.amount == null ||
                                   session.donationGoal == null
                               ? [
                                   Text(

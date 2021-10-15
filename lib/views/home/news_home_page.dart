@@ -7,14 +7,13 @@ import 'package:one_d_m/components/news_post.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/news.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 
 class NewsHomePage extends StatefulWidget {
-  Function changePage;
+  final Function changePage;
 
-  NewsHomePage(this.changePage);
+  const NewsHomePage(this.changePage);
 
   @override
   _NewsHomePageState createState() => _NewsHomePageState();
@@ -23,19 +22,16 @@ class NewsHomePage extends StatefulWidget {
 class _NewsHomePageState extends State<NewsHomePage>
     with AutomaticKeepAliveClientMixin {
   late TextTheme _textTheme;
-  late ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    _theme = ThemeManager.of(context);
 
-    print("NOWWWW");
+    super.build(context);
 
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
-          brightness: Brightness.dark,
           elevation: 0,
           backgroundColor: Colors.transparent,
           automaticallyImplyLeading: false,
@@ -95,12 +91,8 @@ class _NewsHomePageState extends State<NewsHomePage>
                             SizedBox(
                               height: 10,
                             ),
-                            RaisedButton(
+                            ElevatedButton(
                               onPressed: widget.changePage as void Function()?,
-                              color: _theme.colors!.contrast,
-                              textColor: _theme.colors!.textOnContrast,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6)),
                               child: Text("Zu den Projekten"),
                             ),
                           ],

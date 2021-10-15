@@ -157,7 +157,7 @@ class UserManager extends ChangeNotifier {
   }
 
   Future<ApiResult<User>> uploadAdditionalInformations(
-      User user, File image) async {
+      User user, File? image) async {
     try {
       _status = Status.Authenticating;
       notifyListeners();

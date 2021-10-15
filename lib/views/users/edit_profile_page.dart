@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -10,13 +8,11 @@ import 'package:one_d_m/api/api_result.dart';
 import 'package:one_d_m/components/custom_text_field.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/helper/storage_service.dart';
 import 'package:one_d_m/helper/validate.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -116,12 +112,10 @@ class _EditProfileState extends State<EditProfile> {
                                     String _phoneNumber =
                                         _phoneNumberController.text;
 
-                                    if (_name != null &&
-                                        Validate.username(_name) == null)
+                                    if (Validate.username(_name) == null)
                                       currUser.name = _name;
-                                    if (_phoneNumber != null &&
-                                        Validate.telephone(_phoneNumber) ==
-                                            null)
+                                    if (Validate.telephone(_phoneNumber) ==
+                                        null)
                                       currUser.phoneNumber = _phoneNumber;
 
                                     if (streamRes != null &&
@@ -236,7 +230,7 @@ class _EditProfileState extends State<EditProfile> {
                               setState(() {
                                 _loading = false;
                               });
-                              Scaffold.of(context).showSnackBar(SnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                   content: Text(
                                       "Wir haben dir eine Email zum Zurücksetzen deines Passwortes geschickt!")));
                             },

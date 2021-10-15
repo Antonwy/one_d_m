@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_d_m/components/sessions/session_donation.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/session_member.dart';
 

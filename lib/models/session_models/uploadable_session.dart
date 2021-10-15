@@ -1,12 +1,10 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/preview_session.dart';
-import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/user.dart';
 
 class UploadableSession {

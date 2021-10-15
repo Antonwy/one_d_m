@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/info_feed.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/user.dart';
@@ -19,7 +18,6 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:styled_text/styled_text.dart';
 import 'constants.dart';
-import 'database_service.dart';
 import 'numeral.dart';
 
 class InstagramImages {
@@ -171,10 +169,10 @@ class SessionImage extends StatelessWidget {
                                         ),
                                         YMargin(6),
                                         Text(
-                                          user!.name!,
+                                          user!.name,
                                           style: _theme.textTheme
                                               .correctColorFor(
-                                                  session!.secondaryColor!)!
+                                                  session!.secondaryColor!)
                                               .bodyText1
                                               .copyWith(
                                                   fontWeight: FontWeight.bold),
@@ -208,7 +206,7 @@ class SessionImage extends StatelessWidget {
                                       "One\nDollar\nMovement",
                                       style: _theme.textTheme
                                           .correctColorFor(
-                                              session!.secondaryColor!)!
+                                              session!.secondaryColor!)
                                           .bodyText1
                                           .copyWith(
                                               fontWeight: FontWeight.bold,
@@ -228,22 +226,26 @@ class SessionImage extends StatelessWidget {
             Text(
               session!.name!,
               style: _theme.textTheme
-                  .correctColorFor(session!.primaryColor!)!
+                  .correctColorFor(session!.primaryColor!)
                   .headline6,
             ),
             StyledText(
               text:
                   "<b>${session!.name}</b> unterstützt <b>${session!.campaignTitle}</b>",
-              styles: {'b': TextStyle(fontWeight: FontWeight.bold)},
+              tags: {
+                'b':
+                    StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold))
+              },
               style: _theme.textTheme
-                  .correctColorFor(session!.primaryColor!)!
+                  .correctColorFor(session!.primaryColor!)
                   .caption,
             ),
             YMargin(12),
             Builder(builder: (context) {
-              Color? textColor = _theme.correctColorFor(session!.secondaryColor!);
+              Color? textColor =
+                  _theme.correctColorFor(session!.secondaryColor!);
               BaseTextTheme textTheme =
-                  _theme.textTheme.correctColorFor(session!.secondaryColor!)!;
+                  _theme.textTheme.correctColorFor(session!.secondaryColor!);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -266,7 +268,8 @@ class SessionImage extends StatelessWidget {
                                       TextSpan(
                                           text:
                                               "${Numeral(session!.amount!).value()} "),
-                                      if (session!.donationUnit.smiley != null &&
+                                      if (session!.donationUnit.smiley !=
+                                              null &&
                                           session!
                                               .donationUnit.smiley!.isNotEmpty)
                                         TextSpan(
@@ -278,7 +281,7 @@ class SessionImage extends StatelessWidget {
                                       else
                                         TextSpan(
                                             text:
-                                                "${session!.donationUnit.name ?? "DV"}",
+                                                "${session!.donationUnit.name}",
                                             style: TextStyle(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w300))
@@ -300,9 +303,9 @@ class SessionImage extends StatelessWidget {
                               return Container(
                                 width: width,
                                 child: PercentLine(
-                                  percent:
-                                      (session!.amount! / session!.donationGoal!)
-                                          .clamp(0.0, 1.0),
+                                  percent: (session!.amount! /
+                                          session!.donationGoal!)
+                                      .clamp(0.0, 1.0),
                                   height: 10.0,
                                   color: textColor,
                                 ),
@@ -331,7 +334,7 @@ class SessionImage extends StatelessWidget {
                                             fontWeight: FontWeight.bold)),
                                     TextSpan(
                                         text:
-                                            "${session!.donationUnit.smiley ?? session!.donationUnit.name ?? "DV"}"),
+                                            "${session!.donationUnit.smiley ?? session!.donationUnit.name}"),
                                   ])),
                             ],
                           )

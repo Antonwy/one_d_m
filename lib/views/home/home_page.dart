@@ -2,18 +2,15 @@ import 'dart:async';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:one_d_m/components/connection_widget.dart';
 import 'package:one_d_m/components/dialog_holder.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/navbar.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/dynamic_link_manager.dart';
 import 'package:one_d_m/provider/navbar_manager.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,8 +18,8 @@ import 'explore_page.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
-  Future? initFuture;
-  HomePage({Key? key, this.initFuture}) : super(key: key);
+  final Future? initFuture;
+  const HomePage({Key? key, this.initFuture}) : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();

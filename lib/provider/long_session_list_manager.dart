@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
-import 'package:one_d_m/api/endpoints/api_endpoint.dart';
 import 'package:one_d_m/api/endpoints/sessions_endpoint.dart';
 import 'package:one_d_m/components/sessions/long_session_list.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';

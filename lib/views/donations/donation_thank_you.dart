@@ -254,14 +254,14 @@ class _DonationAmountContent extends StatelessWidget {
               children: [
                 Text('Du hast ', style: _theme.textTheme.headline6),
                 NumberSlideAnimation(
-                  number: "${(ddm.amount! / ddm.dr!.unit.value!).round()}",
+                  number: "${(ddm.amount! / ddm.dr!.unit.value).round()}",
                   duration: const Duration(seconds: 3),
                   curve: Curves.bounceIn,
                   textStyle: _theme.textTheme.headline6!.copyWith(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline),
                 ),
-                Text(' ${ddm.dr!.unit.smiley ?? ddm.dr!.unit.name ?? "DV"}',
+                Text(' ${ddm.dr!.unit.smiley ?? ddm.dr!.unit.name}',
                     style: _theme.textTheme.headline6),
                 Text('gespendet!', style: _theme.textTheme.headline6),
               ],

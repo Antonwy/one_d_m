@@ -4,7 +4,6 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/warning_icon.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/components/video_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

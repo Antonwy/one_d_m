@@ -10,8 +10,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/warning_icon.dart';
-import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:video_player/video_player.dart';
 

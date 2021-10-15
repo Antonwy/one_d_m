@@ -265,8 +265,6 @@ class DatabaseService {
   }
 
   static Future<SearchResult> getSearchResultFromQuery(String query) async {
-    List<BaseCampaign> campaigns = await getCampaignFromQuery(query);
-    List<User> users = await getUsersFromQuery(query);
     return SearchResult();
   }
 
@@ -293,7 +291,7 @@ class DatabaseService {
         .get();
 
     List<User> users = nameSnapshot.docs.map(User.fromSnapshot).toList();
-    users.removeWhere((User c) => !c.name!.contains(query));
+    users.removeWhere((User c) => !c.name.contains(query));
     return users;
   }
 
@@ -825,7 +823,6 @@ class DatabaseService {
 
   static Future<List<String>> getCertifiedSessionsFromUserFuture(
       String uid) async {
-    if (uid == null) return [];
     return (await userCollection.doc(uid).collection(SESSIONS).get())
         .docs
         .map((doc) => doc.id)
@@ -1122,7 +1119,6 @@ class DatabaseService {
 
   static Future<bool> hasContributedToSurvey({String? uid, String? sid}) async {
     return (await surveysCollection.doc(sid).collection(RESULTS).doc(uid).get())
-            ?.exists ??
-        false;
+        .exists;
   }
 }

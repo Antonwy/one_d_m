@@ -2,13 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/components/video_or_image.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:provider/provider.dart';
 import '../big_button.dart';
@@ -118,7 +116,7 @@ Widget _titleShuttle(
 
 String getFirstTag(BaseCampaign campaign) {
   DonationUnit unit = campaign.unit ?? DonationUnit.defaultUnit;
-  return "${Numeral(((campaign.amount ?? 0) / unit.value!).round()).value()} ${unit.name} ${unit.effect}";
+  return "${Numeral(((campaign.amount ?? 0) / unit.value).round()).value()} ${unit.name} ${unit.effect}";
 }
 
 Widget campaignShuttle(
@@ -376,7 +374,7 @@ class _DonationBottomPlaceholder extends StatelessWidget {
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold),
                                           text:
-                                              "Ein ${cm.baseCampaign!.unit!.singular ?? cm.baseCampaign!.unit!.name} ${cm.baseCampaign!.unit!.smiley ?? ''}\n"),
+                                              "Ein ${cm.baseCampaign!.unit!.singular} ${cm.baseCampaign!.unit!.smiley ?? ''}\n"),
                                       TextSpan(text: "entspricht "),
                                       TextSpan(
                                           style: TextStyle(

@@ -44,6 +44,7 @@ class _GoalPageState extends State<GoalPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: ColorTheme.appBg,
       body: SingleChildScrollView(
@@ -291,7 +292,10 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
                   .copyWith(
                       fontSize: 25, fontWeight: FontWeight.w400, height: 1.3),
               textAlign: TextAlign.center,
-              styles: {'bold': TextStyle(fontWeight: FontWeight.bold)},
+              tags: {
+                'bold':
+                    StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold))
+              },
             ),
             YMargin(12),
             LayoutBuilder(builder: (context, constraints) {
@@ -306,12 +310,14 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
                           : _theme.textTheme
                               .withColor(_suggestion.textOnSecondary!))
                       .caption,
-                  styles: {
-                    'bold': TextStyle(fontWeight: FontWeight.bold),
-                    'highlight': TextStyle(
-                        color: _isDone
-                            ? _theme.colors.textOnContrast
-                            : _suggestion.textOnSecondary)
+                  tags: {
+                    'bold': StyledTextTag(
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    'highlight': StyledTextTag(
+                        style: TextStyle(
+                            color: _isDone
+                                ? _theme.colors.textOnContrast
+                                : _suggestion.textOnSecondary))
                   },
                   textAlign: TextAlign.center,
                 ),
@@ -332,7 +338,7 @@ class __SuggestionBoxState extends State<_SuggestionBox> {
                           setState(() {
                             _campaigLoading = true;
                           });
-                          Campaign c = await (DatabaseService.getCampaign(
+                          Campaign? c = await (DatabaseService.getCampaign(
                               _suggestion.campaignId) as FutureOr<Campaign>);
 
                           if (c == null) {
@@ -614,7 +620,7 @@ class __RiveBoxState extends State<_RiveBox> {
 }
 
 class _Roadmap extends StatelessWidget {
-  late ThemeManager _theme;
+  late final ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {

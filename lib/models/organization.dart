@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Organization {
   final String? name, imgUrl, thumbnailUrl, id, description, website;
 
-  static final String NAME = "name",
+  static const String NAME = "name",
       IMAGEURL = "image_url",
       THUMBNAIL_URL = "thumbnail_url",
       DESCRIPTION = "description",

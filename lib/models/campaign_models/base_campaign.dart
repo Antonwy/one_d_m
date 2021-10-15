@@ -20,7 +20,7 @@ class BaseCampaign {
   final List<String>? moreImages, donationEffects, effects, tags;
   final DonationUnit? unit;
 
-  static final String ID = "id",
+  static const String ID = "id",
       NAME = "title",
       DESCRIPTION = "description",
       SHORTDESCRIPTION = "short_description",
@@ -101,11 +101,5 @@ class BaseCampaign {
 
   static List<BaseCampaign> listFromSnapshot(List<DocumentSnapshot> list) {
     return list.map(BaseCampaign.fromSnapshot).toList();
-  }
-
-  @override
-  bool operator ==(other) {
-    if (other is BaseCampaign) return other.id == this.id;
-    return false;
   }
 }

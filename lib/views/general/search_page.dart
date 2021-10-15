@@ -5,9 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:one_d_m/components/search_results_list.dart';
-import 'package:one_d_m/helper/color_theme.dart';
-import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:provider/provider.dart';
 

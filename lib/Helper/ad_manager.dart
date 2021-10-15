@@ -10,7 +10,7 @@ import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/provider/remote_config_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
-import 'package:provider/src/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdManager {

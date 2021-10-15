@@ -5,15 +5,12 @@ import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/stream_result.dart';
 import 'package:one_d_m/components/campaigns/campaign_list.dart';
 import 'package:one_d_m/components/categories_list.dart';
-import 'package:one_d_m/components/category_dialog.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/components/margin.dart';
 import 'package:one_d_m/components/sessions/sessions_list.dart';
 import 'package:one_d_m/components/warning_icon.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/general/search_page.dart';
 import 'package:one_d_m/views/home/profile_page.dart';
 import 'package:one_d_m/views/sessions/create_session_page.dart';
@@ -45,6 +42,7 @@ class _ExplorePageState extends State<ExplorePage>
   Widget build(BuildContext context) {
     ThemeData _theme = Theme.of(context);
 
+    super.build(context);
     return Scaffold(
       body: CustomScrollView(
         controller: widget.scrollController,

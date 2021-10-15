@@ -8,12 +8,10 @@ import 'package:one_d_m/components/users/user_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/database_service.dart';
 import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/donation.dart';
 import 'package:one_d_m/models/user.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/users/user_page.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -21,10 +19,11 @@ import 'bottom_dialog.dart';
 import 'campaigns/campaign_button.dart';
 import 'custom_open_container.dart';
 
+// ignore: must_be_immutable
 class DonationWidget extends StatelessWidget {
   final Donation donation;
   final bool campaignPage, withUsername, backgroundLight;
-  Color? textColor;
+  final Color? textColor;
 
   DonationWidget(this.donation,
       {this.campaignPage = false,
@@ -32,11 +31,11 @@ class DonationWidget extends StatelessWidget {
       this.backgroundLight = true,
       this.textColor});
 
-  late TextTheme _textTheme;
+  late final TextTheme _textTheme;
 
   Future<User?>? _future;
 
-  late MediaQueryData _mq;
+  late final MediaQueryData _mq;
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +214,7 @@ class RoundedAvatar extends StatelessWidget {
   final Color? iconColor, color;
   final BoxFit fit;
 
-  late ThemeData _theme;
+  late final ThemeData _theme;
 
   RoundedAvatar(this.imgUrl,
       {this.loading = false,

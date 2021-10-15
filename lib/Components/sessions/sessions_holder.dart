@@ -7,7 +7,6 @@ import 'package:one_d_m/components/warning_icon.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/models/session_models/base_session.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
 
 import 'long_session_list.dart';

@@ -354,6 +354,8 @@ class __SurveyWrapperState<T extends Survey> extends State<_SurveyWrapper<T>>
         (widget.survey.onlyAdmin! && !(um.user?.admin ?? false)) ||
         (widget.survey.question?.isEmpty ?? true)) return SizedBox.shrink();
 
+    super.build(context);
+
     ThemeManager _theme = ThemeManager.of(context);
     return Provider<T>(
       create: (context) => widget.survey,
@@ -376,7 +378,7 @@ class __SurveyWrapperState<T extends Survey> extends State<_SurveyWrapper<T>>
                             unselectedWidgetColor:
                                 _theme.colors.textOnContrast.withOpacity(.8),
                             colorScheme: ColorScheme.fromSwatch().copyWith(
-                                secondary: _theme.colors!.textOnContrast)),
+                                secondary: _theme.colors.textOnContrast)),
                         child: ExpansionTile(
                           initiallyExpanded: true,
                           maintainState: true,
@@ -416,7 +418,6 @@ class __YesNoSurveyWidgetState extends State<_YesNoSurveyWidget>
     SingleAnswerSurvey<bool?> survey =
         context.read<SingleAnswerSurvey<bool?>>();
     return AnimatedSize(
-      vsync: this,
       duration: Duration(milliseconds: 250),
       curve: Curves.fastLinearToSlowEaseIn,
       child: AnimatedSwitcher(
@@ -556,7 +557,6 @@ class __TextSurveyWidgetState extends State<_TextSurveyWidget>
         context.read<SingleAnswerSurvey<String>>();
 
     return AnimatedSize(
-      vsync: this,
       duration: Duration(milliseconds: 250),
       curve: Curves.fastLinearToSlowEaseIn,
       child: AnimatedSwitcher(
@@ -642,7 +642,6 @@ class __ChoiceWidgetState extends State<_ChoiceWidget>
         Duration duration = Duration(milliseconds: 250);
 
         return AnimatedSize(
-          vsync: this,
           duration: duration,
           curve: Curves.fastLinearToSlowEaseIn,
           child: Column(
@@ -776,7 +775,7 @@ class _FollowNotificationWidget extends StatelessWidget {
 
   _FollowNotificationWidget(this.notification, this.highlighted);
 
-  late ThemeManager _theme;
+  late final ThemeManager _theme;
 
   @override
   Widget build(BuildContext context) {
@@ -804,7 +803,10 @@ class _FollowNotificationWidget extends StatelessWidget {
                       : _theme.textTheme.dark)
                   .bodyText2,
               overflow: TextOverflow.ellipsis,
-              styles: {"bold": TextStyle(fontWeight: FontWeight.bold)},
+              tags: {
+                "bold":
+                    StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold))
+              },
             ),
             subtitle: Text(
               timeago.format(notification.createdAt!, locale: "de"),

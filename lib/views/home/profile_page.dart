@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -14,6 +15,7 @@ import 'package:one_d_m/components/push_notification.dart';
 import 'package:one_d_m/components/replace_text.dart';
 import 'package:one_d_m/components/post_feed.dart';
 import 'package:one_d_m/components/settings_dialog.dart';
+import 'package:one_d_m/extensions/theme_extensions.dart';
 import 'package:one_d_m/helper/constants.dart';
 import 'package:one_d_m/helper/currency.dart';
 import 'package:one_d_m/helper/database_service.dart';
@@ -47,6 +49,8 @@ class ProfilePageState extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(context.systemOverlayStyle);
+    super.build(context);
     return Scaffold(
       body: CustomScrollView(
         controller: widget.scrollController,
@@ -136,7 +140,7 @@ class _DailyReportWidgeProfiletState extends State<DailyReportProfileWidget> {
 }
 
 class DailyReportWidget extends StatelessWidget {
-  late ThemeData _theme;
+  late final ThemeData _theme;
   final DailyReport? dailyReport;
   final Future<void> Function(String)? close;
 
@@ -315,6 +319,7 @@ class __GiftAvailableState extends State<_GiftAvailable> {
                                                 title:
                                                     "${gift.amount} DV eingesammelt"));
                                       } on Exception catch (e) {
+                                        print(e);
                                         await PushNotification.of(context).show(
                                             NotificationContent(
                                                 isWarning: true,
@@ -425,8 +430,9 @@ class _ProfileHeader extends SliverPersistentHeaderDelegate {
             children: [
               Stack(
                 children: [
-                  Opacity(
-                      opacity: 1 - percentage,
+                  AnimatedOpacity(
+                      opacity: percentage < .05 ? 1.0 : 0.0,
+                      duration: Duration(milliseconds: 250),
                       child: IgnorePointer(
                           ignoring: !_fullVisible,
                           child: _ScrolledHeader(
@@ -562,56 +568,59 @@ class _ScrolledHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData _theme = Theme.of(context);
-    return SafeArea(
-        bottom: false,
-        child: Builder(builder: (context) {
-          UserManager um = context.watch<UserManager>();
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '${um.user?.dvBalance ?? 0}',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
+    return Material(
+      color: _theme.cardColor,
+      child: SafeArea(
+          bottom: false,
+          child: Builder(builder: (context) {
+            UserManager um = context.watch<UserManager>();
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '${um.user?.dvBalance ?? 0}',
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const XMargin(5),
-                        Text('Donation Votes',
-                            style: _theme.textTheme.bodyText1),
-                      ],
-                    ),
-                    SizedBox(height: 5.0),
-                    AutoSizeText(
-                      'Entspricht ${Currency((um.user?.dvBalance ?? 0) * 5).value()}',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-                    ),
-                  ],
-                ),
-                AppBarButton(
-                  icon: CupertinoIcons.settings_solid,
-                  color: _theme.canvasColor,
-                  iconColor: _theme.colorScheme.onBackground,
-                  onPressed: () {
-                    showSettings!(context);
-                  },
-                ),
-              ],
-            ),
-          );
-        }));
+                          const XMargin(5),
+                          Text('Donation Votes',
+                              style: _theme.textTheme.bodyText1),
+                        ],
+                      ),
+                      SizedBox(height: 5.0),
+                      AutoSizeText(
+                        'Entspricht ${Currency((um.user?.dvBalance ?? 0) * 5).value()}',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                  AppBarButton(
+                    icon: CupertinoIcons.settings_solid,
+                    color: _theme.canvasColor,
+                    iconColor: _theme.colorScheme.onBackground,
+                    onPressed: () {
+                      showSettings!(context);
+                    },
+                  ),
+                ],
+              ),
+            );
+          })),
+    );
   }
 }
 

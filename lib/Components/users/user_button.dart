@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/users/user_follow_button.dart';
-import 'package:one_d_m/helper/color_theme.dart';
 import 'package:one_d_m/helper/helper.dart';
 import 'package:one_d_m/models/user.dart';
 import 'package:one_d_m/provider/theme_manager.dart';

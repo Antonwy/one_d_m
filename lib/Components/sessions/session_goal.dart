@@ -29,7 +29,7 @@ class SessionGoal extends StatelessWidget {
               String? _unit = sm.unit!.name;
               String? _smiley = sm.unit!.smiley;
 
-              double amount = sm.baseSession!.amount! / sm.unit!.value!;
+              double amount = sm.baseSession!.amount! / sm.unit!.value;
 
               return Padding(
                 padding:
@@ -64,7 +64,7 @@ class SessionGoal extends StatelessWidget {
                                                   fontWeight: FontWeight.w300))
                                         else
                                           TextSpan(
-                                              text: _unit ?? "DVs",
+                                              text: _unit,
                                               style: TextStyle(
                                                   fontSize: 22,
                                                   fontWeight: FontWeight.w300))
@@ -117,8 +117,7 @@ class SessionGoal extends StatelessWidget {
                                           text: "${baseSession!.donationGoal} ",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold)),
-                                      TextSpan(
-                                          text: "${_smiley ?? _unit ?? "DV"}"),
+                                      TextSpan(text: "${_smiley ?? _unit}"),
                                     ])),
                               ],
                             )
@@ -136,7 +135,7 @@ class SessionGoal extends StatelessWidget {
 
   String _formatPercent(BaseSession baseSession) {
     double percentValue =
-        ((baseSession.amount! / baseSession.donationUnit.value!) /
+        ((baseSession.amount! / baseSession.donationUnit.value) /
                 baseSession.donationGoal!) *
             100;
 

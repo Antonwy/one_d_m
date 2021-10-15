@@ -34,8 +34,8 @@ import 'package:one_d_m/provider/sessions_manager.dart';
 import 'package:provider/provider.dart';
 
 class CreateSessionPage extends StatelessWidget {
-  late ThemeData _theme;
-  BaseSessionManager? _baseSessionManager;
+  late final ThemeData _theme;
+  final BaseSessionManager? _baseSessionManager;
 
   CreateSessionPage([this._baseSessionManager]);
 
@@ -130,7 +130,7 @@ class CreateSessionPage extends StatelessWidget {
                         child: InkWell(
                           onTap: () async {
                             ImagePicker picker = ImagePicker();
-                            PickedFile? file = await picker.getImage(
+                            XFile? file = await picker.pickImage(
                                 source: ImageSource.gallery);
 
                             if (file?.path != null)
@@ -245,8 +245,8 @@ class CreateSessionPage extends StatelessWidget {
 }
 
 class _ColorPicker extends StatelessWidget {
-  late ThemeData _theme;
-  late BuildContext context;
+  late final ThemeData _theme;
+  late final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -456,9 +456,9 @@ class __DonationTargetState extends State<_DonationTarget> {
 }
 
 class _SessionNameInput extends StatelessWidget {
-  late ThemeData _theme;
+  late final ThemeData _theme;
 
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -518,9 +518,9 @@ class _SessionNameInput extends StatelessWidget {
 }
 
 class _SessionDescriptionInput extends StatelessWidget {
-  late ThemeData _theme;
+  late final ThemeData _theme;
 
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -531,7 +531,7 @@ class _SessionDescriptionInput extends StatelessWidget {
           CreateSessionManager csm =
               Provider.of<CreateSessionManager>(context, listen: false);
 
-          if (csm.editMode && (_controller.text.isEmpty ?? true))
+          if (csm.editMode && (_controller.text.isEmpty))
             _controller.text =
                 csm.baseSessionManager!.baseSession!.description!;
 
@@ -667,8 +667,8 @@ class _SearchCampaignButton extends StatelessWidget {
 }
 
 class _HorizontalCampaignView extends StatelessWidget {
-  BaseCampaign? campaign;
-  late ThemeData _theme;
+  final BaseCampaign? campaign;
+  late final ThemeData _theme;
 
   _HorizontalCampaignView(this.campaign);
 

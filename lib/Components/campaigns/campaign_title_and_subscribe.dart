@@ -1,13 +1,7 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:one_d_m/components/custom_open_container.dart';
 import 'package:one_d_m/components/join_button.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/models/campaign_models/base_campaign.dart';
-import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/organizations/organization_page.dart';
 import 'package:provider/provider.dart';
 

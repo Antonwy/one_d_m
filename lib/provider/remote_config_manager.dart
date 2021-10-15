@@ -84,7 +84,7 @@ class RemoteConfigManager {
 }
 
 class AppVersion {
-  static final String VERSION = "version", BUILD_NUMBER = "build_number";
+  static const String VERSION = "version", BUILD_NUMBER = "build_number";
   static const AppVersion currentVersion =
       AppVersion(version: "1.0.7", buildNumber: 51);
 

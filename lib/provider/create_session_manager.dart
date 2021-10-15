@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/api/api_error.dart';
@@ -11,7 +10,6 @@ import 'package:one_d_m/models/donation_unit.dart';
 import 'package:one_d_m/models/session_models/preview_session.dart';
 import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/models/session_models/uploadable_session.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';

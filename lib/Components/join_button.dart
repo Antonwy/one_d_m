@@ -1,9 +1,6 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:one_d_m/components/loading_indicator.dart';
 import 'package:one_d_m/extensions/theme_extensions.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 
 class JoinButton extends StatefulWidget {
   final Function(bool join)? joinOrLeave;

@@ -184,12 +184,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 }
 
 class _WelcomePage extends StatelessWidget {
-  String? svgName, imageName, title, description;
-  double? animatedValue;
-  AutoSizeText? titleText;
-  VoidCallback? onPressed;
-  int index;
-  bool isPermission, loading, darkText;
+  final String? svgName, imageName, title, description;
+  final double? animatedValue;
+  final AutoSizeText? titleText;
+  final VoidCallback? onPressed;
+  final int index;
+  final bool isPermission, loading, darkText;
 
   _WelcomePage(
       {this.svgName,
@@ -204,13 +204,11 @@ class _WelcomePage extends StatelessWidget {
       this.loading = false,
       this.isPermission = false});
 
-  late TextTheme _textTheme;
-  MediaQueryData? _mq;
+  late final TextTheme _textTheme;
 
   @override
   Widget build(BuildContext context) {
     _textTheme = Theme.of(context).textTheme;
-    _mq = MediaQuery.of(context);
     return Transform.scale(
       scale: Tween<double>(begin: 1.0, end: .75).transform(animatedValue!),
       child: Opacity(

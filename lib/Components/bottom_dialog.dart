@@ -68,13 +68,13 @@ class __DialogState<T> extends State<_Dialog>
   final GlobalKey _childKey = GlobalKey();
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _childKey.currentContext!.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    _controller.value -=
-        details.primaryDelta! / (_childHeight ?? details.primaryDelta!);
+    _controller.value -= details.primaryDelta! / (_childHeight);
   }
 
   void _handleDragEnd(DragEndDetails details) {

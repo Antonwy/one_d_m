@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,6 +15,9 @@ import 'package:one_d_m/models/session_models/session.dart';
 import 'package:one_d_m/views/campaigns/campaign_page.dart';
 import 'package:one_d_m/views/donations/donation_dialog.dart';
 import 'package:one_d_m/views/sessions/session_page.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+import 'formatted_text.dart';
 
 class NewsPost extends StatefulWidget {
   final News news;
@@ -96,7 +98,7 @@ class _NewsPostState extends State<NewsPost> {
                           .copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      "by ${news.organizationName}",
+                      "by ${news.organizationName} - ${timeago.format(news.createdAt)}",
                       style: context.theme.textTheme.caption,
                     )),
             !_showImage
@@ -109,14 +111,14 @@ class _NewsPostState extends State<NewsPost> {
                       blurHash: news.blurHash,
                     ),
                   ),
-            _buildExpandableContent(context, news.text)
+            _buildExpandableContent()
           ],
         ),
       ),
     );
   }
 
-  Widget _buildExpandableContent(BuildContext context, String post) {
+  Widget _buildExpandableContent() {
     return ExpandableNotifier(
       child: ScrollOnExpand(
         child: Expandable(
@@ -125,15 +127,10 @@ class _NewsPostState extends State<NewsPost> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ..._optionalContent(),
               Padding(
                 padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: Text(
-                    post.substring(0, min(post.length, _maxChars)) +
-                        (post.length >= _maxChars ? "..." : ""),
-                    maxLines: !_showImage ? 10 : 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    style: context.theme.textTheme.bodyText2!),
+                child: _buildText(),
               ),
               Builder(builder: (context) {
                 return _buttonBar(context);
@@ -145,11 +142,10 @@ class _NewsPostState extends State<NewsPost> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ..._optionalContent(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: Text(post,
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context).textTheme.bodyText2!),
+                child: _buildText(true),
               ),
               Builder(builder: (context) {
                 return _buttonBar(context);
@@ -159,6 +155,44 @@ class _NewsPostState extends State<NewsPost> {
         ),
       ),
     );
+  }
+
+  Widget _buildText([bool expanded = false]) {
+    String text = widget.news.text;
+
+    return FormattedText(text,
+        maxLines: expanded
+            ? 9999
+            : !_showImage
+                ? 10
+                : 3,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.start,
+        style: context.theme.textTheme.bodyText2);
+  }
+
+  List<Widget> _optionalContent() {
+    List<Widget> widgets = [];
+    News news = widget.news;
+
+    if (news.title != null)
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: Text(
+            news.title!,
+            style: context.theme.textTheme.headline6,
+          ),
+        ),
+      );
+
+    if (news.shortText != null)
+      widgets.add(Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+        child: Text(news.shortText!, style: context.theme.textTheme.caption),
+      ));
+
+    return widgets;
   }
 
   Widget _buttonBar(BuildContext context) {

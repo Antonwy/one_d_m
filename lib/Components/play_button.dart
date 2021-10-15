@@ -1,20 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:intl/intl.dart';
-import 'package:one_d_m/api/api.dart';
 import 'package:one_d_m/components/discovery_holder.dart';
 import 'package:one_d_m/components/margin.dart';
-import 'package:one_d_m/components/push_notification.dart';
 import 'package:one_d_m/helper/ad_manager.dart';
 import 'package:one_d_m/helper/constants.dart';
-import 'package:one_d_m/helper/helper.dart';
-import 'package:one_d_m/provider/remote_config_manager.dart';
-import 'package:one_d_m/provider/user_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/src/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayButton extends StatefulWidget {
   final double? size;

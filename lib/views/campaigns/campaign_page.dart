@@ -20,7 +20,6 @@ import 'package:one_d_m/helper/numeral.dart';
 import 'package:one_d_m/models/campaign_models/base_campaign.dart';
 import 'package:one_d_m/models/campaign_models/campaign.dart';
 import 'package:one_d_m/provider/campaign_manager.dart';
-import 'package:one_d_m/provider/theme_manager.dart';
 import 'package:one_d_m/provider/user_manager.dart';
 import 'package:one_d_m/views/campaigns/campaign_description.dart';
 import 'package:one_d_m/views/campaigns/campaign_news.dart';
@@ -31,9 +30,9 @@ import 'package:sliver_tools/sliver_tools.dart';
 class CampaignPage extends StatefulWidget {
   final BaseCampaign baseCampaign;
   final bool withHero;
-  ScrollController? scrollController;
+  final ScrollController? scrollController;
 
-  CampaignPage(this.baseCampaign,
+  const CampaignPage(this.baseCampaign,
       {Key? key, this.scrollController, this.withHero = true})
       : super(key: key);
 

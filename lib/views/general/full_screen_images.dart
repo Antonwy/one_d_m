@@ -5,7 +5,7 @@ import 'package:one_d_m/helper/color_theme.dart';
 
 class FullscreenImages extends StatelessWidget {
   final List<String> imgUrls;
-  PageIndicatorController _pageController = PageIndicatorController();
+  final PageIndicatorController _pageController = PageIndicatorController();
 
   FullscreenImages(this.imgUrls);
 

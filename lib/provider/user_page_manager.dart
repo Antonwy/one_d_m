@@ -35,13 +35,13 @@ class UserPageManager extends ChangeNotifier {
   Future<void> followOrUnfollowUser(bool follow, BuildContext context) async {
     try {
       if (follow)
-        await Api().users().subscribe(user!.id);
+        await Api().users().subscribe(user.id);
       else
-        await Api().users().unsubscribe(user!.id);
+        await Api().users().unsubscribe(user.id);
 
       await context.read<FirebaseAnalytics>().logEvent(
           name: "${follow ? 'Followed' : 'Unfollowed'} User",
-          parameters: {"user": user!.id});
+          parameters: {"user": user.id});
     } catch (e) {
       print("something went wrong subscribing user!");
       return;

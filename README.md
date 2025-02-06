@@ -2,7 +2,5 @@
 
 A Flutter Android and IOS App, that makes it easy to donate to 
 
-## Getting Started
-
-1. Clone the Project.
-2. Install AddOns. (pub get)
+## Pitchdeck
+[odm-pitchdeck-3.pdf](https://github.com/user-attachments/files/18697027/odm-pitchdeck-3.pdf)

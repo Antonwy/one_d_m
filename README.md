@@ -6,9 +6,9 @@ A Flutter Android and IOS App, that makes it easy to donate to
 [odm-pitchdeck.pdf](https://github.com/user-attachments/files/18697027/odm-pitchdeck-3.pdf)
 
 ## Appstore Image
-![screen–3@3x](https://github.com/user-attachments/assets/44517603-f256-477b-90f4-5df5af0a9907)
-![screen–6@3x](https://github.com/user-attachments/assets/f76ea1cd-d843-49ab-919a-1f1cbfa2723a)
-![screen–5@3x](https://github.com/user-attachments/assets/9eb2648a-1239-4987-9cb0-47bc6e8bfda7)
-![screen–4@3x](https://github.com/user-attachments/assets/5a676ba1-8281-44af-a54f-3cf161b11724)
-![screen–2@3x](https://github.com/user-attachments/assets/697d88a7-c187-40fd-ab5b-a9ffeecdcc96)
-![screen-1@3x](https://github.com/user-attachments/assets/2966fde2-9617-4d8f-ba5c-cdb1b022dee1)
+![screen–6@2x](https://github.com/user-attachments/assets/d6142ffa-eb86-4427-a3ee-21068183c032)
+![screen–5@2x](https://github.com/user-attachments/assets/27e9bd17-bf51-4ab7-8f66-5b65a3579198)
+![screen–4@2x](https://github.com/user-attachments/assets/c1cba62b-9730-4642-94fb-4b0e5ad9353a)
+![screen–3@2x](https://github.com/user-attachments/assets/b8c7ea7c-95ba-441f-b817-a7a9fd8a4ddb)
+![screen–2@2x](https://github.com/user-attachments/assets/9ebd618d-12d8-4e88-b4ab-0ab68e0b9449)
+![screen-1@2x](https://github.com/user-attachments/assets/183bb266-f025-4e4a-970f-0a428ebd6ad6)
